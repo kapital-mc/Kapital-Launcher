@@ -66,6 +66,13 @@ func waitForFile(path string, limit time.Duration) bool {
 // with SIGTERM, as Stop does. It reports whether want appeared.
 func startAndStop(t *testing.T, exe string, want string, args ...string) bool {
 	t.Helper()
+	return startRunStop(t, exe, want, nil, args...)
+}
+
+// startRunStop is startAndStop with during called while Prism is up, once want
+// exists.
+func startRunStop(t *testing.T, exe string, want string, during func(), args ...string) bool {
+	t.Helper()
 	cmd := exec.Command(exe, args...)
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
@@ -73,6 +80,9 @@ func startAndStop(t *testing.T, exe string, want string, args ...string) bool {
 	done := make(chan error, 1)
 	go func() { done <- cmd.Wait() }()
 	seen := waitForFile(want, 90*time.Second)
+	if seen && during != nil {
+		during()
+	}
 	if err := terminateProcess(cmd.Process.Pid, false); err != nil {
 		t.Error(err)
 	}
@@ -250,7 +260,15 @@ func TestMacManagedPrism(t *testing.T) {
 		// The launch passes the managed root with --dir; Prism's own log in
 		// that root is what the tracker follows (#106).
 		log := filepath.Join(m.Root(), "logs", "PrismLauncher-0.log")
-		if !startAndStop(t, exe, log, "--dir", m.Root()) {
+		// While it runs, the look an update takes before it removes the
+		// previous version's folder sees it, by name and image path (#227).
+		seen := func() {
+			open, err := NewGameTracker(t.TempDir(), nil).OtherPrismOpen("", exe)
+			if err != nil || !open {
+				t.Errorf("a running managed Prism is not seen as open: %v, %v", open, err)
+			}
+		}
+		if !startRunStop(t, exe, log, seen, "--dir", m.Root()) {
 			t.Fatalf("Prism started with --dir wrote no %s", log)
 		}
 	})
@@ -377,5 +395,75 @@ func TestMacSyncCopyRunsOutsideTheBundle(t *testing.T) {
 	// A URL but none of Prism's INST_ variables: refused, still cleanly.
 	if code, out := run(SyncFlag, "https://kapital-packs.alessandrogekeler.workers.dev/frangfurd/pack.toml"); code != SyncExitRefused || !strings.Contains(out, "refused") {
 		t.Fatalf("exit %d, output %q", code, out)
+	}
+}
+
+// TestMacLauncherStartsWithItsMenus starts the built bundle the way Finder
+// would leave it running, checks that it stays up, and reads its menu bar
+// through System Events (#225): App, Edit and Window, which carry the Cmd
+// shortcuts. Reading another process's menus needs the Accessibility
+// permission; where the runner has not granted it to osascript the menus are
+// logged as unread and only the start is checked. It ends with the menu's own
+// Quit when the menus could be read, else SIGTERM.
+func TestMacLauncherStartsWithItsMenus(t *testing.T) {
+	app := itEnv(t, "KAPITAL_IT_APP")
+	itDisposable(t) // the app writes its settings and log to the real data dir
+	exe := filepath.Join(app, "Contents", "MacOS", "kapital-launcher")
+	var stderr strings.Builder
+	cmd := exec.Command(exe)
+	cmd.Stderr = &stderr
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
+	ended := false
+	defer func() {
+		if ended {
+			return
+		}
+		if err := terminateProcess(cmd.Process.Pid, true); err != nil {
+			t.Log(err)
+		}
+		<-done
+	}()
+
+	// Up for 15 s: long enough for the window, the webview and the startup's
+	// first reads to have run.
+	select {
+	case err := <-done:
+		ended = true
+		t.Fatalf("the launcher exited at start: %v\n%s", err, stderr.String())
+	case <-time.After(15 * time.Second):
+	}
+	if !strings.Contains(stderr.String(), "msg=starting") {
+		t.Errorf("no start line in the launcher's log:\n%s", stderr.String())
+	}
+
+	pid := strconv.Itoa(cmd.Process.Pid)
+	script := `tell application "System Events" to get name of every menu bar item of menu bar 1 of (first process whose unix id is ` + pid + `)`
+	out, err := exec.Command("/usr/bin/osascript", "-e", script).CombinedOutput()
+	if err != nil {
+		t.Logf("menus unread, osascript: %v: %s", err, strings.TrimSpace(string(out)))
+		return
+	}
+	menus := strings.TrimSpace(string(out))
+	t.Logf("menu bar: %s", menus)
+	for _, want := range []string{"Edit", "Window"} {
+		if !strings.Contains(menus, want) {
+			t.Errorf("menu bar %q has no %s menu", menus, want)
+		}
+	}
+
+	// Cmd+Q's own item, so a quit through the menu is seen to end the app.
+	quit := `tell application "System Events" to tell (first process whose unix id is ` + pid + `) to click (first menu item of menu 1 of menu bar item 2 of menu bar 1 whose name starts with "Quit")`
+	if out, err := exec.Command("/usr/bin/osascript", "-e", quit).CombinedOutput(); err != nil {
+		t.Fatalf("click Quit: %v: %s", err, out)
+	}
+	select {
+	case <-done:
+		ended = true
+	case <-time.After(20 * time.Second):
+		t.Error("the launcher did not quit from its Quit menu item within 20 s")
 	}
 }
