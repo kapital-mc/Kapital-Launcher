@@ -162,7 +162,10 @@ func TestLaunchChapterSeedsTheManagedPrismsLogRulesBeforePrismStarts(t *testing.
 		if err := os.WriteFile(filepath.Join(appDir, "qtlogging.ini"), []byte("[Rules]\n*.debug=true\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if err := app.SaveSettings(models.AppSettings{Theme: "dark"}); err != nil {
+		// A root of its own: with none, a Prism that is not the managed one
+		// resolves the real data root, and the launch rewrote a real instance
+		// (issue 248).
+		if err := app.SaveSettings(models.AppSettings{Theme: "dark", PrismRoot: t.TempDir()}); err != nil {
 			t.Fatal(err)
 		}
 		app.engine = models.EngineInfo{Found: true, Source: source, Executable: filepath.Join(appDir, "no-such-prism"), Root: managed.Root()}
