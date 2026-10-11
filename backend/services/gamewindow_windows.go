@@ -500,10 +500,12 @@ func showHeld(held []windows.HWND) bool {
 }
 
 // nudge makes a fullscreen window one pixel shorter and back, so a game that
-// came up drawing at the wrong size takes its real one (#46). A window that
-// does not cover its monitor is left as it is. Both resizes are queued to the
-// game's thread (SWP_ASYNCWINDOWPOS) so a busy thread cannot block this one.
-// It reports whether the window went there and back.
+// came up drawing at the wrong size takes its real one (#46). A window the
+// size of its monitor that is off its corner is first moved there (issue 246,
+// placedOn). A window that does not cover its monitor is left as it is. Every
+// move and resize is queued to the game's thread (SWP_ASYNCWINDOWPOS) so a
+// busy thread cannot block this one. It reports whether the window went there
+// and back.
 func nudge(hwnd windows.HWND) bool {
 	rect, ok := windowRect(hwnd)
 	if !ok {
@@ -511,6 +513,15 @@ func nudge(hwnd windows.HWND) bool {
 		return false
 	}
 	monitor, ok := monitorRect(hwnd)
+	if placed, move := rect.placedOn(monitor); ok && move {
+		if !setWindowPos(hwnd, placed.Left, placed.Top, placed.width(), placed.height()) {
+			slog.Info("game window not moved onto its monitor", "error", windows.GetLastError(), "window", rect)
+			return false
+		}
+		slog.Info("game window moved onto its monitor", "from", rect, "to", placed)
+		rect = placed
+		time.Sleep(handoverNudgeWait)
+	}
 	if !ok || !rect.covers(monitor) || rect.height() < 2 {
 		slog.Info("game window nudge skipped", "reason", "not fullscreen", "monitorFound", ok,
 			"window", rect, "monitor", monitor)

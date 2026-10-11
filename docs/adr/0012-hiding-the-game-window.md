@@ -154,3 +154,29 @@ close it by: its `--launch` was handed to that Prism (issue 211, seen on
   has a game the player is in, and quitting the launcher leaves it. The close is
   the same routine, by the pid the launcher started and never by name (S3.9), and
   a Prism that exits by itself releases the record as before.
+
+## Amendment, 2026-10-12: a screen-sized window off its monitor is put back at the handover
+
+Lichdenstein's window came up at full-screen size but down and to the right,
+partly off screen, on every start from the launcher with the card on (issue 246).
+Measured with every `GLFW30` window recorded each 100 ms: started from Prism
+directly, three times, Cubes Without Borders (`windows:windowed`) made the
+window borderless at (0, 0) and it stayed there. Started from the launcher, it
+was borderless at (0, 0) too, and then, as the hold's queued hide landed late
+at about the handover, it was hidden and shown again at its creation spot,
+Windows' cascade position, with the full-screen size kept. The nudge then
+skipped it, as it did not cover its monitor.
+
+The hide is the hold's (the window's thread takes a queued hide when it next
+reads its messages, #132), and the move is the mod's reaction to it, so the
+handover corrects the result rather than the mod: a game window at least its
+monitor's size and not covering it is moved to the monitor's corner at its own
+size (`placedOn`), queued like the nudge, and then nudged. A window smaller than
+its monitor is the player's and is never moved. The rectangle read is the one
+the nudge already reads; nothing more of the window is read. Starts from Prism
+itself never have the hold, so they never had the offset.
+
+This corrects kapital-packs#15, which put the move on a pack mod: the recorder
+then followed whichever `GLFW30` window came first, and the game creates small
+hidden ones during the start (an OpenGL context probe).
+

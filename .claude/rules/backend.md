@@ -102,7 +102,10 @@ show and resize is queued to the game's thread (`ShowWindowAsync`,
 it loads mods, and a hide that waited on it outlived the handover (#132). The
 handover is the resource reload beginning: a hide still queued is let land, the
 window is shown and, once it reports its real rectangle, given the foreground
-and, if fullscreen, made one pixel shorter and back (#46).
+and, if fullscreen, made one pixel shorter and back (#46). A window the size
+of its monitor that is off its corner is moved there first (`placedOn`, issue
+246): the hold's late hide makes Cubes Without Borders put a borderless window
+back at its creation spot with the fullscreen size.
 It reads the class, owner and rectangle of the game's window, never its title,
 and starts no process.
 

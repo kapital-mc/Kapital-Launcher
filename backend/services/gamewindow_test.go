@@ -364,6 +364,35 @@ func TestScreenRectCoversTellsFullscreenFromWindowed(t *testing.T) {
 	}
 }
 
+// Issue 246: Cubes Without Borders left Lichdenstein's window at the cascade
+// spot with the fullscreen size; the handover puts it on the monitor's corner.
+func TestPlacedOnMovesOnlyAScreenSizedWindowThatIsOffItsMonitor(t *testing.T) {
+	monitor := screenRect{0, 0, 2560, 1440}
+	cases := []struct {
+		name string
+		win  screenRect
+		want screenRect
+		move bool
+	}{
+		{"the cascade spot, 2026-10-12", screenRect{338, 338, 2898, 1779}, screenRect{0, 0, 2560, 1441}, true},
+		{"up and to the left", screenRect{-40, -20, 2520, 1420}, screenRect{0, 0, 2560, 1440}, true},
+		{"already covering it", screenRect{0, 0, 2560, 1441}, screenRect{}, false},
+		{"borderless with an edge off screen", screenRect{-8, -8, 2568, 1448}, screenRect{}, false},
+		{"windowed", screenRect{100, 100, 970, 619}, screenRect{}, false},
+		{"one pixel narrower", screenRect{338, 338, 2897, 1779}, screenRect{}, false},
+	}
+	for _, c := range cases {
+		got, move := c.win.placedOn(monitor)
+		if move != c.move || got != c.want {
+			t.Errorf("%s: placedOn = %v %v, want %v %v", c.name, got, move, c.want, c.move)
+		}
+	}
+	second := screenRect{2560, 0, 4480, 1080}
+	if got, move := (screenRect{2600, 40, 4520, 1121}).placedOn(second); !move || got != (screenRect{2560, 0, 4480, 1081}) {
+		t.Fatalf("a second monitor's corner: %v %v", got, move)
+	}
+}
+
 func TestTickDeltaSurvivesTheCounterWrapping(t *testing.T) {
 	cases := []struct {
 		now, event uint32

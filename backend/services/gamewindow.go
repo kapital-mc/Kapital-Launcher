@@ -156,6 +156,20 @@ func (r screenRect) covers(other screenRect) bool {
 	return r.Left <= other.Left && r.Top <= other.Top && r.Right >= other.Right && r.Bottom >= other.Bottom
 }
 
+// placedOn is where a window that fills its monitor but is not on it goes at
+// the handover (issue 246): the monitor's corner, at the window's own size.
+// Cubes Without Borders' windowed borderless puts a game window back at the
+// position it was created at, keeping the fullscreen size, when the hold's
+// late hide lands; that is Windows' cascade spot, down and to the right. A
+// window smaller than the monitor is the player's, and one that already
+// covers it needs no move: both report false.
+func (r screenRect) placedOn(monitor screenRect) (screenRect, bool) {
+	if r.width() < monitor.width() || r.height() < monitor.height() || r.covers(monitor) {
+		return screenRect{}, false
+	}
+	return screenRect{monitor.Left, monitor.Top, monitor.Left + r.width(), monitor.Top + r.height()}, true
+}
+
 // hideTally counts hides and the delay of each, the pure half of a report.
 type hideTally struct {
 	hides         int
