@@ -65,6 +65,8 @@ interface Props {
   /** Ends the chapter's run at once. */
   onStop: () => void
   onInstall: () => void
+  /** Moves an instance the launcher did not set up aside and installs (issue 244). */
+  onReinstall: () => void
   onGetPrism: () => void
   onOpenPrismSite: () => void
   onOpenReleasePage: () => void
@@ -102,6 +104,12 @@ const CONFIRM_MS = 5000
  * disabled until its pack is hosted. Install writes the instance; the pack
  * downloads on the first Play, which the line says until then. An instance
  * that cannot be looked for (unknown) keeps Play, and Prism says the rest.
+ *
+ * An instance under the chapter's name that the launcher did not set up (no
+ * pre-launch command of its own, so no pack URL in the report: one made by
+ * hand or by another tool) would start as it is and never sync. Reinstall
+ * takes Play's place for it (issue 244): Go moves the folder aside, kept in
+ * Prism as a stashed copy, and installs.
  *
  * A developer's local pack (#41) makes Install available without a hosted
  * one, and an instance syncing from anything but the manifest's pack says so.
@@ -148,6 +156,7 @@ export function ActionBar({
   onPlay,
   onStop,
   onInstall,
+  onReinstall,
   onGetPrism,
   onOpenPrismSite,
   onOpenReleasePage,
@@ -158,6 +167,7 @@ export function ActionBar({
   const missing = engine !== null && !engine.found
   const working = install !== null && WORKING.includes(install.phase)
   const needsInstall = installed === false
+  const foreign = installed === true && !instancePack
   const published = isPublished(chapter) || devPack !== undefined
   const source = installed ? packSourceLine(instancePack, chapter.pack.packwiz) : null
   const playing = isActive(game?.phase)
@@ -217,6 +227,8 @@ export function ActionBar({
         : `Install adds ${chapter.instance.id} to Prism`,
       'text-warning',
     ]
+  } else if (foreign) {
+    ;[state, meta, tone] = ['○ Invalid instance', 'Reinstall required', 'text-warning']
   } else if (installedNow) {
     ;[state, meta] = ['● Installed', 'The first Play downloads the pack']
   } else if (source) {
@@ -244,14 +256,14 @@ export function ActionBar({
             <Icon icon={Square} size="sm" className="fill-current" />
             <span>{needsConfirm && confirming ? 'Confirm' : 'Stop'}</span>
           </Button>
-        ) : needsInstall ? (
+        ) : needsInstall || foreign ? (
           <Button
             variant="play"
-            onClick={onInstall}
+            onClick={foreign ? onReinstall : onInstall}
             disabled={!published || installing || missing || working}
           >
             <Icon icon={Download} size="sm" />
-            <span>{installLabel(chapter)}</span>
+            <span>{foreign ? 'Reinstall' : installLabel(chapter)}</span>
           </Button>
         ) : (
           <Button variant="play" onClick={onPlay} disabled={installing || missing || working}>

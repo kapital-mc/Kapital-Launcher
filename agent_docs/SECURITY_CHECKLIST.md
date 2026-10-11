@@ -9,7 +9,7 @@ Two reaches matter: **network** (a manifest, a pack index, a download, a server
 ping response) and **bridge** (a bound method on `App`, callable by anything
 that runs in the WebView).
 
-Bound methods on 2026-10-05: **49** (`grep -c '^func (a \*App) [A-Z]' app.go app_*.go`,
+Bound methods on 2026-10-11: **51** (`grep -c '^func (a \*App) [A-Z]' app.go app_*.go`,
 summed). A different count is new surface to classify: add the method to this table.
 
 | Method | Takes from the bridge | Reaches | Item |
@@ -23,6 +23,8 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetPrismRelease` | nothing | one bounded GET to Prism's fixed release URL | S4.5 |
 | `InstallPrism` | nothing | download, verify and unpack Prism's official build | S4.5 |
 | `InstallChapter` | a chapter id | the manifest's instance and pack URL: one instance folder written into the Prism root | S3.3, S4.6 |
+| `ReinstallChapter` | a chapter id | for an installed chapter whose instance has no pack URL of the launcher's: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. Refused for the launcher's own instance, under a preview, while the game is active or running, or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
+| `ShowStashedInstance` | a chapter id | Prism started with `[--dir <root>] --show <stash>`, where the stash is the folder name Go recorded at that chapter's last `ReinstallChapter` in this app run, never the caller's, and only while `<instances>/<stash>/instance.cfg` exists; the started Prism is not followed | S3.1, S3.2, S3.3 |
 | `LaunchChapter`, `OpenChapterWiki`, `GetServerStatus` | a chapter id | the manifest's instance, URL or address for it; before a launch, the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, only from the launcher's earlier template | S3.3, S3.7, S4.6, S6.1 |
 | `SetPackSource` | a chapter id and `published` or `dev` | the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, between the manifest's pack URL and the loopback override from settings, only from the launcher's own template; refused while the game is active or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
 | `StopGame` | a chapter id | the pid of the Prism the launcher started, or of the game's Java found as its child, for a run the tracker follows: asked to close, then ended | S3.3, S3.9 |
@@ -549,7 +551,7 @@ chains).
 Probe: a release whose asset URL points elsewhere; a zip naming `../x`; a zip with
 `a` to `.`, `b` to `a/..` and a file `b/x`.
 
-**S4.6 A chapter's instance is created once, and only its own settings keys and its pre-launch command are ever rewritten.**
+**S4.6 A chapter's instance is created once, and only its own settings keys and its pre-launch command are ever rewritten; one the launcher did not set up is only ever moved aside.**
 Holds when: `InstanceCreator.Create` makes the folder with a plain `mkdir` and
 refuses an existing one; writes `instance.cfg` last and removes only the folder
 it created on failure; fetches `pack.toml` with a timeout and a size bound, holds
@@ -580,8 +582,19 @@ names no part of it, and nothing is logged beyond the chapter and the word
 `published` or `dev`. The caller supplies a chapter id and one of those two
 words, never a URL. The write is atomic with every other line and its line
 ending kept, and is refused while the game is active or the instance looks to be
-running.
-Verify: `packinstance_test.go`; `TestWriteChapterSettingsTouchesOnlyItsKeys`,
+running. One more write replaces an instance the launcher did not set up
+(issue 244, ADR-2's fourteenth amendment): `ReinstallChapter` renames it to
+`<id>-stashed-<day>` with `StashInstance` (an `os.Rename` inside the instances
+folder, of a plain folder name, never over an existing name), only for an
+instance with no pack URL of the launcher's, and only after the preview, game
+and open-Prism guards; then the install above runs, and a failed install
+renames it back (`UnstashInstance`, never over a folder that is there again).
+Nothing in the folder is opened or deleted.
+Verify: `packinstance_test.go`; `stashinstance_test.go`,
+`TestReinstallChapterRefusesBeforeMovingAnything`,
+`TestReinstallChapterPutsTheOldInstanceBackWhenTheInstallFails`,
+`TestShowStashedInstanceOpensOnlyTheRecordedStash`;
+`TestWriteChapterSettingsTouchesOnlyItsKeys`,
 `TestRewriteINIKeysAddsMissingKeysToGeneralOnly`,
 `TestValidateChapterSettingsHoldsToThePresetsAndTheMachine`,
 `TestChapterSettingsRoundTripThroughTheInstance`;

@@ -60,6 +60,7 @@ export function ChapterView({ chapter, onOpenSettings, onOpenLogs, onOpenMap }: 
   const installing = useEngineStore((s) => s.installing)
   const installedNow = useEngineStore((s) => s.installedNow)
   const installChapter = useEngineStore((s) => s.installChapter)
+  const reinstallChapter = useEngineStore((s) => s.reinstallChapter)
 
   const status = useServerStore(selectStatus(chapter.id))
   const game = useGameStore(selectGame(chapter.id))
@@ -116,6 +117,7 @@ export function ChapterView({ chapter, onOpenSettings, onOpenLogs, onOpenMap }: 
         // The store has recorded a refusal for the corner's notice.
         onStop={() => void stopGame(chapter.id).catch((e) => console.warn('stop game', errMsg(e)))}
         onInstall={() => void installChapter(chapter.id)}
+        onReinstall={() => void reinstallChapter(chapter.id)}
         release={release}
         install={install}
         onGetPrism={() => void installPrism()}

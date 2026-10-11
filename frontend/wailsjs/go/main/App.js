@@ -158,6 +158,10 @@ export function RefreshEngine() {
   return window['go']['main']['App']['RefreshEngine']();
 }
 
+export function ReinstallChapter(arg1) {
+  return window['go']['main']['App']['ReinstallChapter'](arg1);
+}
+
 export function SaveChapterSettings(arg1, arg2) {
   return window['go']['main']['App']['SaveChapterSettings'](arg1, arg2);
 }
@@ -180,6 +184,10 @@ export function ShowInstanceInPrism(arg1) {
 
 export function ShowPrismConsole(arg1) {
   return window['go']['main']['App']['ShowPrismConsole'](arg1);
+}
+
+export function ShowStashedInstance(arg1) {
+  return window['go']['main']['App']['ShowStashedInstance'](arg1);
 }
 
 export function StartPreview(arg1, arg2) {

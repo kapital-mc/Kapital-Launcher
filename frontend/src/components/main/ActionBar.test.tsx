@@ -52,7 +52,8 @@ function bar(over: Partial<ComponentProps<typeof ActionBar>> = {}) {
       devPack={undefined}
       serverChoice={undefined}
       joinServer={false}
-      instancePack={undefined}
+      // An instance the launcher set up syncs from the chapter's own pack.
+      instancePack={(over.chapter ?? chapter).pack.packwiz ?? undefined}
       packState={undefined}
       game={undefined}
       launching={false}
@@ -64,6 +65,7 @@ function bar(over: Partial<ComponentProps<typeof ActionBar>> = {}) {
       onPlay={noop}
       onStop={noop}
       onInstall={noop}
+      onReinstall={noop}
       onGetPrism={noop}
       onOpenPrismSite={noop}
       onOpenReleasePage={noop}
@@ -403,5 +405,42 @@ describe('ActionBar Stop', () => {
     unmount()
     bar({ game: { ...game('crashed', 1), reason: 'stopped' } })
     expect(play()).toBeEnabled()
+  })
+})
+
+describe('ActionBar instance the launcher did not set up', () => {
+  afterEach(cleanup)
+
+  it("puts Reinstall in Play's place and says the instance is invalid", () => {
+    const onReinstall = vi.fn()
+    bar({ instancePack: undefined, status: online, onReinstall })
+    expect(screen.queryByRole('button', { name: new RegExp(`Play ${chapter.name}`) })).toBeNull()
+    expect(screen.getByText('○ Invalid instance')).toBeInTheDocument()
+    expect(screen.getByText('Reinstall required')).toBeInTheDocument()
+    // Not the server's line, so not its refresh either.
+    expect(screen.queryByRole('button', { name: 'Check the server now' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Reinstall' }))
+    expect(onReinstall).toHaveBeenCalledOnce()
+  })
+
+  it('holds Reinstall while it runs and without Prism', () => {
+    bar({ instancePack: undefined, installing: true })
+    expect(screen.getByRole('button', { name: 'Reinstall' })).toBeDisabled()
+    expect(screen.getByText('◐ Installing')).toBeInTheDocument()
+    cleanup()
+    bar({
+      instancePack: undefined,
+      engine: { found: false, executable: '', version: '', root: '', source: '' },
+    })
+    expect(screen.getByRole('button', { name: 'Reinstall' })).toBeDisabled()
+  })
+
+  it('keeps Play for an instance of unknown presence and Stop while its game runs', () => {
+    bar({ instancePack: undefined, installed: undefined })
+    expect(play()).toBeEnabled()
+    cleanup()
+    bar({ instancePack: undefined, game: game('running') })
+    expect(stop()).toBeEnabled()
+    expect(screen.queryByRole('button', { name: 'Reinstall' })).toBeNull()
   })
 })

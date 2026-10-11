@@ -26,9 +26,11 @@ import {
   OpenInstanceFolder,
   OpenPrism,
   RefreshEngine,
+  ReinstallChapter,
   SaveChapterSettings,
   SetPackSource,
   ShowInstanceInPrism,
+  ShowStashedInstance,
 } from '../../wailsjs/go/main/App'
 import { EventsOff, EventsOn } from '../../wailsjs/runtime/runtime'
 
@@ -52,6 +54,8 @@ interface EngineStore {
   installing: string | null
   /** The chapter installed last, until it is played: its first Play downloads the pack. */
   installedNow: string | null
+  /** The folder each chapter's Reinstall moved its old instance to (issue 244), for the corner's notice. */
+  reinstalled: Record<string, string>
   error: string | null
   /** Prism's latest release, when the launcher could install or update it; null when unknown. */
   release: PrismRelease | null
@@ -86,6 +90,13 @@ interface EngineStore {
   launch: (chapterId: string) => Promise<void>
   installChapter: (chapterId: string) => Promise<void>
   /**
+   * Replaces an instance the launcher did not set up (issue 244): Go moves the
+   * old folder aside as a stashed copy and installs, as Install does.
+   */
+  reinstallChapter: (chapterId: string) => Promise<void>
+  /** Opens the old instance the chapter's Reinstall backed up, in Prism; a refusal is the corner's error. */
+  showStash: (chapterId: string) => Promise<void>
+  /**
    * Points an installed chapter's instance at its published pack or the local
    * one from settings (ADR-2, seventh amendment). A write: Go answers with the
    * instances read again, the pack state is checked against the new source,
@@ -93,6 +104,27 @@ interface EngineStore {
    */
   setPackSource: (chapterId: string, source: PackSource) => Promise<void>
   clearError: () => void
+}
+
+/**
+ * Writes a chapter's instance through one of Go's two writers and takes the
+ * instances it answers with, so the button turns into Play from what is on
+ * disk, not from an assumption.
+ */
+async function writeInstance(
+  set: (partial: Partial<EngineStore>) => void,
+  chapterId: string,
+  write: (chapterId: string) => Promise<InstanceReport>,
+) {
+  set({ installing: chapterId, installedNow: null, error: null })
+  try {
+    const instances = await write(chapterId)
+    set({ instances, installedNow: instances.present[chapterId] ? chapterId : null })
+  } catch (e) {
+    set({ error: errMsg(e) })
+  } finally {
+    set({ installing: null })
+  }
 }
 
 export const useEngineStore = create<EngineStore>((set, get) => ({
@@ -103,6 +135,7 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   launching: null,
   installing: null,
   installedNow: null,
+  reinstalled: {},
   error: null,
   release: null,
   install: null,
@@ -228,17 +261,24 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
     }
   },
 
-  // A write like launch: Go answers with the instances read again, so the
-  // button turns into Play from what is on disk, not from an assumption.
-  installChapter: async (chapterId) => {
-    set({ installing: chapterId, installedNow: null, error: null })
+  // A write like launch.
+  installChapter: (chapterId) => writeInstance(set, chapterId, InstallChapter),
+
+  // The same write with the old folder moved aside first; Go puts it back when
+  // the install fails.
+  reinstallChapter: (chapterId) =>
+    writeInstance(set, chapterId, async (id) => {
+      const { instances, stash } = await ReinstallChapter(id)
+      set({ reinstalled: { ...get().reinstalled, [id]: stash } })
+      return instances
+    }),
+
+  // Go opens the stash it recorded; the chapter id is all that crosses.
+  showStash: async (chapterId) => {
     try {
-      const instances = await InstallChapter(chapterId)
-      set({ instances, installedNow: instances.present[chapterId] ? chapterId : null })
+      await ShowStashedInstance(chapterId)
     } catch (e) {
       set({ error: errMsg(e) })
-    } finally {
-      set({ installing: null })
     }
   },
 

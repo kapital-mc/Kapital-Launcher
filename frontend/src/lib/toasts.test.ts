@@ -11,7 +11,7 @@ const at = (phase: GamePhase, over: Partial<GameState> = {}): GameState => ({
 })
 
 const name = (id: string) => (id === 'frangfurd' ? 'Frangfurd' : id)
-const none = { engineError: null, stopErrors: {}, games: {}, chapterName: name }
+const none = { engineError: null, stopErrors: {}, games: {}, reinstalled: {}, chapterName: name }
 
 describe('errorToasts', () => {
   it('has nothing to say when nothing went wrong', () => {
@@ -98,8 +98,28 @@ describe('errorToasts', () => {
       engineError: 'refused',
       stopErrors: { luxemburg: 'no game' },
       games: { frangfurd: at('failed') },
+      reinstalled: { lichdenstein: 'kapital-lichdenstein-stashed-2026-10-11' },
       chapterName: name,
     })
-    expect(toasts.map((t) => t.id)).toEqual(['engine', 'stop:luxemburg', 'game:frangfurd'])
+    expect(toasts.map((t) => t.id)).toEqual([
+      'engine',
+      'stop:luxemburg',
+      'game:frangfurd',
+      'reinstall:lichdenstein',
+    ])
+  })
+
+  it('says where a reinstall backed the old instance up, with Open in Prism to it', () => {
+    const stash = 'kapital-frangfurd-stashed-2026-10-11'
+    expect(errorToasts({ ...none, reinstalled: { frangfurd: stash } })).toEqual([
+      {
+        id: 'reinstall:frangfurd',
+        stamp: stash,
+        title: '● Frangfurd reinstalled',
+        detail: `The old instance is backed up in Prism as ${stash}`,
+        tone: 'muted',
+        stashFor: 'frangfurd',
+      },
+    ])
   })
 })

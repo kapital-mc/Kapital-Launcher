@@ -28,7 +28,8 @@ const GLYPH = {
  * The launcher's notices, stacked in the bottom-right corner over the chapter
  * card and inset from its edge, so an error never moves what is on the screen: a launch, install or
  * stop the backend refused, and a run that crashed or never started, with
- * Details to its report. The notices are derived from the stores
+ * Details to its report. A reinstall says where the old instance went, with
+ * Open in Prism to it. The notices are derived from the stores
  * (`lib/toasts.ts`), so one leaves when its cause does, and the cross puts
  * one away until its source has something new to say.
  */
@@ -36,12 +37,14 @@ export function Toasts({ onOpenReport }: Props) {
   const engineError = useEngineStore((s) => s.error)
   const stopErrors = useGameStore((s) => s.stopErrors)
   const games = useGameStore((s) => s.states)
+  const reinstalled = useEngineStore((s) => s.reinstalled)
+  const showStash = useEngineStore((s) => s.showStash)
   const chapters = useChapterStore((s) => s.manifest.chapters)
   // The stamp each notice was dismissed at; a notice with a newer stamp shows again.
   const [dismissed, setDismissed] = useState<Record<string, string>>({})
 
   const chapterName = (id: string) => chapters.find((c) => c.id === id)?.name ?? id
-  const toasts = errorToasts({ engineError, stopErrors, games, chapterName }).filter(
+  const toasts = errorToasts({ engineError, stopErrors, games, reinstalled, chapterName }).filter(
     (t) => dismissed[t.id] !== t.stamp,
   )
   const dismiss = (t: Toast) => setDismissed((d) => ({ ...d, [t.id]: t.stamp }))
@@ -73,6 +76,15 @@ export function Toasts({ onOpenReport }: Props) {
                 onClick={() => onOpenReport(t.reportFor!)}
               >
                 Details
+              </TextLink>
+            )}
+            {t.stashFor && (
+              <TextLink
+                strong
+                className="mt-1 self-start"
+                onClick={() => void showStash(t.stashFor!)}
+              >
+                Open in Prism
               </TextLink>
             )}
           </div>

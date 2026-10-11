@@ -60,7 +60,12 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // panorama's faces in the background and says it is loading meanwhile, so a chapter
 // switch never waits on them (lib/panorama, the spinner glyph). Both run from the
 // first paint. Measured 90.0 KB, from 89.7 KB before it.
-const BUDGET_KB = 90.1
+// 90.4 since Reinstall (2026-10-11, issue 244): the action bar tells an instance the
+// launcher did not set up from its own and offers Reinstall in Play's place, the
+// engine store has the write behind it, and the corner says where the old instance
+// went, with Open in Prism to it. All are the first paint's. Measured 90.34 KB, from
+// 90.07 KB before it.
+const BUDGET_KB = 90.4
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)
