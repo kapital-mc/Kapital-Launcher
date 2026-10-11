@@ -23,6 +23,7 @@ describe('useEngineStore', () => {
       launching: null,
       installing: null,
       installedNow: null,
+      reinstalled: {},
       error: null,
       release: null,
       install: null,
@@ -34,6 +35,7 @@ describe('useEngineStore', () => {
     vi.mocked(App.RefreshEngine).mockReset()
     vi.mocked(App.LaunchChapter).mockReset()
     vi.mocked(App.InstallChapter).mockReset()
+    vi.mocked(App.ReinstallChapter).mockReset()
     vi.mocked(App.SetPackSource).mockReset()
     vi.mocked(App.GetPackStates).mockReset()
     vi.mocked(App.GetChangelogs).mockReset()
@@ -80,6 +82,48 @@ describe('useEngineStore', () => {
     expect(s.installing).toBeNull()
     expect(s.installedNow).toBeNull()
     expect(s.instances).toBe(before)
+  })
+
+  it('reinstalls a chapter as an install, and keeps the instances when Go refuses', async () => {
+    const report = {
+      root: 'C:/Prism',
+      dir: 'C:/Prism/instances',
+      present: { lichdenstein: true },
+      packUrl: { lichdenstein: 'https://example.com/lichdenstein/pack.toml' },
+    }
+    const stash = 'kapital-lichdenstein-stashed-2026-10-11'
+    vi.mocked(App.ReinstallChapter).mockResolvedValue(
+      models.ReinstallResult.createFrom({ instances: report, stash }),
+    )
+    const pending = useEngineStore.getState().reinstallChapter('lichdenstein')
+    expect(useEngineStore.getState().installing).toBe('lichdenstein')
+    await pending
+    let s = useEngineStore.getState()
+    expect(App.ReinstallChapter).toHaveBeenCalledWith('lichdenstein')
+    expect(s.installing).toBeNull()
+    expect(s.installedNow).toBe('lichdenstein')
+    expect(selectInstancePack('lichdenstein')(s)).toBe(report.packUrl.lichdenstein)
+    expect(s.reinstalled).toEqual({ lichdenstein: stash })
+
+    const before = s.instances
+    vi.mocked(App.ReinstallChapter).mockRejectedValue('Prism is open; close it first')
+    await useEngineStore.getState().reinstallChapter('lichdenstein')
+    s = useEngineStore.getState()
+    expect(s.error).toBe('Prism is open; close it first')
+    expect(s.installing).toBeNull()
+    expect(s.instances).toBe(before)
+    expect(s.reinstalled).toEqual({ lichdenstein: stash })
+  })
+
+  it('opens the backed-up instance through Go, and records a refusal for the corner', async () => {
+    const gone = 'the backed-up Lichdenstein instance is no longer in Prism'
+    vi.mocked(App.ShowStashedInstance).mockResolvedValue()
+    await useEngineStore.getState().showStash('lichdenstein')
+    expect(App.ShowStashedInstance).toHaveBeenCalledWith('lichdenstein')
+    expect(useEngineStore.getState().error).toBeNull()
+    vi.mocked(App.ShowStashedInstance).mockRejectedValue(gone)
+    await useEngineStore.getState().showStash('lichdenstein')
+    expect(useEngineStore.getState().error).toBe(gone)
   })
 
   it('switches the pack source, takes the report Go returns and checks the pack again', async () => {

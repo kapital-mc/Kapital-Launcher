@@ -52,6 +52,12 @@ const report = (present: Record<string, boolean>, sizeBytes: Record<string, numb
     root: 'C:/Prism',
     dir: 'C:/Prism/instances',
     present,
+    // An instance the launcher set up syncs from the chapter's own pack.
+    packUrl: Object.fromEntries(
+      BUNDLED_MANIFEST.chapters
+        .filter((c) => present[c.id] && c.pack.packwiz)
+        .map((c) => [c.id, c.pack.packwiz]),
+    ),
     sizeBytes,
   })
 

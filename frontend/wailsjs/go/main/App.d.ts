@@ -80,6 +80,8 @@ export function ReadRunLog(arg1:string,arg2:string,arg3:string,arg4:number):Prom
 
 export function RefreshEngine():Promise<models.EngineInfo>;
 
+export function ReinstallChapter(arg1:string):Promise<models.ReinstallResult>;
+
 export function SaveChapterSettings(arg1:string,arg2:models.ChapterSettings):Promise<models.ChapterSettingsInfo>;
 
 export function SaveSettings(arg1:models.AppSettings):Promise<void>;
@@ -91,6 +93,8 @@ export function SetPackSource(arg1:string,arg2:string):Promise<models.InstanceRe
 export function ShowInstanceInPrism(arg1:string):Promise<void>;
 
 export function ShowPrismConsole(arg1:string):Promise<boolean>;
+
+export function ShowStashedInstance(arg1:string):Promise<void>;
 
 export function StartPreview(arg1:string,arg2:string):Promise<models.PreviewStart>;
 

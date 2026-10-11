@@ -29,8 +29,10 @@ import (
 //     entries; no file inside is opened, symlinks are not followed, and the
 //     walk stops at a ceiling of entries.
 //
-// The one write into a Prism root is packinstance.go's, which creates a
-// chapter's instance folder when it is absent (ADR-2, amendment).
+// The writes into a Prism root are packinstance.go's, which creates a
+// chapter's instance folder when it is absent (ADR-2, amendment), and
+// stashinstance.go's, which moves one the launcher did not set up aside under
+// another name on the player's request (issue 244, fourteenth amendment).
 
 const (
 	prismConfigName   = "prismlauncher.cfg"

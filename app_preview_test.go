@@ -453,7 +453,7 @@ func TestInstancePreviewsFakeWhatIsReportedAndNotWhatIsOnTheDisk(t *testing.T) {
 	}
 }
 
-// Install, pack source and settings are writes to the instance: under the
+// Install, reinstall, pack source and settings are writes to the instance: under the
 // chapter's preview they are refused, the preview ends, and the file is as it was.
 func TestWritesToAPreviewedChapterAreRefusedAndEndThePreview(t *testing.T) {
 	for _, tc := range []struct {
@@ -461,6 +461,7 @@ func TestWritesToAPreviewedChapterAreRefusedAndEndThePreview(t *testing.T) {
 		call func(app *App) error
 	}{
 		{"install", func(app *App) error { _, err := app.InstallChapter("frangfurd"); return err }},
+		{"reinstall", func(app *App) error { _, err := app.ReinstallChapter("frangfurd"); return err }},
 		{"pack source", func(app *App) error { _, err := app.SetPackSource("frangfurd", "published"); return err }},
 		{"chapter settings", func(app *App) error {
 			_, err := app.SaveChapterSettings("frangfurd", anySave)

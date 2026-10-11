@@ -504,3 +504,45 @@ command.
   rare and fails safe, with a message the player can act on.
 - **Where it cannot be told.** An OS with no process lookup, or an empty
   executable path, gives no answer and the write goes ahead as before.
+
+## Fourteenth amendment, 2026-10-11
+
+An instance folder under the launcher's name that the launcher did not set up
+counted as installed, and nothing could put it right (issue 244). Seen on
+2026-10-11: `kapital-lichdenstein` was the author's copy made by hand from the
+Modrinth App on 2026-09-30, with no `PreLaunchCommand`. Play started it as it was
+and it never synced: no Default Options, none of the pack's configs, vanilla
+settings. Install refuses an existing folder (the decision above), and the
+fourth amendment's rewrite leaves a config with no command alone, so the only
+way out was deleting the instance in Prism, which the launcher never said.
+
+The author chose to flag it and let the player replace it, without deleting
+anything:
+
+- **What is flagged.** A chapter whose instance is present and has no pack URL
+  in the instance report: no pre-launch command, or one that is not the
+  launcher's template (`packURLFromCommand` reads none back). The action bar says
+  "Invalid instance" over "Reinstall required", and Reinstall takes Play's place.
+  The old instance can still be played from Prism.
+- **What Reinstall writes (`ReinstallChapter`, `StashInstance`).** One rename in
+  the instances folder: `<id>` becomes `<id>-stashed-<YYYY-MM-DD>`, the day of
+  the stash, with `-2`, `-3` and so on for another that day. Nothing in the
+  folder is opened, copied or deleted, and Prism lists it as the instance it was.
+  Then the install of the decision above runs as Install's does, into the freed
+  name. An install that fails renames the stash back, unless a folder of the id
+  is there again; then the stash is kept and the error names it.
+- **What the player is told after.** A notice in the corner, "<Chapter>
+  reinstalled", says the old instance is backed up in Prism under its stash name,
+  with Open in Prism to it (`ShowStashedInstance`): Prism's `--show` with the
+  folder name Go recorded at the stash in this app run, never one the caller
+  names, and only while that folder still holds an `instance.cfg`.
+- **When it is refused, before anything is renamed.** For an instance that is the
+  launcher's own (it has a pack URL: `SetPackSource` is the way to another
+  pack), a chapter that is not installed or has no pack to install, under a
+  developer preview, while the game is active or looks to be running, and while
+  a Prism is open (the thirteenth amendment's `refuseIfPrismOpen`: a Prism with
+  the instance loaded would keep its old path and write its settings back).
+
+The decision's rule that an instance is never overwritten still holds: the old
+folder is moved aside whole, on the player's request, and a new one is created
+where it was.

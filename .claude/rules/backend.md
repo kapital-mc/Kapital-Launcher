@@ -197,7 +197,10 @@ marked `[verify]` in a comment; clearing those is Roadmap milestone 2.
 The launcher writes one thing into a player's Prism data directory: a
 chapter's instance folder, created by `InstanceCreator` only when it does not
 exist, `instance.cfg` last, and touched again only in the keys the amendments
-name (ADR-2, amendment). In the managed root it owns it also seeds `prismlauncher.cfg`,
+name (ADR-2, amendment). The one exception is Reinstall (`ReinstallChapter`,
+`stashinstance.go`, issue 244, fourteenth amendment): an instance under the
+chapter's name with no pack URL of the launcher's is renamed whole to
+`<id>-stashed-<day>` before the install, and back if the install fails. In the managed root it owns it also seeds `prismlauncher.cfg`,
 `prismlauncher_update.cfg` and `qtlogging.ini` once, before Prism first starts
 (the last also before a launch, when absent, for an earlier install). The pre-launch
 command it writes is the launcher's own copy in a sync mode,

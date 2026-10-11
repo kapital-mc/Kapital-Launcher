@@ -84,6 +84,14 @@ first Play downloads the pack". The launcher writes this folder only when it
 does not exist, and after that touches `instance.cfg` only for the settings
 it owns (ADR-2 and its amendments say exactly which keys).
 
+A folder of that name the launcher did not write, such as an instance copied
+over by hand, has none of this, so Play would start it as it is and never sync.
+The launcher says so ("Invalid instance", "Reinstall required") and offers
+Reinstall in Play's place: the old folder is renamed to, say,
+`kapital-lichdenstein-stashed-2026-10-11`, kept in Prism with everything in it,
+and the chapter is installed fresh (issue 244). A notice in the corner says where
+the old one went, with a button that opens it in Prism.
+
 ## Play is the sync
 
 Play asks Prism to launch the instance. Prism runs the pre-launch command

@@ -14,10 +14,12 @@ export interface Toast {
   title: string
   /** The sentence under it; the error's own words for a refusal. */
   detail: string
-  /** `danger` for an error, `muted` for a stop the player asked for. */
+  /** `danger` for an error, `muted` for a stop the player asked for or a reinstall. */
   tone: 'danger' | 'muted'
   /** The chapter whose run report Details opens; absent when there is none to read. */
   reportFor?: string
+  /** The chapter whose backed-up instance Open in Prism opens, after a reinstall. */
+  stashFor?: string
 }
 
 export interface ToastSources {
@@ -27,6 +29,8 @@ export interface ToastSources {
   stopErrors: Record<string, string>
   /** Where each chapter's game is. */
   games: Record<string, GameState>
+  /** The folder each chapter's Reinstall backed its old instance up to. */
+  reinstalled: Record<string, string>
   /** A chapter's name by id, for the game's own line. */
   chapterName: (chapterId: string) => string
 }
@@ -43,12 +47,14 @@ const ENDED: readonly GameState['phase'][] = ['crashed', 'failed']
  * store's error), a Stop it refused, and a run that crashed or never started,
  * which keeps its notice until the next Play, with Details to the run report.
  * A run the player stopped is confirmed in the muted tone, with nothing to
- * explain.
+ * explain, and so is a reinstall (issue 244), with Open in Prism to the
+ * backed-up instance.
  */
 export function errorToasts({
   engineError,
   stopErrors,
   games,
+  reinstalled,
   chapterName,
 }: ToastSources): Toast[] {
   const toasts: Toast[] = []
@@ -82,6 +88,16 @@ export function errorToasts({
       detail: rows[1],
       tone: stopped ? 'muted' : 'danger',
       ...(stopped ? {} : { reportFor: chapterId }),
+    })
+  }
+  for (const [chapterId, stash] of Object.entries(reinstalled)) {
+    toasts.push({
+      id: `reinstall:${chapterId}`,
+      stamp: stash,
+      title: `● ${chapterName(chapterId)} reinstalled`,
+      detail: `The old instance is backed up in Prism as ${stash}`,
+      tone: 'muted',
+      stashFor: chapterId,
     })
   }
   return toasts

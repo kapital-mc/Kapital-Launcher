@@ -53,3 +53,10 @@ type InstanceReport struct {
 	// a folder that could not be walked.
 	SizeBytes map[string]int64 `json:"sizeBytes"`
 }
+
+// ReinstallResult is what Reinstall did (issue 244): the instances read again,
+// and the folder name the old instance was moved to, which Prism lists.
+type ReinstallResult struct {
+	Instances InstanceReport `json:"instances"`
+	Stash     string         `json:"stash"`
+}

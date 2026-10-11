@@ -93,6 +93,9 @@ type App struct {
 	seenMu       sync.Mutex
 	ended        map[string]time.Time
 	packVersions map[string]string
+	// stashes is the folder each chapter's last Reinstall moved its old
+	// instance to in this app run (issue 244), the one ShowStashedInstance opens.
+	stashes map[string]string
 }
 
 // NewApp wires the services. The manifest is parsed and validated here so a
