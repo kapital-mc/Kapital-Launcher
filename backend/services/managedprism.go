@@ -113,6 +113,8 @@ type ManagedPrism struct {
 	stall        time.Duration
 
 	mu sync.Mutex // one install at a time
+
+	drift selfUpdate // Reconcile's last look (#221)
 }
 
 // NewManagedPrism keeps the managed Prism under dataDir/prism.

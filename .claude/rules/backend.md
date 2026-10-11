@@ -185,7 +185,10 @@ their `com.apple.cs.*` attributes go back on the files they name
 previous version's folder, so `InstallPrism` first refuses one while any process
 runs from the managed executable (`refusePrismUpdateWhileOpen`, the
 `OtherPrismOpen` look, #227); a first install or the version already in place
-removes nothing and is not checked.
+removes nothing and is not checked. Prism's own updater may replace the bundle
+in place (Sparkle stays on, ADR-11's 2026-10-09 amendment): `GetPrismRelease`
+measures an update against the version detection read (`Reconcile`, #221), not
+`managed.json`'s.
 
 Detection is injected (`lookPath`, `getenv`, `stat`, `run`) so it is tested on
 a machine with no Prism. A path that has not been observed on a real install is
