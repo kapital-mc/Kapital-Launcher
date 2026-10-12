@@ -71,6 +71,9 @@ func TestModJarNameAcceptsTheRealOnesAndNothingThatCouldNameAPath(t *testing.T) 
 		"Drip Sounds-0.5.2+1.20.6-Fabric.jar",
 		"Hold My Items 1.20.5 - 1.20.6 v4.0.jar",
 		"Ünïcode-1.0.jar",
+		// The project's own jars, carried by the pack itself (ADR-3, amendment).
+		"frangfurd_menu-0.1.0.jar",
+		"frangfurd_tempo-0.1.0.jar",
 	} {
 		if !ModJarName(name) {
 			t.Errorf("%q was refused", name)

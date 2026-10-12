@@ -90,10 +90,10 @@
         "type": "modpack",
         "loader": "NeoForge",
         "minecraft": "1.21.1",
-        "mods": 92,
+        "mods": 96,
         "memoryGb": 8,
         "jvm": "zgc",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "packwiz": "https://kapital-packs.alessandrogekeler.workers.dev/frangfurd/pack.toml",
         "mrpack": null,
         "toggles": [
@@ -105,7 +105,9 @@
             "jarPrefix": "colorwheel_patcher-neoforge-",
             "requires": "colorwheel-neoforge-"
           },
-          { "name": "Create Better FPS", "jarPrefix": "createbetterfps-" }
+          { "name": "Create Better FPS", "jarPrefix": "createbetterfps-" },
+          { "name": "Frangfurd Menu", "jarPrefix": "frangfurd_menu-" },
+          { "name": "Frangfurd Tempo", "jarPrefix": "frangfurd_tempo-" }
         ]
       },
       "server": {
