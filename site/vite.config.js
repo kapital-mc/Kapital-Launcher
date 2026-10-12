@@ -8,10 +8,43 @@ import tailwindcss from '@tailwindcss/vite'
 // release renders the "Download · coming soon" fallback and leaves out the
 // download popup. A release is a tag, and the two installer URLs and the
 // release notes URL are derived from it and the GitHub link, so nothing is
-// written twice.
+// written twice. `release: "latest"` resolves the tag when the site is built
+// (resolveLatest below), and SITE_RELEASE in the environment overrides
+// links.json for a build without network access.
 const TAG = /^v\d+\.\d+\.\d+(-(alpha|beta)\.\d+)?$/
 
-function readLinks() {
+const installerUrls = (base, tag) => ({
+  WINDOWS_URL: `${base}/releases/download/${tag}/Kapital-Launcher-${tag}-windows-amd64-setup.exe`,
+  MACOS_URL: `${base}/releases/download/${tag}/Kapital-Launcher-${tag}-macos-universal.dmg`,
+})
+
+// The newest release that has both installers, prereleases included, which
+// GitHub's releases/latest/download/ would skip. Read from the repository's
+// public releases feed rather than the REST API: the feed has no API rate
+// limit, so an unauthenticated build on a shared CI runner does not fail on
+// one. The feed lists newest first. A release whose installers are not up yet
+// (a release still uploading) is passed over for the one before it. Any network
+// failure fails the build: Pages then keeps the deployment it has.
+async function resolveLatest(base) {
+  const feed = await fetch(`${base}/releases.atom`, { signal: AbortSignal.timeout(15000) })
+  if (!feed.ok) throw new Error(`site: ${base}/releases.atom answered ${feed.status}`)
+  const xml = await feed.text()
+  const tags = [...xml.matchAll(/\/releases\/tag\/([^"<\s]+)"/g)].map((m) => decodeURIComponent(m[1]))
+  for (const tag of tags) {
+    if (!TAG.test(tag)) continue
+    const found = await Promise.all(
+      Object.values(installerUrls(base, tag)).map((url) =>
+        fetch(url, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(15000) }).then(
+          (r) => r.status === 302 || r.ok,
+        ),
+      ),
+    )
+    if (found.every(Boolean)) return tag
+  }
+  throw new Error(`site: no release on ${base} has both installers`)
+}
+
+async function readLinks() {
   const links = JSON.parse(readFileSync(new URL('./links.json', import.meta.url), 'utf8'))
   const all = { github: links.github }
   for (const [key, url] of Object.entries(all)) {
@@ -21,20 +54,24 @@ function readLinks() {
     }
   }
 
-  const tag = links.release
+  let tag = process.env.SITE_RELEASE ?? links.release
+  if (tag === 'null') tag = null
+  if (tag === 'latest') {
+    if (all.github === null) throw new Error('site: release "latest" needs the github link')
+    tag = await resolveLatest(all.github.replace(/\/+$/, ''))
+  }
   let release = null
   if (tag !== null) {
     if (typeof tag !== 'string' || !TAG.test(tag)) {
       throw new Error(
-        `site: release must be a tag like v0.1.0-beta.1 or null, got ${JSON.stringify(tag)}`,
+        `site: release must be a tag like v0.1.0-beta.1, "latest" or null, got ${JSON.stringify(tag)}`,
       )
     }
     if (all.github === null) throw new Error('site: a release needs the github link')
     const base = all.github.replace(/\/+$/, '')
     release = {
       tag,
-      WINDOWS_URL: `${base}/releases/download/${tag}/Kapital-Launcher-${tag}-windows-amd64-setup.exe`,
-      MACOS_URL: `${base}/releases/download/${tag}/Kapital-Launcher-${tag}-macos-universal.dmg`,
+      ...installerUrls(base, tag),
       NOTES_URL: `${base}/releases/tag/${tag}`,
     }
   }
@@ -78,8 +115,9 @@ function fillLinks(html, links) {
   return out
 }
 
-function links() {
-  const resolved = readLinks()
+async function links() {
+  const resolved = await readLinks()
+  if (resolved.release) console.log(`site: download links point at ${resolved.release.tag}`)
   return {
     name: 'kapital:links',
     transformIndexHtml: { order: 'pre', handler: (html) => fillLinks(html, resolved) },
@@ -131,8 +169,8 @@ function stylesheetFirst() {
   }
 }
 
-export default defineConfig({
-  plugins: [tailwindcss(), links(), stylesheetFirst()],
+export default defineConfig(async () => ({
+  plugins: [tailwindcss(), await links(), stylesheetFirst()],
   build: {
     // The script runs as a classic script (stylesheetFirst above), and the page
     // has no module to preload, so the module preload polyfill has no work.
@@ -142,4 +180,4 @@ export default defineConfig({
     // never inline, so script-src 'self' is all it needs.
     assetsInlineLimit: 0,
   },
-})
+}))

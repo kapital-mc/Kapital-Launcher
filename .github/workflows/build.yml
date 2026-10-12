@@ -343,3 +343,20 @@ jobs:
           fi
 
           gh release create "${args[@]}"
+
+      # The download site resolves the newest release when it is built
+      # (site/vite.config.js, ADR-9), so a published release asks Cloudflare
+      # Pages for a build through its deploy hook. The hook URL is a secret,
+      # SITE_DEPLOY_HOOK. Without it, or if the call fails, the site follows on
+      # its next build, so neither fails the release, which is already out.
+      - name: Rebuild the download site
+        env:
+          HOOK: ${{ secrets.SITE_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::notice::No SITE_DEPLOY_HOOK secret: the download site picks up $TAG on its next build."
+          elif curl -fsS --retry 3 -X POST "$HOOK" > /dev/null; then
+            echo "Asked Cloudflare Pages to rebuild the download site for $TAG."
+          else
+            echo "::warning::The Pages deploy hook failed: the download site picks up $TAG on its next build."
+          fi
