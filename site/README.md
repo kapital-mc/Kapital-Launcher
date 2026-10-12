@@ -74,9 +74,8 @@ included, whose two installers are both up. GitHub's own
 is. It reads the repository's public releases feed (`<github>/releases.atom`),
 not the REST API, so an unauthenticated build on a shared CI runner does not run
 into the API's rate limit, and checks each installer link before choosing a
-release. The build prints the tag it chose (`site: download links point at
-v1.0.0-beta.2`). A network failure fails the build, and Cloudflare Pages then
-keeps the deployment it has.
+release. A network failure fails the build, and Cloudflare Pages then keeps the
+deployment it has.
 
 So the site follows a release on its next build: the next push to `main`, or
 the Pages deploy hook the release workflow calls once a release is published

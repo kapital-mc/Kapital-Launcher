@@ -117,7 +117,6 @@ function fillLinks(html, links) {
 
 async function links() {
   const resolved = await readLinks()
-  if (resolved.release) console.log(`site: download links point at ${resolved.release.tag}`)
   return {
     name: 'kapital:links',
     transformIndexHtml: { order: 'pre', handler: (html) => fillLinks(html, resolved) },
