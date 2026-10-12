@@ -86,9 +86,57 @@ function links() {
   }
 }
 
+// Vite writes the page's script as a module before the stylesheet. A module
+// never stops the parser, so the whole body is parsed while the stylesheet is
+// still loading. Chromium holds the first paint for a stylesheet in the head
+// anyway, but Safari and Firefox can paint what is parsed before it arrives
+// (Firefox whenever something asks for layout early, an extension included),
+// and that frame is the page unstyled: raw text and full-width icons.
+// A classic script after the stylesheet stops the parser until the stylesheet
+// has loaded, so there is no body to paint until it can be painted styled. The
+// script is detect.js, which waits for DOMContentLoaded and so can run in the
+// head; an inline script would do as well but the CSP forbids one.
+const SCRIPT = /[ \t]*<script type="module" crossorigin src="([^"]+)"><\/script>\r?\n?/g
+const SHEET = /<link rel="stylesheet" crossorigin href="[^"]+">/g
+
+function stylesheetFirst() {
+  return {
+    name: 'kapital:stylesheet-first',
+    apply: 'build',
+    generateBundle(_, bundle) {
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== 'chunk') continue
+        if (chunk.imports.length || chunk.dynamicImports.length || chunk.exports.length) {
+          throw new Error(`site: ${chunk.fileName} imports or exports, so it cannot run as a classic script`)
+        }
+        if (chunk.code.includes('import.meta')) {
+          throw new Error(`site: ${chunk.fileName} reads import.meta, so it cannot run as a classic script`)
+        }
+      }
+    },
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        const scripts = [...html.matchAll(SCRIPT)]
+        const sheets = html.match(SHEET) ?? []
+        if (scripts.length !== 1 || sheets.length !== 1) {
+          throw new Error(
+            `site: expected one module script and one stylesheet in the built page, found ${scripts.length} and ${sheets.length}`,
+          )
+        }
+        const [tag, src] = scripts[0]
+        return html.replace(tag, '').replace(sheets[0], `${sheets[0]}\n    <script src="${src}"></script>`)
+      },
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [tailwindcss(), links()],
+  plugins: [tailwindcss(), links(), stylesheetFirst()],
   build: {
+    // The script runs as a classic script (stylesheetFirst above), and the page
+    // has no module to preload, so the module preload polyfill has no work.
+    modulePreload: { polyfill: false },
     // Every asset is a file, never a data: URI, so the CSP in public/_headers
     // can stay at img-src 'self' and font-src 'self'. The script is a file too,
     // never inline, so script-src 'self' is all it needs.

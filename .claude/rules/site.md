@@ -10,7 +10,10 @@ paths:
 
 - **One script, and it only picks the OS.** `src/detect.js` checks the
   download popup's Windows or macOS radio and does nothing else: no network,
-  no storage. The CSP in `public/_headers` is `default-src 'none'` with
+  no storage. The build places it after the stylesheet as a classic script,
+  so the parser waits for the stylesheet and no browser paints the page
+  unstyled (`stylesheetFirst` in `vite.config.js`); keep it free of imports,
+  exports and `import.meta`, which the build refuses. The CSP in `public/_headers` is `default-src 'none'` with
   scripts, styles, images and fonts from the site itself. Adding a second
   script, an inline script or style, a data: URI or a remote asset means
   changing that policy on purpose, in the same change. The launcher window on the page cycles
