@@ -543,6 +543,24 @@
                           stroke-linejoin="round"
                           class="size-(--layout-icon-md) shrink-0"
                         >
+                          <path d="m7 11 2-2-2-2" />
+                          <path d="M11 13h4" />
+                          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                        </svg>
+                      </span>
+                      <span
+                        class="text-fg-muted inline-flex size-11 shrink-0 items-center justify-center rounded-md"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="size-(--layout-icon-md) shrink-0"
+                        >
                           <path
                             d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"
                           />
@@ -578,7 +596,7 @@
                         >
                         <span
                           class="border-line-strong text-fg-soft rounded-pill bg-sunken/55 inline-flex h-6.5 items-center border px-2.5 text-xs"
-                          >208 mods</span
+                          >202 mods</span
                         >
                         <span
                           class="border-line-strong text-fg-soft rounded-pill bg-sunken/55 inline-flex h-6.5 items-center border px-2.5 text-xs"
@@ -614,10 +632,35 @@
                       <div class="ml-auto flex items-center gap-2">
                         <div class="flex flex-col items-end gap-0.5">
                           <span class="font-ui text-accent text-xs font-medium"
-                            >● Updated</span
+                            >● Server online</span
                           >
-                          <span class="text-fg-faint text-xs">Version 4.1</span>
+                          <span class="text-fg-faint text-xs"
+                            >3/20 players · 24 ms</span
+                          >
                         </div>
+                        <span
+                          class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="size-(--layout-icon-md) shrink-0"
+                          >
+                            <path
+                              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                            />
+                            <path d="M21 3v5h-5" />
+                            <path
+                              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                            />
+                            <path d="M8 16H3v5" />
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -629,7 +672,7 @@
                       <div class="flex flex-col gap-3.5">
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Version</span
-                          ><span class="font-mono">4.1</span>
+                          ><span class="font-mono">1.5.0</span>
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Loader</span
@@ -641,11 +684,11 @@
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Mods</span
-                          ><span class="font-mono">208</span>
+                          ><span class="font-mono">202</span>
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Size</span
-                          ><span class="text-fg-faint">Unknown</span>
+                          ><span class="font-mono">1.3 GB</span>
                         </div>
                       </div>
                     </div>
@@ -653,7 +696,18 @@
                       <h2 class="text-fg-faint m-0 text-xs font-medium">
                         Changelog
                       </h2>
-                      <span class="text-fg-faint text-sm">No entries yet.</span>
+                      <div class="flex flex-col gap-3">
+                        <div
+                          class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-3 text-sm"
+                        >
+                          <span class="text-accent text-2xs truncate font-mono"
+                            >1.5.0</span
+                          >
+                          <span class="text-fg-soft line-clamp-2"
+                            >The first Kapital release: Create and its add-ons, JourneyMap, and Embeddium with Oculus for shaders.</span
+                          >
+                        </div>
+                      </div>
                     </div>
                     <div class="flex flex-col gap-3 p-7">
                       <h2 class="text-fg-faint m-0 text-xs font-medium">
@@ -662,11 +716,16 @@
                       <p
                         class="font-display m-0 line-clamp-1 text-lg leading-snug"
                       >
-                        Bellum Castle
+                        Luxemburg
                       </p>
                       <span
                         class="text-fg-muted line-clamp-4 min-h-[4lh] text-sm leading-normal"
-                        >A trade empire grown out of a mountain pass.</span
+                        >Luxemburg is a nation with roots predating the Avari era,
+                        originally a smaller state bordered and surrounded by
+                        Lachsenhausen. Following the Avari Empire's collapse in
+                        1365, it re-emerged as the dominant name for the
+                        consolidating successor states, formally unifying in
+                        1701.</span
                       >
                       <span class="text-accent mt-auto w-fit text-sm"
                         >Read the history →</span
@@ -724,6 +783,24 @@
                           stroke-linejoin="round"
                           class="size-(--layout-icon-md) shrink-0"
                         >
+                          <path d="m7 11 2-2-2-2" />
+                          <path d="M11 13h4" />
+                          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                        </svg>
+                      </span>
+                      <span
+                        class="text-fg-muted inline-flex size-11 shrink-0 items-center justify-center rounded-md"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="size-(--layout-icon-md) shrink-0"
+                        >
                           <path
                             d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"
                           />
@@ -760,7 +837,7 @@
                         >
                         <span
                           class="border-line-strong text-fg-soft rounded-pill bg-sunken/55 inline-flex h-6.5 items-center border px-2.5 text-xs"
-                          >31 mods</span
+                          >37 mods</span
                         >
                         <span
                           class="border-line-strong text-fg-soft rounded-pill bg-sunken/55 inline-flex h-6.5 items-center border px-2.5 text-xs"
@@ -796,10 +873,10 @@
                       <div class="ml-auto flex items-center gap-2">
                         <div class="flex flex-col items-end gap-0.5">
                           <span class="font-ui text-accent text-xs font-medium"
-                            >● Installed</span
+                            >● Server online</span
                           >
                           <span class="text-fg-faint text-xs"
-                            >The first Play downloads the pack</span
+                            >5/30 players · 41 ms</span
                           >
                         </div>
                         <span
@@ -836,11 +913,11 @@
                       <div class="flex flex-col gap-3.5">
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Version</span
-                          ><span class="text-fg-faint">Not installed</span>
+                          ><span class="font-mono">1.0.0</span>
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Loader</span
-                          ><span>Client visuals</span>
+                          ><span class="font-mono">Fabric</span>
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Minecraft</span
@@ -848,11 +925,11 @@
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Mods</span
-                          ><span class="font-mono">31</span>
+                          ><span class="font-mono">37</span>
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Size</span
-                          ><span class="text-fg-faint">Not installed</span>
+                          ><span class="font-mono">640 MB</span>
                         </div>
                       </div>
                     </div>
@@ -860,7 +937,18 @@
                       <h2 class="text-fg-faint m-0 text-xs font-medium">
                         Changelog
                       </h2>
-                      <span class="text-fg-faint text-sm">No entries yet.</span>
+                      <div class="flex flex-col gap-3">
+                        <div
+                          class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-3 text-sm"
+                        >
+                          <span class="text-accent text-2xs truncate font-mono"
+                            >1.0.0</span
+                          >
+                          <span class="text-fg-soft line-clamp-2"
+                            >The first visual pack: Sodium, Iris, Distant Horizons and Xaero's World Map on Fabric 1.20.6.</span
+                          >
+                        </div>
+                      </div>
                     </div>
                     <div class="flex flex-col gap-3 p-7">
                       <h2 class="text-fg-faint m-0 text-xs font-medium">
@@ -873,7 +961,11 @@
                       </p>
                       <span
                         class="text-fg-muted line-clamp-4 min-h-[4lh] text-sm leading-normal"
-                        >Small, cautious settlements on scarred land.</span
+                        >Lichdenstein is a post-collapse civilisation built
+                        approximately c. 2300 on the land that was once
+                        Luxemburg, after the nation ceased to function as a
+                        state. It sits above the entrenched remains of the Curse
+                        of Ravana and the fused body of Severin Falkenrath.</span
                       >
                       <span class="text-accent mt-auto w-fit text-sm"
                         >Read the history →</span
@@ -931,6 +1023,24 @@
                           stroke-linejoin="round"
                           class="size-(--layout-icon-md) shrink-0"
                         >
+                          <path d="m7 11 2-2-2-2" />
+                          <path d="M11 13h4" />
+                          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                        </svg>
+                      </span>
+                      <span
+                        class="text-fg-muted inline-flex size-11 shrink-0 items-center justify-center rounded-md"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="size-(--layout-icon-md) shrink-0"
+                        >
                           <path
                             d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"
                           />
@@ -970,7 +1080,7 @@
                         >
                         <span
                           class="border-line-strong text-fg-soft rounded-pill bg-sunken/55 inline-flex h-6.5 items-center border px-2.5 text-xs"
-                          >Version 1.0.1</span
+                          >Version 1.0.4</span
                         >
                       </div>
                     </div>
@@ -1002,10 +1112,10 @@
                       <div class="ml-auto flex items-center gap-2">
                         <div class="flex flex-col items-end gap-0.5">
                           <span class="font-ui text-accent text-xs font-medium"
-                            >● Updated</span
+                            >● Server online</span
                           >
                           <span class="text-fg-faint text-xs"
-                            >Version 1.0.1</span
+                            >4/9 players · 18 ms</span
                           >
                         </div>
                         <span
@@ -1042,7 +1152,7 @@
                       <div class="flex flex-col gap-3.5">
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Version</span
-                          ><span class="font-mono">1.0.0</span>
+                          ><span class="font-mono">1.0.4</span>
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Loader</span
@@ -1058,7 +1168,7 @@
                         </div>
                         <div class="flex justify-between text-sm">
                           <span class="text-fg-muted">Size</span
-                          ><span class="text-fg-faint">Unknown</span>
+                          ><span class="font-mono">5.7 GB</span>
                         </div>
                       </div>
                     </div>
@@ -1066,7 +1176,38 @@
                       <h2 class="text-fg-faint m-0 text-xs font-medium">
                         Changelog
                       </h2>
-                      <span class="text-fg-faint text-sm">No entries yet.</span>
+                      <div class="flex flex-col gap-3">
+                        <div
+                          class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-3 text-sm"
+                        >
+                          <span class="text-accent text-2xs truncate font-mono"
+                            >1.0.4</span
+                          >
+                          <span class="text-fg-soft line-clamp-2"
+                            >A refreshed design for the screen shown while connecting to a server.</span
+                          >
+                        </div>
+                        <div
+                          class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-3 text-sm"
+                        >
+                          <span class="text-accent text-2xs truncate font-mono"
+                            >1.0.3</span
+                          >
+                          <span class="text-fg-soft line-clamp-2"
+                            >The world map opens above ground: Cave Mode starts Off instead of Layered in dimensions you visit for the first time.</span
+                          >
+                        </div>
+                        <div
+                          class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-3 text-sm"
+                        >
+                          <span class="text-accent text-2xs truncate font-mono"
+                            >1.0.2</span
+                          >
+                          <span class="text-fg-soft line-clamp-2"
+                            >Added Create: Copycats+ and Copycat WE Fix. Copycats from Create: Connected stay as they are.</span
+                          >
+                        </div>
+                      </div>
                     </div>
                     <div class="flex flex-col gap-3 p-7">
                       <h2 class="text-fg-faint m-0 text-xs font-medium">
@@ -1075,11 +1216,14 @@
                       <p
                         class="font-display m-0 line-clamp-1 text-lg leading-snug"
                       >
-                        The Obelisk
+                        Frangfurd
                       </p>
                       <span
                         class="text-fg-muted line-clamp-4 min-h-[4lh] text-sm leading-normal"
-                        >A built-up city-state, read from a distance.</span
+                        >Frangfurd is an industrialised city-state defined by
+                        machinery, automation, and nuclear ambition. It
+                        represents the third era of the Kapitel Kapital
+                        universe, following Luxemburg and Lichdenstein.</span
                       >
                       <span class="text-accent mt-auto w-fit text-sm"
                         >Read the history →</span
