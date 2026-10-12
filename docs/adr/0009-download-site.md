@@ -101,3 +101,17 @@ The Wiki button is gone, at the author's request: the page offers Download and
 GitHub only. The build no longer reads `data/launcher.json` for a link, and a
 `data-link="wiki"` in `index.html` would now fail it as an unknown key. The
 launcher itself still links the wiki from each chapter's "From the wiki" panel.
+
+## Amendment, 2026-10-12
+
+The page flashed unstyled for a frame on every load: raw text and the inlined
+icons at full width. Vite wrote the script as a module before the stylesheet,
+and a module never stops the parser, so the whole body was parsed while the
+stylesheet was still loading. Chromium holds the first paint for a stylesheet
+in the head; Safari and Firefox can paint what is parsed before it arrives.
+The build now turns the script's tag into a classic script after the
+stylesheet, which the parser waits on, so there is no body to paint until it
+can be painted styled. An empty inline script would do the same, but the CSP
+forbids inline script, and this keeps the page at one script and the policy
+unchanged. `src/detect.js` waits for `DOMContentLoaded`, since it now runs
+before the popup is parsed.

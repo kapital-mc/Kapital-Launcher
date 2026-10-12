@@ -88,8 +88,14 @@ beta is not code-signed yet with a link to the release notes, and a close
 button. The switch is a fieldset of two radios and CSS `:has()`, so it works
 without script. Windows is checked by default.
 
-`src/detect.js` is the page's one script, loaded as a module and emitted by
-Vite as a file under `assets/`. It checks the radio for the visitor's system
+`src/detect.js` is the page's one script, emitted by Vite as a file under
+`assets/`. The build turns its tag into a classic script placed after the
+stylesheet (`stylesheetFirst` in `vite.config.js`), which stops the parser
+until the stylesheet has loaded. Without that, the body was parsed while the
+stylesheet was still on its way, and Safari and Firefox could paint it
+unstyled for a frame on every load. The script waits for `DOMContentLoaded`
+before it looks for the radio, and the build refuses a script that imports,
+exports or reads `import.meta`, since a classic script cannot. It checks the radio for the visitor's system
 (`navigator.userAgentData?.platform`, then `navigator.platform`, then the user
 agent) and does nothing else: no network, no storage. iPhone, iPad, Android and
 Linux are neither, and keep Windows checked. With `release` set to `null`, the

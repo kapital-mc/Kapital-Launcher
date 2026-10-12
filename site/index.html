@@ -14,7 +14,9 @@
   </head>
   <!--
     One page, one small script (src/detect.js, it only picks the OS in the
-    download popup). The links are filled in at build time by
+    download popup). The build makes it a classic script after the
+    stylesheet, so the body is not parsed, and cannot be painted unstyled,
+    until the stylesheet has loaded (stylesheetFirst in vite.config.js). The links are filled in at build time by
     vite.config.js from links.json and the manifest; see site/README.md. The
     classes on the buttons are the app's Button variants (play and ghost).
 
