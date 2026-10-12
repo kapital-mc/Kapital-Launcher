@@ -56,7 +56,7 @@ chapter facts, is a change to this page in the same pull request.
 
 | Button | Source | When `null` |
 |---|---|---|
-| Download | `links.json` `release`, a tag | Shows "Download · coming soon", no popup |
+| Download | `links.json` `release`: `"latest"` or a tag | Shows "Download · coming soon", no popup |
 | GitHub | `links.json` `github` | Left out |
 
 `vite.config.js` fills them in at build time and refuses anything that is not
@@ -68,13 +68,27 @@ build derives the two installers and the release notes:
 - `<github>/releases/download/<tag>/Kapital-Launcher-<tag>-macos-universal.dmg`
 - `<github>/releases/tag/<tag>`
 
-The tag is bumped by hand for each release, because `releases/latest/download/`
-skips prereleases. It stays `null` until there is a release to point at; GitHub
-was set on 2026-10-02, the repository being public. When a release exists, set:
+`release` is `"latest"`: the build picks the newest release, prereleases
+included, whose two installers are both up. GitHub's own
+`releases/latest/download/` would skip prereleases, which every release so far
+is. It reads the repository's public releases feed (`<github>/releases.atom`),
+not the REST API, so an unauthenticated build on a shared CI runner does not run
+into the API's rate limit, and checks each installer link before choosing a
+release. A network failure fails the build, and Cloudflare Pages then keeps the
+deployment it has.
+
+So the site follows a release on its next build: the next push to `main`, or
+the Pages deploy hook the release workflow calls once a release is published
+(the repository secret `SITE_DEPLOY_HOOK`, see `.github/workflows/build.yml`).
+
+A tag in `release` pins the page to that release instead, and `null` shows
+"coming soon". For a build without network access, `SITE_RELEASE` in the
+environment overrides `links.json`, for example `SITE_RELEASE=v1.0.0-beta.2
+pnpm build` or `SITE_RELEASE=null pnpm build`.
 
 ```json
 {
-  "release": "v1.0.0-beta.1",
+  "release": "latest",
   "github": "https://github.com/sandrogekeler/Kapital-Launcher"
 }
 ```

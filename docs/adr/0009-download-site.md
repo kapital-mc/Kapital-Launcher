@@ -115,3 +115,30 @@ can be painted styled. An empty inline script would do the same, but the CSP
 forbids inline script, and this keeps the page at one script and the policy
 unchanged. `src/detect.js` waits for `DOMContentLoaded`, since it now runs
 before the popup is parsed.
+
+## Amendment, 2026-10-12: the newest release, resolved at build time
+
+The tag in `links.json` was bumped by hand for every release, so the page kept
+offering `v1.0.0-beta.1` after `v1.0.0-beta.2` was out. `release` may now be
+`"latest"`, and is: the build resolves it to the newest release, prereleases
+included, whose two installers are both up.
+
+- **From the releases feed, not the API.** The build reads
+  `<github>/releases.atom`, which lists releases newest first and has no REST
+  API rate limit. CI builds the site without a token on shared runners, where
+  the API's unauthenticated limit of 60 requests an hour is easily used up.
+  Each candidate's installer links are checked with a `HEAD` request, so a
+  release still uploading is passed over for the one before it.
+- **Resolved when built, not when visited.** The page stays static, with no
+  request to GitHub from a visitor's browser and no change to the CSP. The
+  cost is that the page follows a release on its next build, not at once: the
+  next push to `main`, or the Pages deploy hook the release workflow
+  (`build.yml`, "Rebuild the download site") calls once a release is
+  published. The hook URL is the repository secret `SITE_DEPLOY_HOOK`;
+  without it, or when the call fails, the release still succeeds and the site
+  follows on its next build.
+- **Failures.** A network failure or a feed with no complete release fails the
+  build, and Pages keeps the deployment it has. `SITE_RELEASE` in the
+  environment overrides `links.json` for a build without network access. A tag
+  in `links.json` still pins the page to that release, and `null` still shows
+  "coming soon".
