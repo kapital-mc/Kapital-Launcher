@@ -79,9 +79,9 @@ func TestGetChapterModsListsTheFolderAndResolvesTheToggles(t *testing.T) {
 	if want := []string{modCW, modDH, modJade}; !reflect.DeepEqual(mods, want) {
 		t.Fatalf("mods: %q, want %q", mods, want)
 	}
-	// Frangfurd's five quick switches, in the manifest's order: DH is off,
-	// Colorwheel on, the two the pack has not shipped here match nothing.
-	if len(got.Toggles) != 5 {
+	// Frangfurd's seven quick switches, in the manifest's order: DH is off,
+	// Colorwheel on, the ones the pack has not shipped here match nothing.
+	if len(got.Toggles) != 7 {
 		t.Fatalf("toggles: %+v", got.Toggles)
 	}
 	byName := map[string]models.ModToggleState{}
@@ -102,7 +102,7 @@ func TestGetChapterModsListsTheFolderAndResolvesTheToggles(t *testing.T) {
 func TestGetChapterModsBeforeThePacksFirstSyncIsEmptyNotAnError(t *testing.T) {
 	app, cfg := packApp(t, commandLine("https://example.com/pack.toml"), nil)
 	got, err := app.GetChapterMods("frangfurd")
-	if err != nil || got.Mods == nil || len(got.Mods) != 0 || len(got.Toggles) != 5 {
+	if err != nil || got.Mods == nil || len(got.Mods) != 0 || len(got.Toggles) != 7 {
 		t.Fatalf("%+v, %v", got, err)
 	}
 	for _, tg := range got.Toggles {

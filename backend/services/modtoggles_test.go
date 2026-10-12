@@ -13,8 +13,9 @@ func toggle(name, prefix string) models.ModToggle {
 }
 
 // The bundled manifest's quick switches, with the real jar names each one has
-// to match (kapital-packs' .pw.toml files, read 2026-10-04) and one a
-// neighbour has to leave alone.
+// to match (kapital-packs' .pw.toml files, read 2026-10-04; the frangfurd-mod
+// jars the pack carries itself, 2026-10-12) and the neighbours they have to
+// leave alone.
 func TestBundledManifestNamesTheQuickToggles(t *testing.T) {
 	m, err := ParseManifest(bundledManifest(t))
 	if err != nil {
@@ -31,7 +32,7 @@ func TestBundledManifestNamesTheQuickToggles(t *testing.T) {
 	for _, tg := range fra.Pack.Toggles {
 		names = append(names, tg.Name)
 	}
-	if want := []string{"Distant Horizons", "Iris", "Colorwheel", "Colorwheel Patcher", "Create Better FPS"}; !reflect.DeepEqual(names, want) {
+	if want := []string{"Distant Horizons", "Iris", "Colorwheel", "Colorwheel Patcher", "Create Better FPS", "Frangfurd Menu", "Frangfurd Tempo"}; !reflect.DeepEqual(names, want) {
 		t.Fatalf("Frangfurd: %q", names)
 	}
 	// Colorwheel declares Iris required in its neoforge.mods.toml (read from the
@@ -46,7 +47,11 @@ func TestBundledManifestNamesTheQuickToggles(t *testing.T) {
 		"colorwheel-neoforge-1.3.0+mc1.21.1.jar",
 		"colorwheel_patcher-neoforge-1.0.5+mc1.21.1.jar",
 		"createbetterfps-1.21.1-1.1.5.jar",
+		"frangfurd_menu-0.1.0.jar",
+		"frangfurd_tempo-0.1.0.jar",
 		"Jade-1.21.1-NeoForge-15.1.jar",
+		// The server mod of the same repository, never in the client pack.
+		"frangfurd_roles-0.1.0.jar",
 	}
 	for i, tg := range fra.Pack.Toggles {
 		var hit []string

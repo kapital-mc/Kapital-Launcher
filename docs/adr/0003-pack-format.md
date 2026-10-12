@@ -28,7 +28,8 @@ As proposed, with two things stated more precisely than the handoff did:
   refused, not skipped.
 - Mods are referenced by their Modrinth or CurseForge download URL and never
   re-hosted. Prefer Modrinth where a mod is on both, and expect some
-  CurseForge mods to opt out of third-party distribution.
+  CurseForge mods to opt out of third-party distribution. The one exception
+  is the project's own jars (amendment below).
 - Hosting is a static host that serves `pack.toml`, `index.toml`, the mods'
   metadata and every file the pack carries itself (configs, scripts, its own
   resource pack); GitHub Releases or Cloudflare Pages. For Frangfurd that is
@@ -96,3 +97,37 @@ and every later Play syncs it. Checked in a container on 2026-09-30 by
 parsing the generated `instance.cfg` with Qt's own `QSettings`, splitting the
 command with `QProcess::splitCommand`, and running it against `packwiz serve`:
 529 of 529 files, also from a path with a space in it.
+
+## Amendment, 2026-10-12: the project's own jars (#207)
+
+The mods from `sandrogekeler/frangfurd-mod` are on neither Modrinth nor
+CurseForge, and will not be. Under "never re-hosted" they could never be part
+of a pack, so they were copied by hand into the server and each client.
+
+**Decision:** a pack may carry a jar this project builds and owns as a plain
+file, listed in `index.toml` with its hash and served by the pack host like a
+config file.
+
+- **What it covers.** Jars whose name starts with a prefix on the importer's
+  allowlist in `kapital-packs` (`FIRST_PARTY` in `tools/import_instance.py`,
+  today `frangfurd_`). That repository's checks refuse any other stored jar.
+  The jars come from a tagged frangfurd-mod release with a `checksums.txt`.
+- **What it does not cover.** Any third-party mod, whatever its licence and
+  however inconvenient its download. Those stay references, and a CurseForge
+  mod with third-party downloads turned off is still swapped or removed.
+- **Why it is allowed.** Re-hosting is refused because those files are someone
+  else's to distribute. That reason does not apply to the project's own jars.
+
+**Consequences:**
+
+- The jars are public once served, although frangfurd-mod is a private
+  repository: anyone with the `pack.toml` URL can download them (#35).
+- Nothing changes in the sync. packwiz-installer already fetches plain index
+  files from the pack host and checks their hash. A first-party jar's name is
+  one `modJarName` accepts, so it is handled like any other mod.
+- `AllowedManifestHosts` is unchanged: the jars come from the pack host the
+  manifest already names.
+- Every mod in frangfurd-mod is optional on the client (its ADR 0001), so
+  Frangfurd's client mods, Frangfurd Menu and Frangfurd Tempo, are switches in
+  `pack.toggles` (`frangfurd_menu-`, `frangfurd_tempo-`). Frangfurd Roles is a
+  server mod and is not in the client pack.
