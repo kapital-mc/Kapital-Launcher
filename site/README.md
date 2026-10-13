@@ -58,6 +58,7 @@ chapter facts, is a change to this page in the same pull request.
 |---|---|---|
 | Download | `links.json` `release`: `"latest"` or a tag | Shows "Download · coming soon", no popup |
 | GitHub | `links.json` `github` | Left out |
+| Prism zips, in the popup | The release, one per chapter with a `packwiz` URL in `data/launcher.json` (#251) | Left out, also when the release has not all of them |
 
 `vite.config.js` fills them in at build time and refuses anything that is not
 https. `release` is a tag such as `v1.0.0-beta.1`, checked against

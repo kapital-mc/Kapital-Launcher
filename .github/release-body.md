@@ -14,6 +14,10 @@ Download `Kapital-Launcher-<version>-windows-amd64-setup.exe` and run it. If Sma
 
 Download `Kapital-Launcher-<version>-macos-universal.dmg` (Apple Silicon and Intel), open it and drag Kapital Launcher onto Applications. The first time you open it, macOS says it cannot verify the app. Open System Settings, go to Privacy & Security, scroll to the Security section, choose "Open Anyway" for Kapital Launcher, then choose Open and confirm with your password. This is needed once.
 
+## Prism Launcher on its own
+
+`Kapitel-Kapital-<chapter>.zip` is one chapter as a Prism instance, for playing it in Prism without Kapital Launcher. In Prism, choose Add Instance, then Import, and pick the zip or paste its link. The first Play downloads the whole pack and every later Play updates it. The zip holds no mods, only packwiz's installer, under its MIT licence. Kapital Launcher does not count an instance imported this way as installed.
+
 ## Verifying a download
 
 Each file carries a build attestation that ties it to the workflow run in this repository that produced it. With the [GitHub CLI](https://cli.github.com/):

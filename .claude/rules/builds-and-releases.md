@@ -19,12 +19,13 @@ Its fields: `version` (`X.Y.Z`), `channel` (`beta`, `alpha` or `stable`),
 `number` (the N of a prerelease) and `dry_run`. Together they make the tag,
 `vX.Y.Z[-alpha.N|-beta.N]`. It uploads `windows-amd64` (the NSIS setup and the
 bare `.exe`) and `macos-universal` (a disk image holding the `.app` and a link
-to Applications) as workflow artefacts for 14 days, named
-`kapital-launcher-<tag>-<target>`; a dry run stops there and publishes
+to Applications) and `prism-instances` (a Prism instance zip per chapter with
+a hosted pack, `go run ./scripts/prism-instances`, #251) as workflow artefacts
+for 14 days, named `kapital-launcher-<tag>-<target>`; a dry run stops there and publishes
 nothing, which is how a change to the workflow or to `build/` is tried from
 its branch. The tag is validated and refused when taken, the build stamps `main.Version` with it and `wails.json`'s
 `productVersion` with its numeric part, and the `release` job attests the disk
-image and both exes with `actions/attest`, writes `checksums.txt` and publishes a GitHub
+image, both exes and the zips with `actions/attest`, writes `checksums.txt` and publishes a GitHub
 Release at that commit, a prerelease when the tag has a suffix. No
 code-signing certificate (ADR-6). The body is `.github/release-body.md` (the
 Minecraft disclaimer, the SmartScreen and Gatekeeper steps, how to verify)
