@@ -185,7 +185,8 @@ main window with `--dir` alone, `--version`, `flatpak info`), all with argument 
 `/usr/bin/codesign --verify` on macOS with a fixed argument list (S4.5) and
 `/usr/bin/open` on macOS with one argument, the absolute path of a chapter's
 instance folder (S3.6), plus the one the pre-launch sync starts, the `INST_JAVA`
-Prism named with the packwiz template's arguments (S3.11); nothing invokes `sh`,
+Prism named (or, when that is not a file, the `JavaPath` Prism saved in the
+instance's `instance.cfg`) with the packwiz template's arguments (S3.11); nothing invokes `sh`,
 `cmd` or `powershell`. One
 process is not ours: on macOS Wails' `ClipboardSetText` runs `pbcopy`, no
 argument and the redacted log tail on its stdin, when the log is copied (S7.3).
@@ -475,6 +476,9 @@ instance's URL passes at install), reads `INST_MC_DIR`, `INST_JAVA` (both
 absolute) and `INST_ID` (the instance folder pattern) from the environment,
 renames mods only for an `INST_ID` that is a chapter's instance and whose game
 folder is that instance's own, and runs one process: the `INST_JAVA` Prism named,
+or, when that is not a regular file (an instance's first launch from a root with
+no Java, ADR-2 fifteenth amendment), the absolute `JavaPath` of the instance's
+`instance.cfg` with `OverrideJavaLocation=true`, a regular file and never printed,
 with the argument array of the packwiz template (`packwizSyncArgs`, equal to that
 template token for token by `TestPackwizSyncArgsAreThePackwizCommandsArguments`),
 in the game folder, no shell. It prints ASCII lines prefixed `kapital-sync:` and

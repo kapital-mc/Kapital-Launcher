@@ -27,8 +27,9 @@ its process. `ShowArgs` and `Show` do the same for `--show` (Open in Prism,
 issue 190), whose Prism is waited on only to be reaped. The only other processes are macOS's `codesign`, with fixed
 arguments, in `verify_darwin.go`, macOS's `open`, with the absolute path of
 a folder that exists as its only argument, in `openfolder_darwin.go`, and the
-pre-launch sync's Java, the `INST_JAVA` Prism named with the packwiz template's
-arguments, in `modsync.go` (`ExecSyncRunner`). Windows
+pre-launch sync's Java, the `INST_JAVA` Prism named (or the `JavaPath` Prism saved
+in `instance.cfg` when that is not a file, ADR-2 fifteenth amendment) with the
+packwiz template's arguments, in `modsync.go` (`ExecSyncRunner`). Windows
 opens a folder with `ShellExecute`, an API call and not a process. Copying the
 log (`CopyRedactedLog`) goes through Wails' `ClipboardSetText`, which on macOS
 runs `pbcopy` with no argument and the redacted text on its stdin

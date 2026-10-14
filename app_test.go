@@ -26,6 +26,8 @@ func newTestApp(t *testing.T) *App {
 		t.Fatal(err)
 	}
 	app.syncCopy = services.NewSyncCopyFrom(dataDir, Version, func() (string, error) { return launcher, nil })
+	// No startup runs here, so GetEngine has no detection to wait for.
+	app.engineReady = nil
 	return app
 }
 

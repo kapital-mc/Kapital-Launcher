@@ -157,7 +157,55 @@ func (s *syncRun) environment() (syncEnv, error) {
 	if info, err := os.Stat(mc); err != nil || !info.IsDir() {
 		return syncEnv{}, errors.New("INST_MC_DIR is not a folder")
 	}
-	return syncEnv{mcDir: mc, java: filepath.Clean(java), id: id}, nil
+	java = filepath.Clean(java)
+	if !isRegularFile(java) {
+		saved, err := savedJava(filepath.Dir(mc))
+		if err != nil {
+			return syncEnv{}, fmt.Errorf("INST_JAVA is not a file, and %w", err)
+		}
+		s.say("INST_JAVA is not a file, so the Java Prism saved for this instance is used")
+		java = saved
+	}
+	return syncEnv{mcDir: mc, java: java, id: id}, nil
+}
+
+// savedJava is the Java Prism saved for the instance in instDir: the JavaPath of
+// its instance.cfg, set together with OverrideJavaLocation by Prism's
+// AutoInstallJava step. Prism fixes a pre-launch command's environment when it
+// builds the launch, before that step runs, and INST_JAVA is
+// QDir(JavaPath).absolutePath(): with no JavaPath yet, on an instance's first
+// launch from a root with no Java, it is Prism's working folder
+// (MinecraftInstance::getVariables, PreLaunchCommand's constructor, Prism
+// 11.1.1). The step has saved the file by the time the command runs. Only an
+// absolute path to a regular file is taken; the path itself is never printed.
+func savedJava(instDir string) (string, error) {
+	f, err := os.Open(filepath.Join(instDir, "instance.cfg"))
+	if err != nil {
+		return "", fmt.Errorf("instance.cfg cannot be read (%s)", errKind(err))
+	}
+	defer f.Close() //nolint:errcheck // read only; nothing to flush
+	keys, err := scanINIKeys(io.LimitReader(f, maxPrismConfigLen), "OverrideJavaLocation", "JavaPath")
+	if err != nil {
+		return "", errors.New("instance.cfg cannot be read")
+	}
+	path := keys["JavaPath"]
+	if keys["OverrideJavaLocation"] != "true" || path == "" {
+		return "", errors.New("instance.cfg names no Java")
+	}
+	if strings.ContainsRune(path, 0) || !filepath.IsAbs(path) {
+		return "", errors.New("the Java instance.cfg names is not an absolute path")
+	}
+	path = filepath.Clean(path)
+	if !isRegularFile(path) {
+		return "", errors.New("the Java instance.cfg names is not a file")
+	}
+	return path, nil
+}
+
+// isRegularFile reports whether path is a regular file, following links.
+func isRegularFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.Mode().IsRegular()
 }
 
 // checkSyncPackURL is the rule an instance's pack URL passes to be synced from:

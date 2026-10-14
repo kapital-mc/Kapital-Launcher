@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log/slog"
 
 	wailsrt "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -13,9 +12,7 @@ import (
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	if _, err := a.detectEngine(); err != nil {
-		slog.Warn("engine detection", "error", err)
-	}
+	a.detectStartupEngine()
 	// The copy Prism's pre-launch command runs follows this build, when there is
 	// one, off the startup path (it is the size of the launcher).
 	if a.syncCopy != nil && a.syncCopy.Exists() {

@@ -88,6 +88,9 @@ type App struct {
 
 	mu     sync.Mutex
 	engine models.EngineInfo
+	// engineReady is closed once startup's detection has kept its result
+	// (issue 260). Nil, as in a test that never runs startup, waits for nothing.
+	engineReady chan struct{}
 
 	// seenMu guards what the app has seen of each chapter at run time.
 	// ended is when a run the tracker followed last ended (app_chapters.go);
@@ -144,6 +147,7 @@ func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 		},
 		previewStep: previewInstallStep,
 		live:        services.NewLiveLog(),
+		engineReady: make(chan struct{}),
 	}
 	a.syncCopy = services.NewSyncCopy(dataDir, Version)
 	a.creator.UseSyncCopy(a.syncExe)
