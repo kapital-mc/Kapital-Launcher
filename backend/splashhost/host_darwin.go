@@ -232,6 +232,22 @@ func (h *darwinHost) Update(stateJSON []byte) {
 	C.splashEval(h.ref, cState)
 }
 
+// Cover raises the card over a cover on every screen, or lowers it again
+// (host_darwin.m's splashCover). It only dispatches to the main queue, as
+// Update does.
+func (h *darwinHost) Cover(on bool) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.ref == nil {
+		return
+	}
+	cOn := C.int(0)
+	if on {
+		cOn = 1
+	}
+	C.splashCover(h.ref, cOn)
+}
+
 // Close orders the window out and releases it and its webview, and returns once
 // that is done, or once the main queue has not answered in five seconds.
 func (h *darwinHost) Close() {
@@ -356,6 +372,20 @@ func onMainThread() bool { return C.splashIsMainThread() != 0 }
 
 // hasWindowServer is whether this process has a desktop session.
 func hasWindowServer() bool { return C.splashHasWindowServer() != 0 }
+
+// coverState is how many cover windows are up and whether the card is raised
+// above them. Tests only.
+func (h *darwinHost) coverState() (covers int, raised bool) {
+	h.mu.Lock()
+	ref := h.ref
+	h.mu.Unlock()
+	if ref == nil {
+		return 0, false
+	}
+	var n, up C.int
+	C.splashCoverState(ref, &n, &up)
+	return int(n), up == 1
+}
 
 // pumpMainThread runs the main run loop for a moment, on the calling thread,
 // which must be the process's main thread. Tests only: a test binary does not

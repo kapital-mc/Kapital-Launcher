@@ -33,8 +33,14 @@ type Host interface {
 	// page, and a state pushed before the page has defined window.kapitalSplash
 	// is not lost: the host keeps the newest and delivers it once the page has.
 	Update(stateJSON []byte)
-	// Close destroys the window. Safe to call twice and after a failed Open,
-	// and it returns once the window is gone.
+	// Cover puts the card above the game's windows, over a cover of the host's
+	// own on every screen, or with false takes the cover away and puts the card
+	// back among ordinary windows (#258). It stands in for the game window hold
+	// where the OS has none: macOS, whose host is the only one that does
+	// anything. It never blocks, and does nothing before Open or after Close.
+	Cover(on bool)
+	// Close destroys the window, and the cover with it. Safe to call twice and
+	// after a failed Open, and it returns once the window is gone.
 	Close()
 }
 

@@ -168,9 +168,13 @@ to centre on, as Windows parks a minimised window at about (-32000, -32000), so
 the primary work area on Windows, which also does it for any frame whose centre
 is on no monitor (`placeOnScreen`, #210), and the launcher's screen on macOS;
 when the card cannot open it says so and the run holds nothing), `Observe` per
-game event, `Handover` from `TrackRequest.OnHandover` on Windows once the
-holder's foreground release is done, and `Leave`. On macOS there is no window
-hold, so the card closes at the game's `window` phase instead. The launcher
+game event, `Handover` from `TrackRequest.OnHandover` once the holder's
+foreground release is done, and `Leave`. macOS has no window hold, so the card
+stands in for one (`splashcard_cover.go`, issue 258): `GameHold` is given to the
+tracker as `TrackRequest.Hold`, which raises the card over a cover window of its
+own on every screen (`Host.Cover`) once the game's Java is bound, and whose
+release lowers both, and at the handover activates the game's application by
+its pid (`activateGame`, `gameforeground_darwin.m`) before the card closes. The launcher
 comes back when the game ends, showing how it ended; a crash or failure before
 the handover keeps the card for the error until the player leaves it. The
 launcher's own window is only asked where it is and whether it is minimised, to

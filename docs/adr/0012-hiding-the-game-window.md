@@ -180,3 +180,36 @@ This corrects kapital-packs#15, which put the move on a pack mod: the recorder
 then followed whichever `GLFW30` window came first, and the game creates small
 hidden ones during the start (an OpenGL context probe).
 
+
+## Amendment, 2026-10-14: macOS covers the game with the launcher's own windows
+
+On the author's iMac (Frangfurd, the managed Prism 11.1.1) the card was seen
+behind NeoForge's early window, then gone: on macOS it was an ordinary window and
+closed at the game's `window` phase, which comes after the early window opens.
+The player saw the early window with its title bar, Drippy's screen and the
+title, all in plain view (issue 258).
+
+The decision above still holds for the game's window: macOS lets no app hide or
+move another's without the Accessibility permission, and the launcher does not
+ask for it. What the launcher may move is its own windows.
+
+- **The card stands in for the hold.** From the moment the tracker binds the
+  game's Java, where Windows starts its hold, the card goes to
+  `NSMainMenuWindowLevel + 3` over a borderless cover window in its background
+  colour on every screen at `+ 2`. GLFW puts a full screen game at `+ 1`, the
+  highest a game's window goes. Nothing is raised before the Java exists, so a
+  Prism sign-in or error dialog is never covered.
+- **The same seam as Windows.** The cover is the tracker's `WindowHolder` for the
+  run (`TrackRequest.Hold`, `SplashCard.GameHold`), so it is started, released
+  and logged by the same code: the handover is the resource reload beginning,
+  and a run that ends first releases it without the foreground.
+- **The handover.** The cover goes, the card returns to the normal level, the
+  game's application is activated by its pid (`NSRunningApplication`, yielding
+  first on macOS 14), and the card closes. Nothing of the game's window is read.
+- **A run that ends first** lowers the card and keeps it with the error, where
+  Prism's console and the launcher can come in front of it. Leaving the card
+  closes the cover with it.
+
+Costs: the early window may show for the moment between the game's window
+appearing and the Java being bound, to be measured on the iMac. The cover is on
+every screen for the length of the start, about a minute.

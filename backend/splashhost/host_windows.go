@@ -118,6 +118,10 @@ func (h *windowsHost) Update(stateJSON []byte) {
 	c.post(wmUpdate)
 }
 
+// Cover does nothing on Windows: the game's window is held hidden until the
+// handover (ADR-0012), so there is nothing to cover.
+func (h *windowsHost) Cover(bool) {}
+
 // Close tears the window down and returns once its thread is done, or after a
 // bound it logs. Safe twice, and after an Open that failed or never ran.
 func (h *windowsHost) Close() {

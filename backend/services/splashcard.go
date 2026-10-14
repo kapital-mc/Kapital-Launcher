@@ -39,9 +39,9 @@ type CardActions struct {
 
 // CardConfig is what a SplashCard is made from.
 type CardConfig struct {
-	// GOOS decides where the handover is: Windows closes the card when the
-	// game's window is released (Handover), macOS at the game's "window"
-	// phase, where there is no hold (Observe).
+	// GOOS decides how the game is kept out of sight until the handover:
+	// Windows holds its window hidden (ADR-0012), macOS raises the card over a
+	// cover of its own (GameHold, #258). Both close the card at the handover.
 	GOOS     string
 	Launcher CardLauncher
 	// NewHost makes the window of one run; splashhost.New in the app.
@@ -57,6 +57,9 @@ type CardConfig struct {
 	// game event to say so (the handover, the player leaving), so the view can
 	// be told the splash flag is false.
 	Changed func(chapterID string)
+	// Activate brings the game's process to the front at a macOS handover and
+	// says whether the OS accepted; nil is activateGame. A test stands in.
+	Activate func(pid int) bool
 }
 
 // SplashCard is the loading card for a start (#97): a window of its own,
@@ -109,13 +112,18 @@ type cardRun struct {
 
 // NewSplashCard makes the card for cfg.
 func NewSplashCard(cfg CardConfig) *SplashCard {
+	if cfg.Activate == nil {
+		cfg.Activate = activateGame
+	}
 	return &SplashCard{cfg: cfg, spawn: func(f func()) { go f() }}
 }
 
-// HoldsGameWindow is whether this OS's start keeps the game's window hidden
-// until the handover (ADR-0012): Windows only. macOS has no such hold, so its
-// card closes when the game's window appears instead.
-func (c *SplashCard) HoldsGameWindow() bool { return c.cfg.GOOS == "windows" }
+// HoldsGameWindow is whether this OS's start keeps the game out of sight until
+// the handover: Windows by hiding the game's window (ADR-0012), macOS by
+// raising the card over a cover (GameHold, #258). Elsewhere there is no card.
+func (c *SplashCard) HoldsGameWindow() bool {
+	return c.cfg.GOOS == "windows" || c.cfg.GOOS == "darwin"
+}
 
 // Showing is whether the chapter's run has its card up.
 func (c *SplashCard) Showing(chapterID string) bool {
@@ -217,10 +225,9 @@ func cardRect(x, y, w, h int, minimised bool) splashhost.Rect {
 }
 
 // Observe is called for each game state of a chapter's run, and returns
-// whether that event shows the card. The card is updated; on macOS the card
-// closes at the game's window. A run that ends gives the launcher back, except
-// one that crashed or failed before the handover: the card stays, to say so,
-// and the player leaves it.
+// whether that event shows the card. The card is updated. A run that ends gives
+// the launcher back, except one that crashed or failed before the handover: the
+// card stays, to say so, and the player leaves it.
 func (c *SplashCard) Observe(s models.GameState) bool {
 	c.mu.Lock()
 	run := c.run
@@ -229,7 +236,6 @@ func (c *SplashCard) Observe(s models.GameState) bool {
 		return false
 	}
 	run.latest = s
-	var after func()
 	switch s.Phase {
 	case models.GamePhaseClosed, models.GamePhaseCrashed, models.GamePhaseFailed:
 		if !run.closed && s.Phase != models.GamePhaseClosed {
@@ -238,23 +244,16 @@ func (c *SplashCard) Observe(s models.GameState) bool {
 			c.showEnd(run, s)
 			return true
 		}
-		after = c.finish(run)
+		after := c.finish(run)
 		c.mu.Unlock()
 		after()
 		return false
-	case models.GamePhaseWindow, models.GamePhaseResources, models.GamePhaseRunning, models.GamePhaseStopping:
-		if c.cfg.GOOS == "darwin" && !run.closed {
-			after = c.closeCard(run)
-		}
 	}
 	shows := !run.closed
 	if shows {
 		c.push(run)
 	}
 	c.mu.Unlock()
-	if after != nil {
-		after()
-	}
 	return shows
 }
 
@@ -288,15 +287,16 @@ func (c *SplashCard) showEnd(run *cardRun, s models.GameState) {
 	c.push(run)
 }
 
-// Handover is the game having the foreground, on Windows: the card closes and
-// the launcher stays minimised, to be restored when the game ends. Called by
-// the tracker once its foreground release has finished, because closing first
-// would hand the foreground elsewhere. It does nothing when the player left
-// the card, when the run has already ended or, on macOS, ever.
+// Handover is the game having the foreground: the card closes and the launcher
+// stays minimised, to be restored when the game ends. Called by the tracker once
+// its foreground release has finished (the shown window on Windows, the cover
+// lowered and the game activated on macOS), because closing first would hand
+// the foreground elsewhere. It does nothing when the player left the card, when
+// the run has already ended, or on an OS with no hold.
 func (c *SplashCard) Handover(chapterID string) {
 	c.mu.Lock()
 	run := c.run
-	if c.cfg.GOOS != "windows" || run == nil || run.opening || run.chapter.ID != chapterID || run.closed || run.ended {
+	if !c.HoldsGameWindow() || run == nil || run.opening || run.chapter.ID != chapterID || run.closed || run.ended {
 		c.mu.Unlock()
 		return
 	}

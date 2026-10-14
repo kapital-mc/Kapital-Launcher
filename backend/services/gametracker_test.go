@@ -181,6 +181,8 @@ type gameRig struct {
 	onHandover func()
 	// onConsoleHeld is TrackRequest.OnConsoleHeld for the requests the rig makes.
 	onConsoleHeld func()
+	// holdFor is TrackRequest.Hold for the requests the rig makes.
+	holdFor func(pid int) (WindowHolder, error)
 	// activity counts the OS activities the tracker takes and ends.
 	activity *activityCount
 
@@ -243,6 +245,7 @@ func (r *gameRig) request() TrackRequest {
 		HoldWindow:    r.hold,
 		OnHandover:    r.onHandover,
 		OnConsoleHeld: r.onConsoleHeld,
+		Hold:          r.holdFor,
 	}
 }
 

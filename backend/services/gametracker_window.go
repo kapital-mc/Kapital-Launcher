@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"log/slog"
 
 	"kapital/backend/models"
@@ -10,11 +11,15 @@ import (
 // the handover has not come. It never fails the run: where it cannot hold, the
 // window shows as the game makes it.
 func (r *gameRun) holdWindow(pid int) {
-	if !r.req.HoldWindow || r.t.hold == nil || r.holder != nil ||
+	hold := r.t.hold
+	if r.req.Hold != nil {
+		hold = r.req.Hold
+	}
+	if !r.req.HoldWindow || hold == nil || r.holder != nil ||
 		phaseRank[r.state.Phase] >= phaseRank[models.GamePhaseResources] {
 		return
 	}
-	h, err := r.t.hold(pid)
+	h, err := hold(pid)
 	if err != nil {
 		if r.t.holdWarned.CompareAndSwap(false, true) {
 			slog.Warn("game window cannot be held", "chapter", r.req.ChapterID, "error", err)
@@ -81,6 +86,11 @@ func (r *gameRun) holdPrismDialogs() {
 	}
 	d, err := r.t.holdDialogs(r.req.Prism.PID)
 	if err != nil {
+		// macOS holds the game through the card's cover and has no dialog hold:
+		// nothing went wrong there, so nothing is logged.
+		if errors.Is(err, errWindowHoldUnsupported) {
+			return
+		}
 		if r.t.dialogsWarned.CompareAndSwap(false, true) {
 			slog.Warn("prism dialogs cannot be held", "chapter", r.req.ChapterID, "error", err)
 		}

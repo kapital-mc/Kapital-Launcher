@@ -24,7 +24,9 @@ type Fake struct {
 	updates [][]byte
 	closes  int
 	open    bool
-	// log is every call in order: "open", "update", "close".
+	covered bool
+	// log is every call in order: "open", "update", "cover on", "cover off",
+	// "close".
 	log []string
 	// done is closed by Close, which ends an Open that is still waiting.
 	done     chan struct{}
@@ -81,14 +83,27 @@ func (f *Fake) Update(stateJSON []byte) {
 	f.updates = append(f.updates, append([]byte(nil), stateJSON...))
 }
 
+// Cover records the cover going up or down.
+func (f *Fake) Cover(on bool) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if on {
+		f.log = append(f.log, "cover on")
+	} else {
+		f.log = append(f.log, "cover off")
+	}
+	f.covered = on
+}
+
 // Close records the close, and each one is recorded, so a test can say how
-// many there were.
+// many there were. The cover goes with the window, as a real host's does.
 func (f *Fake) Close() {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.log = append(f.log, "close")
 	f.closes++
 	f.open = false
+	f.covered = false
 	f.doneOnce.Do(func() { close(f.closed()) })
 }
 
@@ -127,7 +142,16 @@ func (f *Fake) IsOpen() bool {
 	return f.open
 }
 
-// Calls is every call in order, "open", "update" and "close".
+// Covered is whether the cover is up: the last Cover was true and no Close
+// came since.
+func (f *Fake) Covered() bool {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.covered
+}
+
+// Calls is every call in order, "open", "update", "cover on", "cover off" and
+// "close".
 func (f *Fake) Calls() []string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
