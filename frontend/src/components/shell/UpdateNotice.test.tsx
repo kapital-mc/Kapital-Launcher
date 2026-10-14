@@ -56,7 +56,8 @@ describe('useUpdateStore', () => {
 
 describe('UpdateNotice', () => {
   beforeEach(() => {
-    useUpdateStore.setState({ update: newer, dismissed: false, error: null })
+    useUpdateStore.setState({ update: null, dismissed: false, error: null })
+    vi.mocked(Bindings.GetUpdate).mockReset().mockResolvedValue(newer)
     vi.mocked(Bindings.OpenExternal).mockReset()
   })
   afterEach(cleanup)
@@ -64,7 +65,7 @@ describe('UpdateNotice', () => {
   it('names both versions and opens the download page', async () => {
     vi.mocked(Bindings.OpenExternal).mockResolvedValue()
     render(<UpdateNotice />)
-    const dialog = screen.getByRole('dialog', { name: 'A new version is out' })
+    const dialog = await screen.findByRole('dialog', { name: 'A new version is out' })
     expect(dialog).toHaveTextContent('v1.0.0-beta.3 · you have v1.0.0-beta.2')
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Open the download page' }))
@@ -73,19 +74,30 @@ describe('UpdateNotice', () => {
     expect(useUpdateStore.getState().dismissed).toBe(true)
   })
 
-  it('goes away for this run on Not now and on Escape', () => {
+  it('goes away for this run on Not now and on Escape', async () => {
     render(<UpdateNotice />)
-    fireEvent.click(screen.getByRole('button', { name: 'Not now' }))
-    expect(useUpdateStore.getState().dismissed).toBe(true)
-    useUpdateStore.setState({ dismissed: false })
+    fireEvent.click(await screen.findByRole('button', { name: 'Not now' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    act(() => useUpdateStore.setState({ dismissed: false }))
     fireEvent.keyDown(window, { key: 'Escape' })
-    expect(useUpdateStore.getState().dismissed).toBe(true)
+    expect(screen.queryByRole('dialog')).toBeNull()
     expect(Bindings.OpenExternal).not.toHaveBeenCalled()
   })
 
-  it('says why the page did not open', () => {
-    useUpdateStore.setState({ error: 'The window is not ready' })
+  it('renders nothing when this build is current', async () => {
+    vi.mocked(Bindings.GetUpdate).mockResolvedValue({ ...newer, available: false })
     render(<UpdateNotice />)
+    await act(async () => {})
+    expect(Bindings.GetUpdate).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('says why the page did not open', async () => {
+    vi.mocked(Bindings.OpenExternal).mockRejectedValue('The window is not ready')
+    render(<UpdateNotice />)
+    await act(async () => {
+      fireEvent.click(await screen.findByRole('button', { name: 'Open the download page' }))
+    })
     expect(screen.getByText('The window is not ready')).toBeInTheDocument()
   })
 })

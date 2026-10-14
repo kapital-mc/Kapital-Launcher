@@ -1,4 +1,5 @@
-import { useUpdateStore } from '../../stores/useUpdateStore'
+import { useEffect } from 'react'
+import { selectUpdateShown, useUpdateStore } from '../../stores/useUpdateStore'
 import { ExternalLink } from '../../lib/icons'
 import { Button } from '../ui/Button'
 import { Dialog } from '../ui/Dialog'
@@ -9,13 +10,22 @@ import { Icon } from '../ui/Icon'
  * out and which this is, and a button to the download site, where the player
  * gets the installer as they did the first time. The launcher downloads and
  * installs nothing itself. Not now puts it away until the next start.
+ *
+ * App mounts it once for the app's lifetime, in a chunk of its own: it asks Go
+ * on mount (Go reads the site once a start) and renders nothing unless a newer
+ * build is out.
  */
 export function UpdateNotice() {
+  const load = useUpdateStore((s) => s.load)
+  const shown = useUpdateStore(selectUpdateShown)
   const update = useUpdateStore((s) => s.update)
   const error = useUpdateStore((s) => s.error)
   const dismiss = useUpdateStore((s) => s.dismiss)
   const openPage = useUpdateStore((s) => s.openPage)
-  if (!update) return null
+  useEffect(() => {
+    void load()
+  }, [load])
+  if (!shown || !update) return null
 
   return (
     <Dialog

@@ -10,7 +10,6 @@ import { useEngineStore } from './stores/useEngineStore'
 import { useSettingsStore } from './stores/useSettingsStore'
 import { useServerStore } from './stores/useServerStore'
 import { isActive, useGameStore } from './stores/useGameStore'
-import { selectUpdateShown, useUpdateStore } from './stores/useUpdateStore'
 import { Environment } from '../wailsjs/runtime/runtime'
 import { errMsg, hasWailsBridge, readOr } from './lib/ipc'
 import { guessPlatform } from './lib/platform'
@@ -32,7 +31,8 @@ const AccountPanel = lazy(() =>
 const ChapterPage = lazy(() =>
   import('./components/main/ChapterPage').then((m) => ({ default: m.ChapterPage })),
 )
-// The popup for a newer launcher shows at most once a start, so it loads then.
+// The check for a newer launcher, and its popup, load in a chunk of their own
+// after the first paint, which keeps them out of the bundle budget.
 const UpdateNotice = lazy(() =>
   import('./components/shell/UpdateNotice').then((m) => ({ default: m.UpdateNotice })),
 )
@@ -63,9 +63,6 @@ export default function App() {
   const listenGame = useGameStore((s) => s.listen)
   const loadGames = useGameStore((s) => s.load)
   const gameActive = useGameStore((s) => Object.values(s.states).some((g) => isActive(g.phase)))
-
-  const loadUpdate = useUpdateStore((s) => s.load)
-  const updateShown = useUpdateStore(selectUpdateShown)
 
   const theme = useSettingsStore((s) => s.settings.theme)
   const loadSettings = useSettingsStore((s) => s.load)
@@ -157,12 +154,6 @@ export default function App() {
     if (engineFound === false || engineSource === 'managed') void loadRelease()
   }, [engineFound, engineSource, loadRelease])
 
-  // Whether a newer launcher is out: Go reads the download site once a start
-  // (ADR-9 amendment), and this asks it once.
-  useEffect(() => {
-    void loadUpdate()
-  }, [loadUpdate])
-
   // Server status arrives as events from Go's ticker (.claude/rules/ipc.md);
   // this is the one listener, for the app's lifetime.
   useEffect(() => listenServers(), [listenServers])
@@ -240,11 +231,9 @@ export default function App() {
         </Scrollable>
       </div>
       <Toasts onOpenReport={pages.openReport} />
-      {updateShown && (
-        <Suspense fallback={null}>
-          <UpdateNotice />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <UpdateNotice />
+      </Suspense>
     </div>
   )
 }
