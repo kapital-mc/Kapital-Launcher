@@ -308,6 +308,29 @@ describe('ActionBar game line', () => {
     expect(screen.getByText('Try again')).toHaveClass('invisible')
   })
 
+  it('opens the approval for getting Prism as a popup, and hands the confirm on', async () => {
+    const onGetPrism = vi.fn()
+    bar({
+      engine: { found: false, executable: '', version: '', root: '', source: '' },
+      release: {
+        version: '11.1.1',
+        asset: 'a.zip',
+        url: 'https://github.com/x',
+        size: 1024 * 1024,
+        digest: 'sha256:00',
+        page: 'https://github.com/x',
+        installed: '',
+        updateAvailable: false,
+      },
+      onGetPrism,
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Get Prism Launcher' })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Download' }))
+    expect(onGetPrism).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
   it('shows the usual line once the game has closed', () => {
     bar({ game: game('closed') })
     expect(screen.queryByText(/The game/)).toBeNull()
