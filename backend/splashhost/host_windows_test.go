@@ -4,6 +4,7 @@ package splashhost
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -11,10 +12,145 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/wailsapp/go-webview2/webviewloader"
 	"golang.org/x/sys/windows"
 
 	"kapital/backend/testwindows"
 )
+
+const (
+	// ciColdOpenTimeout is how long a test on CI lets a card open in a data
+	// folder WebView2 has never used. The hosted Windows runner has no GPU,
+	// and since its 20261007 image (Edge 154) the first start in a new folder,
+	// which builds the shader caches (GrShaderCache, DawnGraphiteCache) in
+	// software, has run past openTimeout. A second start in the same
+	// folder is warm and still has to open within openTimeout, as do all
+	// starts off CI.
+	ciColdOpenTimeout = 30 * time.Second
+	// browserExitTimeout bounds the wait for WebView2's processes to end once
+	// every card is closed. They end within a second on a desktop; a leak
+	// never ends, and fails the test when the bound runs out.
+	browserExitTimeout = 30 * time.Second
+	webviewExe         = "msedgewebview2.exe"
+)
+
+// coldOpenTimeout is the bound for a card's first start in a new data folder.
+func coldOpenTimeout() time.Duration {
+	if os.Getenv("CI") != "" {
+		return ciColdOpenTimeout
+	}
+	return openTimeout
+}
+
+// realWindowDir gates a test that opens a real card and gives it a data
+// folder. Before the folder is removed it waits for the WebView2 processes the
+// test started to end, so a card that failed mid-start leaves a failure that
+// says so, not a locked cache file in TempDir's cleanup.
+func realWindowDir(t *testing.T) string {
+	t.Helper()
+	testwindows.Require(t, "opens a real WebView2 window")
+	if v, err := webviewloader.GetAvailableCoreWebView2BrowserVersionString(""); err == nil {
+		t.Logf("WebView2 runtime %s", v)
+	}
+	dir := t.TempDir()
+	// Registered after TempDir's own cleanup, so it runs before it.
+	t.Cleanup(func() {
+		if err := waitForBrowsersToExit(browserExitTimeout); err != nil {
+			t.Error(err)
+		}
+	})
+	return dir
+}
+
+// waitForBrowsersToExit waits until no WebView2 process this test binary
+// started is running: the browser process, a child of this one, and its own
+// children, which are found through the browser even after it has ended.
+func waitForBrowsersToExit(within time.Duration) error {
+	deadline := time.Now().Add(within)
+	tracked := map[uint32]windows.Handle{}
+	defer func() {
+		for _, h := range tracked {
+			windows.CloseHandle(h) //nolint:errcheck // a handle only waited on
+		}
+	}()
+	for {
+		if err := trackWebviewProcesses(tracked); err != nil {
+			return err
+		}
+		var running []uint32
+		for pid, h := range tracked {
+			ev, err := windows.WaitForSingleObject(h, 0)
+			if err != nil {
+				return fmt.Errorf("waiting for WebView2 process %d: %w", pid, err)
+			}
+			if ev == uint32(windows.WAIT_TIMEOUT) {
+				running = append(running, pid)
+			}
+		}
+		if len(running) == 0 {
+			return nil
+		}
+		if time.Now().After(deadline) {
+			return fmt.Errorf("WebView2 processes %v still run %s after the card closed", running, within)
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+}
+
+// trackWebviewProcesses adds to tracked, with a handle that keeps its id from
+// being reused, every WebView2 process whose parent is this process or one
+// already tracked.
+func trackWebviewProcesses(tracked map[uint32]windows.Handle) error {
+	snap, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
+	if err != nil {
+		return fmt.Errorf("listing processes: %w", err)
+	}
+	defer windows.CloseHandle(snap) //nolint:errcheck // a snapshot only read
+	type proc struct{ pid, parent uint32 }
+	var procs []proc
+	e := windows.ProcessEntry32{Size: uint32(unsafe.Sizeof(windows.ProcessEntry32{}))}
+	for err = windows.Process32First(snap, &e); err == nil; err = windows.Process32Next(snap, &e) {
+		if strings.EqualFold(windows.UTF16ToString(e.ExeFile[:]), webviewExe) {
+			procs = append(procs, proc{e.ProcessID, e.ParentProcessID})
+		}
+	}
+	self := uint32(os.Getpid())
+	for added := true; added; {
+		added = false
+		for _, p := range procs {
+			if _, ok := tracked[p.pid]; ok {
+				continue
+			}
+			if _, ours := tracked[p.parent]; !ours && p.parent != self {
+				continue
+			}
+			h, err := windows.OpenProcess(windows.SYNCHRONIZE, false, p.pid)
+			if err != nil {
+				continue // it has ended already
+			}
+			tracked[p.pid] = h
+			added = true
+		}
+	}
+	return nil
+}
+
+// removeOnceFree removes the folder, retrying briefly for a file the system
+// itself (the search indexer, an antivirus scan) may still have open.
+func removeOnceFree(t *testing.T, dir string) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		err := os.RemoveAll(dir)
+		if err == nil {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("the data folder is still held after WebView2 ended: %v", err)
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+}
 
 // findCardWindow is the card's top-level window, or 0 when none exists.
 func findCardWindow() uintptr {
@@ -88,13 +224,16 @@ func waitFor(t *testing.T, what string, cond func() bool) {
 // TestARealWindowLoadsItsPageTalksBackAndLeavesNothing runs three cycles in the
 // same data folder, which is what a player's three starts are: each opens the
 // card, gets a message from the page, pushes a state to it and closes, and
-// each close must leave no window and no browser holding the folder.
+// each close must leave no window and no browser holding the folder. Only the
+// first, cold, start gets longer on CI; the warm ones keep openTimeout.
 func TestARealWindowLoadsItsPageTalksBackAndLeavesNothing(t *testing.T) {
-	testwindows.Require(t, "opens a real WebView2 window")
-	dataDir := t.TempDir()
+	dataDir := realWindowDir(t)
 	for cycle := 1; cycle <= 3; cycle++ {
 		got := &collector{}
 		h := New()
+		if cycle == 1 {
+			h.(*windowsHost).openWithin = coldOpenTimeout()
+		}
 		start := time.Now()
 		err := h.Open(Rect{X: 200, Y: 200, W: 320, H: 200}, Page{
 			Assets:     testAssets,
@@ -141,31 +280,25 @@ func TestARealWindowLoadsItsPageTalksBackAndLeavesNothing(t *testing.T) {
 	// The browser process that held the folder ends shortly after the last
 	// Close; if the card let go of nothing it would hold the folder until the
 	// launcher exits.
-	deadline := time.Now().Add(10 * time.Second)
-	for {
-		err := os.RemoveAll(dataDir)
-		if err == nil {
-			break
-		}
-		if time.Now().After(deadline) {
-			t.Fatalf("the data folder is still held after Close: %v", err)
-		}
-		time.Sleep(200 * time.Millisecond)
+	if err := waitForBrowsersToExit(browserExitTimeout); err != nil {
+		t.Fatal(err)
 	}
+	removeOnceFree(t, dataDir)
 }
 
 func TestAStateThatArrivesBeforeTheWindowHasLoadedIsNotLost(t *testing.T) {
-	testwindows.Require(t, "opens a real WebView2 window")
+	dataDir := realWindowDir(t)
 	got := &collector{}
 	h := New()
 	defer h.Close()
+	h.(*windowsHost).openWithin = coldOpenTimeout()
 	opened := make(chan error, 1)
 	go func() {
 		opened <- h.Open(Rect{X: 200, Y: 200, W: 320, H: 200}, Page{
 			Assets:    testAssets,
 			Entry:     "splash.html",
 			OnMessage: got.add,
-			DataDir:   t.TempDir(),
+			DataDir:   dataDir,
 		})
 	}()
 	// The tracker pushes as soon as its goroutine has the host, which can be
@@ -192,8 +325,7 @@ func TestAStateThatArrivesBeforeTheWindowHasLoadedIsNotLost(t *testing.T) {
 // window then aborts the creation, and go-webview2 ends the whole process on
 // that, so this test failing is the test binary exiting with no FAIL line.
 func TestACloseWhileTheWebviewStartsLeavesTheProcessRunning(t *testing.T) {
-	testwindows.Require(t, "opens a real WebView2 window")
-	dataDir := t.TempDir()
+	dataDir := realWindowDir(t)
 	h := New()
 	opened := make(chan error, 1)
 	go func() {
@@ -227,15 +359,8 @@ func TestACloseWhileTheWebviewStartsLeavesTheProcessRunning(t *testing.T) {
 	if findCardWindow() != 0 {
 		t.Fatal("the window is still there after the card's thread finished")
 	}
-	deadline := time.Now().Add(10 * time.Second)
-	for {
-		err := os.RemoveAll(dataDir)
-		if err == nil {
-			break
-		}
-		if time.Now().After(deadline) {
-			t.Fatalf("the data folder is still held after the card closed: %v", err)
-		}
-		time.Sleep(200 * time.Millisecond)
+	if err := waitForBrowsersToExit(browserExitTimeout); err != nil {
+		t.Fatal(err)
 	}
+	removeOnceFree(t, dataDir)
 }
