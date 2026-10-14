@@ -57,6 +57,10 @@ type cardFixture struct {
 	// hold and entered, when set, are given to each host made: its Open waits
 	// on hold and closes entered once it is waiting.
 	hold, entered chan struct{}
+	// activated are the pids a macOS handover brought to the front, and
+	// activateOK what the OS is made to answer.
+	activated  []int
+	activateOK bool
 }
 
 func newCardFixture(goos string) *cardFixture {
@@ -84,6 +88,10 @@ func newCardFixture(goos string) *cardFixture {
 			return f.report, f.reportErr
 		},
 		Changed: func(id string) { f.changed = append(f.changed, id) },
+		Activate: func(pid int) bool {
+			f.activated = append(f.activated, pid)
+			return f.activateOK
+		},
 	})
 	f.card.spawn = func(fn func()) { fn() }
 	return f
@@ -282,45 +290,6 @@ func TestOnWindowsTheCardClosesAtTheHandoverAndTheLauncherComesBackWhenTheGameEn
 	}
 	if _, left := f.card.Leave(); left {
 		t.Fatal("nothing left to leave")
-	}
-}
-
-func TestOnMacOSTheCardClosesAtTheGameWindowAndNeverAtAHandover(t *testing.T) {
-	for _, phase := range []string{models.GamePhaseWindow, models.GamePhaseResources, models.GamePhaseRunning} {
-		t.Run(phase, func(t *testing.T) {
-			f := newCardFixture("darwin")
-			f.begin(t)
-			if f.card.HoldsGameWindow() {
-				t.Fatal("there is no hold on macOS")
-			}
-			if !f.card.Observe(game(models.GamePhaseMods)) {
-				t.Fatal("the card shows while mods load")
-			}
-			// The tracker's handover, were it called, is not macOS's.
-			f.card.Handover("frangfurd")
-			if f.host().Closes() != 0 {
-				t.Fatal("a handover closed the card on macOS")
-			}
-
-			if f.card.Observe(game(phase)) {
-				t.Fatal("the card is gone once the game's window is")
-			}
-			if f.host().Closes() != 1 || f.card.Showing("frangfurd") {
-				t.Fatalf("the card closes: %v", f.host().Calls())
-			}
-			if f.unminimises() != 0 {
-				t.Fatal("the launcher waits for the game to end")
-			}
-			// Later phases do not close it again.
-			f.card.Observe(game(models.GamePhaseRunning))
-			if f.host().Closes() != 1 {
-				t.Fatalf("closed twice: %v", f.host().Calls())
-			}
-			f.card.Observe(game(models.GamePhaseClosed))
-			if f.unminimises() != 1 {
-				t.Fatalf("the launcher comes back: %v", f.launcher.calls)
-			}
-		})
 	}
 }
 

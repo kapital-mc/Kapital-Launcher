@@ -420,3 +420,48 @@ func TestHoldGameWindowRefusesWhatItCannotHold(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 }
+
+func TestTrackerUsesTheRequestsHoldInPlaceOfItsOwn(t *testing.T) {
+	r, own := holdRig(t, true)
+	card := &fakeHold{}
+	r.holdFor = card.hold
+	r.procs.add(200, 100, "javaw.exe", r.play.Add(7*time.Second))
+	r.start()
+
+	until(t, "the request's hold", func() bool { return card.count() == 1 })
+	if card.holder(0).pid != 200 || own.callCount() != 0 {
+		t.Fatalf("held pid %d with the request's hold, the tracker's called %d times", card.holder(0).pid, own.callCount())
+	}
+	r.log.write("[00:30:39] [main/INFO]: ModLauncher running\n")
+	r.log.append(render + "Reloading ResourceManager\n")
+	r.untilPhase("resources")
+	until(t, "the handover", func() bool { return len(card.holder(0).releases()) == 1 })
+	if got := card.holder(0).releases(); !reflect.DeepEqual(got, []bool{true}) {
+		t.Fatalf("the handover releases the request's hold with the foreground: %v", got)
+	}
+}
+
+func TestTrackerSaysNothingOfPrismHoldsThisOSDoesNotHave(t *testing.T) {
+	logs := captureLog(t)
+	r, _ := holdRig(t, true)
+	var asked sync.WaitGroup
+	asked.Add(2)
+	r.tracker.holdDialogs = func(int) (DialogHolder, error) {
+		asked.Done()
+		return nil, errWindowHoldUnsupported
+	}
+	r.tracker.holdConsole = func(int, func()) (ConsoleHolder, error) {
+		asked.Done()
+		return nil, errWindowHoldUnsupported
+	}
+	r.start()
+	asked.Wait()
+	r.log.write("first\n")
+	r.log.append(render + "Sound engine started\n")
+	r.untilPhase("running")
+	for _, quiet := range []string{"prism dialogs cannot be held", "prism console cannot be held"} {
+		if strings.Contains(logs.String(), quiet) {
+			t.Errorf("logged %q for a hold the OS has none of:\n%s", quiet, logs.String())
+		}
+	}
+}

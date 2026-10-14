@@ -48,9 +48,11 @@ func asDarwin(t *testing.T) *darwinHost {
 func TestCloseAndUpdateBeforeOpenAndCloseTwiceAreSafe(t *testing.T) {
 	h := asDarwin(t)
 	h.Update([]byte(`{"a":1}`))
+	h.Cover(true)
 	h.Close()
 	h.Close()
 	h.Update([]byte(`{"a":2}`))
+	h.Cover(false)
 	if err := h.Open(Rect{W: 480, H: 300}, Page{Entry: "splash.html", Assets: func(string) ([]byte, string, bool) { return nil, "", false }}); err == nil {
 		t.Fatal("a closed host opened")
 	}
@@ -288,6 +290,60 @@ func TestRealWindowLoadsThePageTakesStatesAndMessagesAndCloses(t *testing.T) {
 	case msg := <-msgs:
 		t.Fatalf("a closed card still talked: %q", msg)
 	case <-time.After(300 * time.Millisecond):
+	}
+}
+
+// coverReaches waits for the main queue to have carried out the cover calls
+// made so far, which only dispatch: the card raised over one cover per screen,
+// or lowered with none. It returns the number of covers.
+func coverReaches(t *testing.T, h *darwinHost, raised bool) int {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		covers, up := h.coverState()
+		if up == raised && (covers > 0) == raised {
+			return covers
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("covers %d raised %v, want raised %v", covers, up, raised)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
+func TestRealWindowRaisesOverACoverOnEveryScreenAndLowersAgain(t *testing.T) {
+	windowTest(t)
+	page := Page{
+		Entry: "splash.html",
+		Assets: func(path string) ([]byte, string, bool) {
+			if path == "splash.html" {
+				return []byte(testPage), "text/html; charset=utf-8", true
+			}
+			return nil, "", false
+		},
+	}
+	h := asDarwin(t)
+	defer h.Close()
+	if err := h.Open(Rect{X: 100, Y: 100, W: 480, H: 300}, page); err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	coverReaches(t, h, false)
+	// A second raise adds no second set of covers.
+	h.Cover(true)
+	h.Cover(true)
+	covers := coverReaches(t, h, true)
+	if again := coverReaches(t, h, true); again != covers {
+		t.Fatalf("covers went from %d to %d", covers, again)
+	}
+	h.Cover(false)
+	coverReaches(t, h, false)
+	// Raised again, the window's close takes the cover with it.
+	h.Cover(true)
+	coverReaches(t, h, true)
+	h.Close()
+	h.Cover(false)
+	if n, _ := h.coverState(); n != 0 {
+		t.Fatalf("a closed card reports covers: %d", n)
 	}
 }
 

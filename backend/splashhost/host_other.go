@@ -10,4 +10,5 @@ func newHost() Host { return unsupportedHost{} }
 
 func (unsupportedHost) Open(Rect, Page) error { return ErrUnsupported }
 func (unsupportedHost) Update([]byte)         {}
+func (unsupportedHost) Cover(bool)            {}
 func (unsupportedHost) Close()                {}

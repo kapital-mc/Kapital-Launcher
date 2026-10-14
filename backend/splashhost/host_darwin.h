@@ -37,10 +37,20 @@ void splashShow(void *ref);
 // loaded. Async, and the state is copied before it returns.
 void splashEval(void *ref, const char *stateJSON);
 
+// splashCover with on raises the card above the game's windows, over a cover
+// window on every screen; with 0 it closes the covers and puts the card back at
+// the normal level. Async; nothing happens once the card is closed.
+void splashCover(void *ref, int on);
+
 // splashClose takes the window down and releases the reference, which must not
 // be used again. It returns 1 once that has happened and 0 when the main queue
 // did not get to it in time (then nothing was done).
 int splashClose(void *ref);
+
+// splashCoverState writes how many cover windows are up and whether the card
+// sits above them (1) or among ordinary windows (0), read on the main queue;
+// -1 for both when it did not answer in time. Tests only.
+void splashCoverState(void *ref, int *covers, int *raised);
 
 // splashPump runs the main run loop for a moment. Tests only: a process that
 // does not run NSApp has nobody serving the main queue.

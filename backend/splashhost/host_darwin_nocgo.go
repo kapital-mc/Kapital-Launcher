@@ -12,4 +12,5 @@ func newHost() Host { return noCgoHost{} }
 
 func (noCgoHost) Open(Rect, Page) error { return ErrUnsupported }
 func (noCgoHost) Update([]byte)         {}
+func (noCgoHost) Cover(bool)            {}
 func (noCgoHost) Close()                {}

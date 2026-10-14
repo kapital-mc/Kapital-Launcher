@@ -101,6 +101,11 @@ type TrackRequest struct {
 	// here, for a run that has ended before it. It runs on its own goroutine
 	// and may be nil.
 	OnConsoleHeld func()
+	// Hold, when set, is what keeps the game out of sight for this run in
+	// place of the tracker's own window hold: the loading card's cover on
+	// macOS (SplashCard.GameHold, #258). It is started and released exactly as
+	// the hold is, and only with HoldWindow.
+	Hold func(pid int) (WindowHolder, error)
 }
 
 // GameTracker follows each launched chapter from Play to the game's end: the

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"log/slog"
 	"sync"
 	"sync/atomic"
@@ -102,11 +103,14 @@ func (r *gameRun) holdPrismConsole() {
 	c := &prismConsole{pid: r.req.Prism.PID, exited: r.req.Prism.Exited, gone: make(chan struct{})}
 	if r.req.HoldWindow && r.t.holdConsole != nil {
 		h, err := r.t.holdConsole(r.req.Prism.PID, r.consoleHeld)
-		if err != nil {
+		switch {
+		case errors.Is(err, errWindowHoldUnsupported):
+			// macOS: Prism's console shows as Prism makes it (ADR-0012).
+		case err != nil:
 			if r.t.consoleWarned.CompareAndSwap(false, true) {
 				slog.Warn("prism console cannot be held", "chapter", r.req.ChapterID, "error", err)
 			}
-		} else {
+		default:
 			c.holder = h
 		}
 	}

@@ -31,6 +31,16 @@ static const NSUInteger kMaxMessageLength = 4096;
 // window.kapitalSplash yet: 50 tries, 100 ms apart.
 static const int kMaxEvalRetries = 50;
 
+// The levels of the cover and of the card above it while the game starts
+// (#258). GLFW puts a full screen game window at NSMainMenuWindowLevel + 1
+// (cocoa_window.m, acquireMonitor), the highest a game's window goes, so the
+// cover sits one above that and the card one above the cover. Alerts, the
+// screen saver and the system's own panels stay above both. Macros, because the
+// AppKit level is CoreGraphics' kCGMainMenuWindowLevel, a function call that
+// cannot initialise a static constant.
+#define kCoverLevel (NSMainMenuWindowLevel + 2)
+#define kCoveredCardLevel (NSMainMenuWindowLevel + 3)
+
 // A borderless window refuses to be key unless it says it can; the card needs
 // to be, for its buttons to take the first click. It is never main, so the
 // launcher stays the app's main window.
@@ -49,6 +59,9 @@ static const int kMaxEvalRetries = 50;
 @property (nonatomic, copy) NSString *scheme;
 @property (nonatomic, strong) KSplashWindow *window;
 @property (nonatomic, strong) WKWebView *webView;
+// The cover's windows, one per screen, while the card is raised over the game;
+// nil when it is not.
+@property (nonatomic, strong) NSArray<NSWindow *> *covers;
 // The newest state not yet delivered, and whether the page has loaded to take it.
 @property (nonatomic, copy) NSString *pending;
 // The newest state Go has pushed, kept after it is delivered, for a page that
@@ -93,10 +106,56 @@ static const int kMaxEvalRetries = 50;
     }];
 }
 
+// raise puts a cover window on every screen, in the card's colour, and the card
+// above it, without activating the app: the game may have the keyboard while it
+// loads, and the launcher never takes it back. A second raise changes nothing.
+// https://developer.apple.com/documentation/appkit/nswindow/orderfrontregardless()
+- (void)raise {
+    if (self.closed || self.covers != nil) return;
+    NSMutableArray<NSWindow *> *covers = [NSMutableArray array];
+    for (NSScreen *screen in NSScreen.screens) {
+        NSWindow *cover = [[NSWindow alloc] initWithContentRect:screen.frame
+                                                      styleMask:NSWindowStyleMaskBorderless
+                                                        backing:NSBackingStoreBuffered
+                                                          defer:NO];
+        [cover setReleasedWhenClosed:NO];
+        [cover setLevel:kCoverLevel];
+        [cover setOpaque:YES];
+        [cover setHasShadow:NO];
+        [cover setBackgroundColor:self.window.backgroundColor];
+        // On every Space, the full screen one included, left where it is by
+        // Mission Control and out of the window cycle: it is no window to
+        // switch to, only a backdrop.
+        [cover setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces |
+                                     NSWindowCollectionBehaviorFullScreenAuxiliary |
+                                     NSWindowCollectionBehaviorStationary |
+                                     NSWindowCollectionBehaviorIgnoresCycle];
+        [cover setFrame:screen.frame display:NO];
+        [cover orderFrontRegardless];
+        [covers addObject:cover];
+    }
+    self.covers = covers;
+    [self.window setLevel:kCoveredCardLevel];
+    [self.window orderFrontRegardless];
+}
+
+// lower closes the covers and puts the card back among ordinary windows, where
+// the game, Prism's console and the launcher can come in front of it.
+- (void)lower {
+    if (self.covers == nil) return;
+    for (NSWindow *cover in self.covers) {
+        [cover orderOut:nil];
+        [cover close];
+    }
+    self.covers = nil;
+    if (!self.closed) [self.window setLevel:NSNormalWindowLevel];
+}
+
 // teardown takes the card apart so nothing it owns keeps anything else alive:
 // the user content controller retains its script message handler, which is this
 // object.
 - (void)teardown {
+    [self lower];
     self.closed = YES;
     self.pending = nil;
     self.latest = nil;
@@ -402,6 +461,19 @@ void splashEval(void *ref, const char *stateJSON) {
     }
 }
 
+void splashCover(void *ref, int on) {
+    if (ref == NULL) return;
+    KSplash *splash = (__bridge KSplash *)ref;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (splash.closed) return;
+        if (on) {
+            [splash raise];
+        } else {
+            [splash lower];
+        }
+    });
+}
+
 int splashClose(void *ref) {
     if (ref == NULL) return 1;
     // The reference Go held is taken over here and released when this block's
@@ -413,6 +485,22 @@ int splashClose(void *ref) {
         [splash teardown];
     });
     return ran ? 1 : 0;
+}
+
+void splashCoverState(void *ref, int *covers, int *raised) {
+    *covers = -1;
+    *raised = -1;
+    if (ref == NULL) return;
+    KSplash *splash = (__bridge KSplash *)ref;
+    __block int n = 0;
+    __block int up = 0;
+    BOOL ran = runOnMain(5.0, ^{
+        n = (int)splash.covers.count;
+        up = splash.window.level == kCoveredCardLevel ? 1 : 0;
+    });
+    if (!ran) return;
+    *covers = n;
+    *raised = up;
 }
 
 void splashPump(void) {

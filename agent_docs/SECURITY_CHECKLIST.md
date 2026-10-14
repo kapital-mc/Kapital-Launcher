@@ -318,6 +318,14 @@ only the launcher's own Prism's windows are held, by pid, and a handle is used
 only while it is still a window of that pid. The held windows get `WM_CLOSE`
 (the one hidden window the close routine of S3.9 reaches) and the Prism they
 belong to is closed as S3.9 closes it, only while a console window is left.
+On macOS (issue 258) no window of another process is touched or read: from the
+game's Java being bound to the handover the launcher raises its own card above
+`NSMainMenuWindowLevel + 1` over a borderless cover window of its own on every
+screen (`splashhost.Host.Cover`), lowers both when the run ends first or the
+player leaves, and at the handover asks `NSRunningApplication` to activate the
+application of that one pid (`gameforeground_darwin.m`). Prism's dialogs and
+console show as Prism makes them, and nothing is raised before the game's
+Java exists, so a Prism sign-in is never covered.
 Verify: `TestHolderHidesAndShowsAGLFWWindow`, `TestHolderLeavesOtherWindowsAlone`,
 `TestHandoverNudgesAFullscreenWindowOnePixelAndBack`,
 `TestPlacedOnMovesOnlyAScreenSizedWindowThatIsOffItsMonitor`,
@@ -336,7 +344,12 @@ Verify: `TestHolderHidesAndShowsAGLFWWindow`, `TestHolderLeavesOtherWindowsAlone
 `TestTrackerEndsAStartFailedWhenTheConsoleAppearsBeforeTheGameLog`,
 `TestTrackerLeavesAConsoleThatAppearsAfterTheGameLogBeganAlone`,
 `TestTheNextPlayClosesThePrismOnTheOldConsoleAndReplacesTheHold`,
-`TestShutdownEndsAPrismThatIgnoresTheCloseAndReturnsInTime`.
+`TestShutdownEndsAPrismThatIgnoresTheCloseAndReturnsInTime`;
+`TestOnMacOSTheCardCoversTheGameFromItsJavaUntilTheHandover`,
+`TestOnMacOSARunThatEndsBeforeTheHandoverLowersTheCardAndKeepsIt`,
+`TestTheCoverIsNotRaisedForACardThatIsGone`,
+`TestTrackerUsesTheRequestsHoldInPlaceOfItsOwn`,
+`TestRealWindowRaisesOverACoverOnEveryScreenAndLowersAgain` (macOS, opt-in).
 Probe: a window of another class, or of another process, shown while the hold
 is on; a Prism window titled "Sign in" or "Error" shown during the first ten
 seconds of a launch; a window titled "Minecraft Console window for" (the prefix
