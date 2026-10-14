@@ -65,7 +65,11 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // engine store has the write behind it, and the corner says where the old instance
 // went, with Open in Prism to it. All are the first paint's. Measured 90.34 KB, from
 // 90.07 KB before it.
-const BUDGET_KB = 90.4
+// 90.5 since the update notice (2026-10-14, ADR-9 amendment): the check and its
+// popup load in a chunk of their own after the first paint, and what stays in the
+// entry is the lazy import, its Suspense and the new binding with its model.
+// Measured 90.45 KB, from 90.34 KB before it.
+const BUDGET_KB = 90.5
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

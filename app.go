@@ -74,6 +74,9 @@ type App struct {
 	previews    services.PreviewSet
 	previewStep time.Duration
 
+	// update is the one look at the download site a start gets (app_update.go).
+	update updateCheck
+
 	// What CopyRedactedLog needs: where the log is, who to mask, and the
 	// clipboard. The clipboard is a field so a test needs no window.
 	dataDir      string

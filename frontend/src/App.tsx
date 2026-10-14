@@ -1,4 +1,4 @@
-import { lazy, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { HeaderBar } from './components/shell/HeaderBar'
 import { Toasts } from './components/shell/Toasts'
 import { Sidebar } from './components/sidebar/Sidebar'
@@ -30,6 +30,11 @@ const AccountPanel = lazy(() =>
 )
 const ChapterPage = lazy(() =>
   import('./components/main/ChapterPage').then((m) => ({ default: m.ChapterPage })),
+)
+// The check for a newer launcher, and its popup, load in a chunk of their own
+// after the first paint, which keeps them out of the bundle budget.
+const UpdateNotice = lazy(() =>
+  import('./components/shell/UpdateNotice').then((m) => ({ default: m.UpdateNotice })),
 )
 
 export default function App() {
@@ -226,6 +231,9 @@ export default function App() {
         </Scrollable>
       </div>
       <Toasts onOpenReport={pages.openReport} />
+      <Suspense fallback={null}>
+        <UpdateNotice />
+      </Suspense>
     </div>
   )
 }

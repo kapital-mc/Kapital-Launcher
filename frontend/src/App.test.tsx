@@ -8,6 +8,7 @@ import { useEngineStore } from './stores/useEngineStore'
 import { DEFAULT_SETTINGS, useSettingsStore } from './stores/useSettingsStore'
 import { useServerStore } from './stores/useServerStore'
 import { useGameStore } from './stores/useGameStore'
+import { useUpdateStore } from './stores/useUpdateStore'
 import { BUNDLED_MANIFEST } from './lib/manifest'
 import { SLIDE_INTERVAL_MS } from './lib/slides'
 
@@ -117,6 +118,7 @@ describe('App', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    useUpdateStore.setState({ update: null, dismissed: false, error: null })
     useChapterStore.setState({
       manifest: BUNDLED_MANIFEST,
       selectedId: 'luxemburg',
@@ -418,6 +420,23 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Play Frangfurd' }))
     expect(await screen.findByText('● Dev pack')).toBeInTheDocument()
     expect(screen.getByText('Syncs from localhost:8080')).toBeInTheDocument()
+  })
+
+  it('asks Go once about a newer launcher and opens the popup when there is one', async () => {
+    vi.mocked(Bindings.GetUpdate).mockResolvedValue(
+      models.UpdateInfo.createFrom({
+        current: 'v1.0.0-beta.2',
+        latest: 'v1.0.0-beta.3',
+        available: true,
+        page: 'https://kapital-launcher.pages.dev/',
+        reason: '',
+      }),
+    )
+    render(<App />)
+    const dialog = await screen.findByRole('dialog', { name: 'A new version is out' })
+    expect(Bindings.GetUpdate).toHaveBeenCalledOnce()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Not now' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('offers to get Prism, says what it downloads, and follows the install', async () => {

@@ -12,7 +12,7 @@ var previewNow = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
 
 func TestPreviewSituationsAreAFixedListWithUniqueIDs(t *testing.T) {
 	list := PreviewSituations()
-	if len(list) != 12 {
+	if len(list) != 13 {
 		t.Fatalf("got %d situations", len(list))
 	}
 	seen := map[string]bool{}

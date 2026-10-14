@@ -180,6 +180,22 @@ export interface InstanceReport {
   sizeBytes: Record<string, number>
 }
 
+/**
+ * What the launcher knows about a newer build of itself, from one look at the
+ * download site's version.json a start (ADR-9 amendment). The popup shows only
+ * when `available`.
+ */
+export interface UpdateInfo {
+  current: string
+  /** The tag the download site offers; "" when it was not read. */
+  latest: string
+  available: boolean
+  /** The download site, which the popup opens. */
+  page: string
+  /** Why nothing was compared: "dev build", "no answer", "timed out" or "not a version". */
+  reason: string
+}
+
 /** A Prism release the launcher can install for a player without Prism (ADR-11). */
 export interface PrismRelease {
   version: string

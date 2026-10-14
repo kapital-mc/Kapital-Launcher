@@ -122,6 +122,9 @@ What is left:
       amendment)
 - [x] About section on the settings screen: version, disclaimer, licences (#87)
 - [x] Forward frontend render errors to the Go log (#83)
+- [x] Update notice: once a start the launcher reads the download site's
+      `version.json`, and a newer release opens a popup to the site; Not now
+      waits for the next start (ADR-9 amendment, 2026-10-14)
 - [x] Release workflow with attested artefacts for Windows and macOS; code
       signing decision (ADR-6): `.github/workflows/build.yml` (#107) builds both
       and cuts an attested release, only from the Actions tab since issue 177;
@@ -172,4 +175,5 @@ download.
 - **Telemetry.** None. Outbound traffic is the site, Modrinth or CurseForge,
   Mojang's public profile lookup for the account page (`api.mojang.com`,
   `sessionserver.mojang.com`, `textures.minecraft.net`: the profile name, then
-  the UUID, ADR-13), and whatever Prism itself contacts.
+  the UUID, ADR-13), the download site's `version.json` once a start for the
+  update notice (nothing sent, ADR-9), and whatever Prism itself contacts.

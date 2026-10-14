@@ -259,6 +259,14 @@ of the body read and dropped. Any HTTP status is reachable. It returns a
 frames the map only when it did (SECURITY_CHECKLIST S5.4). `CheckMap` holds the
 address to the manifest's rule again, so a caller cannot widen it.
 
+The update check (`appupdate.go`, `app_update.go`, `GetUpdate`, ADR-9's
+2026-10-14 amendment) is one GET of the download site's `version.json`, a
+constant address, once a start (`sync.Once`) and never from a dev build: 8 s, no
+redirect, a 200 and 4 KiB at most, the one value held to the release tag pattern
+and compared with `main.Version`. It sends nothing but the request, and not
+reaching the site is a reason in an `UpdateInfo`, never an error. The popup opens
+`services.DownloadPage` and nothing else; the launcher downloads nothing for it.
+
 The wiki art (`wikiart.go`, `wikidraw.go`, `GetWikiShots` and `GetWikiArtStats`,
 #141 and issue 172) is the one place that downloads pictures. The wiki's lore
 export lists screenshots (`screenshots[]`) and each page's pictures

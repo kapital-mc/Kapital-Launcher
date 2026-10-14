@@ -21,6 +21,7 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetPackStates` | nothing | one value of each instance's `packwiz.json`, and one bounded GET of each chapter's `pack.toml` on its allowlisted or loopback source | S1.1, S4.3 |
 | `GetChangelogs` | nothing | one bounded GET of each chapter's `changelog.json`, beside the `pack.toml` of the source `GetPackStates` uses (the instance's own pack URL, the loopback override or the manifest's), held to that source's URL rule, redirects included; the answer is parsed strictly and shown as plain text | S4.3, S4.7 |
 | `GetPrismRelease` | nothing | one bounded GET to Prism's fixed release URL | S4.5 |
+| `GetUpdate` | nothing | once a start, one GET (8 s, no redirect followed, 4 KiB) of the download site's fixed `version.json`, sending nothing but the request; only a tag of the release shape is read from it, and a dev build makes no request | S4.3, S4.9 |
 | `InstallPrism` | nothing | download, verify and unpack Prism's official build | S4.5 |
 | `InstallChapter` | a chapter id | the manifest's instance and pack URL: one instance folder written into the Prism root | S3.3, S4.6 |
 | `ReinstallChapter` | a chapter id | for an installed chapter whose instance has no pack URL of the launcher's: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. Refused for the launcher's own instance, under a preview, while the game is active or running, or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
@@ -694,6 +695,23 @@ id; a session profile whose skin is on `evil.example`, on
 `textures.minecraft.net.evil.example` or at `/texture/../x`; a skin that is a
 GIF, 300 KiB or 4000x4000; any of the three hosts answering with a redirect;
 `/mojang-face/../lookup.json`.
+
+**S4.9 The update check reads one tag from a fixed address and sends nothing.**
+Holds when: (a) `GetUpdate` takes no argument and `CheckUpdate` asks only
+`https://kapital-launcher.pages.dev/version.json`, a constant (`services.DownloadPage`),
+with no query, no header but the User-Agent, and nothing about the player, the
+machine or the build; (b) the request is a GET of 8 s, follows no redirect,
+counts only a 200 and decodes at most 4 KiB; (c) the one value used is a string
+that must match the release tag pattern (`releaseTag`, the site's own `TAG`),
+or nothing is shown; (d) it is made at most once a start (`updateCheck`'s
+`sync.Once`) and never by a dev build; (e) the popup opens only
+`services.DownloadPage`, through `OpenExternal`'s checks, and the launcher
+downloads and runs nothing itself (ADR-9 amendment).
+Verify: `TestCheckUpdateComparesTheSitesTagWithTheBuild`,
+`TestCheckUpdateShowsNothingForAnAnswerThatIsNotAVersion`,
+`TestCheckUpdateAsksNothingForADevBuild`, `TestGetUpdateAsksTheSiteOncePerStart`.
+Probe: the file answering a redirect, a 404, HTML, `{"version":"v1.0.0-rc.1"}`
+or 1 MiB.
 
 ## S5. WebView
 
