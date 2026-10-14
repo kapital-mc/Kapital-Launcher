@@ -54,6 +54,57 @@ static const int kMaxEvalRetries = 50;
 
 // One card: the window, its webview and the three delegate roles. Every method
 // runs on the main queue.
+// KCoverView is the page in one cover window: the card's own page in its cover
+// view (splash.html?view=cover, SplashCover), which draws the chapter's backdrop
+// behind the card. It is pushed the card's newest state once it has loaded, as
+// the card is (flush), and sends nothing back: it has no message handler.
+@interface KCoverView : NSObject <WKNavigationDelegate>
+@property (nonatomic, strong) WKWebView *webView;
+@property (nonatomic, copy) NSString *state;
+@property (nonatomic, copy) NSString *scheme;
+@property (nonatomic) int retries;
+- (void)push;
+- (void)teardown;
+@end
+
+@implementation KCoverView
+
+- (void)push {
+    if (self.webView == nil || self.state == nil) return;
+    NSString *script = [NSString stringWithFormat:
+        @"window.kapitalSplash ? (window.kapitalSplash.update(%@), true) : false", self.state];
+    __weak KCoverView *weakSelf = self;
+    [self.webView evaluateJavaScript:script completionHandler:^(id result, NSError *error) {
+        KCoverView *strongSelf = weakSelf;
+        if (strongSelf == nil || strongSelf.webView == nil) return;
+        if ([result isKindOfClass:[NSNumber class]] && [result boolValue]) return;
+        if (strongSelf.retries++ >= kMaxEvalRetries) return;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
+            [weakSelf push];
+        });
+    }];
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    [self push];
+}
+
+// The cover page may load the card's own assets and nothing else.
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)action
+    decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    BOOL ours = [action.request.URL.scheme isEqualToString:self.scheme];
+    decisionHandler(ours ? WKNavigationActionPolicyAllow : WKNavigationActionPolicyCancel);
+}
+
+- (void)teardown {
+    [self.webView stopLoading];
+    self.webView.navigationDelegate = nil;
+    [self.webView removeFromSuperview];
+    self.webView = nil;
+}
+
+@end
+
 @interface KSplash : NSObject <WKURLSchemeHandler, WKScriptMessageHandler, WKNavigationDelegate>
 @property (nonatomic) uintptr_t handle;
 @property (nonatomic, copy) NSString *scheme;
@@ -62,6 +113,8 @@ static const int kMaxEvalRetries = 50;
 // The cover's windows, one per screen, while the card is raised over the game;
 // nil when it is not.
 @property (nonatomic, strong) NSArray<NSWindow *> *covers;
+// The page in each cover window, in the same order, while there are covers.
+@property (nonatomic, strong) NSArray<KCoverView *> *coverViews;
 // The newest state not yet delivered, and whether the page has loaded to take it.
 @property (nonatomic, copy) NSString *pending;
 // The newest state Go has pushed, kept after it is delivered, for a page that
@@ -113,6 +166,7 @@ static const int kMaxEvalRetries = 50;
 - (void)raise {
     if (self.closed || self.covers != nil) return;
     NSMutableArray<NSWindow *> *covers = [NSMutableArray array];
+    NSMutableArray<KCoverView *> *views = [NSMutableArray array];
     for (NSScreen *screen in NSScreen.screens) {
         NSWindow *cover = [[NSWindow alloc] initWithContentRect:screen.frame
                                                       styleMask:NSWindowStyleMaskBorderless
@@ -122,7 +176,10 @@ static const int kMaxEvalRetries = 50;
         [cover setLevel:kCoverLevel];
         [cover setOpaque:YES];
         [cover setHasShadow:NO];
-        [cover setBackgroundColor:self.window.backgroundColor];
+        // Black, the colour of the game's own first frames, so the cover gives
+        // way to the game without a step in tone; the card's dark grey read as
+        // grey beside it on the iMac (2026-10-15).
+        [cover setBackgroundColor:[NSColor blackColor]];
         // On every Space, the full screen one included, left where it is by
         // Mission Control and out of the window cycle: it is no window to
         // switch to, only a backdrop.
@@ -131,18 +188,53 @@ static const int kMaxEvalRetries = 50;
                                      NSWindowCollectionBehaviorStationary |
                                      NSWindowCollectionBehaviorIgnoresCycle];
         [cover setFrame:screen.frame display:NO];
+        KCoverView *view = [self coverViewIn:cover];
+        if (view) [views addObject:view];
         [cover orderFrontRegardless];
         [covers addObject:cover];
     }
     self.covers = covers;
+    self.coverViews = views;
     [self.window setLevel:kCoveredCardLevel];
     [self.window orderFrontRegardless];
+}
+
+// coverViewIn puts the card's page, in its cover view, in a cover window: a
+// webview of its own over the window's black, transparent until the page draws,
+// served by this object from the same embedded assets and holding nothing on
+// disk. Nil when there is no page to show, and the cover stays plain black.
+- (KCoverView *)coverViewIn:(NSWindow *)cover {
+    if (self.pageURL == nil) return nil;
+    NSURLComponents *parts = [NSURLComponents componentsWithURL:self.pageURL resolvingAgainstBaseURL:NO];
+    parts.queryItems = @[ [NSURLQueryItem queryItemWithName:@"view" value:@"cover"] ];
+    NSURL *url = parts.URL;
+    if (url == nil) return nil;
+
+    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+    config.websiteDataStore = [WKWebsiteDataStore nonPersistentDataStore];
+    [config setURLSchemeHandler:self forURLScheme:self.scheme];
+    WKWebView *webView = [[WKWebView alloc] initWithFrame:cover.contentView.bounds configuration:config];
+    [webView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+    @try {
+        [webView setValue:@NO forKey:@"drawsBackground"];
+    } @catch (NSException *exception) {
+    }
+    KCoverView *view = [[KCoverView alloc] init];
+    view.webView = webView;
+    view.state = self.latest;
+    view.scheme = self.scheme;
+    webView.navigationDelegate = view;
+    [cover.contentView addSubview:webView];
+    [webView loadRequest:[NSURLRequest requestWithURL:url]];
+    return view;
 }
 
 // lower closes the covers and puts the card back among ordinary windows, where
 // the game, Prism's console and the launcher can come in front of it.
 - (void)lower {
     if (self.covers == nil) return;
+    for (KCoverView *view in self.coverViews) [view teardown];
+    self.coverViews = nil;
     for (NSWindow *cover in self.covers) {
         [cover orderOut:nil];
         [cover close];
@@ -342,18 +434,25 @@ static NSScreen *launcherScreen(void) {
 }
 
 void splashScreenFrame(double *out) {
-    out[0] = out[1] = out[2] = out[3] = 0;
+    for (int i = 0; i < 8; i++) out[i] = 0;
     // The screen is read inside the block and only copied out here, so a block
     // that is cancelled leaves the zeros.
     __block NSRect visible = NSZeroRect;
+    __block NSRect whole = NSZeroRect;
     BOOL ran = runOnMain(5.0, ^{
-        visible = launcherScreen().visibleFrame;
+        NSScreen *screen = launcherScreen();
+        visible = screen.visibleFrame;
+        whole = screen.frame;
     });
     if (!ran) return;
     out[0] = visible.origin.x;
     out[1] = visible.origin.y;
     out[2] = visible.size.width;
     out[3] = visible.size.height;
+    out[4] = whole.origin.x;
+    out[5] = whole.origin.y;
+    out[6] = whole.size.width;
+    out[7] = whole.size.height;
 }
 
 // makeSplash builds the window and webview, or returns nil. Main queue only.

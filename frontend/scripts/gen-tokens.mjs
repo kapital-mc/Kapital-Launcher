@@ -35,6 +35,8 @@ const UTILITY_ALIAS = {
   'bg-raised': 'raised',
   'bg-raised-2': 'raised-2',
   'bg-hover': 'hover',
+  // The macOS loading card's cover: black in either theme, the game's own colour.
+  'bg-cover': 'cover-ground',
 }
 
 // Tailwind's font-size scale keys. A colour exposed under one of these names

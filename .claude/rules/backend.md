@@ -172,10 +172,13 @@ when the card cannot open it says so and the run holds nothing), `Observe` per
 game event, `Handover` from `TrackRequest.OnHandover` once the holder's
 foreground release is done, and `Leave`. macOS has no window hold, so the card
 stands in for one (`splashcard_cover.go`, issue 258): `GameHold` is given to the
-tracker as `TrackRequest.Hold`, which raises the card over a cover window of its
-own on every screen (`Host.Cover`) once the game's Java is bound, and whose
-release lowers both, and at the handover activates the game's application by
-its pid (`activateGame`, `gameforeground_darwin.m`) before the card closes. The launcher
+tracker as `TrackRequest.Hold`. The card is centred on the launcher's screen and
+raised over a cover window of its own on every screen (`Host.Cover`) from Play
+(`watchCover`), lowered again if no game's Java comes within `CoverWait` and
+raised by the hold when it does; the hold's release lowers both, at the handover
+`HandoverDelay` after the resource reload, and activates the game's application
+by its pid (`activateGame`, `gameforeground_darwin.m`) before the card closes
+(ADR-0012, 2026-10-15 amendment). The launcher
 comes back when the game ends, showing how it ended; a crash or failure before
 the handover keeps the card for the error until the player leaves it. The
 launcher's own window is only asked where it is and whether it is minimised, to

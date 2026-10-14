@@ -213,3 +213,59 @@ ask for it. What the launcher may move is its own windows.
 Costs: the early window may show for the moment between the game's window
 appearing and the Java being bound, to be measured on the iMac. The cover is on
 every screen for the length of the start, about a minute.
+
+## Amendment, 2026-10-15: on macOS the card covers the screen from Play
+
+The amendment above was watched on the iMac (macOS 13.7.8, Frangfurd, the
+managed Prism 11.1.1): every window of the launcher, Prism and the game was
+logged every 50 ms with its level and frame, and the screen captured about every
+0.7 s, over four starts.
+
+- **What it showed.** The card was off unless turned on (the default waited on
+  this check). With it on, Prism's "Please wait..." dialogs opened at window level
+  8, above the card, for about 5 s between Play and the game's Java. From the
+  Java on, the cover hid NeoForge's early window as intended. At the handover the
+  early window's last frame stood frozen until the loading overlay's first frame
+  replaced it: 2.8 to 4.1 s after the reload began in one start, 4.6 to 5.5 s in
+  another. The card opened where the launcher had been, off the middle of the
+  cover.
+- **The cover goes up at Play.** `SplashCard.Begin` raises the cover as soon as
+  the card is open (`watchCover`), so Prism's dialogs are under it. The earlier
+  rule that nothing is raised before the Java exists, so a Prism sign-in is never
+  covered, becomes a wait: if no game's Java has raised the cover within
+  `CoverWait` (30 s; the Java came 6 to 8 s after Play), the cover is lowered and
+  the card stays at the normal level, where Prism can be reached, until the Java
+  raises it again. A run that ends before the Java lowers the cover at once.
+- **The handover waits for the overlay.** The cover stays `HandoverDelay` (6 s)
+  after the resource reload begins, so the game's own loading overlay, Drippy's
+  in Frangfurd, is what the player first sees. No log line marks that frame, so
+  the wait is a time. A run that ends first is released at once.
+- **The card is centred on the screen.** On macOS every card asks for the middle
+  of the launcher's screen, its whole frame (the one the cover fills), not of the
+  launcher's window.
+- **On by default.** The loading splash is on unless the player turns it off, as
+  on Windows (`LoadingSplashOn`).
+- **A black cover with a hint of the chapter.** The cover was the card's
+  background, a dark grey that read as grey next to the game's black. It is black
+  now, and shows the chapter's default backdrop, blurred and tinted toward its
+  accent as on the card, faintly through three soft spots away from the card,
+  which fade in and then breathe slowly (`SplashCover`, the `cover` tokens). Each
+  cover window shows the card's own page in its cover view
+  (`splash.html?view=cover`), served from the same embedded assets and pushed the
+  same state; it sends nothing back.
+- **Why not nothing at all.** The author asked for the card alone on the
+  desktop. Hiding the apps instead of covering them was tried on the iMac:
+  `NSRunningApplication hide` keeps Prism hidden (a dialog showed for at most
+  50 ms), but the game's Java un-hides itself throughout loading, 12 to 16 hides a
+  second notwithstanding: NeoForge's early window stayed visible for 17 s, and with
+  it turned off Minecraft's own window did. Only the Accessibility permission
+  would let the launcher keep the game's window out of sight, and the launcher
+  does not ask for it.
+
+Costs: for the first 30 s of a start the whole screen is the card, and a Prism
+that needs the player waits that long to be seen; the Leave button on the card
+ends that at once. The 6 s are measured on one Mac. The picture drawn small in
+the bottom-left corner of a full screen game is not the launcher's: it is the
+early window's 854x480 size meeting `fullscreen:true` mid-load, which a pack
+setting fixes (kapital-packs, `earlyWindowMaximized`, #46).
+

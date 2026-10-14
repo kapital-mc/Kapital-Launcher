@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"sync"
+	"time"
 
 	"kapital/backend/splashhost"
 )
@@ -11,10 +12,11 @@ import (
 // The macOS stand-in for the game window hold (#258, ADR-0012's macOS
 // amendment). macOS lets no app hide or move another's window without the
 // Accessibility permission, so instead of the game's window the launcher moves
-// its own: from the moment the tracker finds the game's Java, the card is
-// raised above the game's windows over a cover on every screen
-// (splashhost.Host.Cover), and at the handover the cover goes, the game's
-// process is activated by its pid and the card closes. To the tracker it is a
+// its own: the card is raised above every other window over a cover on every
+// screen (splashhost.Host.Cover) from Play (watchCover), and again when the
+// tracker finds the game's Java, if a wait for it lowered the cover meanwhile.
+// At the handover, a moment after the resource reload begins, the cover goes,
+// the game's process is activated by its pid and the card closes. To the tracker it is a
 // WindowHolder like Windows' hold, so the handover, a run that ends first and
 // the logging are the same code.
 
@@ -43,10 +45,11 @@ func (c *SplashCard) cover(chapterID string, pid int) (WindowHolder, error) {
 		return nil, errNoCardToCover
 	}
 	host := run.host
+	run.held = true
 	c.mu.Unlock()
 	host.Cover(true)
 	slog.Info("loading card covers the game", "chapter", chapterID)
-	return &cardCover{host: host, pid: pid, activate: c.cfg.Activate}, nil
+	return &cardCover{host: host, pid: pid, activate: c.cfg.Activate, delay: c.cfg.HandoverDelay}, nil
 }
 
 // cardCover is one run's cover, as the tracker's WindowHolder.
@@ -54,19 +57,28 @@ type cardCover struct {
 	host     splashhost.Host
 	pid      int
 	activate func(pid int) bool
+	// delay is how long the handover keeps the cover after the resource reload
+	// began (CardConfig.HandoverDelay).
+	delay time.Duration
 
 	once sync.Once
 	rep  WindowReport
 }
 
 // Release lowers the card and takes the cover away. With foreground it is the
-// handover, and the game's process is asked to come to the front; the card is
-// closed after it, by Handover. Without, the run ended first and the card stays
+// handover: the cover stays for the delay first, while the game replaces the
+// early window's last frame with its own loading overlay, and then the game's
+// process is asked to come to the front; the card is closed after it, by
+// Handover. The tracker runs a handover's release on a goroutine of its own, so
+// the wait holds nothing up. Without, the run ended first and the card stays
 // at the normal level with its error, where Prism's console and the launcher
 // can come in front of it. A card the player left, or closed, ignores the
 // lowering. Safe twice: the second call returns the first one's report.
 func (h *cardCover) Release(foreground bool) WindowReport {
 	h.once.Do(func() {
+		if foreground && h.delay > 0 {
+			time.Sleep(h.delay)
+		}
 		h.host.Cover(false)
 		// Nothing of the game's window was hidden, so there are no hide times.
 		h.rep = WindowReport{FirstHideMs: -1, MaxHideMs: -1}

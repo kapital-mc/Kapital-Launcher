@@ -67,7 +67,7 @@ func TestLoadingSplashDefaultsToOnOnWindowsOffOnMacOSAndNeverElsewhere(t *testin
 		{"windows, nothing stored", "windows", nil, true, true},
 		{"windows, stored on", "windows", &on, true, true},
 		{"windows, stored off", "windows", &off, true, false},
-		{"macOS, nothing stored is off", "darwin", nil, true, false},
+		{"macOS, nothing stored is on", "darwin", nil, true, true},
 		{"macOS, stored on", "darwin", &on, true, true},
 		{"macOS, stored off", "darwin", &off, true, false},
 		{"linux, nothing stored", "linux", nil, false, false},

@@ -33,6 +33,7 @@ export function emitEffects(src, push) {
     tileBlur,
     tileTint,
     panorama,
+    cover,
   } = src.effect
   push(`/* Effects: values a utility cannot name on its own. Read by the shared`)
   push(`   styles/base.css and by brightness-(--effect-hover-brightness). */`)
@@ -58,6 +59,9 @@ export function emitEffects(src, push) {
   push(`  --panorama-fov: ${panorama.fov}deg;`)
   push(`  --panorama-tilt: ${panorama.tilt}deg;`)
   push(`  --panorama-bleed: ${panorama.bleed / 100};`)
+  push(`  --cover-art: ${cover.art}${cover.unit};`)
+  push(`  --cover-spot: ${cover.spot}${cover.unit};`)
+  push(`  --cover-blur: ${cover.blur}px;`)
   emitRevealValues(src, push)
   push(`}`)
 }

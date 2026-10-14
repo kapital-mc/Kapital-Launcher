@@ -338,18 +338,15 @@ func LoadingSplashAvailable(goos string) bool {
 }
 
 // LoadingSplashOn is whether the next Play shows the loading splash: the
-// player's choice where it is available. On Windows it is on unless they
-// turned it off. On macOS it is off until they turn it on, until #30 has
-// verified the card's window on a real Mac. Never elsewhere, whatever the file
-// says.
+// player's choice where it is available, on unless they turned it off. macOS
+// joined Windows in that on 2026-10-15, once the card, its cover and the
+// handover had been watched on a real Mac (#30). Never elsewhere, whatever the
+// file says.
 func LoadingSplashOn(goos string, s models.AppSettings) bool {
-	switch goos {
-	case "windows":
-		return s.LoadingSplash == nil || *s.LoadingSplash
-	case "darwin":
-		return s.LoadingSplash != nil && *s.LoadingSplash
+	if !LoadingSplashAvailable(goos) {
+		return false
 	}
-	return false
+	return s.LoadingSplash == nil || *s.LoadingSplash
 }
 
 // WithLoadingSplash fills in what the settings screen is told about the
