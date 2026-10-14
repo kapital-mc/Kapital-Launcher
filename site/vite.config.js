@@ -44,6 +44,41 @@ async function resolveLatest(base) {
   throw new Error(`site: no release on ${base} has both installers`)
 }
 
+// The Prism instance zips a release carries (#251), one per chapter with a
+// hosted pack in data/launcher.json, named as PrismZipName names them in
+// backend/services/prisminstancezip.go. Each fills %PRISM_<ID>_URL%.
+const ZIP_NAME = /^[A-Za-z0-9]{1,32}$/
+
+function prismZips(base, tag) {
+  const manifest = JSON.parse(readFileSync(new URL('../data/launcher.json', import.meta.url), 'utf8'))
+  const zips = {}
+  for (const chapter of manifest.chapters) {
+    if (!chapter.pack.packwiz) continue
+    if (!ZIP_NAME.test(chapter.name)) throw new Error(`site: no zip name for chapter ${JSON.stringify(chapter.name)}`)
+    zips[`PRISM_${chapter.id.toUpperCase()}_URL`] =
+      `${base}/releases/download/${tag}/Kapitel-Kapital-${chapter.name}.zip`
+  }
+  return zips
+}
+
+// Whether the release has every zip. A release made before the zips existed, or
+// a build that cannot reach GitHub, has none to offer, and the page leaves the
+// Prism section out rather than link to nothing.
+async function hasAll(urls) {
+  try {
+    const found = await Promise.all(
+      urls.map((url) =>
+        fetch(url, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(15000) }).then(
+          (r) => r.status === 302 || r.ok,
+        ),
+      ),
+    )
+    return found.length > 0 && found.every(Boolean)
+  } catch {
+    return false
+  }
+}
+
 async function readLinks() {
   const links = JSON.parse(readFileSync(new URL('./links.json', import.meta.url), 'utf8'))
   const all = { github: links.github }
@@ -69,10 +104,12 @@ async function readLinks() {
     }
     if (all.github === null) throw new Error('site: a release needs the github link')
     const base = all.github.replace(/\/+$/, '')
+    const zips = prismZips(base, tag)
     release = {
       tag,
       ...installerUrls(base, tag),
       NOTES_URL: `${base}/releases/tag/${tag}`,
+      prism: (await hasAll(Object.values(zips))) ? zips : null,
     }
   }
   return { ...all, release }
@@ -84,9 +121,21 @@ const escapeAttr = (s) => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
 // with their placeholders filled, when a release is set, dropped when not.
 const BLOCK = /[ \t]*<!--release:start-->[\s\S]*?<!--release:end-->[ \t]*\r?\n?/g
 
+// The Prism section of the popup sits between its own markers, kept when the
+// release has the zips.
+const PRISM_BLOCK = /[ \t]*<!--prism:start-->[\s\S]*?<!--prism:end-->[ \t]*\r?\n?/g
+
+function fillPrism(html, zips) {
+  if (zips === null) return html.replace(PRISM_BLOCK, '')
+  return html
+    .replaceAll('<!--prism:start-->', '')
+    .replaceAll('<!--prism:end-->', '')
+    .replace(/%(PRISM_[A-Z]+_URL)%/g, (match, key) => (key in zips ? escapeAttr(zips[key]) : match))
+}
+
 function fillRelease(html, release) {
   if (release === null) return html.replace(BLOCK, '')
-  const out = html
+  const out = fillPrism(html, release.prism)
     .replaceAll('<!--release:start-->', '')
     .replaceAll('<!--release:end-->', '')
     .replace(/%(WINDOWS_URL|MACOS_URL|NOTES_URL)%/g, (_, key) => escapeAttr(release[key]))

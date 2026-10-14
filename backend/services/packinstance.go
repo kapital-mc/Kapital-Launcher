@@ -156,34 +156,46 @@ func (c *InstanceCreator) create(ctx context.Context, chapter models.Chapter, in
 	if !prismInstanceID.MatchString(id) {
 		return fmt.Errorf("instance id %q is not a plain folder name", id)
 	}
-	versions, err := c.fetchVersions(ctx, packURL, check)
-	if err != nil {
-		return err
-	}
-	if err := matchManifest(chapter.Pack, versions); err != nil {
-		return fmt.Errorf("%s: %w", chapter.ID, err)
-	}
 	cfg, err := renderInstanceConfig(chapter, c.syncExe(), packURL)
 	if err != nil {
 		return err
 	}
-	pack, err := mmcPack(versions)
+	files, err := c.instanceFiles(ctx, chapter, packURL, check)
 	if err != nil {
 		return err
 	}
+	return writeInstance(instancesDir, id, files, cfg)
+}
+
+// instanceFiles is every file of a new instance but instance.cfg, by its path
+// inside the instance: mmc-pack.json from the pack's pack.toml, refused when it
+// disagrees with the manifest, and the pinned packwiz jars. Install and the
+// Prism instance zip (PrismZip) both build from it, so the two cannot drift.
+func (c *InstanceCreator) instanceFiles(ctx context.Context, chapter models.Chapter, packURL string, check func(field, raw string) error) (map[string][]byte, error) {
+	versions, err := c.fetchVersions(ctx, packURL, check)
+	if err != nil {
+		return nil, err
+	}
+	if err := matchManifest(chapter.Pack, versions); err != nil {
+		return nil, fmt.Errorf("%s: %w", chapter.ID, err)
+	}
+	pack, err := mmcPack(versions)
+	if err != nil {
+		return nil, err
+	}
 	jars, err := c.jars.ensure(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	files := map[string][]byte{"mmc-pack.json": pack}
 	for name, path := range jars {
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		files[filepath.Join("minecraft", name)] = data
 	}
-	return writeInstance(instancesDir, id, files, cfg)
+	return files, nil
 }
 
 func (c *InstanceCreator) fetchVersions(ctx context.Context, packURL string, check func(field, raw string) error) (packVersions, error) {
@@ -337,6 +349,13 @@ func mmcPack(v packVersions) ([]byte, error) {
 // INI, ConfigVersion 1.3). Every string is quoted and escaped the way Qt
 // reads it back.
 func renderInstanceConfig(chapter models.Chapter, syncExe, packURL string) ([]byte, error) {
+	return renderConfigWith(chapter, packURL, func(url string) string { return preLaunchCommand(syncExe, url) })
+}
+
+// renderConfigWith is renderInstanceConfig with the pre-launch command given
+// by template, which is handed the pack URL only once it has passed
+// commandSafeURL.
+func renderConfigWith(chapter models.Chapter, packURL string, template func(packURL string) string) ([]byte, error) {
 	if !commandSafeURL.MatchString(packURL) {
 		return nil, fmt.Errorf("%s: pack URL %q cannot go on a command line", chapter.ID, packURL)
 	}
@@ -345,7 +364,7 @@ func renderInstanceConfig(chapter models.Chapter, syncExe, packURL string) ([]by
 		{"InstanceType", "OneSix"},
 		{"name", qtString(chapter.Name)},
 		{"OverrideCommands", "true"},
-		{"PreLaunchCommand", qtString(preLaunchCommand(syncExe, packURL))},
+		{"PreLaunchCommand", qtString(template(packURL))},
 	}
 	if chapter.Pack.JVM != nil {
 		preset, ok := jvmPresets[*chapter.Pack.JVM]

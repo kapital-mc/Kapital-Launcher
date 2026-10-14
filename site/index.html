@@ -134,6 +134,39 @@
           </p>
         </div>
 
+        <!--prism:start-->
+        <!-- A chapter as a Prism instance zip, for a player who keeps Prism and
+             not the launcher (issue 251). Left out by the build when the release
+             has no zips; the URLs come from data/launcher.json. -->
+        <div class="border-line flex flex-col gap-3 border-t pt-6">
+          <h3 class="text-fg-muted m-0 text-xs font-normal tracking-label uppercase">
+            Prism Launcher on its own
+          </h3>
+          <div class="flex flex-wrap gap-2">
+            <a
+              href="%PRISM_LUXEMBURG_URL%"
+              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
+              >Luxemburg</a
+            >
+            <a
+              href="%PRISM_LICHDENSTEIN_URL%"
+              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
+              >Lichdenstein</a
+            >
+            <a
+              href="%PRISM_FRANGFURD_URL%"
+              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
+              >Frangfurd</a
+            >
+          </div>
+          <p class="text-fg-soft m-0 text-sm leading-normal">
+            Import a chapter in Prism with Add Instance, then Import. The first
+            Play downloads the whole pack and every later Play updates it.
+            Kapital Launcher does not count it as installed.
+          </p>
+        </div>
+        <!--prism:end-->
+
         <p class="bg-sunken border-line text-fg-muted m-0 rounded-md border px-4 py-3 text-xs leading-normal">
           This beta is not code-signed yet, so Windows and macOS warn before
           the first run. The

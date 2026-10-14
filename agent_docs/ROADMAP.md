@@ -156,6 +156,10 @@ download.
       (issue 178, 2026-10-04); built, waiting for a release tag
 - [x] `release` in `site/links.json` is `v1.0.0-beta.1`, the first release
       (2026-10-04)
+- [x] The download popup offers each chapter as a Prism instance zip for
+      players who keep Prism alone, built and attached by the release
+      workflow (#251, ADR-3's 2026-10-13 amendment); seen in Prism once per
+      OS is still open
 - [ ] A custom domain, if one is wanted
 
 ## Out of scope, and why

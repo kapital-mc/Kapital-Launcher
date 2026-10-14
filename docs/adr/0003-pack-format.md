@@ -131,3 +131,53 @@ config file.
   Frangfurd's client mods, Frangfurd Menu and Frangfurd Tempo, are switches in
   `pack.toggles` (`frangfurd_menu-`, `frangfurd_tempo-`). Frangfurd Roles is a
   server mod and is not in the client pack.
+
+## Amendment, 2026-10-13: a Prism instance zip for Prism alone (#251)
+
+A player who uses Prism and not the launcher had no way in. The `.mrpack` that
+`packwiz modrinth export` makes is not one: it is a snapshot nothing updates,
+and it re-hosts, since packwiz puts every file whose download is not on
+Modrinth's host list (`cdn.modrinth.com`, `github.com`,
+`raw.githubusercontent.com`, `gitlab.com`) into the zip's overrides. For
+Frangfurd that is a CurseForge jar. Read in packwiz's `modrinth/export.go` on
+2026-10-13.
+
+**Decision:** every release attaches one instance zip per chapter with a
+hosted pack, `Kapitel-Kapital-<Name>.zip`, which Prism imports with Add
+Instance, Import. It is packwiz's own documented MultiMC setup ("Installing
+with packwiz-installer", which tells a pack author to export the instance and
+host the zip), built by the same Go that writes a fresh instance:
+
+- `services.PrismZip` takes `instanceFiles` (mmc-pack.json from the hosted
+  `pack.toml`, refused when it disagrees with the manifest, and the two pinned
+  jars) and adds `instance.cfg` and the jars' MIT licence. No mod is inside,
+  so nothing is re-hosted.
+- The pre-launch command is the first template, with packwiz-installer's
+  window. Headless (`-g`) is for the launcher, whose splash covers the sync
+  (#95); in Prism alone the window is the only progress a player sees.
+- `scripts/prism-instances` builds them in the release workflow, and the
+  download site's popup links them when the release it shows has all of them.
+
+**What makes it hold up without a rebuild per pack release:** packwiz-installer
+rewrites `mmc-pack.json` to the pack's Minecraft and loader versions before it
+syncs (`LauncherUtils.handleMultiMC` in v0.5.14; seen on 2026-10-13 moving a
+stale Fabric loader to the hosted Lichdenstein's 0.19.5), so a zip from an
+older release still installs the current pack. Only a change to the command,
+the JVM presets, the memory or the jar pins needs a new zip, and every release
+makes one anyway.
+
+**Consequences:**
+
+- Prism names the instance from its import dialog, which suggests the zip's
+  name, so the folder is not `kapital-<id>`, and the zip's name is chosen not to
+  be (a case-insensitive disk would match it). The launcher does not count such
+  an instance as installed; a player who later installs the launcher installs
+  the chapter again.
+- The zips are only as reachable as the release: they are attested and listed
+  in `checksums.txt` with the installers.
+- Checked on 2026-10-13 in a container with no Prism: the Lichdenstein zip's
+  command, run from its `minecraft/` folder under a path with a space,
+  installed the hosted pack (37 mods, 120 files). The import itself, by Prism's
+  `InstanceImportTask` (a zip with an `instance.cfg` is a MultiMC instance,
+  extracted from that file's folder, renamed from the dialog), is read from
+  source and still to be seen on each OS.
