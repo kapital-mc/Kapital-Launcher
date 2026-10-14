@@ -65,6 +65,9 @@ type windowsHost struct {
 	mu     sync.Mutex
 	card   *card
 	closed bool
+	// openWithin replaces openTimeout when set. Only the tests set it, to give
+	// a cold WebView2 on a CI runner longer (host_windows_test.go).
+	openWithin time.Duration
 }
 
 func newHost() Host { return &windowsHost{} }
@@ -83,6 +86,10 @@ func (h *windowsHost) Open(rect Rect, page Page) error {
 	// launcher minimised and parked off screen, #210), opens on the primary one.
 	c := newCard(placeOnScreen(rect, workAreaAt, primaryWorkArea()), page)
 	h.card = c
+	timeout := openTimeout
+	if h.openWithin > 0 {
+		timeout = h.openWithin
+	}
 	h.mu.Unlock()
 
 	go c.run()
@@ -92,9 +99,9 @@ func (h *windowsHost) Open(rect Rect, page Page) error {
 			c.shutdown()
 		}
 		return err
-	case <-time.After(openTimeout):
+	case <-time.After(timeout):
 		c.shutdown()
-		return fmt.Errorf("the loading card's page did not load in %s", openTimeout)
+		return fmt.Errorf("the loading card's page did not load in %s", timeout)
 	}
 }
 
