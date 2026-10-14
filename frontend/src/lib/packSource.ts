@@ -9,8 +9,19 @@
 
 const LOOPBACK = ['localhost', '127.0.0.1', '[::1]']
 
-/** A pack URL parsed, or null when it is not one. */
-const parse = (url: string): URL | null => (URL.canParse(url) ? new URL(url) : null)
+/**
+ * A pack URL parsed, or null when it is not one. `new URL` in a try rather than
+ * `URL.canParse`, which macOS 13's WebKit (Safari 16) does not have: the
+ * chapter settings page failed to render on the iMac with it.
+ */
+function parse(url: string): URL | null {
+  try {
+    return new URL(url)
+  } catch {
+    // aislop-ignore-next-line ai-slop/hidden-fallback -- a string that is not a URL is the null this returns
+    return null
+  }
+}
 
 /** host:port of a pack URL, or the URL itself when it cannot be parsed. */
 export const packHost = (url: string): string => parse(url)?.host ?? url
