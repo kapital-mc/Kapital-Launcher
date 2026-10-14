@@ -12,6 +12,19 @@ describe('packSource', () => {
     expect(isLocalPack('not a url')).toBe(false)
   })
 
+  it('works where URL.canParse does not exist (Safari 16, macOS 13)', () => {
+    const canParse = Object.getOwnPropertyDescriptor(URL, 'canParse')
+    // Removed to stand in for the older WebKit.
+    Reflect.deleteProperty(URL, 'canParse')
+    try {
+      expect(isLocalPack('http://localhost:8080/pack.toml')).toBe(true)
+      expect(packHost(hosted)).toBe('kapitel-kapital.pages.dev')
+      expect(packHost('not a url')).toBe('not a url')
+    } finally {
+      if (canParse) Object.defineProperty(URL, 'canParse', canParse)
+    }
+  })
+
   it('names the host and port', () => {
     expect(packHost('http://localhost:8080/pack.toml')).toBe('localhost:8080')
     expect(packHost('not a url')).toBe('not a url')

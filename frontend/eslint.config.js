@@ -35,6 +35,24 @@ export default tseslint.config(
       // Styling goes through Tailwind utilities over the generated token layer.
       // Inline style={{}} is for genuinely computed values only, each with a
       // documented eslint-disable-next-line (.claude/rules/frontend-style.md).
+      // The macOS app runs in the system WKWebView, which on macOS 13 is
+      // Safari 16's engine whatever Safari the Mac has installed. These came
+      // after it; URL.canParse broke the chapter settings page on the iMac.
+      'no-restricted-properties': [
+        'error',
+        ...[
+          ['URL', 'canParse'],
+          ['URL', 'parse'],
+          ['Object', 'groupBy'],
+          ['Map', 'groupBy'],
+          ['Promise', 'withResolvers'],
+          ['Array', 'fromAsync'],
+        ].map(([object, property]) => ({
+          object,
+          property,
+          message: `${object}.${property} is newer than Safari 16, the WebView of macOS 13.`,
+        })),
+      ],
       'no-restricted-syntax': [
         'error',
         {
