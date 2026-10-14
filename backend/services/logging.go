@@ -54,13 +54,27 @@ func InitLogger(dataDir string) (*slog.Logger, error) {
 			openErr = fmt.Errorf("open log file: %w", err)
 		} else {
 			logFile = f
-			w = io.MultiWriter(os.Stderr, f)
+			w = logWriter{file: f, stderr: os.Stderr}
 		}
 	}
 
 	logger := slog.New(slog.NewTextHandler(w, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	slog.SetDefault(logger)
 	return logger, openErr
+}
+
+// logWriter writes each record to the log file and then, as a courtesy, to
+// stderr. It is not io.MultiWriter, which stops at the first writer that fails:
+// a Windows GUI build has no stderr, so every write to it fails, and the file
+// was never written (issue 261).
+type logWriter struct {
+	file, stderr io.Writer
+}
+
+func (w logWriter) Write(p []byte) (int, error) {
+	n, err := w.file.Write(p)
+	w.stderr.Write(p) //nolint:errcheck // stderr is often absent; the file is the log.
+	return n, err
 }
 
 // CloseLogger releases the log file. Safe when InitLogger opened none, and
