@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"log/slog"
+	"time"
 
 	wailsrt "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -18,11 +19,37 @@ import (
 // GetEngine returns what is known about the Prism install, from the last
 // detection. RefreshEngine re-runs detection. Under a Prism preview (#124) it
 // answers with the synthetic engine; the app's own work reads realEngine.
+//
+// On Windows Wails runs startup beside the page load, so the page can ask
+// before the first detection has finished, and it asks once (issue 260). The
+// answer waits for that detection, up to engineWait.
 func (a *App) GetEngine() (models.EngineInfo, error) {
 	if info, ok := a.previewEngine(); ok {
 		return info, nil
 	}
+	if a.engineReady != nil {
+		select {
+		case <-a.engineReady:
+		case <-time.After(engineWait):
+			slog.Warn("engine asked for before detection finished", "waited", engineWait)
+		}
+	}
 	return a.realEngine(), nil
+}
+
+// engineWait bounds GetEngine's wait for startup's detection, which is itself
+// bounded: Flatpak's check (5 s) and Prism's --version (15 s) at most.
+const engineWait = 30 * time.Second
+
+// detectStartupEngine is startup's detection: it keeps the result and then
+// lets GetEngine answer, whether or not detection could read the settings.
+func (a *App) detectStartupEngine() {
+	if a.engineReady != nil {
+		defer close(a.engineReady)
+	}
+	if _, err := a.detectEngine(); err != nil {
+		slog.Warn("engine detection", "error", err)
+	}
 }
 
 // realEngine is the Prism the last detection found, which every action of the
