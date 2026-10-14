@@ -546,3 +546,29 @@ anything:
 The decision's rule that an instance is never overwritten still holds: the old
 folder is moved aside whole, on the player's request, and a new one is created
 where it was.
+
+## Fifteenth amendment, 2026-10-14
+
+The first Play of an instance from a Prism root with no Java failed at the
+pre-launch sync, "Pre-Launch command failed with code 1", and the sync's own line
+said "the pack sync could not be started (permission denied)" (seen on the
+author's iMac, 2026-10-14, Frangfurd on a fresh managed Prism). Prism fixes a
+pre-launch command's environment when it builds the launch
+(`PreLaunchCommand`'s constructor), before its `AutoInstallJava` step finds or
+downloads a Java, and `INST_JAVA` is `QDir(JavaPath).absolutePath()`
+(`MinecraftInstance::getVariables`, 11.1.1). With no `JavaPath` yet that is
+Prism's working folder, which the sync then tried to start. The next Play works,
+because the step has saved the Java by then. Every chapter's first Play on a
+fresh root hit it, on Windows as on macOS.
+
+- **The sync falls back to the Java Prism saved.** When `INST_JAVA` is not a
+  regular file, the sync reads two keys of the instance's `instance.cfg` (the
+  folder above `INST_MC_DIR`), `OverrideJavaLocation` and `JavaPath`, which
+  `AutoInstallJava::setJavaPath` sets together and Prism has written by the time
+  the command runs. It takes `JavaPath` only with the override `true` and only
+  as an absolute path to a regular file, says so in one `kapital-sync:` line
+  without the path, and otherwise refuses the run as before.
+- **Nothing else changes.** `INST_JAVA` that is a file is used as it is; the one
+  process the sync starts is still a Java Prism named for the instance, with the
+  packwiz template's arguments.
+

@@ -47,6 +47,7 @@ func newSyncFixture(t *testing.T, disabled []string, files ...string) *syncFixtu
 	t.Helper()
 	f := &syncFixture{t: t, dataDir: t.TempDir(), game: gameFixture(t, files...)}
 	f.java = filepath.Join(t.TempDir(), "jre", "bin", "javaw.exe")
+	writeFakeJava(t, f.java)
 	f.env = map[string]string{
 		"INST_MC_DIR": f.game,
 		"INST_JAVA":   f.java,
@@ -56,6 +57,26 @@ func newSyncFixture(t *testing.T, disabled []string, files ...string) *syncFixtu
 		f.settings(models.AppSettings{Theme: "dark", DisabledMods: map[string][]string{"frangfurd": disabled}})
 	}
 	return f
+}
+
+// writeFakeJava puts a regular file at path: the sync takes INST_JAVA only when
+// it is one.
+func writeFakeJava(t *testing.T, path string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, nil, 0o755); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// instanceCfg writes the instance.cfg beside the fixture's game folder.
+func (f *syncFixture) instanceCfg(content string) {
+	f.t.Helper()
+	if err := os.WriteFile(filepath.Join(filepath.Dir(f.game), "instance.cfg"), []byte(content), 0o644); err != nil {
+		f.t.Fatal(err)
+	}
 }
 
 func (f *syncFixture) settings(s models.AppSettings) {
@@ -430,6 +451,79 @@ func TestSyncRefusesWhatItCannotRunSafely(t *testing.T) {
 			}
 			if f.journalExists() {
 				t.Fatal("a refused run wrote a journal")
+			}
+		})
+	}
+}
+
+// On an instance's first launch from a root with no Java, Prism fixes the
+// environment before its AutoInstallJava step, so INST_JAVA is Prism's working
+// folder. The sync takes the Java that step saved in instance.cfg instead.
+func TestSyncUsesTheJavaPrismSavedWhenINSTJAVAIsAFolder(t *testing.T) {
+	f := newSyncFixture(t, nil)
+	saved := filepath.Join(t.TempDir(), "java-runtime-delta", "bin", "java")
+	writeFakeJava(t, saved)
+	f.env["INST_JAVA"] = t.TempDir()
+	f.instanceCfg("[General]\nAutomaticJava=true\nJavaPath=" + saved + "\nOverrideJavaLocation=true\n")
+	if code := f.run(); code != 0 {
+		t.Fatalf("exit %d\n%s", code, f.say())
+	}
+	if len(f.runs) != 1 || f.runs[0][0] != saved {
+		t.Fatalf("runs %q, want the saved Java %q", f.runs, saved)
+	}
+	if !strings.Contains(f.say(), "the Java Prism saved for this instance is used") {
+		t.Fatalf("lines:\n%s", f.say())
+	}
+	if strings.Contains(f.out.String(), saved) {
+		t.Fatal("the saved Java's path was printed")
+	}
+}
+
+// INST_JAVA that is a file is used as it is, whatever instance.cfg says.
+func TestSyncKeepsINSTJAVAWhenItIsAFile(t *testing.T) {
+	f := newSyncFixture(t, nil)
+	other := filepath.Join(t.TempDir(), "java")
+	writeFakeJava(t, other)
+	f.instanceCfg("JavaPath=" + other + "\nOverrideJavaLocation=true\n")
+	if code := f.run(); code != 0 || len(f.runs) != 1 || f.runs[0][0] != f.java {
+		t.Fatalf("exit %d, runs %q, want %q", code, f.runs, f.java)
+	}
+}
+
+// With INST_JAVA not a file, an instance.cfg that names no usable Java refuses
+// the run, and nothing starts.
+func TestSyncRefusesWhenNeitherINSTJAVANorInstanceCfgIsAJava(t *testing.T) {
+	java := filepath.Join(t.TempDir(), "java")
+	cases := map[string]func(f *syncFixture){
+		"no instance.cfg": func(f *syncFixture) {},
+		"no JavaPath":     func(f *syncFixture) { f.instanceCfg("OverrideJavaLocation=true\n") },
+		"no override": func(f *syncFixture) {
+			writeFakeJava(t, java)
+			f.instanceCfg("JavaPath=" + java + "\n")
+		},
+		"a relative JavaPath": func(f *syncFixture) {
+			f.instanceCfg("JavaPath=java\nOverrideJavaLocation=true\n")
+		},
+		"a JavaPath that is a folder": func(f *syncFixture) {
+			f.instanceCfg("JavaPath=" + t.TempDir() + "\nOverrideJavaLocation=true\n")
+		},
+		"a JavaPath that is not there": func(f *syncFixture) {
+			f.instanceCfg("JavaPath=" + filepath.Join(t.TempDir(), "gone") + "\nOverrideJavaLocation=true\n")
+		},
+	}
+	for name, setup := range cases {
+		t.Run(name, func(t *testing.T) {
+			f := newSyncFixture(t, nil)
+			f.env["INST_JAVA"] = t.TempDir()
+			setup(f)
+			if code := f.run(); code != SyncExitRefused {
+				t.Fatalf("exit %d, want %d\n%s", code, SyncExitRefused, f.say())
+			}
+			if len(f.runs) != 0 {
+				t.Fatalf("the installer ran with %q", f.runs)
+			}
+			if !strings.Contains(f.say(), "INST_JAVA is not a file") {
+				t.Fatalf("lines:\n%s", f.say())
 			}
 		})
 	}
