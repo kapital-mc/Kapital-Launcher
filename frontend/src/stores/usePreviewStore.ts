@@ -4,6 +4,7 @@ import { hasWailsBridge, readOr } from '../lib/ipc'
 import { ClearPreviews, GetPreviewSituations, StartPreview } from '../../wailsjs/go/main/App'
 import { useEngineStore } from './useEngineStore'
 import { useGameStore } from './useGameStore'
+import { useUpdateStore } from './useUpdateStore'
 
 /**
  * The developer previews (#124): screens a run only shows when something goes
@@ -31,7 +32,7 @@ const FINISHED = ['done', 'failed']
 
 /**
  * Reads again what a preview changes that no event carries: the engine, the
- * release and the instances with the pack state. The release goes first, so a
+ * release, the instances with the pack state, and the launcher's update. The release goes first, so a
  * made-up one never outlives its preview; it is read again where the launcher
  * would read it (App does the same on the engine).
  */
@@ -43,6 +44,8 @@ async function readViews() {
   await useEngineStore.getState().load()
   const { engine, loadRelease } = useEngineStore.getState()
   if (engine && (!engine.found || engine.source === 'managed')) await loadRelease()
+  // The launcher's own update notice, which its preview makes up.
+  await useUpdateStore.getState().load()
 }
 
 export const usePreviewStore = create<PreviewStore>((set) => ({

@@ -31,6 +31,8 @@ const (
 	PreviewPrismMissing = "prism-missing"
 	PreviewPrismInstall = "prism-install"
 	PreviewPrismUpdate  = "prism-update"
+
+	PreviewLauncherUpdate = "launcher-update"
 )
 
 // previewSituations is the fixed list, in the order the buttons show.
@@ -47,6 +49,7 @@ var previewSituations = []models.PreviewSituation{
 	{ID: PreviewPrismMissing, Label: "Prism missing", Scope: models.PreviewScopePrism},
 	{ID: PreviewPrismInstall, Label: "Prism install, then it fails", Scope: models.PreviewScopePrism, PlaysInstall: true},
 	{ID: PreviewPrismUpdate, Label: "Prism update available", Scope: models.PreviewScopePrism},
+	{ID: PreviewLauncherUpdate, Label: "Kapital Launcher update available", Scope: models.PreviewScopePrism},
 }
 
 // PreviewSituations is the list of situations, for the frontend to render.
@@ -255,6 +258,18 @@ func PreviewRelease(situation string) (models.PrismRelease, bool) {
 		rel.UpdateAvailable = true
 	}
 	return rel, true
+}
+
+// previewLauncherLatest is the made-up newer launcher the update preview offers.
+const previewLauncherLatest = "v9.9.9"
+
+// PreviewUpdate is the synthetic update notice of the launcher's update
+// situation, or false for any other. Nothing is fetched under it.
+func PreviewUpdate(situation, current string) (models.UpdateInfo, bool) {
+	if situation != PreviewLauncherUpdate {
+		return models.UpdateInfo{}, false
+	}
+	return models.UpdateInfo{Current: current, Latest: previewLauncherLatest, Available: true, Page: DownloadPage}, true
 }
 
 // previewInstallError is what the made-up install fails with.

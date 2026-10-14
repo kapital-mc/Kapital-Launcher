@@ -142,3 +142,35 @@ included, whose two installers are both up.
   environment overrides `links.json` for a build without network access. A tag
   in `links.json` still pins the page to that release, and `null` still shows
   "coming soon".
+
+## Amendment, 2026-10-14: the launcher asks the site for the newest version
+
+A player on an older build had no way to learn of a newer one but to visit the
+page. The author asked for a popup that opens the site, from the next release
+on, and chose the site over GitHub as the source and "ask again next start"
+over skipping a version.
+
+- **The site publishes the version.** Its build writes `version.json`,
+  `{"version": "<tag>"}`, with the same tag the Download button offers (the
+  newest release with both installers, the amendment above), and none when it
+  offers no release. `public/_headers` serves it `no-cache`. The launcher so
+  never announces a version the page does not offer yet, and it contacts no
+  host it did not already know.
+- **The launcher reads it once a start** (`services.CheckUpdate`,
+  `GetUpdate`): one GET of the fixed address, 8 s, no redirect, a 200 and
+  4 KiB at most, the value held to the release tag pattern, and compared with
+  `main.Version` by semantic versioning precedence (a release above its
+  prereleases, alpha below beta). A dev build asks nothing. Not reaching the
+  site shows nothing, with the reason in the log. Nothing about the player or
+  the build is sent (SECURITY_CHECKLIST S4.9).
+- **The popup only points the way.** "A new version is out" names both
+  versions and opens the site in the browser; the player installs as they did
+  the first time. Not now and Escape put it away until the next start. The
+  launcher downloads and installs nothing itself, so ADR-6's signing questions
+  do not reach this.
+- **Seen before a release carries it** through the developer preview
+  "Kapital Launcher update available" (#124), which makes the answer up and
+  fetches nothing.
+- **From the next release on.** Builds up to `v1.0.0-beta.2` have no check;
+  their players learn of the update the old way.
+

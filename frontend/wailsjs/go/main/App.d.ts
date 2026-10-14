@@ -50,6 +50,8 @@ export function GetServerStatus(arg1:string):Promise<models.ServerStatus>;
 
 export function GetSettings():Promise<models.AppSettings>;
 
+export function GetUpdate():Promise<models.UpdateInfo>;
+
 export function GetWikiArtStats():Promise<models.WikiArtStats>;
 
 export function GetWikiPages():Promise<Array<models.WikiPage>>;

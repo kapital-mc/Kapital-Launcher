@@ -860,6 +860,26 @@ export namespace models {
 	        this.checkedAt = source["checkedAt"];
 	    }
 	}
+	export class UpdateInfo {
+	    current: string;
+	    latest: string;
+	    available: boolean;
+	    page: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.current = source["current"];
+	        this.latest = source["latest"];
+	        this.available = source["available"];
+	        this.page = source["page"];
+	        this.reason = source["reason"];
+	    }
+	}
 	
 	export class WikiArtStats {
 	    avgBytes: number;

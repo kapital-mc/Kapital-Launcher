@@ -164,11 +164,24 @@ function fillLinks(html, links) {
   return out
 }
 
+// version.json is the release the page offers, for the launcher's update notice
+// (backend/services/appupdate.go, ADR-9 amendment): the same tag as the Download
+// button, so the launcher never announces a version the page does not offer
+// yet. A build with no release writes none, and the launcher shows no notice.
+function versionFile(release) {
+  if (release === null) return ''
+  return `${JSON.stringify({ version: release.tag })}\n`
+}
+
 async function links() {
   const resolved = await readLinks()
+  const version = versionFile(resolved.release)
   return {
     name: 'kapital:links',
     transformIndexHtml: { order: 'pre', handler: (html) => fillLinks(html, resolved) },
+    generateBundle() {
+      if (version) this.emitFile({ type: 'asset', fileName: 'version.json', source: version })
+    },
   }
 }
 
