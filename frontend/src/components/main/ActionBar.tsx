@@ -27,7 +27,7 @@ import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
 import { StableLabel } from '../ui/StableLabel'
 
-// The approval card is shown only after the player asks to get Prism, so it
+// The approval popup is shown only after the player asks to get Prism, so it
 // loads then and stays out of the launcher's first paint and its bundle budget
 // (scripts/check-bundle-size.mjs), which the map tool's icon and address took
 // the last of (issue 161).
@@ -132,8 +132,9 @@ const CONFIRM_MS = 5000
  * corner (`shell/Toasts`), so the bar keeps its shape and the server's line
  * comes back.
  *
- * Without Prism, the bar offers to get it (ADR-11): the approval card opens
- * below, and once confirmed the state line follows the install step by step.
+ * Without Prism, the bar offers to get it (ADR-11): the approval opens as a
+ * popup over the window, so the card keeps its layout, and once confirmed the
+ * state line follows the install step by step.
  * If the release cannot be read, the button falls back to Prism's website.
  */
 export function ActionBar({
@@ -274,7 +275,9 @@ export function ActionBar({
         {missing && (
           <Button
             onClick={() => (release ? setOffering(true) : onOpenPrismSite())}
-            disabled={working || offering}
+            // Not disabled while the popup is open: the popup covers it, and a
+            // disabled button loses the focus the popup gives back on close.
+            disabled={working}
           >
             <StableLabel
               current={install?.phase === 'failed' ? 'Try again' : 'Get Prism Launcher'}

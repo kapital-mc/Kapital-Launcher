@@ -436,19 +436,19 @@ describe('App', () => {
     await screen.findByText('Kapital Launcher can get it for you')
 
     fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
-    const card = await screen.findByRole('region', { name: 'Get Prism Launcher' })
-    expect(card).toHaveTextContent('Prism Launcher 11.1.1 (19.5 MB)')
+    const card = await screen.findByRole('dialog', { name: 'Get Prism Launcher' })
+    expect(card).toHaveTextContent('Version 11.1.1 · 19.5 MB · GPL-3.0')
     expect(card).toHaveTextContent('sign in with Microsoft')
     fireEvent.click(within(card).getByRole('button', { name: /What.s in 11.1.1/ }))
     expect(Bindings.OpenExternal).toHaveBeenCalledWith(release.page)
     fireEvent.click(within(card).getByRole('button', { name: 'Not now' }))
-    expect(screen.queryByRole('region', { name: 'Get Prism Launcher' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Get Prism Launcher' })).not.toBeInTheDocument()
     expect(Bindings.InstallPrism).not.toHaveBeenCalled()
 
     let finish!: () => void
     vi.mocked(Bindings.InstallPrism).mockReturnValue(new Promise<void>((r) => (finish = r)))
     fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Download and set up' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Download' }))
     expect(Bindings.InstallPrism).toHaveBeenCalledOnce()
     expect(await screen.findByText('◐ Getting Prism · 0%')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Play Luxemburg' })).toBeDisabled()
@@ -472,7 +472,7 @@ describe('App', () => {
     await screen.findByText('Install Prism Launcher and sign in there')
     fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
     expect(Bindings.OpenExternal).toHaveBeenCalledWith('https://prismlauncher.org')
-    expect(screen.queryByRole('region', { name: 'Get Prism Launcher' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Get Prism Launcher' })).not.toBeInTheDocument()
   })
 
   it('offers a one-click update for the managed Prism', async () => {
