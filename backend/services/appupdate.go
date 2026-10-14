@@ -23,6 +23,7 @@ import (
 // no version, no id, no query.
 const (
 	// DownloadPage is the download site, the page the popup opens.
+	// aislop-ignore-next-line ai-slop/hardcoded-url -- fixed on purpose: no manifest or caller may name another (SECURITY_CHECKLIST S4.9)
 	DownloadPage = "https://kapital-launcher.pages.dev/"
 	// updateFeed is the site's version file.
 	updateFeed = DownloadPage + "version.json"
@@ -95,49 +96,50 @@ func checkUpdate(ctx context.Context, client *http.Client, feed, current string)
 		info.Reason = "dev build"
 		return info
 	}
-	latest, reason := readUpdateFeed(ctx, client, feed)
+	latest, theirs, reason := readUpdateFeed(ctx, client, feed)
 	if reason != "" {
 		info.Reason = reason
 		slog.Info("update check", "reason", reason)
 		return info
 	}
 	info.Latest = latest
-	theirs, _ := parseRelease(latest) //nolint:errcheck // readUpdateFeed returns only a tag that parses
 	info.Available = theirs.newerThan(own)
 	slog.Info("update check", "latest", latest, "available", info.Available)
 	return info
 }
 
-// readUpdateFeed fetches the version file and returns its tag, or the reason
-// there is none. No redirect is followed, only a 200 counts, and at most
-// maxUpdateBody bytes are read.
-func readUpdateFeed(ctx context.Context, client *http.Client, feed string) (string, string) {
+// readUpdateFeed fetches the version file and returns its tag with the version
+// it parses to, or the reason there is none. No redirect is followed, only a 200
+// counts, and at most maxUpdateBody bytes are read.
+func readUpdateFeed(ctx context.Context, client *http.Client, feed string) (string, releaseVersion, string) {
+	none := releaseVersion{}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feed, nil)
 	if err != nil {
-		return "", "no answer"
+		return "", none, "no answer"
 	}
 	req.Header.Set("User-Agent", prismUserAgent)
 	resp, err := client.Do(req)
 	if err != nil {
 		var netErr net.Error
 		if errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &netErr) && netErr.Timeout()) {
-			return "", "timed out"
+			return "", none, "timed out"
 		}
 		// The error's text is left out: it holds the address and nothing more useful.
-		return "", "no answer"
+		return "", none, "no answer"
 	}
 	defer resp.Body.Close() //nolint:errcheck // read-only response
 	if resp.StatusCode != http.StatusOK {
-		return "", "no answer"
+		return "", none, "no answer"
 	}
 	var body struct {
 		Version string `json:"version"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, maxUpdateBody)).Decode(&body); err != nil {
-		return "", "not a version"
+		return "", none, "not a version"
 	}
-	if _, ok := parseRelease(body.Version); !ok {
-		return "", "not a version"
+	v, ok := parseRelease(body.Version)
+	if !ok {
+		return "", none, "not a version"
 	}
-	return body.Version, ""
+	return body.Version, v, ""
 }
