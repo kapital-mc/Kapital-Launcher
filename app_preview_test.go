@@ -57,6 +57,14 @@ func previewApp(t *testing.T) (*App, *eventLog, *installLog) {
 	installs := &installLog{}
 	app.emitInstall = installs.add
 	app.previewStep = 0
+	// These tests are about the state a preview pushes, not the card, which
+	// previewCardApp covers over a fake host. With the splash on by default
+	// the real card would be opened, and with no main loop under go test the
+	// macOS one waits five seconds for its window and gives up.
+	off := false
+	if err := app.SaveSettings(models.AppSettings{Theme: "dark", LoadingSplash: &off}); err != nil {
+		t.Fatal(err)
+	}
 	return app, events, installs
 }
 

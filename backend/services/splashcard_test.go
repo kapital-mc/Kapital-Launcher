@@ -92,6 +92,10 @@ func newCardFixture(goos string) *cardFixture {
 			f.activated = append(f.activated, pid)
 			return f.activateOK
 		},
+		// The wait for the game and the handover's delay are real time: a test
+		// that is about them sets its own (coverFixture).
+		CoverWait:     time.Hour,
+		HandoverDelay: time.Nanosecond,
 	})
 	f.card.spawn = func(fn func()) { fn() }
 	return f

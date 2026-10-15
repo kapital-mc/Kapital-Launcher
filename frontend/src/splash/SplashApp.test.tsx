@@ -34,6 +34,24 @@ describe('the card page', () => {
     delete document.documentElement.dataset.theme
   })
 
+  it('in a macOS cover window shows the chapter backdrop and nothing to act on', () => {
+    window.history.replaceState(null, '', '/splash.html?view=cover')
+    try {
+      const { container } = render(<SplashApp />)
+      expect(container).toBeEmptyDOMElement()
+      push()
+      const cover = container.firstElementChild as HTMLElement
+      expect(cover).toHaveAttribute('data-chapter', 'frangfurd')
+      expect(cover).toHaveAttribute('aria-hidden')
+      expect(cover).toHaveClass('bg-cover-ground')
+      expect(cover.querySelector('.cover-spots img')).not.toBeNull()
+      expect(screen.queryByRole('region', { name: 'Loading Frangfurd' })).toBeNull()
+      expect(screen.queryByRole('button')).toBeNull()
+    } finally {
+      window.history.replaceState(null, '', '/')
+    }
+  })
+
   it('renders nothing until the first state', () => {
     const { container } = render(<SplashApp />)
     expect(container).toBeEmptyDOMElement()

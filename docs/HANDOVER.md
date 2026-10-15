@@ -260,7 +260,7 @@ one, the icon check on the PC is what is left), #35 (decided on 2026-10-01).
 - `%APPDATA%\KapitalLauncher\settings.json` carries
   `"packOverrides": {"frangfurd": "http://localhost:8080/pack.toml"}` and
   `"holdGameWindow": true` from the #45 tests. The loading splash is on by
-  default on Windows and off on macOS until #30.
+  default on Windows and, since 2026-10-15, on macOS too.
 - Default Options seeds `options.txt`, keybindings and the server list
   "Frangfurd (Global)" (`female-specified.gl.joinmc.link`) and "Frangfurd
   (Germany)" (`rails-enjoyed.tun.ply.gg`) on a first start.

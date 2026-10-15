@@ -20,8 +20,9 @@ int splashIsMainThread(void);
 
 // splashScreenFrame writes the visible frame (x, y, width, height, in points,
 // AppKit's bottom-left origin, the menu bar and Dock left out) of the screen the
-// launcher is on to out[0..3], or zeros when there is no screen or the main
-// queue did not answer in time.
+// launcher is on to out[0..3], and that screen's whole frame, which the cover
+// fills, to out[4..7], or zeros when there is no screen or the main queue did
+// not answer in time.
 void splashScreenFrame(double *out);
 
 // splashCreate makes the window and its webview on the main queue and starts

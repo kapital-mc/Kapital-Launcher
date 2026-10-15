@@ -27,6 +27,21 @@ type frame struct{ X, Y, W, H float64 }
 // on the iMac, #30), so the result is also pulled back inside the visible
 // frame: a convention that is not what it looks like then puts the card in a
 // wrong place on the screen, never off it.
+// placeDarwin is where the card goes on a Mac: a card with no place of its own
+// (OnScreen, which is every card on macOS, whose cover fills the screen from
+// Play) in the middle of the whole screen, the frame the cover fills, so it sits
+// centred on the cover rather than on the area the menu bar and Dock leave; and
+// anything else as appKitFrame puts it. Either way it is kept inside the visible
+// frame. A screen whose whole frame is unknown falls back to the visible one.
+func placeDarwin(r Rect, visible, whole frame) frame {
+	if !r.OnScreen || whole.W <= 0 || whole.H <= 0 {
+		return appKitFrame(r, visible)
+	}
+	w, h := float64(r.W), float64(r.H)
+	f := frame{X: whole.X + (whole.W-w)/2, Y: whole.Y + (whole.H-h)/2, W: w, H: h}
+	return clampInto(f, visible)
+}
+
 func appKitFrame(r Rect, visible frame) frame {
 	w, h := float64(r.W), float64(r.H)
 	if r.OnScreen {

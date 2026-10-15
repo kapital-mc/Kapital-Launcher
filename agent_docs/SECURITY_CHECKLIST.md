@@ -320,14 +320,19 @@ only the launcher's own Prism's windows are held, by pid, and a handle is used
 only while it is still a window of that pid. The held windows get `WM_CLOSE`
 (the one hidden window the close routine of S3.9 reaches) and the Prism they
 belong to is closed as S3.9 closes it, only while a console window is left.
-On macOS (issue 258) no window of another process is touched or read: from the
-game's Java being bound to the handover the launcher raises its own card above
+On macOS (issue 258) no window of another process is touched or read: from Play
+to the handover the launcher raises its own card above
 `NSMainMenuWindowLevel + 1` over a borderless cover window of its own on every
 screen (`splashhost.Host.Cover`), lowers both when the run ends first or the
-player leaves, and at the handover asks `NSRunningApplication` to activate the
-application of that one pid (`gameforeground_darwin.m`). Prism's dialogs and
-console show as Prism makes them, and nothing is raised before the game's
-Java exists, so a Prism sign-in is never covered.
+player leaves, and at the handover, `HandoverDelay` after the resource reload,
+asks `NSRunningApplication` to activate the application of that one pid
+(`gameforeground_darwin.m`). Each cover window shows the card's own page in its
+cover view (`splash.html?view=cover`), from the same embedded assets through the
+same scheme handler, with no message handler, so it can send nothing, and a
+navigation to any other scheme cancelled. Prism's dialogs and console are under
+the cover only while it is up: a start with no game's Java within `CoverWait` (30 s)
+lowers it, so a Prism sign-in is never covered for longer than that, and the
+card's Leave ends it at once (ADR-0012, 2026-10-15 amendment).
 Verify: `TestHolderHidesAndShowsAGLFWWindow`, `TestHolderLeavesOtherWindowsAlone`,
 `TestHandoverNudgesAFullscreenWindowOnePixelAndBack`,
 `TestPlacedOnMovesOnlyAScreenSizedWindowThatIsOffItsMonitor`,
@@ -347,7 +352,10 @@ Verify: `TestHolderHidesAndShowsAGLFWWindow`, `TestHolderLeavesOtherWindowsAlone
 `TestTrackerLeavesAConsoleThatAppearsAfterTheGameLogBeganAlone`,
 `TestTheNextPlayClosesThePrismOnTheOldConsoleAndReplacesTheHold`,
 `TestShutdownEndsAPrismThatIgnoresTheCloseAndReturnsInTime`;
-`TestOnMacOSTheCardCoversTheGameFromItsJavaUntilTheHandover`,
+`TestOnMacOSTheCardCoversTheScreenFromPlayUntilTheHandover`,
+`TestOnMacOSACoverWithNoGameInTimeIsLoweredAndTheJavaRaisesItAgain`,
+`TestOnMacOSARunThatEndsBeforeTheJavaLowersTheCoverAndKeepsTheCard`,
+`TestOnMacOSTheHandoverKeepsTheCoverForItsDelay`,
 `TestOnMacOSARunThatEndsBeforeTheHandoverLowersTheCardAndKeepsIt`,
 `TestTheCoverIsNotRaisedForACardThatIsGone`,
 `TestTrackerUsesTheRequestsHoldInPlaceOfItsOwn`,

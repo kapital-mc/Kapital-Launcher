@@ -169,13 +169,14 @@ func (h *darwinHost) create(handle uintptr, rect Rect) error {
 	if C.splashHasWindowServer() == 0 {
 		return errNoWindows
 	}
-	var screen [4]C.double
+	var screen [8]C.double
 	C.splashScreenFrame(&screen[0])
 	visible := frame{float64(screen[0]), float64(screen[1]), float64(screen[2]), float64(screen[3])}
+	whole := frame{float64(screen[4]), float64(screen[5]), float64(screen[6]), float64(screen[7])}
 	if visible.W <= 0 || visible.H <= 0 {
 		return errors.New("there is no screen to show the loading card on")
 	}
-	at := appKitFrame(rect, visible)
+	at := placeDarwin(rect, visible, whole)
 	cFrame := [4]C.double{C.double(at.X), C.double(at.Y), C.double(at.W), C.double(at.H)}
 	bg := h.page.Background
 	cColour := [3]C.int{C.int(bg[0]), C.int(bg[1]), C.int(bg[2])}

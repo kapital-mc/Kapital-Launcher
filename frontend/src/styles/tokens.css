@@ -15,6 +15,7 @@
   --color-raised: var(--bg-raised);
   --color-raised-2: var(--bg-raised-2);
   --color-hover: var(--bg-hover);
+  --color-cover-ground: var(--bg-cover);
   --color-fg: var(--fg);
   --color-fg-soft: var(--fg-soft);
   --color-fg-muted: var(--fg-muted);
@@ -86,6 +87,10 @@
   --transition-duration-panorama: 180000ms;
   --duration-dwell: 3780ms;
   --transition-duration-dwell: 3780ms;
+  --duration-cover: 2400ms;
+  --transition-duration-cover: 2400ms;
+  --duration-breathe: 16000ms;
+  --transition-duration-breathe: 16000ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
@@ -134,6 +139,9 @@
   --panorama-fov: 90deg;
   --panorama-tilt: 15deg;
   --panorama-bleed: 0.005;
+  --cover-art: 40%;
+  --cover-spot: 36%;
+  --cover-blur: 36px;
   --layout-reveal-rise: 4px;
   --effect-reveal-blur: 2px;
   --effect-glow-blur: 18px;
@@ -152,6 +160,7 @@
   --bg-raised: #131316;
   --bg-raised-2: #1a1a1f;
   --bg-hover: #212127;
+  --bg-cover: #000000;
   --fg: #ededf0;
   --fg-soft: #c8c8cf;
   --fg-muted: #a5a5ae;
@@ -174,6 +183,7 @@
   --bg-raised: #ffffff;
   --bg-raised-2: #fcfcfd;
   --bg-hover: #eeeef1;
+  --bg-cover: #000000;
   --fg: #14141a;
   --fg-soft: #2e2e38;
   --fg-muted: #4c4c58;
@@ -195,6 +205,7 @@
     --bg-raised: #ffffff;
     --bg-raised-2: #fcfcfd;
     --bg-hover: #eeeef1;
+    --bg-cover: #000000;
     --fg: #14141a;
     --fg-soft: #2e2e38;
     --fg-muted: #4c4c58;

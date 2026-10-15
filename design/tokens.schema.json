@@ -246,7 +246,7 @@
     "effect": {
       "type": "object",
       "description": "Values a utility cannot name on its own: the hover lift on the filled button, the focus outline, the stops of the scrim over artwork, and the grid shown where a chapter has no artwork yet.",
-      "required": ["hoverBrightness", "focusRing", "scrim", "accent", "artPending", "motionBlur", "revealBlur", "glow", "tileBlur", "tileTint", "panorama"],
+      "required": ["hoverBrightness", "focusRing", "scrim", "accent", "artPending", "motionBlur", "revealBlur", "glow", "tileBlur", "tileTint", "panorama", "cover"],
       "additionalProperties": false,
       "properties": {
         "hoverBrightness": { "type": "number", "exclusiveMinimum": 1, "maximum": 2 },
@@ -307,6 +307,18 @@
             "fov": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 180 },
             "tilt": { "type": "number", "minimum": 0, "maximum": 60 },
             "bleed": { "type": "number", "minimum": 0, "maximum": 5 }
+          }
+        },
+        "cover": {
+          "type": "object",
+          "description": "The macOS loading card's cover (ADR-0012, 2026-10-15): black, with the chapter's art, blurred and accent-tinted as on the card, seen only through soft spots. art is its opacity in percent, spot each spot's radius in percent of the screen's longer side, blur in px.",
+          "required": ["unit", "art", "spot", "blur"],
+          "additionalProperties": false,
+          "properties": {
+            "unit": { "const": "%" },
+            "art": { "type": "number", "minimum": 0, "maximum": 100 },
+            "spot": { "type": "number", "minimum": 0, "maximum": 100 },
+            "blur": { "type": "integer", "minimum": 0 }
           }
         },
         "tileTint": {

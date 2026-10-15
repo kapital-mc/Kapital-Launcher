@@ -3,6 +3,7 @@ package services
 import (
 	"log/slog"
 	"sync"
+	"time"
 
 	"kapital/backend/design"
 	"kapital/backend/models"
@@ -60,7 +61,30 @@ type CardConfig struct {
 	// Activate brings the game's process to the front at a macOS handover and
 	// says whether the OS accepted; nil is activateGame. A test stands in.
 	Activate func(pid int) bool
+	// CoverWait is how long the macOS cover, raised at Play, waits for the
+	// game's Java before it is lowered so a Prism that needs the player (a
+	// sign-in) can be reached; zero is DefaultCoverWait.
+	CoverWait time.Duration
+	// HandoverDelay is how long the macOS cover stays after the resource reload
+	// begins, so the game's first own frame is drawn under it rather than the
+	// early window's last; zero is DefaultHandoverDelay.
+	HandoverDelay time.Duration
 }
+
+const (
+	// DefaultCoverWait is CoverWait's default. The game's Java came 6 to 8 s
+	// after Play on the iMac (2026-10-15); a first Play's pack sync runs before
+	// it and can take longer, in which case Prism's own progress shows.
+	DefaultCoverWait = 30 * time.Second
+	// DefaultHandoverDelay is HandoverDelay's default. On the iMac the early
+	// window's last frame stayed after the reload began until the loading
+	// overlay's first frame (Drippy's, in Frangfurd) replaced it: 2.8 to 4.1 s
+	// in one start and 4.6 to 5.5 s in another (2026-10-15, screenshots about
+	// every 0.7 s). Drippy's screen then lasts about 25 s, so 6 s hides the
+	// frozen frame and still shows the overlay. No log line marks its first
+	// frame, so the wait is a time and not an event.
+	DefaultHandoverDelay = 6 * time.Second
+)
 
 // SplashCard is the loading card for a start (#97): a window of its own,
 // opened before Prism is run, kept up to date with the game's phases and
@@ -104,6 +128,9 @@ type cardRun struct {
 	ended bool
 	// minimised is whether the launcher was minimised for this card.
 	minimised bool
+	// held is the game's Java having raised the cover (GameHold), so the wait
+	// for it (watchCover) has nothing more to do.
+	held bool
 	// opening is Begin being inside host.Open, with mu released. The run is
 	// in c.run so a second Begin is refused and Shutdown can find the host,
 	// but it is no card yet: everything but those two leaves it alone.
@@ -114,6 +141,12 @@ type cardRun struct {
 func NewSplashCard(cfg CardConfig) *SplashCard {
 	if cfg.Activate == nil {
 		cfg.Activate = activateGame
+	}
+	if cfg.CoverWait <= 0 {
+		cfg.CoverWait = DefaultCoverWait
+	}
+	if cfg.HandoverDelay <= 0 {
+		cfg.HandoverDelay = DefaultHandoverDelay
 	}
 	return &SplashCard{cfg: cfg, spawn: func(f func()) { go f() }}
 }
@@ -138,7 +171,9 @@ func (c *SplashCard) live(run *cardRun) bool {
 }
 
 // Begin opens the card for the chapter's start, centred on the launcher's
-// window, and then minimises the launcher. It is called just before Prism is
+// window (on macOS, on the launcher's screen, which its cover fills), and then
+// minimises the launcher; on macOS the cover goes up at once (watchCover). It is
+// called just before Prism is
 // run. It returns whether the card is up: when the window cannot be opened it
 // logs why and returns false, the launcher is left alone, and the caller must
 // not hold the game's window for this run, because a hidden game with no card
@@ -146,7 +181,9 @@ func (c *SplashCard) live(run *cardRun) bool {
 // so a quit meanwhile (Shutdown) ends the wait, and Begin then returns false.
 func (c *SplashCard) Begin(chapter models.Chapter, theme string) bool {
 	x, y, w, h := c.cfg.Launcher.Frame()
-	rect := cardRect(x, y, w, h, c.cfg.Launcher.Minimised())
+	// On macOS the cover fills the screen from Play, so the card sits in its
+	// middle rather than where the launcher happened to be.
+	rect := cardRect(x, y, w, h, c.cfg.Launcher.Minimised() || c.cfg.GOOS == "darwin")
 	host := c.cfg.NewHost()
 	run := &cardRun{
 		chapter: splashhost.StateChapter{ID: chapter.ID, Name: chapter.Name},
@@ -206,7 +243,33 @@ func (c *SplashCard) Begin(chapter models.Chapter, theme string) bool {
 	run.minimised = true
 	c.mu.Unlock()
 	slog.Info("loading card opened", "chapter", chapter.ID)
+	if c.cfg.GOOS == "darwin" {
+		c.watchCover(run)
+	}
 	return true
+}
+
+// watchCover raises the macOS cover at Play and lowers it again if the game's
+// Java has not come within CoverWait. Prism's "Please wait" dialogs come before
+// the Java and float above ordinary windows, and macOS lets no app hide another's
+// (ADR-0012's macOS amendment), so the card stands over them from the start. A
+// Prism that waits on the player (a sign-in) would stay hidden behind it, which
+// is what the wait is for: once it is over and no game has come, the cover goes
+// and the card stays, at the normal level, until the Java raises the cover again
+// (GameHold). The host is only dispatched to, with mu released.
+func (c *SplashCard) watchCover(run *cardRun) {
+	run.host.Cover(true)
+	time.AfterFunc(c.cfg.CoverWait, func() {
+		c.mu.Lock()
+		if !c.live(run) || run.ended || run.held {
+			c.mu.Unlock()
+			return
+		}
+		host := run.host
+		c.mu.Unlock()
+		host.Cover(false)
+		slog.Info("loading card lowered: no game yet", "chapter", run.chapter.ID, "waited", c.cfg.CoverWait)
+	})
 }
 
 // cardRect centres the card on the launcher's window: the card's design size
@@ -262,6 +325,12 @@ func (c *SplashCard) Observe(s models.GameState) bool {
 // released, as the host's own calls are, and the card is pushed once, with it,
 // rather than twice. A card the player left meanwhile is not pushed to.
 func (c *SplashCard) showEnd(run *cardRun, s models.GameState) {
+	// On macOS the cover has been up since Play: a run that ends before the
+	// game's Java lowers it here, so the error, Prism's console and the launcher
+	// can be reached. One the hold raised was lowered by its release already.
+	if c.cfg.GOOS == "darwin" {
+		run.host.Cover(false)
+	}
 	var report *models.RunReport
 	// A run the player stopped from the launcher is not one that went wrong: it
 	// has nothing to explain.

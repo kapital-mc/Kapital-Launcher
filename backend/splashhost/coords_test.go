@@ -5,6 +5,36 @@ import (
 	"testing/fstest"
 )
 
+func TestPlaceDarwinCentresACardWithNoPlaceOnTheWholeScreen(t *testing.T) {
+	// A 2560x1440 screen with a 25 point menu bar and a 70 point Dock: the
+	// visible frame is y=70..1415. The cover fills the whole screen, so the card
+	// is centred on it, not on what the menu bar and Dock leave.
+	visible := frame{X: 0, Y: 70, W: 2560, H: 1345}
+	whole := frame{X: 0, Y: 0, W: 2560, H: 1440}
+	got := placeDarwin(Rect{W: 720, H: 405, OnScreen: true}, visible, whole)
+	want := frame{X: 920, Y: 518, W: 720, H: 405}
+	if got != want {
+		t.Fatalf("got %+v, want %+v", got, want)
+	}
+	// A second screen to the left keeps its own origin.
+	left := frame{X: -1920, Y: 0, W: 1920, H: 1080}
+	if got := placeDarwin(Rect{W: 720, H: 405, OnScreen: true}, left, left); got.X != -1920+600 {
+		t.Fatalf("centred on the wrong screen: %+v", got)
+	}
+}
+
+func TestPlaceDarwinLeavesAPlacedCardAndAnUnknownScreenToAppKitFrame(t *testing.T) {
+	visible := frame{X: 0, Y: 70, W: 2560, H: 1345}
+	placed := Rect{X: 500, Y: 300, W: 720, H: 405}
+	if got, want := placeDarwin(placed, visible, frame{W: 2560, H: 1440}), appKitFrame(placed, visible); got != want {
+		t.Fatalf("a placed card moved: %+v, want %+v", got, want)
+	}
+	onScreen := Rect{W: 720, H: 405, OnScreen: true}
+	if got, want := placeDarwin(onScreen, visible, frame{}), appKitFrame(onScreen, visible); got != want {
+		t.Fatalf("no whole frame should fall back: %+v, want %+v", got, want)
+	}
+}
+
 func TestAppKitFrameFlipsFromTopLeftToBottomLeft(t *testing.T) {
 	// A 1440x900 screen with a 25 point menu bar: visible frame y=0..875 after a
 	// 0 point Dock. The card is 480x300, 500 across and 300 down.

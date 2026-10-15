@@ -229,6 +229,43 @@
   }
 }
 
+/* The macOS loading card's cover (components/splash/SplashCover, ADR-0012's
+   2026-10-15 amendment): black, with the chapter's art showing only through
+   three soft spots, which fade in slowly and then breathe, very gently. The
+   spots' size, the art's strength and blur and both durations are tokens; the
+   spots sit where the card, in the middle, does not. With reduced motion they
+   only fade in, and hold. */
+@keyframes cover-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cover-breathe {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.6;
+  }
+}
+@utility cover-spots {
+  mask-image:
+    radial-gradient(ellipse var(--cover-spot) var(--cover-spot) at 14% 22%, black, transparent),
+    radial-gradient(ellipse var(--cover-spot) var(--cover-spot) at 86% 78%, black, transparent),
+    radial-gradient(ellipse var(--cover-spot) var(--cover-spot) at 72% 12%, black, transparent);
+  animation:
+    cover-in var(--duration-cover) var(--ease-out) both,
+    cover-breathe var(--duration-breathe) ease-in-out var(--duration-cover) infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cover-spots {
+    animation: cover-in var(--duration-cover) var(--ease-out) both;
+  }
+}
+
 /* A page sliding over the chapter card (components/main/PageLayer): a chapter's
    own pages come in from the right inside the card's frame, the app's settings
    come down from the top over the card area, and each leaves the way it came.
