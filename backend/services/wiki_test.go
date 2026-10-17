@@ -63,6 +63,17 @@ func TestParseWikiExportShortensALongLine(t *testing.T) {
 	}
 }
 
+func TestParseWikiExportPrefersTheWholeLead(t *testing.T) {
+	raw := `{"pages":[
+	  {"name":"A","url":"/wiki/locations/a","type":"location","era":["Frangfurd"],"status":"canon","excerpt":"Cut…","lead":"Cut short no more."},
+	  {"name":"B","url":"/wiki/locations/b","type":"location","era":["Frangfurd"],"status":"canon","excerpt":"Only an excerpt."}
+	]}`
+	pages := parseWikiExport([]byte(raw), "https://w")
+	if len(pages) != 2 || pages[0].Line != "Cut short no more." || pages[1].Line != "Only an excerpt." {
+		t.Fatalf("got %+v", pages)
+	}
+}
+
 func TestWikiPagesFetchOnceCacheAndFallBack(t *testing.T) {
 	hits := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

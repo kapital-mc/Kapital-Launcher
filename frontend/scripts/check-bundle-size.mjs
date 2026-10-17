@@ -75,7 +75,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // their own; what stays in the entry is the column frame, the icon, the fact
 // list's two-column layout, the lazy imports and the facts' model. Measured
 // 91.04 KB, from 90.45 KB before it.
-const BUDGET_KB = 91.1
+// 91.3 the same day: the dialog centres on the chapter card, closes from an X in
+// its corner, and the popups' chunk is fetched on hover and shortly after the
+// card shows. The dialog is the first paint's (getting Prism). Measured 91.21 KB.
+const BUDGET_KB = 91.3
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

@@ -31,7 +31,25 @@ export interface PanelFact {
 /** What every popup takes: the column's rectangle it grows out of, and how it closes. */
 interface Opened {
   origin: DOMRect
+  /** The chapter card's rectangle, which the popup is centred on. */
+  frame?: DOMRect
   onClose: () => void
+}
+
+/** A column's popup: the dialog grown out of the column, centred on the card, with an X. */
+function Popup({
+  title,
+  facts,
+  origin,
+  frame,
+  onClose,
+  children,
+}: Opened & { title: string; facts?: string; children: ReactNode }) {
+  return (
+    <Dialog title={title} facts={facts} origin={origin} frame={frame} closable onCancel={onClose}>
+      {children}
+    </Dialog>
+  )
 }
 
 /** The body of a popup that may run long: it scrolls inside the dialog rather than past it. */
@@ -54,6 +72,7 @@ export function PackDetails({
   facts,
   unset,
   origin,
+  frame,
   onClose,
 }: Opened & {
   chapter: Chapter
@@ -74,34 +93,29 @@ export function PackDetails({
   const memory = settings ? memoryLabel(settings.settings.maxMemoryMb) : PLACEHOLDER
 
   return (
-    <Dialog title={`${chapter.name} pack`} origin={origin} onCancel={onClose}>
-      {(close) => (
-        <>
-          <Body>
-            <p className="text-fg-soft m-0 leading-normal">{chapter.blurb}</p>
-            <FactList facts={facts} loose>
-              <Fact label="Memory" value={memory} unset={unset} />
-              <Fact
-                label="Server"
-                value={serverSoftware(chapter, status)}
-                unset={status?.checked && !status.online ? 'Offline' : 'Unknown'}
-                plain
-              />
-              <Fact label="Disabled mods" value={off ? 'None' : PLACEHOLDER} unset={unset} plain>
-                {off && off.length > 0 && (
-                  <span className="flex flex-wrap gap-1.5">
-                    {off.map((name) => (
-                      <Pill key={name}>{name}</Pill>
-                    ))}
-                  </span>
-                )}
-              </Fact>
-            </FactList>
-          </Body>
-          <Close onClose={close} />
-        </>
-      )}
-    </Dialog>
+    <Popup title="Pack" facts={chapter.name} origin={origin} frame={frame} onClose={onClose}>
+      <Body>
+        <p className="text-fg-soft m-0 leading-normal">{chapter.blurb}</p>
+        <FactList facts={facts} loose>
+          <Fact label="Memory" value={memory} unset={unset} />
+          <Fact
+            label="Server"
+            value={serverSoftware(chapter, status)}
+            unset={status?.checked && !status.online ? 'Offline' : 'Unknown'}
+            plain
+          />
+          <Fact label="Disabled mods" value={off ? 'None' : PLACEHOLDER} unset={unset} plain>
+            {off && off.length > 0 && (
+              <span className="flex flex-wrap gap-1.5">
+                {off.map((name) => (
+                  <Pill key={name}>{name}</Pill>
+                ))}
+              </span>
+            )}
+          </Fact>
+        </FactList>
+      </Body>
+    </Popup>
   )
 }
 
@@ -110,37 +124,33 @@ export function ChangelogDetails({
   chapter,
   entries,
   origin,
+  frame,
   onClose,
 }: Opened & { chapter: Chapter; entries: PanelEntry[] }) {
   return (
-    <Dialog title={`${chapter.name} changelog`} origin={origin} onCancel={onClose}>
-      {(close) => (
-        <>
-          <Body>
-            {entries.length === 0 ? (
-              <span className="text-fg-faint">No entries yet.</span>
-            ) : (
-              entries.map((entry) => (
-                <div key={entry.version} className="flex flex-col gap-1.5">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-accent font-mono text-xs">{entry.version}</span>
-                    {entry.date && (
-                      <span className="text-fg-faint font-mono text-xs">{entry.date}</span>
-                    )}
-                  </div>
-                  <ul className="text-fg-soft m-0 flex list-none flex-col gap-1 p-0 leading-normal">
-                    {lines(entry).map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))
-            )}
-          </Body>
-          <Close onClose={close} />
-        </>
-      )}
-    </Dialog>
+    <Popup title="Changelog" facts={chapter.name} origin={origin} frame={frame} onClose={onClose}>
+      <Body>
+        {entries.length === 0 ? (
+          <span className="text-fg-faint">No entries yet.</span>
+        ) : (
+          entries.map((entry) => (
+            <div key={entry.version} className="flex flex-col gap-1.5">
+              <div className="flex items-baseline gap-3">
+                <span className="text-accent font-mono text-xs">{entry.version}</span>
+                {entry.date && (
+                  <span className="text-fg-faint font-mono text-xs">{entry.date}</span>
+                )}
+              </div>
+              <ul className="text-fg-soft m-0 flex list-none flex-col gap-1 p-0 leading-normal">
+                {lines(entry).map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        )}
+      </Body>
+    </Popup>
   )
 }
 
@@ -160,51 +170,41 @@ export function WikiDetails({
   teaser,
   onOpenWiki,
   origin,
+  frame,
   onClose,
 }: Opened & {
   page: WikiPage | undefined
-  teaser: { title: string; line: string }
+  /** The manifest's teaser, and the chapter's name for its subtitle. */
+  teaser: { title: string; line: string; chapter: string }
   onOpenWiki: () => void
 }) {
-  const kind = page ? [page.category || page.type, ...page.eras].filter(Boolean) : []
+  const kind = page ? [page.category || page.type, ...page.eras].filter(Boolean) : [teaser.chapter]
   const facts = page?.facts ?? []
   return (
-    <Dialog
+    <Popup
       title={page?.title ?? teaser.title}
       facts={kind.length ? kind.map(capital).join(' · ') : undefined}
       origin={origin}
-      onCancel={onClose}
+      frame={frame}
+      onClose={onClose}
     >
-      {(close) => (
-        <>
-          <Body>
-            <p className="text-fg-soft m-0 leading-normal">{page?.line ?? teaser.line}</p>
-            {facts.length > 0 && (
-              <FactList loose>
-                {facts.map((f, i) => (
-                  <Fact key={i} label={f.label} value={f.value} plain />
-                ))}
-              </FactList>
-            )}
-          </Body>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={onOpenWiki}>
-              <Icon icon={ExternalLink} size="sm" />
-              <span>Read on the wiki</span>
-            </Button>
-            <Button onClick={close}>Close</Button>
-          </div>
-        </>
-      )}
-    </Dialog>
-  )
-}
-
-function Close({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="flex">
-      <Button onClick={onClose}>Close</Button>
-    </div>
+      <Body>
+        <p className="text-fg-soft m-0 leading-normal">{page?.line ?? teaser.line}</p>
+        {facts.length > 0 && (
+          <FactList loose>
+            {facts.map((f, i) => (
+              <Fact key={i} label={f.label} value={f.value} plain />
+            ))}
+          </FactList>
+        )}
+      </Body>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button onClick={onOpenWiki}>
+          <Icon icon={ExternalLink} size="sm" />
+          <span>Read on the wiki</span>
+        </Button>
+      </div>
+    </Popup>
   )
 }
 

@@ -1,4 +1,4 @@
-import { Suspense, lazy, useRef, useState, type ReactNode } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Chapter, PackChangelog, PackState, WikiPage } from '../../types'
 import { Maximize2 } from '../../lib/icons'
 import { factValue, sizeValue, unsetLabel } from '../../lib/manifest'
@@ -12,6 +12,9 @@ import type { PanelEntry, PanelFact } from './PanelDetails'
 // The popups open only when a column is expanded, so they load then and stay out
 // of the first paint and its bundle budget (scripts/check-bundle-size.mjs).
 const details = () => import('./PanelDetails')
+const preload = () => void details()
+/** How long after the card shows the popups' chunk is fetched anyway, in ms. */
+const PRELOAD_AFTER_MS = 1500
 const PackDetails = lazy(() => details().then((m) => ({ default: m.PackDetails })))
 const ChangelogDetails = lazy(() => details().then((m) => ({ default: m.ChangelogDetails })))
 const WikiDetails = lazy(() => details().then((m) => ({ default: m.WikiDetails })))
@@ -38,9 +41,18 @@ function PanelTitle({ children }: { children: string }) {
   return <h2 className="text-fg-faint m-0 text-xs font-medium">{children}</h2>
 }
 
+/** Where a popup opens: the column it grows out of, and the chapter card it is centred on. */
+interface Opening {
+  origin: DOMRect
+  frame?: DOMRect
+}
+
 /**
  * One column, whose expand button shows in its corner on hover and on keyboard
- * focus and opens the column's popup, which grows out of the column.
+ * focus and opens the column's popup, which grows out of the column. Hovering
+ * the column loads the popups' chunk, so the first one opens without waiting.
+ * A button that has focus back from a closed popup only shows while it is
+ * keyboard focus, so the mouse moving away hides it as before.
  */
 function Column({
   title,
@@ -52,7 +64,7 @@ function Column({
   title: string
   /** The expand button's accessible name. */
   label: string
-  onExpand: (origin: DOMRect) => void
+  onExpand: (at: Opening) => void
   last?: boolean
   children: ReactNode
 }) {
@@ -60,15 +72,22 @@ function Column({
   return (
     <div
       ref={ref}
+      onPointerEnter={preload}
+      onFocus={preload}
       className={`group border-line relative flex flex-col gap-3 p-7 ${last ? '' : 'border-r'}`}
     >
       <PanelTitle>{title}</PanelTitle>
-      <div className="duration-fast ease-standard absolute top-5 right-5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+      <div className="duration-fast ease-standard absolute top-5 right-5 opacity-0 transition-opacity group-hover:opacity-100 has-focus-visible:opacity-100">
         <IconButton
           icon={Maximize2}
           size="xs"
           title={label}
-          onClick={() => ref.current && onExpand(ref.current.getBoundingClientRect())}
+          onClick={() => {
+            const el = ref.current
+            if (!el) return
+            const frame = el.closest('[data-popup-frame]')?.getBoundingClientRect()
+            onExpand({ origin: el.getBoundingClientRect(), frame })
+          }}
         />
       </div>
       {children}
@@ -108,10 +127,15 @@ export function Panels({
   wikiPage,
   onOpenWiki,
 }: Props) {
-  const [open, setOpen] = useState<{ kind: 'pack' | 'changelog' | 'wiki'; origin: DOMRect }>()
+  // The popups' chunk is fetched a moment after the card shows, so even a first
+  // open that skips the hover preload does not wait for it.
+  useEffect(() => {
+    const t = setTimeout(preload, PRELOAD_AFTER_MS)
+    return () => clearTimeout(t)
+  }, [])
+  const [open, setOpen] = useState<Opening & { kind: 'pack' | 'changelog' | 'wiki' }>()
   const close = () => setOpen(undefined)
-  const expand = (kind: 'pack' | 'changelog' | 'wiki') => (origin: DOMRect) =>
-    setOpen({ kind, origin })
+  const expand = (kind: 'pack' | 'changelog' | 'wiki') => (at: Opening) => setOpen({ kind, ...at })
   const { pack } = chapter
   const wiki = wikiPage ?? chapter.wiki
   const unset = unsetLabel(installed)
@@ -176,17 +200,25 @@ export function Panels({
             facts={facts}
             unset={unset}
             origin={open.origin}
+            frame={open.frame}
             onClose={close}
           />
         )}
         {open?.kind === 'changelog' && (
-          <ChangelogDetails chapter={chapter} entries={all} origin={open.origin} onClose={close} />
+          <ChangelogDetails
+            chapter={chapter}
+            entries={all}
+            origin={open.origin}
+            frame={open.frame}
+            onClose={close}
+          />
         )}
         {open?.kind === 'wiki' && (
           <WikiDetails
             page={wikiPage}
-            teaser={chapter.wiki}
+            teaser={{ ...chapter.wiki, chapter: chapter.name }}
             origin={open.origin}
+            frame={open.frame}
             onOpenWiki={onOpenWiki}
             onClose={close}
           />

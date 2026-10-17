@@ -380,6 +380,8 @@
    starts on the origin's rectangle and grows to its own, and shrinks back
    into it on close. Dialog sets --grow-x, --grow-y, --grow-sx and --grow-sy
    from the two rectangles before the first paint. The cover fades with it.
+   Opening is the reveal's 200 ms on a fast-out curve, so the box is nearly
+   there at once; closing is quicker still, as nothing is being read then.
    With reduced motion both only fade, over the same duration, so the closing
    box's animationend still fires and the popup is still removed. */
 @keyframes grow-in {
@@ -404,24 +406,24 @@
 }
 @utility grow-in {
   transform-origin: top left;
-  animation: grow-in var(--duration-page) var(--ease-glide) both;
+  animation: grow-in var(--duration-reveal) var(--ease-out) both;
 }
 @utility grow-out {
   transform-origin: top left;
-  animation: grow-out var(--duration-page) var(--ease-glide) both;
+  animation: grow-out var(--duration-fast) ease-in both;
 }
 @utility fade-in {
-  animation: card-fade-in var(--duration-page) ease-in-out both;
+  animation: card-fade-in var(--duration-reveal) var(--ease-out) both;
 }
 @utility fade-out {
-  animation: card-fade-out var(--duration-page) ease-in-out both;
+  animation: card-fade-out var(--duration-fast) ease-in both;
 }
 @media (prefers-reduced-motion: reduce) {
   .grow-in {
-    animation: card-fade-in var(--duration-page) ease-in-out both;
+    animation: card-fade-in var(--duration-reveal) var(--ease-out) both;
   }
   .grow-out {
-    animation: card-fade-out var(--duration-page) ease-in-out both;
+    animation: card-fade-out var(--duration-fast) ease-in both;
   }
 }
 

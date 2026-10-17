@@ -21,7 +21,7 @@ import (
 
 // The wiki publishes its whole lore model at /data/lore.json, built with the
 // site (kapitel-kapital-wiki, src/pages/data/lore.json.ts; read 2026-09-30).
-// Its pages[] entries carry name, url, type, era[], status and excerpt, which
+// Its pages[] entries carry name, url, type, era[], status, excerpt and lead, which
 // is all the "From the wiki" panel needs (#58). A page dropped into the vault
 // is in the next build's export, so nothing is listed by hand anywhere.
 //
@@ -198,6 +198,7 @@ func parseWikiExport(raw []byte, baseURL string) []models.WikiPage {
 			Era      []string                   `json:"era"`
 			Status   string                     `json:"status"`
 			Excerpt  string                     `json:"excerpt"`
+			Lead     string                     `json:"lead"`
 			Fields   map[string]json.RawMessage `json:"fields"`
 		} `json:"pages"`
 		Relations []struct {
@@ -215,7 +216,12 @@ func parseWikiExport(raw []byte, baseURL string) []models.WikiPage {
 		if slices.Contains(wikiSkipTypes, p.Type) || slices.Contains(wikiSkipStatuses, p.Status) {
 			continue
 		}
-		title, line := strings.TrimSpace(p.Name), strings.TrimSpace(p.Excerpt)
+		// The whole lead paragraph where the export has one; an older wiki has
+		// only the excerpt, cut at 200 characters.
+		title, line := strings.TrimSpace(p.Name), strings.TrimSpace(p.Lead)
+		if line == "" {
+			line = strings.TrimSpace(p.Excerpt)
+		}
 		if title == "" || line == "" || len(title) > maxWikiTitle || len(p.Era) == 0 {
 			continue
 		}

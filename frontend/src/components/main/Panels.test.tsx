@@ -128,7 +128,7 @@ describe('Panels', () => {
     }))
     panels({ changelog: { chapterId: chapter.id, checked: true, entries } })
     fireEvent.click(screen.getByRole('button', { name: 'Full changelog' }))
-    const dialog = await screen.findByRole('dialog', { name: `${chapter.name} changelog` })
+    const dialog = await screen.findByRole('dialog', { name: 'Changelog' })
     expect(within(dialog).getByText('1.0.2')).toBeInTheDocument()
     expect(within(dialog).getByText('Fixed Map 1.0.2')).toBeInTheDocument()
     expect(within(dialog).getAllByText('2026-10-03')).toHaveLength(4)
@@ -183,7 +183,7 @@ describe('Panels', () => {
       fireEvent.click(screen.getByText('Loader'))
       expect(screen.queryByRole('dialog')).toBeNull()
       fireEvent.click(screen.getByRole('button', { name: 'Pack details' }))
-      const dialog = await screen.findByRole('dialog', { name: `${chapter.name} pack` })
+      const dialog = await screen.findByRole('dialog', { name: 'Pack' })
       expect(dialog).toHaveClass('grow-in')
       expect(within(dialog).getByText(chapter.blurb)).toBeInTheDocument()
       expect(await within(dialog).findByText('6.0 GB')).toBeInTheDocument()
@@ -228,5 +228,29 @@ describe('Panels', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Read the history →' }))
     expect(onOpenWiki).toHaveBeenCalledOnce()
     expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('centres a popup on the chapter card, with an X, and shows the arrow again only on keyboard focus', async () => {
+    render(
+      <div data-popup-frame>
+        <Panels
+          chapter={chapter}
+          installed={true}
+          sizeBytes={undefined}
+          packState={undefined}
+          changelog={undefined}
+          wikiPage={undefined}
+          onOpenWiki={noop}
+        />
+      </div>,
+    )
+    const arrow = screen.getByRole('button', { name: 'Full changelog' })
+    expect(arrow.parentElement).toHaveClass('has-focus-visible:opacity-100')
+    expect(arrow.parentElement).not.toHaveClass('focus-within:opacity-100')
+    fireEvent.click(arrow)
+    const dialog = await screen.findByRole('dialog', { name: 'Changelog' })
+    expect(dialog.parentElement).toHaveClass('left-(--frame-x)', 'w-(--frame-w)')
+    expect(within(dialog).getByText(chapter.name)).toHaveClass('font-mono')
+    expect(within(dialog).getByRole('button', { name: 'Close' })).toBeInTheDocument()
   })
 })
