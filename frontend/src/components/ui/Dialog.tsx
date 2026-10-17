@@ -30,6 +30,9 @@ export function Dialog({ title, facts, onCancel, origin, children }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const [leaving, setLeaving] = useState(false)
+  // The grow class goes on only once its custom properties are set: an animation that
+  // started without them would not pick them up.
+  const [measured, setMeasured] = useState(false)
   const close = origin ? () => setLeaving(true) : onCancel
   useEscapeClose(close)
   useEffect(() => {
@@ -45,14 +48,18 @@ export function Dialog({ title, facts, onCancel, origin, children }: Props) {
     const el = box.current
     if (!el || !origin) return
     const r = el.getBoundingClientRect()
-    if (r.width === 0 || r.height === 0) return
+    if (r.width === 0 || r.height === 0) {
+      setMeasured(true)
+      return
+    }
     el.style.setProperty('--grow-x', `${origin.left - r.left}px`)
     el.style.setProperty('--grow-y', `${origin.top - r.top}px`)
     el.style.setProperty('--grow-sx', `${origin.width / r.width}`)
     el.style.setProperty('--grow-sy', `${origin.height / r.height}`)
+    setMeasured(true)
   }, [origin])
 
-  const motion = origin ? (leaving ? 'grow-out' : 'grow-in') : ''
+  const motion = !origin ? '' : !measured ? 'opacity-0' : leaving ? 'grow-out' : 'grow-in'
   return createPortal(
     <div
       className={`scrim-wash fixed inset-0 z-20 flex items-center justify-center p-10 ${
