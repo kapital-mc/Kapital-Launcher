@@ -149,6 +149,7 @@ describe('App', () => {
       players: 2,
       max: 20,
       version: 'Paper 1.20.6',
+      software: 'Paper',
       motd: '',
       latencyMs: 30,
       checkedAt: '2026-09-28T12:00:00Z',
@@ -574,14 +575,17 @@ describe('App', () => {
 
   it('shows a wiki page of the open chapter and opens that page, else the teaser', async () => {
     vi.mocked(Bindings.GetWikiPages).mockResolvedValue([
-      {
+      models.WikiPage.createFrom({
         title: 'The Obelisk',
         line: 'A tower on the water.',
         url: 'https://kapitel-kapital.pages.dev/wiki/locations/the-obelisk',
         eras: ['Frangfurd'],
         id: 'locations/The Obelisk.md',
         related: [],
-      },
+        type: 'location',
+        category: '',
+        facts: [],
+      }),
     ])
     vi.mocked(Bindings.OpenWikiPage).mockResolvedValue()
     vi.mocked(Bindings.OpenChapterWiki).mockResolvedValue()

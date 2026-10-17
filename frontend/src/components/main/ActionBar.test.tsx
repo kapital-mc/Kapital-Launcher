@@ -30,6 +30,7 @@ const online: ServerStatus = {
   players: 3,
   max: 20,
   version: '1.20.1',
+  software: '',
   motd: '',
   latencyMs: 42,
   checkedAt: '2026-10-01T10:00:00Z',

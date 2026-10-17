@@ -57,6 +57,7 @@ func (s *StatusService) Check(ctx context.Context, chapter models.Chapter, addre
 			status.Players = result.Players
 			status.Max = result.MaxPlayers
 			status.Version = result.Version
+			status.Software = result.Software
 			status.MOTD = result.MOTD
 			status.LatencyMs = result.Latency.Milliseconds()
 		}

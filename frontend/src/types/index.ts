@@ -81,6 +81,8 @@ export interface ServerStatus {
   players: number
   max: number
   version: string
+  /** What runs the server as its response shows it ("Paper", "NeoForge"); "" when it does not say. */
+  software: string
   motd: string
   latencyMs: number
   checkedAt: string
@@ -124,6 +126,17 @@ export interface WikiPage {
   id: string
   /** The ids of the listed pages the wiki relates to this one, both ways. */
   related: string[]
+  /** The wiki's page type ("character") and category ("settlement"); "" when it has none. */
+  type: string
+  category: string
+  /** The page's settled facts in the wiki's order, plain text, at most eight. */
+  facts: WikiFact[]
+}
+
+/** One row of a wiki page's facts: "Founded", "2566". */
+export interface WikiFact {
+  label: string
+  value: string
 }
 
 /** One of the wiki's pictures, a screenshot or a page's, cached and served by Go at `src` (issue 172). */
@@ -266,7 +279,7 @@ export interface PackState {
 
 /**
  * One release in a pack's own changelog file (issue 164), shaped for the panel:
- * the summary is the entry's first line, the details are all of them.
+ * the summary is every line joined with "; ", the details are the lines one to a line.
  */
 export interface PackChangelogEntry {
   version: string

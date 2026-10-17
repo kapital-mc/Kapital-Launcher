@@ -30,6 +30,7 @@ export {
   KeyRound,
   LifeBuoy,
   LoaderCircle,
+  Maximize2,
   // lucide's `Map`, renamed: a bare `Map` would shadow the global one.
   Map as MapIcon,
   MemoryStick,

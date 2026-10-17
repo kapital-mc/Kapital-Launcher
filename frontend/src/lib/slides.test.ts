@@ -13,6 +13,9 @@ const page = (id: string, eras: string[], related: string[] = []): WikiPage => (
   eras,
   id,
   related,
+  type: 'location',
+  category: '',
+  facts: [],
 })
 const shot = (src: string, era: string, subject = ''): WikiShot => ({ era, src, subject })
 

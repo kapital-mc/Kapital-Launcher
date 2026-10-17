@@ -56,7 +56,7 @@ func TestParseChangelogAcceptsTheShape(t *testing.T) {
 	want := models.PackChangelogEntry{
 		Version: "1.0.1",
 		Date:    "2026-10-03",
-		Summary: "Removed JEI and WaterMedia",
+		Summary: "Removed JEI and WaterMedia; Fixed a crash on load",
 		Details: "Removed JEI and WaterMedia\nFixed a crash on load",
 	}
 	if entries[0] != want {

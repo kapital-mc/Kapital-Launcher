@@ -212,9 +212,10 @@
         "icon": {
           "type": "object",
           "description": "Icon box sizes, the px value lucide draws at, and the stroke weight in screen px that lucide's absoluteStrokeWidth holds constant across sizes.",
-          "required": ["sm", "md", "stroke"],
+          "required": ["xs", "sm", "md", "stroke"],
           "additionalProperties": false,
           "properties": {
+            "xs": { "type": "integer", "minimum": 1 },
             "sm": { "type": "integer", "minimum": 1 },
             "md": { "type": "integer", "minimum": 1 },
             "stroke": { "type": "number", "exclusiveMinimum": 0 }

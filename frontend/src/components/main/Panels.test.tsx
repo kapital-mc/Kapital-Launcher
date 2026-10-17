@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import type { ComponentProps } from 'react'
 import { Panels } from './Panels'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
+import * as App from '../../../wailsjs/go/main/App'
+import { models } from '../../../wailsjs/go/models'
 
 vi.mock('../../../wailsjs/go/main/App')
 
@@ -82,7 +84,7 @@ describe('Panels', () => {
     expect(screen.getByText('Summary of 1.0.5')).toHaveClass('line-clamp-2')
   })
 
-  it('shows the entries of the pack source by their first line, the rest in the tooltip', () => {
+  it('shows the entries of the pack source by their summary, the details in the tooltip', () => {
     const entries = ['1.0.5', '1.0.4', '1.0.3', '1.0.2'].map((version) => ({
       version,
       date: '2026-10-03',
@@ -115,5 +117,141 @@ describe('Panels', () => {
   it('has one sentence for an empty changelog', () => {
     panels()
     expect(screen.getByText('No entries yet.')).toHaveClass('text-fg-faint', 'text-sm')
+  })
+
+  it('opens the full changelog from its expand button, every entry with every line', async () => {
+    const entries = ['1.0.5', '1.0.4', '1.0.3', '1.0.2'].map((version) => ({
+      version,
+      date: '2026-10-03',
+      summary: `Fixed Map ${version}; Added Xaeros Minimap`,
+      details: `Fixed Map ${version}\nAdded Xaeros Minimap`,
+    }))
+    panels({ changelog: { chapterId: chapter.id, checked: true, entries } })
+    fireEvent.click(screen.getByRole('button', { name: 'Full changelog' }))
+    // The dialog opens on the click; its body loads in its own chunk and fades in.
+    const dialog = screen.getByRole('dialog', { name: 'Changelog' })
+    expect((await within(dialog).findByText('1.0.2')).closest('.reveal')).not.toBeNull()
+    expect(within(dialog).getByText('Fixed Map 1.0.2')).toBeInTheDocument()
+    expect(within(dialog).getAllByText('2026-10-03')).toHaveLength(4)
+    // Close shrinks it back into the column, and it goes when that animation ends.
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
+    expect(dialog).toHaveClass('grow-out')
+    // jsdom has no AnimationEvent, so React listens for the prefixed name there.
+    fireEvent(dialog, new Event('webkitAnimationEnd', { bubbles: true }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('splits a manifest entry at its semicolons in the popup', async () => {
+    const changelog = [{ version: '0.1', summary: 'Added Create; Fixed Teleport Roles' }]
+    panels({ chapter: { ...chapter, changelog } })
+    fireEvent.click(screen.getByRole('button', { name: 'Full changelog' }))
+    const dialog = screen.getByRole('dialog')
+    expect(await within(dialog).findByText('Added Create')).toBeInTheDocument()
+    expect(within(dialog).getByText('Fixed Teleport Roles')).toBeInTheDocument()
+  })
+
+  it('opens the pack details from its expand button only, with what the player set', async () => {
+    Object.assign(window, { go: {} })
+    try {
+      vi.mocked(App.GetChapterSettings).mockResolvedValue(
+        models.ChapterSettingsInfo.createFrom({
+          chapterId: chapter.id,
+          settings: { maxMemoryMb: 6144, jvm: '', jvmArgs: [] },
+          machineMemoryMb: 16384,
+          prismDefaultMb: 4096,
+          packMemoryMb: 8192,
+          presets: [],
+          running: false,
+        }),
+      )
+      vi.mocked(App.GetChapterMods).mockResolvedValue(
+        models.ChapterMods.createFrom({
+          chapterId: chapter.id,
+          mods: [{ name: 'DistantHorizons-3.jar', disabled: true, size: 1 }],
+          toggles: [
+            {
+              name: 'Distant Horizons',
+              jarPrefix: 'DistantHorizons',
+              jars: ['DistantHorizons-3.jar'],
+              disabled: true,
+              blocked: false,
+            },
+          ],
+          running: false,
+        }),
+      )
+      panels()
+      fireEvent.click(screen.getByText('Loader'))
+      expect(screen.queryByRole('dialog')).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: 'Pack details' }))
+      const dialog = await screen.findByRole('dialog', { name: 'Pack' })
+      expect(dialog).toHaveClass('grow-in')
+      expect(await within(dialog).findByText(chapter.blurb)).toBeInTheDocument()
+      expect(await within(dialog).findByText('6.0 GB')).toBeInTheDocument()
+      const off = await within(dialog).findByText('Distant Horizons')
+      expect(off).toHaveClass('rounded-pill')
+      expect(within(dialog).getByText('Disabled mods').nextElementSibling).toContainElement(off)
+    } finally {
+      Reflect.deleteProperty(window, 'go')
+    }
+  })
+
+  it('shows the wiki page whole with its facts, and opens it from the popup', async () => {
+    const onOpenWiki = vi.fn()
+    const wikiPage = {
+      title: 'The Obelisk',
+      line: 'A tower on the water, with a long line the column cuts.',
+      url: '/wiki/locations/the-obelisk',
+      eras: ['Frangfurd'],
+      id: 'locations/The Obelisk.md',
+      related: [],
+      type: 'location',
+      category: 'landmark',
+      facts: [
+        { label: 'Within', value: 'Frangfurder Sea' },
+        { label: 'Built', value: '2566' },
+      ],
+    }
+    panels({ wikiPage, onOpenWiki })
+    fireEvent.click(screen.getByRole('button', { name: 'Wiki details' }))
+    const dialog = await screen.findByRole('dialog', { name: 'The Obelisk' })
+    expect(within(dialog).getByText('Landmark · Frangfurd')).toBeInTheDocument()
+    expect((await within(dialog).findByText('Within')).nextElementSibling).toHaveTextContent(
+      'Frangfurder Sea',
+    )
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Read on the wiki' }))
+    expect(onOpenWiki).toHaveBeenCalledOnce()
+  })
+
+  it('does not open a popup from the column link, which opens the wiki itself', async () => {
+    const onOpenWiki = vi.fn()
+    panels({ onOpenWiki })
+    fireEvent.click(screen.getByRole('button', { name: 'Read the history →' }))
+    expect(onOpenWiki).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('centres a popup on the chapter card, with an X, and shows the arrow again only on keyboard focus', async () => {
+    render(
+      <div data-popup-frame>
+        <Panels
+          chapter={chapter}
+          installed={true}
+          sizeBytes={undefined}
+          packState={undefined}
+          changelog={undefined}
+          wikiPage={undefined}
+          onOpenWiki={noop}
+        />
+      </div>,
+    )
+    const arrow = screen.getByRole('button', { name: 'Full changelog' })
+    expect(arrow.parentElement).toHaveClass('has-focus-visible:opacity-100')
+    expect(arrow.parentElement).not.toHaveClass('focus-within:opacity-100')
+    fireEvent.click(arrow)
+    const dialog = await screen.findByRole('dialog', { name: 'Changelog' })
+    expect(dialog.parentElement).toHaveClass('left-(--frame-x)', 'w-(--frame-w)')
+    expect(within(dialog).getByText(chapter.name)).toHaveClass('font-mono')
+    expect(within(dialog).getByRole('button', { name: 'Close' })).toBeInTheDocument()
   })
 })

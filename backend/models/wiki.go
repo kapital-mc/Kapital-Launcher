@@ -2,7 +2,7 @@ package models
 
 // WikiPage is one page of the Kapitel Kapital wiki as its lore export lists
 // it (#58): enough for the "From the wiki" panel to show a title and a line
-// and to open the page. The launcher never renders wiki content; it shows
+// and to open the page, and for its expanded view to list the page's facts. The launcher never renders wiki content; it shows
 // these two strings as text and hands the URL to the system browser.
 type WikiPage struct {
 	// Title is the page's name.
@@ -20,6 +20,19 @@ type WikiPage struct {
 	// Related is the ids of the listed pages the wiki relates to this one, in
 	// either direction (#141): the posts a picture of this page may come with.
 	Related []string `json:"related"`
+	// Type is the wiki's page type ("character", "location"), and Category
+	// its sub-kind ("settlement"), "" when the page has none.
+	Type     string `json:"type"`
+	Category string `json:"category"`
+	// Facts are the page's settled facts in the wiki's infobox order, as
+	// plain text, at most eight; empty when it states none.
+	Facts []WikiFact `json:"facts"`
+}
+
+// WikiFact is one row of a page's facts: "Founded", "2566".
+type WikiFact struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
 }
 
 // WikiShot is one of the wiki's pictures, a screenshot (#141) or a picture a

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { clock, serverLine } from './serverLine'
+import { clock, serverLine, serverSoftware } from './serverLine'
+import { BUNDLED_MANIFEST, PLACEHOLDER } from './manifest'
 import type { ServerStatus } from '../types'
 
 const base: ServerStatus = {
@@ -9,6 +10,7 @@ const base: ServerStatus = {
   players: 4,
   max: 20,
   version: 'Paper 1.20.6',
+  software: 'Paper',
   motd: '',
   latencyMs: 37,
   checkedAt: '2026-09-28T12:34:00Z',
@@ -39,5 +41,23 @@ describe('serverLine', () => {
 
   it('clock falls back on an unreadable timestamp', () => {
     expect(clock('nonsense')).toBe('?')
+  })
+})
+
+describe('serverSoftware', () => {
+  const chapter = BUNDLED_MANIFEST.chapters[2]!
+  const named = (software: string) => ({
+    ...chapter,
+    server: { addresses: [{ label: 'Main', address: 'a.example' }], software },
+  })
+
+  it('takes what the ping showed, then the manifest, and says None without a server', () => {
+    expect(serverSoftware(named(PLACEHOLDER), { ...base, software: 'NeoForge' })).toBe('NeoForge')
+    expect(serverSoftware(named('Paper'), { ...base, software: '' })).toBe('Paper')
+    expect(serverSoftware(named('Paper'), { ...base, online: false, software: 'Purpur' })).toBe(
+      'Paper',
+    )
+    expect(serverSoftware(named(PLACEHOLDER), undefined)).toBe(PLACEHOLDER)
+    expect(serverSoftware({ ...chapter, server: null }, undefined)).toBe('None')
   })
 })

@@ -52,3 +52,16 @@ export function withJarsSet(view: ChapterMods, jars: readonly string[], off: boo
     })),
   }
 }
+
+/**
+ * The names of the mods switched off in the instance: a manifest toggle by its
+ * own name when every jar of it is off, any other jar by its file name.
+ */
+export function disabledMods(view: ChapterMods): string[] {
+  const off = view.toggles.filter((t) => t.disabled)
+  const covered = new Set(off.flatMap((t) => t.jars))
+  return [
+    ...off.map((t) => t.name),
+    ...view.mods.filter((m) => m.disabled && !covered.has(m.name)).map((m) => modLabel(m.name)),
+  ]
+}

@@ -10,6 +10,9 @@ const page = (url: string, ...eras: string[]): WikiPage => ({
   eras,
   id: url,
   related: [],
+  type: 'location',
+  category: '',
+  facts: [],
 })
 const pages = [
   page('/wiki/a', 'Frangfurd'),

@@ -13,6 +13,9 @@ type ServerStatus struct {
 	Max     int  `json:"max"`
 	// Version is the server's own version string, as it reports it.
 	Version string `json:"version"`
+	// Software is what runs the server, as its response shows it: "Paper",
+	// "NeoForge", "Forge", or "" when it does not say (vanilla, Fabric).
+	Software string `json:"software"`
 	// MOTD is the server's description as plain text.
 	MOTD string `json:"motd"`
 	// LatencyMs is the round trip of the last successful ping.

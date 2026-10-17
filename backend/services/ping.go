@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -71,8 +72,10 @@ type PingResult struct {
 	Players    int
 	MaxPlayers int
 	Version    string
-	MOTD       string
-	Latency    time.Duration
+	// Software is the server's kind as the response shows it: "Paper", "NeoForge", or "".
+	Software string
+	MOTD     string
+	Latency  time.Duration
 }
 
 // Ping performs one Server List Ping against host[:port]. A refused
@@ -142,6 +145,11 @@ type statusResponse struct {
 		Max    int `json:"max"`
 	} `json:"players"`
 	Description json.RawMessage `json:"description"`
+	// IsModded is NeoForge's own addition to the response.
+	IsModded bool `json:"isModded"`
+	// ForgeData (1.13 and later) and ModInfo (before) are Forge's.
+	ForgeData json.RawMessage `json:"forgeData"`
+	ModInfo   json.RawMessage `json:"modinfo"`
 }
 
 func parseStatus(raw []byte) (PingResult, error) {
@@ -154,8 +162,35 @@ func parseStatus(raw []byte) (PingResult, error) {
 		Players:    s.Players.Online,
 		MaxPlayers: s.Players.Max,
 		Version:    s.Version.Name,
+		Software:   serverSoftware(s),
 		MOTD:       componentText(s.Description),
 	}, nil
+}
+
+// serverSoftware names what runs the server, from what its response carries.
+// A plugin server puts its name before the game version ("Paper 1.21.1"); a
+// NeoForge server keeps the vanilla version and adds isModded, and Forge adds
+// its mod data. A vanilla or Fabric server says nothing about itself, and gets
+// "". The name is the server's own text, so only one short word of letters is
+// taken from it.
+func serverSoftware(s statusResponse) string {
+	fields := strings.Fields(stripFormatting(s.Version.Name))
+	if len(fields) >= 2 && softwareWord.MatchString(fields[0]) && startsWithDigit(fields[1]) {
+		return fields[0]
+	}
+	switch {
+	case s.IsModded:
+		return "NeoForge"
+	case len(s.ForgeData) > 0 || len(s.ModInfo) > 0:
+		return "Forge"
+	}
+	return ""
+}
+
+var softwareWord = regexp.MustCompile(`^[A-Za-z][A-Za-z-]{1,23}$`)
+
+func startsWithDigit(s string) bool {
+	return s != "" && s[0] >= '0' && s[0] <= '9'
 }
 
 // componentText flattens a chat component into plain text: a string as is,

@@ -249,3 +249,25 @@ func TestResolveTargetFallsBackToTheHostOn25565(t *testing.T) {
 		t.Errorf("SRV looked up %d times, want %d (never when the port is given)", calls, len(cases)-1)
 	}
 }
+
+func TestServerSoftwareReadsWhatTheResponseShows(t *testing.T) {
+	cases := []struct {
+		name, raw, want string
+	}{
+		{"plugin server names itself", `{"version":{"name":"Paper 1.21.1"}}`, "Paper"},
+		{"NeoForge adds isModded", `{"version":{"name":"1.21.1"},"isModded":true}`, "NeoForge"},
+		{"Forge adds its mod data", `{"version":{"name":"1.20.1"},"forgeData":{"mods":[]}}`, "Forge"},
+		{"vanilla and Fabric say nothing", `{"version":{"name":"1.21.1"}}`, ""},
+		{"a long sentence is not a name", `{"version":{"name":"Requires MC 1.8 / 1.21"}}`, ""},
+		{"formatting is not a name", `{"version":{"name":"§cPaper 1.21.1"}}`, "Paper"},
+	}
+	for _, c := range cases {
+		got, err := parseStatus([]byte(c.raw))
+		if err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+		if got.Software != c.want {
+			t.Errorf("%s: software %q, want %q", c.name, got.Software, c.want)
+		}
+	}
+}

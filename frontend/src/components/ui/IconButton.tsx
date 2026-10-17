@@ -6,8 +6,11 @@ interface Props {
   /** The accessible name; the icon carries none, and no tooltip is drawn (the author, 2026-09-30). */
   title: string
   onClick: () => void
-  /** `md` is the 44px box the hero tools use; `sm` the 32px one in the account card. */
-  size?: 'sm' | 'md'
+  /**
+   * `md` is the 44px box the hero tools use; `sm` the 32px one in the account card; `xs`
+   * the 28px one in a column's corner, with the smaller glyph.
+   */
+  size?: 'xs' | 'sm' | 'md'
   disabled?: boolean
   /**
    * One cell of a joined group of tools (the hero's): square, so its hover
@@ -17,6 +20,7 @@ interface Props {
 }
 
 const BOX = {
+  xs: 'size-7',
   sm: 'size-8',
   md: 'size-11',
 } as const

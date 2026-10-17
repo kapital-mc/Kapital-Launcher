@@ -875,6 +875,7 @@ export namespace models {
 	    players: number;
 	    max: number;
 	    version: string;
+	    software: string;
 	    motd: string;
 	    latencyMs: number;
 	    checkedAt: string;
@@ -891,6 +892,7 @@ export namespace models {
 	        this.players = source["players"];
 	        this.max = source["max"];
 	        this.version = source["version"];
+	        this.software = source["software"];
 	        this.motd = source["motd"];
 	        this.latencyMs = source["latencyMs"];
 	        this.checkedAt = source["checkedAt"];
@@ -931,6 +933,20 @@ export namespace models {
 	        this.pools = source["pools"];
 	    }
 	}
+	export class WikiFact {
+	    label: string;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new WikiFact(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.label = source["label"];
+	        this.value = source["value"];
+	    }
+	}
 	export class WikiPage {
 	    title: string;
 	    line: string;
@@ -938,6 +954,9 @@ export namespace models {
 	    eras: string[];
 	    id: string;
 	    related: string[];
+	    type: string;
+	    category: string;
+	    facts: WikiFact[];
 	
 	    static createFrom(source: any = {}) {
 	        return new WikiPage(source);
@@ -951,7 +970,28 @@ export namespace models {
 	        this.eras = source["eras"];
 	        this.id = source["id"];
 	        this.related = source["related"];
+	        this.type = source["type"];
+	        this.category = source["category"];
+	        this.facts = this.convertValues(source["facts"], WikiFact);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class WikiShot {
 	    era: string;

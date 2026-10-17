@@ -152,7 +152,7 @@ func ParseChangelog(raw []byte) ([]models.PackChangelogEntry, error) {
 		entries = append(entries, models.PackChangelogEntry{
 			Version: e.Version,
 			Date:    e.Date,
-			Summary: e.Lines[0],
+			Summary: strings.Join(e.Lines, "; "),
 			Details: strings.Join(e.Lines, "\n"),
 		})
 	}
