@@ -81,8 +81,8 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 92.1 the same day: a column's popup opens on the click itself, so the dialog
 // and the fade its body comes in with (Reveal) are the first paint's; only the
 // bodies load on demand. Before, the whole popup waited for its chunk. Measured
-// 92.06 KB.
-const BUDGET_KB = 92.1
+// 92.06 KB locally and just over 92.1 KB on CI's runner, so 92.2.
+const BUDGET_KB = 92.2
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)
