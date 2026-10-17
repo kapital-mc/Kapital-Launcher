@@ -59,6 +59,13 @@ chapter's `map` (below): a playit tunnel serves BlueMap over http.
   requires Iris, as its `neoforge.mods.toml` says): with that one off, Go turns this one
   off too (`WithRequiredOff`, on every `SetModsDisabled`) and the page locks it. The
   chain must end, which `validateToggles` checks.
+- `pack.dhSnapshot` is optional: the `latest.json` of the server's Distant
+  Horizons terrain snapshot (issue 136, ADR-2 sixteenth amendment), https on an
+  allowlisted host, ending in `/latest.json`, with no query or fragment
+  (`checkDHSnapshotURL`). It is what the chapter's World data card downloads on
+  the player's click. The pointer and index it leads to are untrusted too and
+  are held to the same host (`ParseDHPointer`, `ParseDHIndex`, `dhResolve`).
+  Frangfurd's is on `dh.frangfurd.click`, the R2 bucket's custom domain.
 - `map` is optional: a chapter's BlueMap web map (issue 161, ADR-4's third
   amendment), `http` or `https` on `*.tun.ply.gg` with an explicit port, lowercase
   and bare (no user info, path, query or fragment); `services.checkMapURL` refuses

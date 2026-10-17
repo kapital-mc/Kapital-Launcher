@@ -9,7 +9,7 @@ Two reaches matter: **network** (a manifest, a pack index, a download, a server
 ping response) and **bridge** (a bound method on `App`, callable by anything
 that runs in the WebView).
 
-Bound methods on 2026-10-11: **51** (`grep -c '^func (a \*App) [A-Z]' app.go app_*.go`,
+Bound methods on 2026-10-17: **55** (`grep -c '^func (a \*App) [A-Z]' app.go app_*.go`,
 summed). A different count is new surface to classify: add the method to this table.
 
 | Method | Takes from the bridge | Reaches | Item |
@@ -52,6 +52,9 @@ summed). A different count is new surface to classify: add the method to this ta
 | `CheckChapterMap` | a chapter id | one GET (5 s, no redirect followed, body dropped after 4 KiB) of the address the manifest names as that chapter's `map`, a playit tunnel with a port; nothing is kept, and a chapter with no map makes no request | S2.2, S5.4 |
 | `GetPlayerProfile` | a profile name, checked against `^[A-Za-z0-9_]{3,16}$` before any request | up to three bounded GETs on Mojang's public hosts (the name to `api.mojang.com`, the UUID it returned to `sessionserver.mojang.com`, a hash it named to `textures.minecraft.net`), the face cut from the skin and cached in the app data dir's `mojang/` and served at `/mojang-face/`; every outcome is a status, never an error | S1.1, S4.8 |
 | `CopyPlayerUUID` | nothing | the UUID of the latest found profile, held in Go, to the clipboard through Wails' `ClipboardSetText` | S4.8 |
+| `GetDHSnapshot` | a chapter id | for a chapter whose manifest names `pack.dhSnapshot`: two bounded GETs (the pointer, then the index it names, on the same host), the names of the instance's mods folder, the sizes of that server's Distant Horizons databases in the game folder and the staging journal; nothing written | S3.3, S4.10 |
+| `DownloadDHSnapshot` | a chapter id and whether to replace | the same reads, then that snapshot's parts (each checked against its hash) into `<instance>/kapital-dh-download/` and, once every level matched its hash, one rename per level into `<game folder>/Distant_Horizons_server_data/<server>/<level>/`; refused under a preview, while the game is active or running (asked again before placing), while another download runs, for a newer Distant Horizons, and over existing terrain unless replace is true | S3.3, S4.10 |
+| `CancelDHSnapshot` | a chapter id | the running download's context, cancelled; nothing else | S4.10 |
 | `GetPreviewSituations` | nothing | the fixed list of developer previews, in memory | none |
 | `StartPreview`, `ClearPreviews` | a chapter id and a situation name, which must be one of the fixed list (`services.PreviewSituations`) | state and copy only: a synthetic `game:state`, the real loading card with a made-up report, synthetic pack, instance, engine and release answers, and a made-up Prism install that never reaches the installer. No file, process, URL or network request; a real launch, game event or write to the chapter ends the preview | S3.3, S3.8, S4.5 |
 
@@ -720,6 +723,34 @@ Verify: `TestCheckUpdateComparesTheSitesTagWithTheBuild`,
 `TestCheckUpdateAsksNothingForADevBuild`, `TestGetUpdateAsksTheSiteOncePerStart`.
 Probe: the file answering a redirect, a 404, HTML, `{"version":"v1.0.0-rc.1"}`
 or 1 MiB.
+
+**S4.10 The Distant Horizons terrain comes only from the manifest's host, is checked part by part, and lands only in that server's level folders.**
+Holds when: (a) `pack.dhSnapshot` is https on an allowlisted host, ends in
+`/latest.json` and has no query, fragment, `..` or `//` (`checkDHSnapshotURL`),
+and the schema's pattern agrees; (b) the pointer and the index are decoded
+strictly (unknown fields and trailing data refused) under 4 KiB and 4 MiB, and
+every address after them is relative, resolved against the one before, on the
+same scheme and host, with no query (`dhResolve`); no redirect is followed and
+plain http is refused; (c) the server folder, each level folder and each hash
+hold to a fixed shape, level folders are unique, parts are at most 64 MiB, sum
+to their level and the snapshot to at most 64 GiB; (d) a part counts only when
+its bytes match its hash and size, a level is placed only when its whole file
+matches the index's hash, and a mismatch removes the file; (e) every write goes
+through an `os.Root` on the instance folder, to the staging folder and the
+level folders only, and placing removes that database's SQLite side files
+first; (f) it runs only on the player's click, one at a time, is refused while
+the game runs (checked again before placing), under a preview, for a newer
+Distant Horizons than the instance's, without the disk space, and over existing
+terrain without the player's confirmation (ADR-2 sixteenth amendment); (g)
+every request has a timeout (15 s for the small files, a 30 s stall for a part)
+and nothing is sent but the GET.
+Verify: `TestParseDHIndexRefuses`, `TestParseDHPointer`,
+`TestDHAddressesStayOnTheSnapshotsHost`, `TestManifestHoldsTheSnapshotAddress`,
+`dhsnapshot_download_test.go`, `app_terrain_test.go`.
+Probe: a pointer naming `https://evil.example/index.json` or `../index.json`;
+an index with `partsBase` `https://evil.example/`, a server folder `..` or
+`CON`, a level folder `a/b`, a part answering a redirect, 1 byte too many or the
+wrong bytes; a download started with the game's log written a second ago.
 
 ## S5. WebView
 

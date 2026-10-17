@@ -99,6 +99,8 @@ export interface Pack {
   mrpack?: string | null
   /** Mods a player may switch off from the chapter's settings as a quick choice (issue 156). */
   toggles?: ModToggle[] | null
+  /** The https address of the server's Distant Horizons terrain snapshot (issue 136). */
+  dhSnapshot?: string | null
 }
 
 /**
@@ -218,6 +220,39 @@ export interface PrismInstallProgress {
   received: number
   total: number
   error: string
+}
+
+/**
+ * A chapter's published Distant Horizons terrain and what its instance holds (issue 136), from
+ * GetDHSnapshot. `reason` says why a download cannot start when `available` is false.
+ */
+export interface DHSnapshotInfo {
+  chapterId: string
+  available: boolean
+  reason: string
+  createdAt: string
+  sizeBytes: number
+  dimensions: number
+  serverDhVersion: string
+  clientDhVersion: string
+  /** Terrain the instance already has for the server, which a download replaces. */
+  existingBytes: number
+  /** What an interrupted download of this snapshot left, which the next continues from. */
+  partialBytes: number
+  running: boolean
+  downloading: boolean
+}
+
+export type DHDownloadPhase =
+  'checking' | 'downloading' | 'verifying' | 'placing' | 'done' | 'cancelled' | 'failed'
+
+/** One dh:download event: a terrain download's phase and bytes of the whole snapshot. */
+export interface DHDownloadProgress {
+  chapterId: string
+  phase: DHDownloadPhase | string
+  received: number
+  total: number
+  error?: string
 }
 
 /** Whether a chapter's installed pack is the one its source serves now (#71). */

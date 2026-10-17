@@ -108,7 +108,8 @@
           { "name": "Create Better FPS", "jarPrefix": "createbetterfps-" },
           { "name": "Frangfurd Menu", "jarPrefix": "frangfurd_menu-" },
           { "name": "Frangfurd Tempo", "jarPrefix": "frangfurd_tempo-" }
-        ]
+        ],
+        "dhSnapshot": "https://dh.frangfurd.click/dh/latest.json"
       },
       "server": {
         "addresses": [

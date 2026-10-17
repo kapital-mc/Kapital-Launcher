@@ -572,3 +572,39 @@ fresh root hit it, on Windows as on macOS.
   process the sync starts is still a Java Prism named for the instance, with the
   packwiz template's arguments.
 
+
+## Sixteenth amendment, 2026-10-17
+
+Distant Horizons fills in the far terrain of a server only while the player
+stands in it, a little at a time. The Frangfurd server publishes the terrain it
+has already generated as a snapshot (Konnekt's format: a `latest.json` pointer,
+an `index.json` and content-addressed 8 MiB parts), and the launcher can put it
+into the chapter's instance on the player's request (issue 136). That is one
+more write inside a chapter's own instance.
+
+- **Where it comes from.** The manifest's `pack.dhSnapshot`, an https address
+  ending in `/latest.json` on an allowlisted host, with no query (`checkDHSnapshotURL`).
+  The pointer and the index are read with a cap each and decoded strictly; every
+  further address is relative to the one before and must stay on the same host
+  (`dhResolve`). No redirect is followed. Every name the index gives (the server
+  folder, each level folder, each hash) is held to a fixed shape before a path
+  is made from it, and the sizes are capped per part and in all.
+- **What is written.** A staging folder, `<instance>/kapital-dh-download/`,
+  beside the game folder, holding a journal of verified parts and one file per
+  level being assembled. Each level, once its whole file matched the index's
+  hash, is renamed to
+  `<game folder>/Distant_Horizons_server_data/<serverFolder>/<level>/DistantHorizons.sqlite`,
+  the folder Distant Horizons itself keeps a server's terrain in, after that
+  database's `-wal`, `-shm` and `-journal` files are removed. Every write goes
+  through an `os.Root` on the instance folder. The staging folder is removed
+  when the download is done and kept, with what was verified, when it is
+  cancelled or fails.
+- **When.** Only on the player's click, never on a timer or at a launch. It is
+  refused while the game runs (asked again just before anything is placed:
+  Distant Horizons holds the database open), while another download runs, under
+  a developer preview, when the snapshot comes from a newer Distant Horizons than
+  the instance's jar, and when the disk lacks the room. Terrain the instance
+  already holds for the server is replaced only after the player confirms.
+- **What does not change.** Nothing outside those level folders and the staging
+  folder is written, nothing is sent but the GETs, and no account data is
+  touched. The launcher never writes to the bucket.

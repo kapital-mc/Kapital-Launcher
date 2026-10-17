@@ -46,6 +46,7 @@ type App struct {
 	games          *services.GameTracker
 	splash         *services.SplashCard
 	live           *services.LiveLog
+	terrain        *terrainDownloads
 	stop           context.CancelFunc
 	frontendErrors *services.FrontendErrorLog
 	// runCtx is the context the background work runs under: cancelled in
@@ -147,6 +148,7 @@ func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 		},
 		previewStep: previewInstallStep,
 		live:        services.NewLiveLog(),
+		terrain:     newTerrainDownloads(),
 		engineReady: make(chan struct{}),
 	}
 	a.syncCopy = services.NewSyncCopy(dataDir, Version)

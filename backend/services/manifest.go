@@ -30,6 +30,10 @@ var AllowedManifestHosts = []string{
 	"raw.githubusercontent.com",
 	"modrinth.com",
 	"cdn.modrinth.com",
+	// Frangfurd's Distant Horizons snapshot: the custom domain of the R2 bucket
+	// Konnekt publishes it to (issue 136). Worker static assets refuse a file
+	// over 25 MiB, and the r2.dev address is rate-limited.
+	"dh.frangfurd.click",
 }
 
 var (
@@ -160,6 +164,11 @@ func validatePack(where string, pack models.Pack) error {
 	}
 	if pack.Mrpack != nil {
 		if err := checkURL(where+".pack.mrpack", *pack.Mrpack); err != nil {
+			return err
+		}
+	}
+	if pack.DHSnapshot != nil {
+		if err := checkDHSnapshotURL(where+".pack.dhSnapshot", *pack.DHSnapshot); err != nil {
 			return err
 		}
 	}

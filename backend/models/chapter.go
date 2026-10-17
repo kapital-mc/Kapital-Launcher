@@ -68,6 +68,12 @@ type Pack struct {
 	// as a quick choice (issue 156). Optional: a pack that names none has only
 	// the advanced list.
 	Toggles []ModToggle `json:"toggles,omitempty"`
+	// DHSnapshot is the https address of the server's Distant Horizons
+	// snapshot pointer, a latest.json that Konnekt publishes (issue 136), or nil
+	// when the chapter has none. A URL and nothing else: the folders the
+	// download writes come from the snapshot's index and are held to Distant
+	// Horizons' own name rules (services.ParseDHIndex).
+	DHSnapshot *string `json:"dhSnapshot,omitempty"`
 }
 
 // Server is a chapter's server: the addresses it can be reached at, each with

@@ -93,6 +93,11 @@
                   }
                 }
               }
+            },
+            "dhSnapshot": {
+              "type": "string",
+              "pattern": "^https://[^?#]+/latest\\.json$",
+              "description": "The server's Distant Horizons terrain snapshot (issue 136): the https address of the latest.json Konnekt publishes, on an allowlisted host. The chapter's settings offer it as a one-time download. A URL and nothing else: the folders the download writes come from the snapshot's index."
             }
           }
         },

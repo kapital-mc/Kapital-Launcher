@@ -80,7 +80,7 @@ export function ChapterServerSection({ chapter }: Props) {
           }
         />
       </SettingsCard>
-      {hasDistantHorizons(chapter) && <DistantHorizonsCard />}
+      {hasDistantHorizons(chapter) && <DistantHorizonsCard chapter={chapter} />}
     </SettingsSection>
   )
 }
