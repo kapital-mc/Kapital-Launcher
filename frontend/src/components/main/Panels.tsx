@@ -1,23 +1,52 @@
-import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from 'react'
 import type { Chapter, PackChangelog, PackState, WikiPage } from '../../types'
 import { Maximize2 } from '../../lib/icons'
 import { factValue, sizeValue, unsetLabel } from '../../lib/manifest'
 import { versionValue } from '../../lib/packState'
+import { Dialog } from '../ui/Dialog'
 import { Drift } from '../ui/Drift'
 import { FactList } from '../ui/Fact'
 import { IconButton } from '../ui/IconButton'
+import { Reveal } from '../ui/Reveal'
 import { TextLink } from '../ui/TextLink'
 import type { PanelEntry, PanelFact } from './PanelDetails'
+import type * as Chunk from './PanelDetails'
 
-// The popups open only when a column is expanded, so they load then and stay out
-// of the first paint and its bundle budget (scripts/check-bundle-size.mjs).
-const details = () => import('./PanelDetails')
+// The popups' bodies show only when a column is expanded, so they load then and
+// stay out of the first paint and its bundle budget (scripts/check-bundle-size.mjs).
+// The popup itself is the dialog every page already has, so it opens on the click
+// and its body fades in when it is there (Reveal), as a settings page's does.
+type Details = typeof Chunk
+/** The chunk once it has loaded, so a body renders at once rather than suspending. */
+let loaded: Details | undefined
+const details = () => import('./PanelDetails').then((m) => (loaded = m))
 const preload = () => void details()
 /** How long after the card shows the popups' chunk is fetched anyway, in ms. */
 const PRELOAD_AFTER_MS = 1500
-const PackDetails = lazy(() => details().then((m) => ({ default: m.PackDetails })))
-const ChangelogDetails = lazy(() => details().then((m) => ({ default: m.ChangelogDetails })))
-const WikiDetails = lazy(() => details().then((m) => ({ default: m.WikiDetails })))
+
+/**
+ * A body from the chunk: drawn straight away once the chunk is in, so the dialog
+ * measures its full size before it grows (a lazy component would suspend once
+ * even then), and lazily before that.
+ */
+function fromChunk<P extends object>(pick: (m: Details) => ComponentType<P>) {
+  const Lazy = lazy(() => details().then((m) => ({ default: pick(m) })))
+  return function Body(props: P) {
+    const Ready = loaded ? pick(loaded) : Lazy
+    return <Ready {...props} />
+  }
+}
+const PackDetails = fromChunk((m) => m.PackDetails)
+const ChangelogDetails = fromChunk((m) => m.ChangelogDetails)
+const WikiDetails = fromChunk((m) => m.WikiDetails)
 
 interface Props {
   chapter: Chapter
@@ -45,6 +74,42 @@ function PanelTitle({ children }: { children: string }) {
 interface Opening {
   origin: DOMRect
   frame?: DOMRect
+}
+
+/** A column's popup: open at once, its body revealed when its chunk has loaded. */
+function Popup({
+  title,
+  subtitle,
+  at,
+  onClose,
+  children,
+}: {
+  title: string
+  subtitle?: string
+  at: Opening
+  onClose: () => void
+  children: ReactNode
+}) {
+  return (
+    <Dialog
+      title={title}
+      facts={subtitle}
+      origin={at.origin}
+      frame={at.frame}
+      closable
+      onCancel={onClose}
+    >
+      <Suspense fallback={null}>
+        <Reveal className="flex flex-col gap-4">{children}</Reveal>
+      </Suspense>
+    </Dialog>
+  )
+}
+
+/** The wiki popup's subtitle: the page's category and eras, else the chapter's name. */
+function wikiKind(page: WikiPage | undefined, chapter: string): string {
+  const words = page ? [page.category || page.type, ...page.eras].filter(Boolean) : [chapter]
+  return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' · ')
 }
 
 /**
@@ -193,37 +258,26 @@ export function Panels({
           </TextLink>
         </Drift>
       </Column>
-      <Suspense fallback={null}>
-        {open?.kind === 'pack' && (
-          <PackDetails
-            chapter={chapter}
-            facts={facts}
-            unset={unset}
-            origin={open.origin}
-            frame={open.frame}
-            onClose={close}
-          />
-        )}
-        {open?.kind === 'changelog' && (
-          <ChangelogDetails
-            chapter={chapter}
-            entries={all}
-            origin={open.origin}
-            frame={open.frame}
-            onClose={close}
-          />
-        )}
-        {open?.kind === 'wiki' && (
-          <WikiDetails
-            page={wikiPage}
-            teaser={{ ...chapter.wiki, chapter: chapter.name }}
-            origin={open.origin}
-            frame={open.frame}
-            onOpenWiki={onOpenWiki}
-            onClose={close}
-          />
-        )}
-      </Suspense>
+      {open?.kind === 'pack' && (
+        <Popup title="Pack" subtitle={chapter.name} at={open} onClose={close}>
+          <PackDetails chapter={chapter} facts={facts} unset={unset} />
+        </Popup>
+      )}
+      {open?.kind === 'changelog' && (
+        <Popup title="Changelog" subtitle={chapter.name} at={open} onClose={close}>
+          <ChangelogDetails entries={all} />
+        </Popup>
+      )}
+      {open?.kind === 'wiki' && (
+        <Popup
+          title={wiki.title}
+          subtitle={wikiKind(wikiPage, chapter.name)}
+          at={open}
+          onClose={close}
+        >
+          <WikiDetails page={wikiPage} line={chapter.wiki.line} onOpenWiki={onOpenWiki} />
+        </Popup>
+      )}
     </section>
   )
 }

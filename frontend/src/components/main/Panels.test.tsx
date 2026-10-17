@@ -128,8 +128,9 @@ describe('Panels', () => {
     }))
     panels({ changelog: { chapterId: chapter.id, checked: true, entries } })
     fireEvent.click(screen.getByRole('button', { name: 'Full changelog' }))
-    const dialog = await screen.findByRole('dialog', { name: 'Changelog' })
-    expect(within(dialog).getByText('1.0.2')).toBeInTheDocument()
+    // The dialog opens on the click; its body loads in its own chunk and fades in.
+    const dialog = screen.getByRole('dialog', { name: 'Changelog' })
+    expect((await within(dialog).findByText('1.0.2')).closest('.reveal')).not.toBeNull()
     expect(within(dialog).getByText('Fixed Map 1.0.2')).toBeInTheDocument()
     expect(within(dialog).getAllByText('2026-10-03')).toHaveLength(4)
     // Close shrinks it back into the column, and it goes when that animation ends.
@@ -144,8 +145,8 @@ describe('Panels', () => {
     const changelog = [{ version: '0.1', summary: 'Added Create; Fixed Teleport Roles' }]
     panels({ chapter: { ...chapter, changelog } })
     fireEvent.click(screen.getByRole('button', { name: 'Full changelog' }))
-    const dialog = await screen.findByRole('dialog')
-    expect(within(dialog).getByText('Added Create')).toBeInTheDocument()
+    const dialog = screen.getByRole('dialog')
+    expect(await within(dialog).findByText('Added Create')).toBeInTheDocument()
     expect(within(dialog).getByText('Fixed Teleport Roles')).toBeInTheDocument()
   })
 
@@ -185,7 +186,7 @@ describe('Panels', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Pack details' }))
       const dialog = await screen.findByRole('dialog', { name: 'Pack' })
       expect(dialog).toHaveClass('grow-in')
-      expect(within(dialog).getByText(chapter.blurb)).toBeInTheDocument()
+      expect(await within(dialog).findByText(chapter.blurb)).toBeInTheDocument()
       expect(await within(dialog).findByText('6.0 GB')).toBeInTheDocument()
       const off = await within(dialog).findByText('Distant Horizons')
       expect(off).toHaveClass('rounded-pill')
@@ -215,7 +216,7 @@ describe('Panels', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Wiki details' }))
     const dialog = await screen.findByRole('dialog', { name: 'The Obelisk' })
     expect(within(dialog).getByText('Landmark · Frangfurd')).toBeInTheDocument()
-    expect(within(dialog).getByText('Within').nextElementSibling).toHaveTextContent(
+    expect((await within(dialog).findByText('Within')).nextElementSibling).toHaveTextContent(
       'Frangfurder Sea',
     )
     fireEvent.click(within(dialog).getByRole('button', { name: 'Read on the wiki' }))

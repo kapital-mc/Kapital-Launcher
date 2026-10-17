@@ -9,7 +9,6 @@ import { useEngineStore } from '../../stores/useEngineStore'
 import { useModStore } from '../../stores/useModStore'
 import { selectStatus, useServerStore } from '../../stores/useServerStore'
 import { Button } from '../ui/Button'
-import { Dialog } from '../ui/Dialog'
 import { Fact, FactList } from '../ui/Fact'
 import { Icon } from '../ui/Icon'
 import { Pill } from '../ui/Pill'
@@ -28,30 +27,6 @@ export interface PanelFact {
   plain?: boolean
 }
 
-/** What every popup takes: the column's rectangle it grows out of, and how it closes. */
-interface Opened {
-  origin: DOMRect
-  /** The chapter card's rectangle, which the popup is centred on. */
-  frame?: DOMRect
-  onClose: () => void
-}
-
-/** A column's popup: the dialog grown out of the column, centred on the card, with an X. */
-function Popup({
-  title,
-  facts,
-  origin,
-  frame,
-  onClose,
-  children,
-}: Opened & { title: string; facts?: string; children: ReactNode }) {
-  return (
-    <Dialog title={title} facts={facts} origin={origin} frame={frame} closable onCancel={onClose}>
-      {children}
-    </Dialog>
-  )
-}
-
 /** The body of a popup that may run long: it scrolls inside the dialog rather than past it. */
 function Body({ children }: { children: ReactNode }) {
   return (
@@ -62,19 +37,16 @@ function Body({ children }: { children: ReactNode }) {
 }
 
 /**
- * The Pack column, expanded: the chapter's blurb, the column's facts, and what
- * the player set for it: the memory Prism starts it with and the mods switched
- * off. Both are read from the instance when the popup opens; a chapter that is
- * not installed has neither and says so.
+ * The Pack column's popup body: the chapter's blurb, the column's facts, and
+ * what the player set for it: the memory Prism starts it with and the mods
+ * switched off. Both are read from the instance when the popup opens; a
+ * chapter that is not installed has neither and says so.
  */
 export function PackDetails({
   chapter,
   facts,
   unset,
-  origin,
-  frame,
-  onClose,
-}: Opened & {
+}: {
   chapter: Chapter
   facts: PanelFact[]
   /** What the instance's own facts say while there is no answer: "Not installed", or "Unknown". */
@@ -93,64 +65,52 @@ export function PackDetails({
   const memory = settings ? memoryLabel(settings.settings.maxMemoryMb) : PLACEHOLDER
 
   return (
-    <Popup title="Pack" facts={chapter.name} origin={origin} frame={frame} onClose={onClose}>
-      <Body>
-        <p className="text-fg-soft m-0 leading-normal">{chapter.blurb}</p>
-        <FactList facts={facts} loose>
-          <Fact label="Memory" value={memory} unset={unset} />
-          <Fact
-            label="Server"
-            value={serverSoftware(chapter, status)}
-            unset={status?.checked && !status.online ? 'Offline' : 'Unknown'}
-            plain
-          />
-          <Fact label="Disabled mods" value={off ? 'None' : PLACEHOLDER} unset={unset} plain>
-            {off && off.length > 0 && (
-              <span className="flex flex-wrap gap-1.5">
-                {off.map((name) => (
-                  <Pill key={name}>{name}</Pill>
-                ))}
-              </span>
-            )}
-          </Fact>
-        </FactList>
-      </Body>
-    </Popup>
+    <Body>
+      <p className="text-fg-soft m-0 leading-normal">{chapter.blurb}</p>
+      <FactList facts={facts} loose>
+        <Fact label="Memory" value={memory} unset={unset} />
+        <Fact
+          label="Server"
+          value={serverSoftware(chapter, status)}
+          unset={status?.checked && !status.online ? 'Offline' : 'Unknown'}
+          plain
+        />
+        <Fact label="Disabled mods" value={off ? 'None' : PLACEHOLDER} unset={unset} plain>
+          {off && off.length > 0 && (
+            <span className="flex flex-wrap gap-1.5">
+              {off.map((name) => (
+                <Pill key={name}>{name}</Pill>
+              ))}
+            </span>
+          )}
+        </Fact>
+      </FactList>
+    </Body>
   )
 }
 
-/** The Changelog column, expanded: every entry, each with its date and its full text. */
-export function ChangelogDetails({
-  chapter,
-  entries,
-  origin,
-  frame,
-  onClose,
-}: Opened & { chapter: Chapter; entries: PanelEntry[] }) {
+/** The Changelog column's popup body: every entry, each with its date and its full text. */
+export function ChangelogDetails({ entries }: { entries: PanelEntry[] }) {
   return (
-    <Popup title="Changelog" facts={chapter.name} origin={origin} frame={frame} onClose={onClose}>
-      <Body>
-        {entries.length === 0 ? (
-          <span className="text-fg-faint">No entries yet.</span>
-        ) : (
-          entries.map((entry) => (
-            <div key={entry.version} className="flex flex-col gap-1.5">
-              <div className="flex items-baseline gap-3">
-                <span className="text-accent font-mono text-xs">{entry.version}</span>
-                {entry.date && (
-                  <span className="text-fg-faint font-mono text-xs">{entry.date}</span>
-                )}
-              </div>
-              <ul className="text-fg-soft m-0 flex list-none flex-col gap-1 p-0 leading-normal">
-                {lines(entry).map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
+    <Body>
+      {entries.length === 0 ? (
+        <span className="text-fg-faint">No entries yet.</span>
+      ) : (
+        entries.map((entry) => (
+          <div key={entry.version} className="flex flex-col gap-1.5">
+            <div className="flex items-baseline gap-3">
+              <span className="text-accent font-mono text-xs">{entry.version}</span>
+              {entry.date && <span className="text-fg-faint font-mono text-xs">{entry.date}</span>}
             </div>
-          ))
-        )}
-      </Body>
-    </Popup>
+            <ul className="text-fg-soft m-0 flex list-none flex-col gap-1 p-0 leading-normal">
+              {lines(entry).map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      )}
+    </Body>
   )
 }
 
@@ -161,35 +121,25 @@ function lines(entry: PanelEntry): string[] {
 }
 
 /**
- * The wiki column, expanded: the whole line, and the facts the wiki states
- * about the page (type, eras, then its own rows). The manifest's teaser has
- * only a title and a line.
+ * The wiki column's popup body: the page's whole lead, the facts the wiki
+ * states about it, and the way to the page. The manifest's teaser has only a
+ * line.
  */
 export function WikiDetails({
   page,
-  teaser,
+  line,
   onOpenWiki,
-  origin,
-  frame,
-  onClose,
-}: Opened & {
+}: {
   page: WikiPage | undefined
-  /** The manifest's teaser, and the chapter's name for its subtitle. */
-  teaser: { title: string; line: string; chapter: string }
+  /** The manifest teaser's line, for when there is no page. */
+  line: string
   onOpenWiki: () => void
 }) {
-  const kind = page ? [page.category || page.type, ...page.eras].filter(Boolean) : [teaser.chapter]
   const facts = page?.facts ?? []
   return (
-    <Popup
-      title={page?.title ?? teaser.title}
-      facts={kind.length ? kind.map(capital).join(' · ') : undefined}
-      origin={origin}
-      frame={frame}
-      onClose={onClose}
-    >
+    <>
       <Body>
-        <p className="text-fg-soft m-0 leading-normal">{page?.line ?? teaser.line}</p>
+        <p className="text-fg-soft m-0 leading-normal">{page?.line ?? line}</p>
         {facts.length > 0 && (
           <FactList loose>
             {facts.map((f, i) => (
@@ -204,8 +154,6 @@ export function WikiDetails({
           <span>Read on the wiki</span>
         </Button>
       </div>
-    </Popup>
+    </>
   )
 }
-
-const capital = (word: string) => word.charAt(0).toUpperCase() + word.slice(1)

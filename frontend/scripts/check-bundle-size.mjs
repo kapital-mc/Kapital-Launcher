@@ -77,8 +77,12 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 91.04 KB, from 90.45 KB before it.
 // 91.3 the same day: the dialog centres on the chapter card, closes from an X in
 // its corner, and the popups' chunk is fetched on hover and shortly after the
-// card shows. The dialog is the first paint's (getting Prism). Measured 91.21 KB.
-const BUDGET_KB = 91.3
+// card shows. Measured 91.21 KB.
+// 92.1 the same day: a column's popup opens on the click itself, so the dialog
+// and the fade its body comes in with (Reveal) are the first paint's; only the
+// bodies load on demand. Before, the whole popup waited for its chunk. Measured
+// 92.06 KB.
+const BUDGET_KB = 92.1
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)
