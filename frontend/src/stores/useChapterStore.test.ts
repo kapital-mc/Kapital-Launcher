@@ -3,7 +3,7 @@ import * as App from '../../wailsjs/go/main/App'
 import { models } from '../../wailsjs/go/models'
 import { selectChapter, selectPanorama, selectWikiPick, useChapterStore } from './useChapterStore'
 import { BUNDLED_MANIFEST } from '../lib/manifest'
-import type { WikiPage, WikiShot } from '../types'
+import type { WikiShot } from '../types'
 
 vi.mock('../../wailsjs/go/main/App')
 
@@ -63,14 +63,18 @@ describe('useChapterStore', () => {
   })
 
   it('picks a wiki page for the open chapter when the pages arrive, and again on each switch', async () => {
-    const page = (url: string, era: string): WikiPage => ({
-      title: url,
-      line: 'l',
-      url,
-      eras: [era],
-      id: url,
-      related: [],
-    })
+    const page = (url: string, era: string) =>
+      models.WikiPage.createFrom({
+        title: url,
+        line: 'l',
+        url,
+        eras: [era],
+        id: url,
+        related: [],
+        type: 'location',
+        category: '',
+        facts: [],
+      })
     vi.mocked(App.GetWikiPages).mockResolvedValue([
       page('/a', 'Luxemburg'),
       page('/b', 'Frangfurd'),
@@ -104,14 +108,18 @@ describe('useChapterStore', () => {
   })
 
   describe('slides (issue 142)', () => {
-    const page = (id: string, era: string, related: string[] = []): WikiPage => ({
-      title: id,
-      line: 'l',
-      url: `/wiki/${id}`,
-      eras: [era],
-      id,
-      related,
-    })
+    const page = (id: string, era: string, related: string[] = []) =>
+      models.WikiPage.createFrom({
+        title: id,
+        line: 'l',
+        url: `/wiki/${id}`,
+        eras: [era],
+        id,
+        related,
+        type: 'location',
+        category: '',
+        facts: [],
+      })
     const shot = (src: string, era: string, subject = ''): WikiShot => ({ era, src, subject })
 
     it('gives the open chapter a picture once the screenshots arrive, with a post about it', async () => {

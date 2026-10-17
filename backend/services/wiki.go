@@ -48,6 +48,9 @@ const (
 // /wiki/, plain characters, no query, no fragment, no dot segments.
 var wikiPagePath = regexp.MustCompile(`^/wiki/[a-z0-9][a-z0-9/_-]*$`)
 
+// wikiTaxonomy is a page type or category as the wiki's taxonomy writes one.
+var wikiTaxonomy = regexp.MustCompile(`^[a-z][a-z-]{0,31}$`)
+
 // Pages the panel does not pick from: the vault's index pages and the
 // timeline (they are lists, not lore), and stubs, whose excerpt is one line
 // at best (decided with the author, 2026-09-30).
@@ -186,13 +189,16 @@ func (w *WikiService) fetch(ctx context.Context) ([]byte, error) {
 func parseWikiExport(raw []byte, baseURL string) []models.WikiPage {
 	var doc struct {
 		Pages []struct {
-			ID      string   `json:"id"`
-			Name    string   `json:"name"`
-			URL     string   `json:"url"`
-			Type    string   `json:"type"`
-			Era     []string `json:"era"`
-			Status  string   `json:"status"`
-			Excerpt string   `json:"excerpt"`
+			ID       string                     `json:"id"`
+			Name     string                     `json:"name"`
+			URL      string                     `json:"url"`
+			Type     string                     `json:"type"`
+			Category string                     `json:"category"`
+			Region   string                     `json:"region"`
+			Era      []string                   `json:"era"`
+			Status   string                     `json:"status"`
+			Excerpt  string                     `json:"excerpt"`
+			Fields   map[string]json.RawMessage `json:"fields"`
 		} `json:"pages"`
 		Relations []struct {
 			From string `json:"from"`
@@ -234,10 +240,20 @@ func parseWikiExport(raw []byte, baseURL string) []models.WikiPage {
 		}
 		pages = append(pages, models.WikiPage{
 			Title: title, Line: line, URL: baseURL + p.URL, Eras: eras, ID: id, Related: []string{},
+			Type: wikiWord(p.Type), Category: wikiWord(p.Category), Facts: wikiFacts(p.Fields, p.Region),
 		})
 	}
 	relate(pages, doc.Relations)
 	return pages
+}
+
+// wikiWord is a taxonomy value the panel prints as a word ("character",
+// "settlement"): lowercase letters and hyphens, else "".
+func wikiWord(v string) string {
+	if !wikiTaxonomy.MatchString(v) {
+		return ""
+	}
+	return v
 }
 
 // relate fills each listed page's Related with the listed pages the export's

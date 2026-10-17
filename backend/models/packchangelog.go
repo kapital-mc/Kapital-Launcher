@@ -2,13 +2,14 @@ package models
 
 // PackChangelogEntry is one release in a pack's own changelog.json (issue
 // 164), shaped for the Changelog panel, whose own entries are a version and a
-// summary: the file's lines are one to ten of plain text, and the panel shows
-// the first and keeps all of them for a tooltip.
+// summary: the file's lines are one to ten of plain text, short by the pack
+// repo's rule ("Fixed Map Teleport"), and the panel shows them on one line
+// joined with "; " and lists them in its expanded view.
 type PackChangelogEntry struct {
 	Version string `json:"version"`
 	// Date is YYYY-MM-DD.
 	Date string `json:"date"`
-	// Summary is the first line.
+	// Summary is every line, joined with "; ".
 	Summary string `json:"summary"`
 	// Details is every line, one to a line.
 	Details string `json:"details"`
