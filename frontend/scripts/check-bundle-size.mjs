@@ -69,12 +69,13 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // popup load in a chunk of their own after the first paint, and what stays in the
 // entry is the lazy import, its Suspense and the new binding with its model.
 // Measured 90.45 KB, from 90.34 KB before it.
-// 91 since the expandable columns (2026-10-17): each column under the actions
-// opens a popup, from a click on it or the expand icon that shows on hover, and
-// the wiki export carries a page's facts. The popups load in a chunk of their
-// own; what stays in the entry is the column frame, the icon, the lazy imports
-// and the facts' model. Measured 90.9 KB, from 90.45 KB before it.
-const BUDGET_KB = 91
+// 91.1 since the expandable columns (2026-10-17): each column under the actions
+// opens a popup from the expand icon that shows on hover, and the wiki export
+// carries a page's facts. The popups and their grow animation load in a chunk of
+// their own; what stays in the entry is the column frame, the icon, the fact
+// list's two-column layout, the lazy imports and the facts' model. Measured
+// 91.04 KB, from 90.45 KB before it.
+const BUDGET_KB = 91.1
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

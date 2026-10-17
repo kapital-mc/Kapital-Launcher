@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ChapterMods, ModFile } from '../types'
-import { disabledNames, filterMods, modLabel, withJars, withJarsSet } from './mods'
+import { disabledMods, disabledNames, filterMods, modLabel, withJars, withJarsSet } from './mods'
 
 const dh = 'DistantHorizons-3.3.3-1.21.1-fabric-neoforge.jar'
 const cw = 'colorwheel-neoforge-1.3.0+mc1.21.1.jar'
@@ -24,6 +24,31 @@ describe('mods helpers', () => {
     expect(withJars(mods, [dh], true)).toEqual([dh])
     expect(withJars(mods, [jade], false)).toEqual([dh])
     expect(withJars(mods, [cw, jade], true).sort()).toEqual([cw, dh, jade].sort())
+  })
+
+  it('names the mods that are off: a toggle by its name, any other jar by its file name', () => {
+    const view: ChapterMods = {
+      chapterId: 'frangfurd',
+      mods: mods.map((m) => (m.name === jade ? { ...m, disabled: true } : m)),
+      toggles: [
+        {
+          name: 'Distant Horizons',
+          jarPrefix: 'DistantHorizons',
+          jars: [dh],
+          disabled: true,
+          blocked: false,
+        },
+        {
+          name: 'Colorwheel',
+          jarPrefix: 'colorwheel',
+          jars: [cw],
+          disabled: false,
+          blocked: false,
+        },
+      ],
+      running: false,
+    }
+    expect(disabledMods(view)).toEqual(['Distant Horizons', modLabel(jade)])
   })
 
   it('names a mod without its extension', () => {

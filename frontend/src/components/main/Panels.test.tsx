@@ -3,6 +3,8 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import type { ComponentProps } from 'react'
 import { Panels } from './Panels'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
+import * as App from '../../../wailsjs/go/main/App'
+import { models } from '../../../wailsjs/go/models'
 
 vi.mock('../../../wailsjs/go/main/App')
 
@@ -130,7 +132,11 @@ describe('Panels', () => {
     expect(within(dialog).getByText('1.0.2')).toBeInTheDocument()
     expect(within(dialog).getByText('Fixed Map 1.0.2')).toBeInTheDocument()
     expect(within(dialog).getAllByText('2026-10-03')).toHaveLength(4)
+    // Close shrinks it back into the column, and it goes when that animation ends.
     fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
+    expect(dialog).toHaveClass('grow-out')
+    // jsdom has no AnimationEvent, so React listens for the prefixed name there.
+    fireEvent(dialog, new Event('webkitAnimationEnd', { bubbles: true }))
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
@@ -143,18 +149,50 @@ describe('Panels', () => {
     expect(within(dialog).getByText('Fixed Teleport Roles')).toBeInTheDocument()
   })
 
-  it('opens the pack details on a click anywhere on the column', async () => {
-    const toggles = [{ name: 'Distant Horizons', jarPrefix: 'DistantHorizons' }]
-    panels({ chapter: { ...chapter, pack: { ...chapter.pack, memoryGb: 8, toggles } } })
-    fireEvent.click(screen.getByText('Loader'))
-    const dialog = await screen.findByRole('dialog', { name: `${chapter.name} pack` })
-    expect(within(dialog).getByText(chapter.blurb)).toBeInTheDocument()
-    expect(within(dialog).getByText('Recommended memory').nextElementSibling).toHaveTextContent(
-      '8 GB',
-    )
-    expect(within(dialog).getByText('Optional mods').nextElementSibling).toHaveTextContent(
-      'Distant Horizons',
-    )
+  it('opens the pack details from its expand button only, with what the player set', async () => {
+    Object.assign(window, { go: {} })
+    try {
+      vi.mocked(App.GetChapterSettings).mockResolvedValue(
+        models.ChapterSettingsInfo.createFrom({
+          chapterId: chapter.id,
+          settings: { maxMemoryMb: 6144, jvm: '', jvmArgs: [] },
+          machineMemoryMb: 16384,
+          prismDefaultMb: 4096,
+          packMemoryMb: 8192,
+          presets: [],
+          running: false,
+        }),
+      )
+      vi.mocked(App.GetChapterMods).mockResolvedValue(
+        models.ChapterMods.createFrom({
+          chapterId: chapter.id,
+          mods: [{ name: 'DistantHorizons-3.jar', disabled: true, size: 1 }],
+          toggles: [
+            {
+              name: 'Distant Horizons',
+              jarPrefix: 'DistantHorizons',
+              jars: ['DistantHorizons-3.jar'],
+              disabled: true,
+              blocked: false,
+            },
+          ],
+          running: false,
+        }),
+      )
+      panels()
+      fireEvent.click(screen.getByText('Loader'))
+      expect(screen.queryByRole('dialog')).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: 'Pack details' }))
+      const dialog = await screen.findByRole('dialog', { name: `${chapter.name} pack` })
+      expect(dialog).toHaveClass('grow-in')
+      expect(within(dialog).getByText(chapter.blurb)).toBeInTheDocument()
+      expect(await within(dialog).findByText('6.0 GB')).toBeInTheDocument()
+      const off = await within(dialog).findByText('Distant Horizons')
+      expect(off).toHaveClass('rounded-pill')
+      expect(within(dialog).getByText('Disabled mods').nextElementSibling).toContainElement(off)
+    } finally {
+      Reflect.deleteProperty(window, 'go')
+    }
   })
 
   it('shows the wiki page whole with its facts, and opens it from the popup', async () => {

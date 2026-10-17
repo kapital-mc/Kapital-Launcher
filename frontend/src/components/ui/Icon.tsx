@@ -10,6 +10,7 @@ const ICON_STROKE_PX = LAYOUT.icon.stroke
 
 // The box and the px lucide draws at, both from layout.icon in design/tokens.json.
 const SIZE = {
+  xs: { cls: 'size-(--layout-icon-xs)', px: LAYOUT.icon.xs },
   sm: { cls: 'size-(--layout-icon-sm)', px: LAYOUT.icon.sm },
   md: { cls: 'size-(--layout-icon-md)', px: LAYOUT.icon.md },
 } as const

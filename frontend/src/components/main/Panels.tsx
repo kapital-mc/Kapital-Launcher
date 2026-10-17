@@ -1,10 +1,10 @@
-import { Suspense, lazy, useState, type MouseEvent, type ReactNode } from 'react'
+import { Suspense, lazy, useRef, useState, type ReactNode } from 'react'
 import type { Chapter, PackChangelog, PackState, WikiPage } from '../../types'
 import { Maximize2 } from '../../lib/icons'
 import { factValue, sizeValue, unsetLabel } from '../../lib/manifest'
 import { versionValue } from '../../lib/packState'
 import { Drift } from '../ui/Drift'
-import { Fact } from '../ui/Fact'
+import { FactList } from '../ui/Fact'
 import { IconButton } from '../ui/IconButton'
 import { TextLink } from '../ui/TextLink'
 import type { PanelEntry, PanelFact } from './PanelDetails'
@@ -39,9 +39,8 @@ function PanelTitle({ children }: { children: string }) {
 }
 
 /**
- * One column, which opens its popup: a click anywhere on it that is not on one
- * of its own buttons, or the expand button that shows in its corner on hover
- * and on keyboard focus.
+ * One column, whose expand button shows in its corner on hover and on keyboard
+ * focus and opens the column's popup, which grows out of the column.
  */
 function Column({
   title,
@@ -53,22 +52,24 @@ function Column({
   title: string
   /** The expand button's accessible name. */
   label: string
-  onExpand: () => void
+  onExpand: (origin: DOMRect) => void
   last?: boolean
   children: ReactNode
 }) {
-  const onClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.target instanceof Element && e.target.closest('button')) return
-    onExpand()
-  }
+  const ref = useRef<HTMLDivElement>(null)
   return (
     <div
-      onClick={onClick}
-      className={`group border-line hover:bg-hover duration-fast ease-standard relative flex cursor-pointer flex-col gap-3 p-7 transition-colors ${last ? '' : 'border-r'}`}
+      ref={ref}
+      className={`group border-line relative flex flex-col gap-3 p-7 ${last ? '' : 'border-r'}`}
     >
       <PanelTitle>{title}</PanelTitle>
-      <div className="duration-fast ease-standard absolute top-4 right-4 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-        <IconButton icon={Maximize2} size="sm" title={label} onClick={onExpand} />
+      <div className="duration-fast ease-standard absolute top-5 right-5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+        <IconButton
+          icon={Maximize2}
+          size="xs"
+          title={label}
+          onClick={() => ref.current && onExpand(ref.current.getBoundingClientRect())}
+        />
       </div>
       {children}
     </div>
@@ -107,8 +108,10 @@ export function Panels({
   wikiPage,
   onOpenWiki,
 }: Props) {
-  const [open, setOpen] = useState<'pack' | 'changelog' | 'wiki' | null>(null)
-  const close = () => setOpen(null)
+  const [open, setOpen] = useState<{ kind: 'pack' | 'changelog' | 'wiki'; origin: DOMRect }>()
+  const close = () => setOpen(undefined)
+  const expand = (kind: 'pack' | 'changelog' | 'wiki') => (origin: DOMRect) =>
+    setOpen({ kind, origin })
   const { pack } = chapter
   const wiki = wikiPage ?? chapter.wiki
   const unset = unsetLabel(installed)
@@ -126,14 +129,10 @@ export function Panels({
 
   return (
     <section className="grid shrink-0 grid-cols-3">
-      <Column title="Pack" label="Pack details" onExpand={() => setOpen('pack')}>
-        <div className="flex flex-col gap-3.5">
-          {facts.map((f) => (
-            <Fact key={f.label} {...f} />
-          ))}
-        </div>
+      <Column title="Pack" label="Pack details" onExpand={expand('pack')}>
+        <FactList facts={facts} />
       </Column>
-      <Column title="Changelog" label="Full changelog" onExpand={() => setOpen('changelog')}>
+      <Column title="Changelog" label="Full changelog" onExpand={expand('changelog')}>
         <div className="flex flex-col gap-3">
           {entries.length === 0 ? (
             <span className="text-fg-faint text-sm">No entries yet.</span>
@@ -152,7 +151,7 @@ export function Panels({
           )}
         </div>
       </Column>
-      <Column title="From the wiki" label="Wiki details" onExpand={() => setOpen('wiki')} last>
+      <Column title="From the wiki" label="Wiki details" onExpand={expand('wiki')} last>
         {/* The post drifts to the next with the hero's picture (issue 142). */}
         <Drift
           id={wikiPage?.url ?? 'teaser'}
@@ -171,14 +170,23 @@ export function Panels({
         </Drift>
       </Column>
       <Suspense fallback={null}>
-        {open === 'pack' && <PackDetails chapter={chapter} facts={facts} onClose={close} />}
-        {open === 'changelog' && (
-          <ChangelogDetails chapter={chapter} entries={all} onClose={close} />
+        {open?.kind === 'pack' && (
+          <PackDetails
+            chapter={chapter}
+            facts={facts}
+            unset={unset}
+            origin={open.origin}
+            onClose={close}
+          />
         )}
-        {open === 'wiki' && (
+        {open?.kind === 'changelog' && (
+          <ChangelogDetails chapter={chapter} entries={all} origin={open.origin} onClose={close} />
+        )}
+        {open?.kind === 'wiki' && (
           <WikiDetails
             page={wikiPage}
             teaser={chapter.wiki}
+            origin={open.origin}
             onOpenWiki={onOpenWiki}
             onClose={close}
           />

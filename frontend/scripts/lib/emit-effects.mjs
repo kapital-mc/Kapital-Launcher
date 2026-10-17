@@ -13,6 +13,7 @@ export function emitLayout(src, push) {
     push(`  --layout-${k}: ${src.layout[k]}${unit};`)
   }
   push(`  --layout-play-min: ${src.layout.playMin}${unit};`)
+  push(`  --layout-icon-xs: ${src.layout.icon.xs}${src.layout.unit};`)
   push(`  --layout-icon-sm: ${src.layout.icon.sm}${src.layout.unit};`)
   push(`  --layout-icon-md: ${src.layout.icon.md}${src.layout.unit};`)
   push(`  --layout-splash-width: ${src.layout.splash.width}${src.layout.unit};`)
