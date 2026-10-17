@@ -307,6 +307,24 @@ keyed by the pack's name, sizes and times, and the route `/panorama/`
 through an `os.Root`, ahead of the wiki art's route. The page asks on focus and
 after an install or a run, only while the panorama is the chosen picture.
 
+The Distant Horizons terrain (`dhsnapshot_index.go`, `dhsnapshot_fetch.go`,
+`dhsnapshot_download.go`, `app_terrain.go`, `GetDHSnapshot`, `DownloadDHSnapshot`
+and `CancelDHSnapshot`, issue 136, ADR-2 sixteenth amendment) is the one large
+download into an instance. The manifest's `pack.dhSnapshot` names a Konnekt
+snapshot's `latest.json`; the pointer and the index are read strictly and
+capped, and every address after them is relative and held to the same host
+(`dhResolve`), with no redirect followed. The index's names become path
+segments only after a fixed-shape check. On the player's click, parts are
+written at their offsets into `<instance>/kapital-dh-download/<level>.sqlite`
+through an `os.Root`, each counted in the journal only once it matched its hash,
+so a cancel or a failure continues from there; a level whose whole file matches
+is renamed to `<game folder>/Distant_Horizons_server_data/<server>/<level>/DistantHorizons.sqlite`
+after its SQLite side files are removed. It refuses while the game runs (asked
+again before placing), for a newer Distant Horizons than the instance's jar,
+without the disk space, and over existing terrain without `replace`. One
+download at a time (`terrainDownloads`), progress as `dh:download` events, and
+the launcher never writes to the bucket.
+
 The player's profile (`mojang.go`, `app_mojang.go`, `GetPlayerProfile` and
 `CopyPlayerUUID`, issue 193, ADR-13) is the one lookup that sends something about
 the player off the machine: the profile name to `api.mojang.com`, then the UUID

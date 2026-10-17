@@ -42,7 +42,7 @@ A bare `catch {}` that swallows a rejection is the thing to refuse in review.
 
 ## Events
 
-Four: `server:status`, a `models.ServerStatus` emitted by
+Five: `server:status`, a `models.ServerStatus` emitted by
 `StatusService.Run`'s ticker and by `GetServerStatus`; `prism:install`, a
 `models.PrismInstallProgress` per step while `InstallPrism` runs, heard by the
 engine store (`EVENT_PRISM_INSTALL`), the install's outcome still coming from
@@ -51,12 +51,16 @@ the promise, so a missed event cannot leave it hanging; `game:state`, a
 `GameTracker` (`EventGameState`), heard by the game store
 (`EVENT_GAME_STATE`), with `GetGameStates` for the state now; it carries the
 splash flag (the card is up for the run) and the start's estimate (#43), and
-`LeaveSplash` closes the card and brings the launcher's window back; and
+`LeaveSplash` closes the card and brings the launcher's window back;
 `log:live` (issue 155), a `models.LiveLogEvent` (`chapterId`, redacted `lines`,
 `reset`) from the follower of `logs/latest.log` that `WatchLiveLog` starts and
 `StopLiveLog` ends, heard by the log store (`EVENT_LOG_LIVE`) only while the
 logs page shows the live log: it subscribes when the page starts the watch and
-unsubscribes when the page leaves it.
+unsubscribes when the page leaves it; and `dh:download` (issue 136), a
+`models.DHDownloadProgress` (`chapterId`, `phase`, bytes received and total) per
+step and per MiB while `DownloadDHSnapshot` runs, heard by the terrain store
+(`EVENT_DH_DOWNLOAD`) only while the World data card is on screen, the
+download's outcome still coming from the promise.
 
 The loading card (#97) is a second page in a window of its own and has no Wails
 bridge: it is not on this list. What it can ask Go for is its four actions,

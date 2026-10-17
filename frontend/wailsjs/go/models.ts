@@ -149,6 +149,7 @@ export namespace models {
 	    mrpack?: string;
 	    jvm?: string;
 	    toggles?: ModToggle[];
+	    dhSnapshot?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Pack(source);
@@ -166,6 +167,7 @@ export namespace models {
 	        this.mrpack = source["mrpack"];
 	        this.jvm = source["jvm"];
 	        this.toggles = this.convertValues(source["toggles"], ModToggle);
+	        this.dhSnapshot = source["dhSnapshot"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -383,6 +385,40 @@ export namespace models {
 		    }
 		    return a;
 		}
+	}
+	export class DHSnapshotInfo {
+	    chapterId: string;
+	    available: boolean;
+	    reason: string;
+	    createdAt: string;
+	    sizeBytes: number;
+	    dimensions: number;
+	    serverDhVersion: string;
+	    clientDhVersion: string;
+	    existingBytes: number;
+	    partialBytes: number;
+	    running: boolean;
+	    downloading: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new DHSnapshotInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.chapterId = source["chapterId"];
+	        this.available = source["available"];
+	        this.reason = source["reason"];
+	        this.createdAt = source["createdAt"];
+	        this.sizeBytes = source["sizeBytes"];
+	        this.dimensions = source["dimensions"];
+	        this.serverDhVersion = source["serverDhVersion"];
+	        this.clientDhVersion = source["clientDhVersion"];
+	        this.existingBytes = source["existingBytes"];
+	        this.partialBytes = source["partialBytes"];
+	        this.running = source["running"];
+	        this.downloading = source["downloading"];
+	    }
 	}
 	export class EngineInfo {
 	    found: boolean;

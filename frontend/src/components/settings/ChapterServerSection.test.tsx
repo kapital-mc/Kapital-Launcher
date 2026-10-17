@@ -6,6 +6,7 @@ import { BUNDLED_MANIFEST } from '../../lib/manifest'
 import { ChapterServerSection } from './ChapterServerSection'
 
 vi.mock('../../../wailsjs/go/main/App')
+vi.mock('../../../wailsjs/runtime/runtime')
 
 const [luxemburg, lichdenstein, frangfurd] = BUNDLED_MANIFEST.chapters as [
   (typeof BUNDLED_MANIFEST.chapters)[number],
@@ -141,11 +142,17 @@ describe('The Server section of a chapter settings page', () => {
     expect(screen.getByRole('switch', { name: JOIN })).toBeChecked()
   })
 
-  it('holds a place for the Distant Horizons world data where the pack has it (issue 136)', () => {
+  it('shows the Distant Horizons world data where the pack has it (issue 136)', async () => {
+    vi.mocked(App.GetDHSnapshot).mockResolvedValue({
+      chapterId: 'frangfurd',
+      available: false,
+      reason: 'Install Frangfurd first.',
+    } as never)
     render(<ChapterServerSection chapter={frangfurd} />)
     expect(screen.getByText('World data')).toBeInTheDocument()
-    expect(screen.getByText('Not available yet')).toBeInTheDocument()
+    expect(await screen.findByText('Install Frangfurd first.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Download' })).toBeDisabled()
+    expect(App.GetDHSnapshot).toHaveBeenCalledWith('frangfurd')
     cleanup()
     render(<ChapterServerSection chapter={luxemburg} />)
     expect(screen.queryByText('World data')).toBeNull()

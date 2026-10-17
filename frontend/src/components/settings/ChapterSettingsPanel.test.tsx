@@ -10,6 +10,7 @@ import type { ChapterSettingsInfo, GamePhase } from '../../types'
 import { ChapterSettingsPanel } from './ChapterSettingsPanel'
 
 vi.mock('../../../wailsjs/go/main/App')
+vi.mock('../../../wailsjs/runtime/runtime')
 
 const frangfurd = BUNDLED_MANIFEST.chapters[2]!
 const info = (over: Partial<ChapterSettingsInfo> = {}) =>
