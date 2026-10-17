@@ -19,6 +19,7 @@ const online: ServerStatus = {
   players: 3,
   max: 20,
   version: 'Paper 1.20.6',
+  software: 'Paper',
   motd: 'Lichdenstein',
   latencyMs: 41,
   checkedAt: '2026-09-28T12:00:00Z',

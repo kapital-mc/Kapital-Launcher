@@ -149,6 +149,7 @@ describe('App', () => {
       players: 2,
       max: 20,
       version: 'Paper 1.20.6',
+      software: 'Paper',
       motd: '',
       latencyMs: 30,
       checkedAt: '2026-09-28T12:00:00Z',

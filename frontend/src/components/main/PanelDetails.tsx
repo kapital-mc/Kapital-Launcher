@@ -2,10 +2,12 @@ import { useEffect, type ReactNode } from 'react'
 import type { Chapter, PackChangelogEntry, WikiPage } from '../../types'
 import { ExternalLink } from '../../lib/icons'
 import { PLACEHOLDER } from '../../lib/manifest'
+import { serverSoftware } from '../../lib/serverLine'
 import { memoryLabel } from '../../lib/chapterSettings'
 import { disabledMods } from '../../lib/mods'
 import { useEngineStore } from '../../stores/useEngineStore'
 import { useModStore } from '../../stores/useModStore'
+import { selectStatus, useServerStore } from '../../stores/useServerStore'
 import { Button } from '../ui/Button'
 import { Dialog } from '../ui/Dialog'
 import { Fact, FactList } from '../ui/Fact'
@@ -62,6 +64,7 @@ export function PackDetails({
   const settings = useEngineStore((s) => s.chapterSettings[chapter.id])
   const loadSettings = useEngineStore((s) => s.loadChapterSettings)
   const mods = useModStore((s) => s.byChapter[chapter.id])
+  const status = useServerStore(selectStatus(chapter.id))
   const loadMods = useModStore((s) => s.load)
   useEffect(() => {
     void loadSettings(chapter.id)
@@ -78,7 +81,12 @@ export function PackDetails({
             <p className="text-fg-soft m-0 leading-normal">{chapter.blurb}</p>
             <FactList facts={facts} loose>
               <Fact label="Memory" value={memory} unset={unset} />
-              <Fact label="Server" value={chapter.server?.software ?? 'None'} plain />
+              <Fact
+                label="Server"
+                value={serverSoftware(chapter, status)}
+                unset={status?.checked && !status.online ? 'Offline' : 'Unknown'}
+                plain
+              />
               <Fact label="Disabled mods" value={off ? 'None' : PLACEHOLDER} unset={unset} plain>
                 {off && off.length > 0 && (
                   <span className="flex flex-wrap gap-1.5">

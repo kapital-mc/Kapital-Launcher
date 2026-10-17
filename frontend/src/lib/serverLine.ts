@@ -1,4 +1,5 @@
-import type { ServerStatus } from '../types'
+import type { Chapter, ServerStatus } from '../types'
+import { PLACEHOLDER, isPlaceholder } from './manifest'
 
 /**
  * The state line's two rows for a chapter with a server: what the last ping
@@ -22,4 +23,15 @@ export function clock(iso: string): string {
   return Number.isNaN(d.getTime())
     ? '?'
     : d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+}
+
+/**
+ * What runs the chapter's server: what its last ping showed, else what the
+ * manifest says, else unsettled. A chapter with no server says None.
+ */
+export function serverSoftware(chapter: Chapter, status: ServerStatus | undefined): string {
+  if (!chapter.server) return 'None'
+  if (status?.online && status.software) return status.software
+  const named = chapter.server.software
+  return isPlaceholder(named) ? PLACEHOLDER : named
 }

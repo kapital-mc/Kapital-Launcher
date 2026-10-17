@@ -839,6 +839,7 @@ export namespace models {
 	    players: number;
 	    max: number;
 	    version: string;
+	    software: string;
 	    motd: string;
 	    latencyMs: number;
 	    checkedAt: string;
@@ -855,6 +856,7 @@ export namespace models {
 	        this.players = source["players"];
 	        this.max = source["max"];
 	        this.version = source["version"];
+	        this.software = source["software"];
 	        this.motd = source["motd"];
 	        this.latencyMs = source["latencyMs"];
 	        this.checkedAt = source["checkedAt"];

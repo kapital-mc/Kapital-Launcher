@@ -81,6 +81,8 @@ export interface ServerStatus {
   players: number
   max: number
   version: string
+  /** What runs the server as its response shows it ("Paper", "NeoForge"); "" when it does not say. */
+  software: string
   motd: string
   latencyMs: number
   checkedAt: string
