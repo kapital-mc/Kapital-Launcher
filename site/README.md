@@ -1,9 +1,12 @@
 # Download site
 
-One static page: what the launcher is, the Download and GitHub buttons,
-and under them the launcher window itself, cycling through its three
-chapters. It is separate from the Kapitel Kapital wiki and runs one small
-script, which only picks the operating system in the download popup.
+One static page: the launcher's name, the Download and GitHub buttons and a
+line on Prism Launcher, and under them the launcher window itself, cycling
+through its three chapters, whose rows a visitor can click. Above the footer,
+Changelog and Code signing policy each open a popup. It is separate from the
+Kapitel Kapital wiki and runs two small scripts, bundled into one file: one
+picks the operating system in the download popup, the other makes the
+window's rows clickable. Neither touches the network or storage.
 The decision record is `docs/adr/0009-download-site.md`.
 
 ## Where the look comes from
@@ -28,8 +31,9 @@ Below the buttons is the launcher window at its real size
 components (`frontend/src/components`): the header bar, the chapter nav with
 its gliding highlight, the account card, and the chapter card with its hero,
 action bar and panels, filled from `data/launcher.json`. The icons are
-lucide's paths inlined as SVG, the same glyphs the app renders. The window
-is a picture: nothing in it is a control, it is hidden from assistive
+lucide's paths inlined as SVG, the same glyphs the app renders. Apart from
+the nav's chapter rows, which are buttons (below), the window is a picture:
+nothing else in it is a control, the rest is hidden from assistive
 technology, and a sentence before it names the three chapters.
 
 It cycles through the chapters on CSS animations alone, in `src/showcase.css`,
@@ -43,6 +47,21 @@ from one animation on the page's root, so the popup never restarts the cycle. A 
 the keyframe stops in `showcase.css` are fractions of that cycle and say how
 to recompute them if either duration changes. With reduced motion the cards
 cross-fade on the same clock and the highlight steps instead of gliding.
+
+### Clicking a chapter
+
+`src/showcase.js` turns the rows into a switch. Once it runs it sets
+`data-showcase="live"` on the root, which stops the CSS cycle, and runs the
+same cycle itself: every step (dwell plus slow, read from the tokens) the next
+chapter slides in. A click on a row shows that chapter with the same slide,
+highlight glide and colour change, in the direction the app uses (down the
+list from below, up the list from above), and restarts the clock, so the
+chosen chapter stays a full dwell before the cycle moves on. The script only
+sets attributes: which chapter is open (`data-showcase-open`, `aria-current`,
+`data-open`) and which card enters or leaves which way (`data-motion`). The
+motion itself is the `[data-showcase="live"]` rules in `src/showcase.css`, on
+the same tokens. Without the script the rows are inert and the CSS cycle runs
+as before.
 
 Narrower than the app's minimum window (1024px) the panels and the window's
 disclaimer are left out and the window takes the height of its content;
@@ -103,8 +122,8 @@ beta is not code-signed yet with a link to the release notes, and a close
 button. The switch is a fieldset of two radios and CSS `:has()`, so it works
 without script. Windows is checked by default.
 
-`src/detect.js` is the page's one script, emitted by Vite as a file under
-`assets/`. The build turns its tag into a classic script placed after the
+`src/detect.js` is bundled with `src/showcase.js` into the page's one script
+file, emitted by Vite under `assets/`. The build turns its tag into a classic script placed after the
 stylesheet (`stylesheetFirst` in `vite.config.js`), which stops the parser
 until the stylesheet has loaded. Without that, the body was parsed while the
 stylesheet was still on its way, and Safari and Firefox could paint it
@@ -126,10 +145,30 @@ hides it plainly, and reduced motion turns the transitions off.
 The CSP in `public/_headers` allows it with `script-src 'self'` and nothing
 more, so an inline script would be blocked.
 
+## The changelog
+
+"Changelog", above the footer, opens a popup with each release's changes,
+newest first. `changelog.js` makes it from the repository's releases feed,
+the same `releases.atom` the build reads to pick the newest release: for each
+release, what follows its notes' "What's changed" heading, sorted into
+Features, Fixes and Other changes. Documentation and Maintenance are left out,
+as `.github/scripts/release-notes.py` counts rather than lists them: they
+change nothing a player runs. Each line is the pull request's title with a
+link to it. Every value is escaped, and the links are built from the GitHub
+link in `links.json`.
+
+So the changelog follows a release the way the Download button does: the
+release workflow's deploy hook rebuilds the site once a release is published,
+and every push to `main` rebuilds it too. The feed holds the newest ten
+releases, which is as far back as the popup goes. A build with a pinned tag
+tries the feed and, if GitHub cannot be reached, links to the releases page
+instead; `SITE_RELEASE` builds do not try. `pnpm test` runs the parser against
+a saved copy of the real feed in `test/fixtures/releases.atom`.
+
 ## The code signing policy
 
-Above the footer is one quiet line, "Code signing policy", a `details`
-element that opens without script. It holds the section SignPath Foundation
+Beside it, "Code signing policy" opens a popup the same way, with no script.
+It holds the section SignPath Foundation
 asks a project to publish on its download page (signpath.org/terms, issue
 179): the attribution sentence, the two team roles, the privacy sentence, and
 how to remove the app. The heading and those sentences are SignPath's wording
@@ -143,6 +182,7 @@ together.
 pnpm install
 pnpm build      # dist/
 pnpm preview    # build, then serve dist/ locally
+pnpm test       # the changelog parser, against test/fixtures/
 ```
 
 There is no `vite` dev server script on purpose: the page's fonts and images

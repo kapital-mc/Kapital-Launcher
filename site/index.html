@@ -11,21 +11,24 @@
     />
     <link rel="stylesheet" href="/src/style.css" />
     <script type="module" src="/src/detect.js"></script>
+    <script type="module" src="/src/showcase.js"></script>
   </head>
   <!--
-    One page, one small script (src/detect.js, it only picks the OS in the
-    download popup). The build makes it a classic script after the
-    stylesheet, so the body is not parsed, and cannot be painted unstyled,
+    One page and two small scripts: src/detect.js picks the OS in the
+    download popup, src/showcase.js makes the window's chapter rows
+    clickable. Vite bundles them into one file, and the build makes it a
+    classic script after the stylesheet, so the body is not parsed, and cannot be painted unstyled,
     until the stylesheet has loaded (stylesheetFirst in vite.config.js). The links are filled in at build time by
     vite.config.js from links.json and the manifest; see site/README.md. The
     classes on the buttons are the app's Button variants (play and ghost).
 
     Below the buttons is the launcher window, drawn with the app's own
     components' classes (frontend/src/components) and cycling through its
-    three chapters on CSS animations alone (src/showcase.css). It is a
-    picture, not a control: nothing in it is focusable, its text cannot be
-    selected, and it is hidden from assistive technology in favour of the
-    sentence before it. The hero's tools do without the app's backdrop blur:
+    three chapters (src/showcase.css). Its chapter rows are buttons: with
+    src/showcase.js a click shows that chapter and restarts the cycle from
+    it; without the script the window cycles on CSS animations alone. The
+    rest of the window is a picture: its text cannot be selected, and it is
+    hidden from assistive technology in favour of the sentence before it. The hero's tools do without the app's backdrop blur:
     a backdrop filter inside the card's blur animation left the hero's text
     unpainted in the author's browser.
 
@@ -200,12 +203,6 @@
           />
         </h1>
 
-        <p class="text-fg-soft m-0 text-lg leading-normal">
-          One place to play the three chapters of Kapitel Kapital. It keeps each
-          pack ready and starts the game through Prism Launcher, which handles
-          your Microsoft sign-in.
-        </p>
-
         <div class="flex flex-wrap items-center justify-center gap-3">
           <!--release:start-->
           <button
@@ -229,15 +226,12 @@
         </div>
 
         <p class="text-fg-muted m-0 text-sm">
-          <span class="block">For Windows 11 and macOS 12 or later, on Apple Silicon and Intel.</span>
-          <span class="block"
-            >Needs
-            <a
-              href="https://prismlauncher.org"
-              class="text-accent underline-offset-2 hover:underline"
-              >Prism Launcher</a
-            >, free and open source.</span
-          >
+          Runs on
+          <a
+            href="https://prismlauncher.org"
+            class="text-accent underline-offset-2 hover:underline"
+            >Prism Launcher</a
+          >, free and open source, installed automatically.
         </p>
       </div>
 
@@ -255,11 +249,11 @@
 
         <figure
           class="showcase bg-canvas border-line relative m-0 flex w-full flex-col overflow-hidden rounded-lg border shadow-2xl select-none lg:h-(--layout-window-height)"
-          aria-hidden="true"
         >
           <!-- The header bar: shell/HeaderBar.tsx, as Windows draws it. -->
           <div
             class="bg-sunken border-line flex h-(--layout-titlebar) shrink-0 items-center border-b pl-5"
+            aria-hidden="true"
           >
             <img
               src="../frontend/src/assets/brand/kapital-launcher-logo.png"
@@ -351,15 +345,18 @@
               class="bg-sunken border-line hidden w-(--layout-sidebar) shrink-0 flex-col gap-7 border-r px-4 pt-5.5 pb-4 md:flex"
             >
               <div class="flex flex-col gap-1">
-                <div class="text-fg-faint px-2.5 pb-1.5 text-xs">Chapters</div>
+                <div class="text-fg-faint px-2.5 pb-1.5 text-xs" aria-hidden="true">Chapters</div>
                 <div class="relative">
                   <div
                     class="showcase-highlight bg-raised pointer-events-none absolute inset-x-0 top-0 rounded-lg border"
+                    aria-hidden="true"
                   ></div>
-                  <div class="showcase-rows flex flex-col gap-1">
-                    <div
+                  <div class="showcase-rows flex flex-col gap-1" role="group" aria-label="Chapters in the preview">
+                    <button
+                      type="button"
                       data-chapter="luxemburg"
-                      class="relative isolate flex w-full items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left"
+                      aria-label="Show Luxemburg"
+                      class="duration-fast ease-standard not-aria-[current=true]:hover:bg-raised-2 relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors"
                     >
                       <div
                         class="showcase-row-art pointer-events-none absolute inset-0 -z-10"
@@ -389,10 +386,12 @@
                         </div>
                         <span class="text-fg-faint text-xs">1200 – 2300</span>
                       </div>
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       data-chapter="lichdenstein"
-                      class="relative isolate flex w-full items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left"
+                      aria-label="Show Lichdenstein"
+                      class="duration-fast ease-standard not-aria-[current=true]:hover:bg-raised-2 relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors"
                     >
                       <div
                         class="showcase-row-art pointer-events-none absolute inset-0 -z-10"
@@ -422,10 +421,12 @@
                         </div>
                         <span class="text-fg-faint text-xs">2300 – 2500</span>
                       </div>
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       data-chapter="frangfurd"
-                      class="relative isolate flex w-full items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left"
+                      aria-label="Show Frangfurd"
+                      class="duration-fast ease-standard not-aria-[current=true]:hover:bg-raised-2 relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors"
                     >
                       <div
                         class="showcase-row-art pointer-events-none absolute inset-0 -z-10"
@@ -457,13 +458,14 @@
                           >2500 – present</span
                         >
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
               <div class="grow"></div>
               <div
                 class="bg-raised border-line flex flex-col gap-2.5 rounded-lg border p-3"
+                aria-hidden="true"
               >
                 <div class="flex items-center gap-2.5">
                   <div
@@ -523,7 +525,7 @@
                  all three in the one grid cell so the tallest sets the height
                  and the others stretch to it. Each card is scoped to its
                  chapter for its accent. -->
-            <div class="flex min-w-0 grow flex-col">
+            <div class="flex min-w-0 grow flex-col" aria-hidden="true">
               <div
                 class="showcase-stage relative m-5 mb-8 grid min-h-0 min-w-0 grow grid-cols-1"
               >
@@ -1277,19 +1279,76 @@
       </div>
     </main>
 
+    <!--changelog:start-->
+    <!-- The changelog: each release's notes from the repository's releases
+         feed, read when the site is built (changelog.js, vite.config.js), so
+         it follows a release the way the Download button does. The build
+         replaces the placeholder below and drops the popup with no GitHub
+         link. Features, Fixes and Other changes only: documentation and
+         maintenance change nothing a player runs. -->
+    <div
+      id="changelog"
+      popover
+      aria-labelledby="changelog-title"
+      class="bg-raised text-fg border-line-strong m-auto max-h-[calc(100dvh-2rem)] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain rounded-lg border p-0 shadow-2xl backdrop:scrim-wash"
+    >
+      <div class="bg-raised border-line sticky top-0 z-10 flex items-start justify-between gap-4 border-b px-8 pt-8 pb-5">
+        <div class="flex flex-col gap-2">
+          <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
+            Kapital Launcher
+          </p>
+          <h2 id="changelog-title" class="font-display m-0 text-2xl leading-tight font-semibold">
+            Changelog
+          </h2>
+        </div>
+        <button
+          type="button"
+          popovertarget="changelog"
+          popovertargetaction="hide"
+          aria-label="Close"
+          class="text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard -mt-2 -mr-2 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent transition-[background-color,color]"
+        >
+          <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+        </button>
+      </div>
+      <div class="px-8 pt-6 pb-8">
+        <!--changelog-->
+      </div>
+    </div>
+    <!--changelog:end-->
+
     <!-- The code signing policy SignPath Foundation asks a project to publish
          on its download page (signpath.org/terms; issue 179). The heading,
          the attribution sentence, the two roles and the privacy sentence are
          theirs to word; keep them as they are. The same text is in the
-         README and in .github/release-body.md. It is a details element, closed
-         until a visitor opens it: one quiet line above the footer, no script. -->
-    <details class="group border-line border-t px-6 py-4">
-      <summary
-        class="text-fg-muted hover:text-fg duration-fast ease-standard mx-auto w-fit cursor-pointer text-xs transition-[color]"
-      >
-        <h2 class="m-0 inline text-xs font-normal">Code signing policy</h2>
-      </summary>
-      <div class="text-fg-soft mx-auto flex max-w-140 flex-col gap-4 pt-6 pb-6 text-sm leading-normal">
+         README and in .github/release-body.md. A popup opened by the quiet
+         line above the footer, with no script. -->
+    <div
+      id="signing"
+      popover
+      aria-labelledby="signing-title"
+      class="bg-raised text-fg border-line-strong m-auto max-h-[calc(100dvh-2rem)] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain rounded-lg border p-0 shadow-2xl backdrop:scrim-wash"
+    >
+      <div class="bg-raised border-line sticky top-0 z-10 flex items-start justify-between gap-4 border-b px-8 pt-8 pb-5">
+        <div class="flex flex-col gap-2">
+          <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
+            Kapital Launcher
+          </p>
+          <h2 id="signing-title" class="font-display m-0 text-2xl leading-tight font-semibold">
+            Code signing policy
+          </h2>
+        </div>
+        <button
+          type="button"
+          popovertarget="signing"
+          popovertargetaction="hide"
+          aria-label="Close"
+          class="text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard -mt-2 -mr-2 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent transition-[background-color,color]"
+        >
+          <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+        </button>
+      </div>
+      <div class="text-fg-soft flex flex-col gap-4 px-8 pt-6 pb-8 text-sm leading-normal">
         <p class="m-0">
           Free code signing provided by
           <a
@@ -1357,7 +1416,18 @@
           worlds stay where they are until you delete them yourself.
         </p>
       </div>
-    </details>
+    </div>
+
+    <div class="border-line flex justify-center gap-6 border-t px-6 py-4">
+      <!--changelog:start-->
+      <button type="button" popovertarget="changelog" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-xs transition-[color]">
+        Changelog
+      </button>
+      <!--changelog:end-->
+      <button type="button" popovertarget="signing" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-xs transition-[color]">
+        Code signing policy
+      </button>
+    </div>
 
     <footer
       class="text-fg-muted border-line border-t px-6 py-4 text-center text-xs"

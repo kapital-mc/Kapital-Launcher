@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
+import { parseChangelog, renderChangelog } from './changelog.js'
 
 // The page's links, filled in at build time so the built HTML carries no inline
 // script. GitHub and `release` come from links.json and stay null until there
@@ -25,10 +26,13 @@ const installerUrls = (base, tag) => ({
 // one. The feed lists newest first. A release whose installers are not up yet
 // (a release still uploading) is passed over for the one before it. Any network
 // failure fails the build: Pages then keeps the deployment it has.
-async function resolveLatest(base) {
+async function fetchFeed(base) {
   const feed = await fetch(`${base}/releases.atom`, { signal: AbortSignal.timeout(15000) })
   if (!feed.ok) throw new Error(`site: ${base}/releases.atom answered ${feed.status}`)
-  const xml = await feed.text()
+  return feed.text()
+}
+
+async function resolveLatest(base, xml) {
   const tags = [...xml.matchAll(/\/releases\/tag\/([^"<\s]+)"/g)].map((m) => decodeURIComponent(m[1]))
   for (const tag of tags) {
     if (!TAG.test(tag)) continue
@@ -79,6 +83,19 @@ async function hasAll(urls) {
   }
 }
 
+// The changelog popup's body, from the same feed: each release's own notes,
+// so the page follows a release the way its Download button does. A build
+// that resolves "latest" has the feed already and fails without it; one with
+// a pinned tag tries it and, if GitHub cannot be reached, links to the
+// releases instead. SITE_RELEASE means a build without network access, so it
+// does not try.
+function changelog(base, xml) {
+  if (base === null) return null
+  const releases = xml === null ? [] : parseChangelog(xml, base)
+  if (xml !== null && releases.length === 0) console.warn('site: the releases feed gave no changelog entries')
+  return renderChangelog(releases, base)
+}
+
 async function readLinks() {
   const links = JSON.parse(readFileSync(new URL('./links.json', import.meta.url), 'utf8'))
   const all = { github: links.github }
@@ -88,12 +105,17 @@ async function readLinks() {
       throw new Error(`site: ${key} link must be an https URL or null, got ${JSON.stringify(url)}`)
     }
   }
+  const github = all.github === null ? null : all.github.replace(/\/+$/, '')
 
   let tag = process.env.SITE_RELEASE ?? links.release
   if (tag === 'null') tag = null
+  let xml = null
   if (tag === 'latest') {
-    if (all.github === null) throw new Error('site: release "latest" needs the github link')
-    tag = await resolveLatest(all.github.replace(/\/+$/, ''))
+    if (github === null) throw new Error('site: release "latest" needs the github link')
+    xml = await fetchFeed(github)
+    tag = await resolveLatest(github, xml)
+  } else if (github !== null && process.env.SITE_RELEASE === undefined) {
+    xml = await fetchFeed(github).catch(() => null)
   }
   let release = null
   if (tag !== null) {
@@ -112,7 +134,7 @@ async function readLinks() {
       prism: (await hasAll(Object.values(zips))) ? zips : null,
     }
   }
-  return { ...all, release }
+  return { ...all, release, changelog: changelog(github, xml) }
 }
 
 const escapeAttr = (s) => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
@@ -144,9 +166,22 @@ function fillRelease(html, release) {
   return out
 }
 
+// The changelog popup and its button sit between changelog markers, dropped
+// with no GitHub link to read releases from; its body replaces <!--changelog-->.
+const CHANGELOG_BLOCK = /[ \t]*<!--changelog:start-->[\s\S]*?<!--changelog:end-->[ \t]*\r?\n?/g
+
+function fillChangelog(html, body) {
+  if (body === null) return html.replace(CHANGELOG_BLOCK, '')
+  if (!html.includes('<!--changelog-->')) throw new Error('site: index.html has no <!--changelog--> placeholder')
+  return html
+    .replaceAll('<!--changelog:start-->', '')
+    .replaceAll('<!--changelog:end-->', '')
+    .replace('<!--changelog-->', () => body)
+}
+
 function fillLinks(html, links) {
   const seen = new Set()
-  const out = fillRelease(html, links.release)
+  const out = fillRelease(fillChangelog(html, links.changelog), links.release)
     .replace(/<a\s+data-link="(\w+)"([^>]*)>([\s\S]*?)<\/a\s*>/g, (_, key, attrs, body) => {
       if (key === 'release' || !(key in links)) {
         throw new Error(`site: index.html links "${key}", links.json has no such key`)
