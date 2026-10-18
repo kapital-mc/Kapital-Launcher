@@ -187,14 +187,14 @@ describe('App', () => {
     expect(screen.getByText('NeoForge 1.21.1')).toBeInTheDocument()
   })
 
-  it('says Play for a server chapter until its switch is on, and disables Play while Prism is missing', async () => {
+  it('says Play for a server chapter until its switch is on, and gets Prism from Play while it is missing', async () => {
     render(<App />)
     await screen.findByRole('heading', { level: 1 })
     switchTo(/02.*Lichdenstein/)
     const play = screen.getByRole('button', { name: 'Play Lichdenstein' })
-    expect(play).toBeDisabled()
+    expect(play).toBeEnabled()
     expect(screen.getByText('○ Prism not found')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Get Prism Launcher' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Get Prism Launcher' })).toBeNull()
   })
 
   it('shows the server line once Prism is found and the ping has answered', async () => {
@@ -455,7 +455,7 @@ describe('App', () => {
     render(<App />)
     await screen.findByText('Kapital Launcher can get it for you')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Play Luxemburg' }))
     const card = await screen.findByRole('dialog', { name: 'Get Prism Launcher' })
     expect(card).toHaveTextContent('Version 11.1.1 · 19.5 MB · GPL-3.0')
     expect(card).toHaveTextContent('sign in with Microsoft')
@@ -467,10 +467,15 @@ describe('App', () => {
 
     let finish!: () => void
     vi.mocked(Bindings.InstallPrism).mockReturnValue(new Promise<void>((r) => (finish = r)))
-    fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Play Luxemburg' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Download' }))
     expect(Bindings.InstallPrism).toHaveBeenCalledOnce()
     expect(await screen.findByText('◐ Getting Prism · 0%')).toBeInTheDocument()
+    // The popup stays with the install, and the sidebar shows it too.
+    expect(screen.getByRole('dialog', { name: 'Get Prism Launcher' })).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Downloads' })).toHaveTextContent(
+      'Prism Launcher',
+    )
     expect(screen.getByRole('button', { name: 'Play Luxemburg' })).toBeDisabled()
 
     vi.mocked(Bindings.GetEngine).mockResolvedValue({
@@ -482,6 +487,9 @@ describe('App', () => {
     })
     await act(async () => finish())
     expect(await screen.findByText('● Prism is ready')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Downloads' })).toBeNull()
+    const done = screen.getByRole('dialog', { name: 'Get Prism Launcher' })
+    fireEvent.click(within(done).getByRole('button', { name: 'Close' }))
     expect(screen.getByText(/sign in with Microsoft/)).toBeInTheDocument()
     expect(screen.getByText('Prism 11.1.1 · managed')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Play Luxemburg' })).toBeEnabled()
@@ -490,7 +498,7 @@ describe('App', () => {
   it("falls back to Prism's website when the release cannot be read", async () => {
     render(<App />)
     await screen.findByText('Install Prism Launcher and sign in there')
-    fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Play Luxemburg' }))
     expect(Bindings.OpenExternal).toHaveBeenCalledWith('https://prismlauncher.org')
     expect(screen.queryByRole('dialog', { name: 'Get Prism Launcher' })).not.toBeInTheDocument()
   })

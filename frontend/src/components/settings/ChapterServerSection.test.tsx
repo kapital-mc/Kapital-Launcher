@@ -3,6 +3,8 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import * as App from '../../../wailsjs/go/main/App'
 import { DEFAULT_SETTINGS, useSettingsStore } from '../../stores/useSettingsStore'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
+import { useTailscaleStore } from '../../stores/useTailscaleStore'
+import type { TailscaleInfo } from '../../types/tailscale'
 import { ChapterServerSection } from './ChapterServerSection'
 
 vi.mock('../../../wailsjs/go/main/App')
@@ -22,6 +24,7 @@ describe('The Server section of a chapter settings page', () => {
     Object.assign(window, { go: {} })
     vi.mocked(App.SaveSettings).mockResolvedValue()
     useSettingsStore.setState({ settings: DEFAULT_SETTINGS, loaded: true, error: null })
+    useTailscaleStore.setState({ info: null, release: null, install: null, error: null })
   })
   afterEach(() => {
     cleanup()
@@ -35,7 +38,11 @@ describe('The Server section of a chapter settings page', () => {
     expect([...group.querySelectorAll('[role="radio"]')].map((r) => r.textContent)).toEqual([
       'Global',
       'Germany',
+      'Tailscale',
     ])
+    // Tailscale is shown but held until its switch is on.
+    expect(screen.getByRole('radio', { name: 'Tailscale' })).toBeDisabled()
+    expect(screen.getByRole('switch', { name: 'Tailscale' })).not.toBeChecked()
     // The default, the first, is on until the player picks.
     expect(screen.getByRole('radio', { name: 'Global' })).toBeChecked()
     expect(screen.getByRole('radio', { name: 'Germany' })).not.toBeChecked()
@@ -156,5 +163,59 @@ describe('The Server section of a chapter settings page', () => {
     cleanup()
     render(<ChapterServerSection chapter={luxemburg} />)
     expect(screen.queryByText('World data')).toBeNull()
+  })
+
+  const tailscale = (state: string): TailscaleInfo => ({
+    state,
+    version: '1.104.1',
+    canInstall: true,
+    signingIn: false,
+  })
+
+  it('offers the Tailscale address once its switch is on, and saves it by chapter id', async () => {
+    vi.mocked(App.GetTailscale).mockResolvedValue(tailscale('running'))
+    useSettingsStore.setState({
+      settings: { ...DEFAULT_SETTINGS, joinServers: [], tailscaleServers: ['lichdenstein'] },
+    })
+    render(<ChapterServerSection chapter={frangfurd} />)
+    await waitFor(() => expect(screen.getByText(/Connected/)).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('switch', { name: 'Tailscale' }))
+    await waitFor(() =>
+      expect(App.SaveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ tailscaleServers: ['lichdenstein', 'frangfurd'] }),
+      ),
+    )
+    expect(screen.getByRole('radio', { name: 'Tailscale' })).toBeEnabled()
+    fireEvent.click(screen.getByRole('radio', { name: 'Tailscale' }))
+    await waitFor(() =>
+      expect(App.SaveSettings).toHaveBeenLastCalledWith(
+        expect.objectContaining({ serverChoices: { frangfurd: 'Tailscale' } }),
+      ),
+    )
+  })
+
+  it('opens the install popup when Tailscale is missing, and saves nothing yet', async () => {
+    vi.mocked(App.GetTailscale).mockResolvedValue(tailscale('missing'))
+    vi.mocked(App.GetTailscaleRelease).mockResolvedValue({
+      version: '1.104.1',
+      file: 'tailscale-setup-1.104.1-amd64.msi',
+      url: 'https://pkgs.tailscale.com/stable/tailscale-setup-1.104.1-amd64.msi',
+      size: 22332629,
+      digest: 'sha256:00',
+    })
+    render(<ChapterServerSection chapter={frangfurd} />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Get Tailscale' })).toBeEnabled())
+    await waitFor(() => expect(useTailscaleStore.getState().release).not.toBeNull())
+    fireEvent.click(screen.getByRole('switch', { name: 'Tailscale' }))
+    expect(await screen.findByRole('dialog', { name: 'Get Tailscale' })).toBeInTheDocument()
+    expect(App.SaveSettings).not.toHaveBeenCalled()
+  })
+
+  it('offers Sign in when Tailscale needs it', async () => {
+    vi.mocked(App.GetTailscale).mockResolvedValue(tailscale('needsLogin'))
+    vi.mocked(App.SignInTailscale).mockResolvedValue()
+    render(<ChapterServerSection chapter={frangfurd} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Sign in' }))
+    await waitFor(() => expect(App.SignInTailscale).toHaveBeenCalled())
   })
 })

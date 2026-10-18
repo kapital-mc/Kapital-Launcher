@@ -5,6 +5,10 @@ import { ErrorLine, Hint } from './Notes'
 interface Option<T extends string> {
   value: T
   label: string
+  /** Shown but not pickable now: a choice another setting turns on. */
+  disabled?: boolean
+  /** Why it cannot be picked, on hover. */
+  title?: string
 }
 
 interface Props<T extends string> {
@@ -60,18 +64,20 @@ export function Segmented<T extends string>({
     >
       {options.map((o) => {
         const selected = o.value === value
+        const off = disabled || o.disabled === true
         return (
           <button
             key={o.value}
             type="button"
             role="radio"
             aria-checked={selected}
-            tabIndex={selected && !disabled ? 0 : -1}
-            disabled={disabled}
+            tabIndex={selected && !off ? 0 : -1}
+            disabled={off}
+            title={o.title}
             onClick={() => onChange(o.value)}
             className={`duration-fast ease-standard cursor-pointer rounded-sm px-3.5 text-sm whitespace-nowrap transition-colors disabled:cursor-default ${
               selected ? 'bg-hover text-fg font-medium' : 'text-fg-muted enabled:hover:text-fg'
-            }`}
+            } ${off && !disabled ? 'opacity-50' : ''}`}
           >
             {o.label}
           </button>

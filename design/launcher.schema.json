@@ -127,6 +127,10 @@
                         "type": "string",
                         "pattern": "^[A-Za-z0-9.-]+(:[0-9]{1,5})?$",
                         "description": "host[:port]. Passed to Prism's --server and dialled for the status line, so nothing else is accepted."
+                      },
+                      "tailscale": {
+                        "type": "boolean",
+                        "description": "The address is reached only through Tailscale. At most one per chapter and never the first: the player turns it on in the chapter's settings, which also adds it to the in-game server list."
                       }
                     }
                   }

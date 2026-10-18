@@ -27,21 +27,21 @@ func TestServerAddressResolvesTheChoiceOrTheDefault(t *testing.T) {
 		"an address, not a label":   {map[string]string{"frangfurd": "de.example:25570"}, "global.example"},
 	}
 	for name, tc := range cases {
-		if got := ServerAddress(c, tc.choices); got != tc.want {
+		if got := ServerAddress(c, models.AppSettings{ServerChoices: tc.choices}); got != tc.want {
 			t.Errorf("%s: got %q want %q", name, got, tc.want)
 		}
 	}
 	one := models.Chapter{ID: "lichdenstein", Server: server(addr("Main", "only.example"))}
-	if got := ServerAddress(one, map[string]string{"lichdenstein": "Main"}); got != "only.example" {
+	if got := ServerAddress(one, models.AppSettings{ServerChoices: map[string]string{"lichdenstein": "Main"}}); got != "only.example" {
 		t.Errorf("a single address: %q", got)
 	}
-	if got := ServerAddress(one, map[string]string{"lichdenstein": "Gone"}); got != "only.example" {
+	if got := ServerAddress(one, models.AppSettings{ServerChoices: map[string]string{"lichdenstein": "Gone"}}); got != "only.example" {
 		t.Errorf("a single address with a stale choice: %q", got)
 	}
-	if got := ServerAddress(models.Chapter{ID: "luxemburg"}, nil); got != "" {
+	if got := ServerAddress(models.Chapter{ID: "luxemburg"}, models.AppSettings{}); got != "" {
 		t.Errorf("no server: %q", got)
 	}
-	if got := ServerAddress(models.Chapter{ID: "x", Server: server()}, nil); got != "" {
+	if got := ServerAddress(models.Chapter{ID: "x", Server: server()}, models.AppSettings{}); got != "" {
 		t.Errorf("a server with no addresses: %q", got)
 	}
 }
@@ -133,8 +133,8 @@ func TestCheckDialsTheAddressItIsGiven(t *testing.T) {
 		return PingResult{Online: true, Latency: time.Millisecond}, nil
 	}
 	c := twoAddresses()
-	svc.Check(context.Background(), c, ServerAddress(c, nil))
-	svc.Check(context.Background(), c, ServerAddress(c, map[string]string{"frangfurd": "Germany"}))
+	svc.Check(context.Background(), c, ServerAddress(c, models.AppSettings{}))
+	svc.Check(context.Background(), c, ServerAddress(c, models.AppSettings{ServerChoices: map[string]string{"frangfurd": "Germany"}}))
 	if len(dialled) != 2 || dialled[0] != "global.example" || dialled[1] != "de.example:25570" {
 		t.Fatalf("%v", dialled)
 	}

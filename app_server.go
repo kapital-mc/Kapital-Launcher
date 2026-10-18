@@ -19,7 +19,7 @@ func (a *App) serverAddress(chapter models.Chapter) string {
 	if err != nil {
 		slog.Warn("settings for the server choice", "error", err)
 	}
-	return services.ServerAddress(chapter, settings.ServerChoices)
+	return services.ServerAddress(chapter, settings)
 }
 
 // joinAddress is what Play passes to Prism's --server: the player's chosen
@@ -30,7 +30,7 @@ func joinAddress(chapter models.Chapter, settings models.AppSettings) string {
 	if chapter.Server == nil || !services.JoinsServer(settings, chapter.ID) {
 		return ""
 	}
-	return services.ServerAddress(chapter, settings.ServerChoices)
+	return services.ServerAddress(chapter, settings)
 }
 
 // checkServer pings a chapter's chosen address now, stores the result and
@@ -52,7 +52,7 @@ func (a *App) checkServer(chapter models.Chapter) models.ServerStatus {
 func (a *App) changedServers(before, after models.AppSettings) []models.Chapter {
 	var changed []models.Chapter
 	for _, c := range a.manifest.Chapters {
-		if services.ServerAddress(c, before.ServerChoices) != services.ServerAddress(c, after.ServerChoices) {
+		if services.ServerAddress(c, before) != services.ServerAddress(c, after) {
 			changed = append(changed, c)
 		}
 	}

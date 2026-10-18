@@ -12,6 +12,7 @@ export namespace models {
 	    packOverrides?: Record<string, string>;
 	    serverChoices?: Record<string, string>;
 	    joinServers?: string[];
+	    tailscaleServers?: string[];
 	    disabledMods?: Record<string, Array<string>>;
 	    loadingSplash?: boolean;
 	    loadingSplashAvailable?: boolean;
@@ -38,6 +39,7 @@ export namespace models {
 	        this.packOverrides = source["packOverrides"];
 	        this.serverChoices = source["serverChoices"];
 	        this.joinServers = source["joinServers"];
+	        this.tailscaleServers = source["tailscaleServers"];
 	        this.disabledMods = source["disabledMods"];
 	        this.loadingSplash = source["loadingSplash"];
 	        this.loadingSplashAvailable = source["loadingSplashAvailable"];
@@ -81,6 +83,7 @@ export namespace models {
 	export class ServerAddress {
 	    label: string;
 	    address: string;
+	    tailscale?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ServerAddress(source);
@@ -90,6 +93,7 @@ export namespace models {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.label = source["label"];
 	        this.address = source["address"];
+	        this.tailscale = source["tailscale"];
 	    }
 	}
 	export class Server {
@@ -898,6 +902,44 @@ export namespace models {
 	        this.motd = source["motd"];
 	        this.latencyMs = source["latencyMs"];
 	        this.checkedAt = source["checkedAt"];
+	    }
+	}
+	export class TailscaleInfo {
+	    state: string;
+	    version: string;
+	    canInstall: boolean;
+	    signingIn: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new TailscaleInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.state = source["state"];
+	        this.version = source["version"];
+	        this.canInstall = source["canInstall"];
+	        this.signingIn = source["signingIn"];
+	    }
+	}
+	export class TailscaleRelease {
+	    version: string;
+	    file: string;
+	    url: string;
+	    size: number;
+	    digest: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TailscaleRelease(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.file = source["file"];
+	        this.url = source["url"];
+	        this.size = source["size"];
+	        this.digest = source["digest"];
 	    }
 	}
 	export class UpdateInfo {

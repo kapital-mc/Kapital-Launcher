@@ -36,12 +36,14 @@ chapter's `map` (below): a playit tunnel serves BlueMap over http.
 - `instance.id` is the Prism instance folder name, `kapital-<id>` by convention
   (ADR-2), and is what `--launch` receives.
 - `server` is `null` or `{ addresses, software }`. `addresses`
-  is a list of `{ label, address }`, at least one, the first the default
-  (ADR-4, amendment). Each address is `host[:port]`, any of them pinged for
+  is a list of `{ label, address, tailscale? }`, at least one, the first the default
+  (ADR-4, amendment). `tailscale: true` marks at most one, never the first, as
+  reached only through Tailscale (ADR-4 amendment 2026-10-18, ADR-14). Each address is `host[:port]`, any of them pinged for
   the status line; the label is short, unique in the chapter and is what the
   player's choice in the chapter's settings is saved as, never the address. The one in use
-  is `services.ServerAddress(chapter, settings.ServerChoices)`: use it, never
-  `Addresses[0]`. Whether Play joins the server is not the manifest's to say:
+  is `services.ServerAddress(chapter, settings)`: use it, never
+  `Addresses[0]`; it skips the Tailscale address unless the player's switch
+  (`settings.TailscaleServers`) is on. Whether Play joins the server is not the manifest's to say:
   `joinOnLaunch` is retired (ADR-4, second amendment), a manifest that carries
   it is refused, and the player's switch (`settings.JoinServers`, on the
   chapter's settings page) is what turns Play into Join and adds `--server` to

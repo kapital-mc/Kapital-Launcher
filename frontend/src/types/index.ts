@@ -65,6 +65,8 @@ export interface PlayerProfile {
 export interface ServerAddress {
   label: string
   address: string
+  /** Reached only through Tailscale: offered once the chapter's Tailscale switch is on. */
+  tailscale?: boolean
 }
 
 export interface Server {
@@ -406,6 +408,8 @@ export interface AppSettings {
    * settings page, off for every chapter until the player turns it on.
    */
   joinServers?: string[]
+  /** The chapters whose Tailscale address the player turned on: an Address choice and an in-game server list entry. */
+  tailscaleServers?: string[]
   /**
    * Chapter id to the jars switched off (issue 156). Go's own: GetSettings never fills it and a
    * save never changes it; the mods section reads and writes the list through GetChapterMods and

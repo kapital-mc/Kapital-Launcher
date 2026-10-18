@@ -197,6 +197,10 @@ instance's `instance.cfg`) with the packwiz template's arguments (S3.11); nothin
 `cmd` or `powershell`. One
 process is not ours: on macOS Wails' `ClipboardSetText` runs `pbcopy`, no
 argument and the redacted log tail on its stdin, when the log is copied (S7.3).
+Tailscale's processes are S4.11's: its CLI (`status --json`, `version`,
+`login`), `msiexec.exe` from `System32` and `/usr/bin/open -W` with the
+verified installer's path, `/usr/sbin/pkgutil --check-signature` with that
+path, and Tailscale's own app.
 Verify: the `shell never sees a command string` invariant in `.claude/suite.json`.
 
 **S3.2 Every argument is validated.**
@@ -549,6 +553,26 @@ it); a game writing a line of megabytes with no newline (sent as it stands in
 64 KiB pieces); two chapters' pages opened one after the other (the first is
 ended before the second reads).
 
+**S3.12 The in-game server list gains or loses one entry, the chapter's Tailscale address, and nothing else changes.**
+Holds when: `SyncServerList` (`serverlist.go`) reads `servers.dat` in the
+chapter's game folder, at most 4 MiB, through a bounded NBT reader (depth 64,
+at most 2^20 items per list); with the switch on it appends one entry
+(`name`, `ip`, `hidden: 0`) when no entry has that address, with it off it
+removes every entry whose `ip` is that address (trimmed, any case); every
+other byte is written back as it was read, atomically; a missing file is
+seeded from the pack's `config/defaultoptions/servers.dat`, or an empty list;
+a list it cannot read is left alone and logged. The address and the entry's
+name come from the validated manifest. It runs on a switch change and before
+Play, and a failure refuses neither.
+Verify: `TestNBTRoundTripsTheGamesOwnFile`, `TestNBTRefusesBrokenFiles`,
+`TestSyncServerListAddsAndRemovesOnlyItsEntry`,
+`TestSyncServerListRemovesAnEntryThePlayerRenamed`,
+`TestSyncServerListSeedsFromThePacksDefaults`,
+`TestSyncServerListRefusesABrokenList`,
+`TestTheTailscaleSwitchEditsTheInGameServerList`.
+Probe: a `servers.dat` nested 100 lists deep, or a list claiming 2^31 items
+(refused, the file untouched).
+
 ## S4. Downloads (milestone 4)
 
 **S4.1 Every downloaded file is verified against its hash before use.** `.mrpack`
@@ -756,6 +780,32 @@ an index with `partsBase` `https://evil.example/`, a server folder `..` or
 `CON`, a level folder `a/b`, a part answering a redirect, 1 byte too many or the
 wrong bytes; a download started with the game's log written a second ago.
 
+**S4.11 Tailscale is installed only on approval, from Tailscale's package server, and only if it verifies.**
+Holds when: (a) `TailscaleInstaller.Latest` reads `pkgs.tailscale.com/stable/?mode=json`
+(15 s, a capped body), takes this OS's package, and refuses a version off its
+pattern, a file name that is not a plain `.msi` or `.pkg` name carrying that
+version, or a size over 300 MB; (b) every request stays on that scheme and
+host, redirects included; (c) `InstallTailscale` takes no argument and reads
+the release again itself, and the popup's Download is the approval; (d) the
+download is checked for its size and the published SHA-256 while it streams,
+with a 60 s stall limit, and removed on any failure; (e) on macOS
+`pkgutil --check-signature` must report a certificate issued by Apple and
+Tailscale's `Developer ID Installer: Tailscale Inc. (W5364U7YZB)` before the
+package is opened; (f) the installer is the OS's own (`msiexec /passive`,
+`open -W`), so the password or administrator prompt is the OS's; one install
+runs at a time. (g) Sign-in runs `tailscale login` and opens only an https
+address on `login.tailscale.com` with no user info, the first it prints; the
+address is never logged, and the run ends after 10 minutes. (h) Only
+`BackendState` and `Version` are read from `tailscale status --json` (4 MiB
+cap); peers, users and addresses are never kept or logged.
+Verify: `TestTailscaleLatestPicksThisOSsInstaller`,
+`TestTailscaleLatestRefusesAnOddIndex`, `TestTailscaleInstallVerifiesThenRuns`,
+`TestTailscaleInstallRefusesAMismatch`, `TestOpenLoginURLOpensOnlyTailscalesPage`,
+`TestTailscaleDetectReadsTheBackendState`.
+Probe: an index naming `../x.pkg` or a file on another host; a `.sha256` that
+does not match; a login line naming `https://login.tailscale.com.evil.example/a/x`
+or `https://user@login.tailscale.com/a/x`.
+
 ## S5. WebView
 
 **S5.1 A Content-Security-Policy ships in every build.**
@@ -921,6 +971,10 @@ at the top, which S8.1 reads as read-only, and widens on its one job.
 Verify: Security, Code scanning on the repository lists both tools.
 
 ## Open backlog
+
+- S4.11: Windows checks Tailscale's MSI by its published digest only; pin
+  Tailscale's Authenticode signer (`WinVerifyTrust` plus the signer's name)
+  as Prism's is on macOS.
 
 - S2.3, S4.2 to S4.4: not built yet; the items are written so the code meets
   them when it is.

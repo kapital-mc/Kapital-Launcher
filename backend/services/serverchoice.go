@@ -41,21 +41,22 @@ func validateServer(where string, s *models.Server) error {
 			return fmt.Errorf("%s: server: addresses[%d]: %w", where, i, err)
 		}
 	}
-	return nil
+	return validateTailscaleAddress(where, s)
 }
 
 // ServerAddress is the address a chapter's server is reached at: the one its
-// saved choice names, else the chapter's first when the choice is missing or
-// names a label no longer in the manifest. It is the one place that turns a
-// choice into an address, and the ping, the ticker and Play's --server all go
-// through it. "" for a chapter with no server.
-func ServerAddress(chapter models.Chapter, choices map[string]string) string {
+// saved choice names, else the chapter's first when the choice is missing,
+// names a label no longer in the manifest, or names the Tailscale address
+// while the chapter's Tailscale switch is off. It is the one place that turns
+// a choice into an address, and the ping, the ticker and Play's --server all
+// go through it. "" for a chapter with no server.
+func ServerAddress(chapter models.Chapter, settings models.AppSettings) string {
 	if chapter.Server == nil || len(chapter.Server.Addresses) == 0 {
 		return ""
 	}
-	if label, ok := choices[chapter.ID]; ok {
+	if label, ok := settings.ServerChoices[chapter.ID]; ok {
 		for _, a := range chapter.Server.Addresses {
-			if a.Label == label {
+			if a.Label == label && (!a.Tailscale || UsesTailscale(settings, chapter.ID)) {
 				return a.Address
 			}
 		}

@@ -80,6 +80,18 @@ func (a *App) seedLogRules(engine models.EngineInfo) {
 	}
 }
 
+// prepareLaunch is what Play changes before Prism runs, and returns the
+// chapter's instance folder ("" when there is none). An instance made with the
+// pack sync's window gets the headless command before Prism reads it (#95), a
+// managed Prism its log rules, and the in-game server list its Tailscale entry.
+func (a *App) prepareLaunch(settings models.AppSettings, engine models.EngineInfo, chapter models.Chapter) string {
+	instanceDir := a.instanceDir(settings, engine, chapter)
+	a.updatePreLaunch(chapter.ID, instanceDir)
+	a.seedLogRules(engine)
+	a.syncTailscaleList(settings, chapter)
+	return instanceDir
+}
+
 // chapterRunning says whether the chapter's game is running and which of two
 // answers said so. The tracker is exact for a start this app made. The guess
 // (InstanceRunning) is the game log's recent activity, the last line of

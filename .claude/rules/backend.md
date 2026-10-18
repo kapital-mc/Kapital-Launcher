@@ -34,7 +34,8 @@ opens a folder with `ShellExecute`, an API call and not a process. Copying the
 log (`CopyRedactedLog`) goes through Wails' `ClipboardSetText`, which on macOS
 runs `pbcopy` with no argument and the redacted text on its stdin
 (`internal/frontend/desktop/darwin/clipboard.go` in Wails): a process of
-Wails' and not one this app starts. There is no shell anywhere, and the `shell
+Wails' and not one this app starts. Tailscale's (ADR-14) are listed in its own
+section below. There is no shell anywhere, and the `shell
 never sees a command string` invariant holds it.
 
 The game tracker (`gametracker.go`, `gameproc_*.go`) follows a launched game:
@@ -211,7 +212,9 @@ exist, `instance.cfg` last, and touched again only in the keys the amendments
 name (ADR-2, amendment). The one exception is Reinstall (`ReinstallChapter`,
 `stashinstance.go`, issue 244, fourteenth amendment): an instance under the
 chapter's name with no pack URL of the launcher's is renamed whole to
-`<id>-stashed-<day>` before the install, and back if the install fails. In the managed root it owns it also seeds `prismlauncher.cfg`,
+`<id>-stashed-<day>` before the install, and back if the install fails. The
+Tailscale switch edits one entry of the game's `servers.dat` in the instance
+(ADR-14). In the managed root it owns it also seeds `prismlauncher.cfg`,
 `prismlauncher_update.cfg` and `qtlogging.ini` once, before Prism first starts
 (the last also before a launch, when absent, for an earlier install). The pre-launch
 command it writes is the launcher's own copy in a sync mode,
@@ -324,6 +327,24 @@ again before placing), for a newer Distant Horizons than the instance's jar,
 without the disk space, and over existing terrain without `replace`. One
 download at a time (`terrainDownloads`), progress as `dh:download` events, and
 the launcher never writes to the bucket.
+
+Tailscale (`tailscale*.go`, `serverlist.go`, `nbt.go`, `app_tailscale.go`,
+ADR-14, SECURITY_CHECKLIST S3.12 and S4.11) is found, never bundled: its CLI
+at the official app's paths, then PATH (`TailscaleCLI`, injected like Prism's
+detection), run with `TAILSCALE_BE_CLI=1` for `status --json` (only
+`BackendState` and `Version` read), `version` and `login`. `login`'s first
+`https://login.tailscale.com` address is opened in the browser and never
+logged. On approval `TailscaleInstaller` downloads this OS's package from
+`pkgs.tailscale.com` alone, checked against the published SHA-256 (and on
+macOS `pkgutil --check-signature` for Tailscale's Developer ID Installer) into
+`<data dir>/tailscale/`, and runs it with the OS's installer: `msiexec.exe /i
+<file> /passive /norestart TS_NOLAUNCH=1` from `System32`, or `/usr/bin/open
+-W <file>`. Open Tailscale starts `tailscale-ipn.exe` or `open -a
+/Applications/Tailscale.app`. A chapter's switch (`TailscaleServers`) adds or
+removes one entry with the manifest's Tailscale address in the instance's
+`servers.dat`, through a bounded NBT reader that writes every other byte back
+as read, on a switch and before each Play; a missing list is seeded from the
+pack's `config/defaultoptions/servers.dat`.
 
 The player's profile (`mojang.go`, `app_mojang.go`, `GetPlayerProfile` and
 `CopyPlayerUUID`, issue 193, ADR-13) is the one lookup that sends something about

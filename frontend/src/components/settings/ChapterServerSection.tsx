@@ -9,13 +9,14 @@ import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { Toggle } from '../ui/Toggle'
 import { hasDistantHorizons } from '../../lib/distantHorizons'
 import { DistantHorizonsCard } from './DistantHorizonsCard'
+import { TailscaleRow } from './TailscaleRow'
 
 interface Props {
   chapter: Chapter
 }
 
 /** Which control a refusal is filed under. */
-type Field = 'address' | 'join'
+type Field = 'address' | 'join' | 'tailscale'
 
 /**
  * The Server section of a chapter's settings page (issue 163), for a chapter
@@ -29,6 +30,10 @@ type Field = 'address' | 'join'
  * changed, through the settings store as the Settings screen does, and a
  * refusal from Go shows under its control with the old value back. A chapter
  * whose pack has Distant Horizons gets the world data card under it (issue 136).
+ *
+ * A server with a Tailscale address offers it under Address too, greyed out
+ * until the Tailscale switch below Address is on (TailscaleRow). Turning the
+ * switch off moves a chapter that had picked it back to its first address.
  */
 export function ChapterServerSection({ chapter }: Props) {
   const settings = useSettingsStore((s) => s.settings)
@@ -46,7 +51,10 @@ export function ChapterServerSection({ chapter }: Props) {
     }
   }
 
-  const label = chosenLabel(server, settings.serverChoices?.[chapter.id]) ?? ''
+  const tailscaleOn = settings.tailscaleServers?.includes(chapter.id) ?? false
+  const hasTailscale = server.addresses.some((a) => a.tailscale)
+  const label = chosenLabel(server, settings.serverChoices?.[chapter.id], tailscaleOn) ?? ''
+  const othersTailscale = (settings.tailscaleServers ?? []).filter((id) => id !== chapter.id)
   const joining = settings.joinServers?.includes(chapter.id) ?? false
   const others = (settings.joinServers ?? []).filter((id) => id !== chapter.id)
   return (
@@ -57,7 +65,12 @@ export function ChapterServerSection({ chapter }: Props) {
             inline
             label="Address"
             value={label}
-            options={server.addresses.map((a) => ({ value: a.label, label: a.label }))}
+            options={server.addresses.map((a) => ({
+              value: a.label,
+              label: a.label,
+              disabled: a.tailscale === true && !tailscaleOn,
+              title: a.tailscale && !tailscaleOn ? 'Turn on Tailscale below first' : undefined,
+            }))}
             error={errors.address}
             onChange={(next) =>
               void save('address', {
@@ -70,6 +83,17 @@ export function ChapterServerSection({ chapter }: Props) {
             <span className="text-fg font-medium">Address</span>
             <span className="text-fg-muted">{label}</span>
           </div>
+        )}
+        {hasTailscale && (
+          <TailscaleRow
+            on={tailscaleOn}
+            error={errors.tailscale}
+            onChange={(on) =>
+              void save('tailscale', {
+                tailscaleServers: on ? [...othersTailscale, chapter.id] : othersTailscale,
+              })
+            }
+          />
         )}
         <Toggle
           label="Join the server on Play"

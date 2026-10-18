@@ -114,7 +114,8 @@
       "server": {
         "addresses": [
           { "label": "Global", "address": "female-specified.gl.joinmc.link" },
-          { "label": "Germany", "address": "rails-enjoyed.tun.ply.gg" }
+          { "label": "Germany", "address": "rails-enjoyed.tun.ply.gg" },
+          { "label": "Tailscale", "address": "ts.frangfurd.click", "tailscale": true }
         ],
         "software": "[PLACEHOLDER]"
       },

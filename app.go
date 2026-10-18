@@ -47,6 +47,7 @@ type App struct {
 	splash         *services.SplashCard
 	live           *services.LiveLog
 	terrain        *terrainDownloads
+	tailscale      *tailscaleState
 	stop           context.CancelFunc
 	frontendErrors *services.FrontendErrorLog
 	// runCtx is the context the background work runs under: cancelled in
@@ -149,6 +150,7 @@ func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 		previewStep: previewInstallStep,
 		live:        services.NewLiveLog(),
 		terrain:     newTerrainDownloads(),
+		tailscale:   newTailscaleState(dataDir),
 		engineReady: make(chan struct{}),
 	}
 	a.syncCopy = services.NewSyncCopy(dataDir, Version)
@@ -291,13 +293,9 @@ func (a *App) LaunchChapter(chapterID string) error {
 		Root:   engine.Root,
 		Server: joinAddress(chapter, settings),
 	}
+	instanceDir := a.prepareLaunch(settings, engine, chapter)
 	// The game log as it is before Prism runs, so the log of an earlier start
 	// is not taken for this one.
-	instanceDir := a.instanceDir(settings, engine, chapter)
-	// An instance made with the pack sync's window gets the headless command
-	// before Prism reads it (#95).
-	a.updatePreLaunch(chapterID, instanceDir)
-	a.seedLogRules(engine)
 	before := services.SnapshotGameLog(instanceDir)
 	// Prism's own log likewise, for a launch step that fails before the game
 	// (#103). The instance folder is <root>/instances/<id>, so the engine's
@@ -414,6 +412,7 @@ func (a *App) GetSettings() (models.AppSettings, error) {
 	// something else cannot write it again.
 	settings.ServerChoices = services.PruneServerChoices(a.manifest.Chapters, settings.ServerChoices)
 	settings.JoinServers = services.PruneJoinServers(a.manifest.Chapters, settings.JoinServers)
+	settings.TailscaleServers = services.PruneTailscaleServers(a.manifest.Chapters, settings.TailscaleServers)
 	// The disabled mods are the mods page's, through GetChapterMods; the screen
 	// holds no copy to send back (SaveSettings keeps what is stored).
 	settings.DisabledMods = nil
@@ -448,6 +447,9 @@ func (a *App) SaveSettings(settings models.AppSettings) error {
 	if err := services.ValidateJoinServers(a.manifest.Chapters, settings.JoinServers); err != nil {
 		return err
 	}
+	if err := a.checkTailscaleSave(&settings); err != nil {
+		return err
+	}
 	// The list of disabled mods is written only by SetModsDisabled, which checks
 	// it against the instance's mods folder; the screen's copy is none, and a
 	// save from it never changes the stored one (issue 156).
@@ -458,6 +460,7 @@ func (a *App) SaveSettings(settings models.AppSettings) error {
 		return err
 	}
 	a.recheckServers(before, settings)
+	a.syncTailscaleLists(before, settings)
 	if !services.AffectsDetection(before, settings) {
 		return nil
 	}
