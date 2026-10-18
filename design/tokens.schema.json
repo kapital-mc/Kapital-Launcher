@@ -168,7 +168,7 @@
     },
     "layout": {
       "type": "object",
-      "required": ["unit", "sidebar", "hero", "titlebar", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "splash"],
+      "required": ["unit", "sidebar", "hero", "titlebar", "titlebarMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "splash"],
       "additionalProperties": false,
       "properties": {
         "unit": { "const": "px" },
@@ -179,6 +179,11 @@
           "description": "The hero's greatest height; it shrinks below this so the chapter card fits the window (#68)."
         },
         "titlebar": { "type": "integer", "minimum": 1 },
+        "titlebarMac": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The header bar's height on macOS, where it holds the system's traffic lights: the height of a standard macOS title bar, so the lights sit at its middle (ADR-10)."
+        },
         "slide": {
           "type": "integer",
           "minimum": 0,

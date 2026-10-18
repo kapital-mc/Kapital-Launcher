@@ -37,7 +37,7 @@ tracking-label tracking-eyebrow`. Radius: `rounded-sm rounded-md
 rounded-lg rounded-pill`. Motion: `duration-fast duration-slow ease-standard
 ease-out` (`duration-dwell` is the site's hold between chapters; the app
 does not use it). Layout: `w-(--layout-sidebar)`, `h-(--layout-hero)`,
-`h-(--layout-titlebar)`, `size-(--layout-icon-sm)` and `-md`. Effects:
+`h-(--layout-titlebar)` (`-mac` on macOS), `size-(--layout-icon-sm)` and `-md`. Effects:
 `hover:brightness-(--effect-hover-brightness)`, `scrim-hero`, `scrim-wash`.
 
 Motion utilities, in `style.css`, built from the motion tokens (`duration-fast`

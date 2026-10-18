@@ -33,6 +33,7 @@ export const LAYOUT = {
   sidebar: 264,
   hero: 440,
   titlebar: 40,
+  titlebarMac: 28,
   icon: { xs: 14, sm: 16, md: 18, stroke: 1.2 },
   splash: { width: 720, height: 405 },
 } as const

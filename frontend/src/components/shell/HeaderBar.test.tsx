@@ -17,9 +17,9 @@ describe('HeaderBar', () => {
     Reflect.deleteProperty(window, 'go')
   })
 
-  it('draws the brand, the gear and our own window buttons on Windows', async () => {
+  it('draws the gear and our own window buttons on Windows, and no wordmark', async () => {
     render(<HeaderBar platform="windows" />)
-    expect(screen.getByAltText('Kapital Launcher')).toBeInTheDocument()
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Settings' })).toBeDisabled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Minimise' }))
@@ -48,8 +48,9 @@ describe('HeaderBar', () => {
     expect(Runtime.WindowToggleMaximise).toHaveBeenCalledOnce()
   })
 
-  it('leaves the window buttons to macOS', () => {
-    render(<HeaderBar platform="darwin" onOpenSettings={() => undefined} />)
+  it('leaves the window buttons to macOS, in a bar as tall as its title bar', () => {
+    const { container } = render(<HeaderBar platform="darwin" onOpenSettings={() => undefined} />)
+    expect(container.querySelector('header')).toHaveClass('h-(--layout-titlebar-mac)')
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Settings' })).toBeEnabled()
   })

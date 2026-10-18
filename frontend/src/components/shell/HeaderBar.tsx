@@ -8,7 +8,6 @@ import {
   WindowMinimise,
   WindowToggleMaximise,
 } from '../../../wailsjs/runtime/runtime'
-import { Brand } from './Brand'
 import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
 
@@ -23,19 +22,19 @@ interface Props {
  * (docs/adr/0010-window-chrome.md). Its empty area drags the window and a
  * double-click maximises; anything interactive opts out of the drag.
  *
- * macOS keeps its native traffic lights at the top left, so the brand starts
- * after them and no window buttons are drawn. Everywhere else the bar ends in
- * our own minimise, maximise and close.
+ * macOS keeps its native traffic lights at the top left, so no window buttons
+ * are drawn there, and the bar is as tall as a macOS title bar so the lights
+ * sit at its middle; the gear is inset from the right as far as the lights
+ * are from the left. Everywhere else the bar ends in our own minimise, maximise
+ * and close. The bar carries no wordmark (ADR-10 amendment, 2026-10-18).
  */
 export function HeaderBar({ platform, onOpenSettings }: Props) {
   const mac = platform === 'darwin'
   return (
     <header
       onDoubleClick={() => bridged(WindowToggleMaximise)}
-      className={`bg-sunken border-line flex h-(--layout-titlebar) shrink-0 items-center border-b [--wails-draggable:drag] ${mac ? 'pl-20' : 'pl-5'}`}
+      className={`bg-sunken border-line flex shrink-0 items-center justify-end border-b [--wails-draggable:drag] ${mac ? 'h-(--layout-titlebar-mac)' : 'h-(--layout-titlebar)'}`}
     >
-      <Brand />
-      <div className="grow" />
       <div
         onDoubleClick={(e) => e.stopPropagation()}
         className="flex h-full items-center gap-1 [--wails-draggable:no-drag]"
@@ -43,11 +42,11 @@ export function HeaderBar({ platform, onOpenSettings }: Props) {
         <IconButton
           icon={Settings}
           title="Settings"
-          size="sm"
+          size={mac ? 'xs' : 'sm'}
           onClick={() => onOpenSettings?.()}
           disabled={!onOpenSettings}
         />
-        {mac ? <div className="w-2" /> : <WindowControls />}
+        {!mac && <WindowControls />}
       </div>
     </header>
   )

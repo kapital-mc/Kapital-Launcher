@@ -12,6 +12,7 @@ export function emitLayout(src, push) {
   for (const k of ['sidebar', 'hero', 'titlebar', 'scrollbar', 'slide', 'drift', 'title']) {
     push(`  --layout-${k}: ${src.layout[k]}${unit};`)
   }
+  push(`  --layout-titlebar-mac: ${src.layout.titlebarMac}${unit};`)
   push(`  --layout-play-min: ${src.layout.playMin}${unit};`)
   push(`  --layout-icon-xs: ${src.layout.icon.xs}${src.layout.unit};`)
   push(`  --layout-icon-sm: ${src.layout.icon.sm}${src.layout.unit};`)

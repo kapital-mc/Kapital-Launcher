@@ -56,3 +56,21 @@ bar where the runner allows it.
 The header no longer starts as the Windows bar until Wails names the platform:
 `lib/platform.ts` guesses it from the WebView's user agent, so a Mac never shows
 the Windows buttons, nor the brand under the traffic lights, at start.
+
+## Amendment, 2026-10-18: no wordmark, and a macOS bar as tall as its title bar
+
+The author asked for the Kapital Launcher logo to go from the header bar: the
+bar now holds only the gear, and the window buttons off macOS. The logo stays
+on the download site.
+
+On macOS the traffic lights did not sit in the middle of the 40px bar. A
+hidden title bar leaves them where a standard title bar puts them: in the
+author's screenshot (macOS, 2x) they were 7.5pt from the window's top and left
+edges and 12pt tall, centred about 13pt down, so 21pt of bar showed under them
+against 7pt above. Wails v2 has no option to move them (Electron's
+`trafficLightPosition` has no equivalent in its `mac.Options`). So on macOS the bar is
+`layout.titlebarMac` (28px) tall, the height of a standard title bar, and the
+gear is the smaller button, inset from the right as the lights are from the
+left. Windows and Linux keep 40px. The screenshot settles the `[verify]` above:
+the lights sit inside the bar; `pl-20` went with the logo. `[verify]` on the
+author's Mac: the lights centred in the 28px bar.
