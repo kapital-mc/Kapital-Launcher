@@ -118,6 +118,9 @@ func TestOpenLoginURLOpensOnlyTailscalesPage(t *testing.T) {
 		"visit https://login.tailscale.com.evil.example/a/abc",
 		"visit http://login.tailscale.com/a/abc",
 		"visit https://evil.example/https://login.tailscale.com/",
+		"visit https://evil.example/?u=https://login.tailscale.com/a/abc",
+		"visit https://login.tailscale.com/a/abc?next=https://evil.example",
+		"visit https://login.tailscale.com/admin",
 	} {
 		if ok, _ := openLoginURL(strings.NewReader(bad), open); ok || len(opened) != 0 {
 			t.Errorf("opened %q from %q", opened, bad)

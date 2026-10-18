@@ -793,8 +793,9 @@ with a 60 s stall limit, and removed on any failure; (e) on macOS
 Tailscale's `Developer ID Installer: Tailscale Inc. (W5364U7YZB)` before the
 package is opened; (f) the installer is the OS's own (`msiexec /passive`,
 `open -W`), so the password or administrator prompt is the OS's; one install
-runs at a time. (g) Sign-in runs `tailscale login` and opens only an https
-address on `login.tailscale.com` with no user info, the first it prints; the
+runs at a time. (g) Sign-in runs `tailscale login` and opens only a whole
+word of its output that is `https://login.tailscale.com/a/<key>` with a plain
+key and no user info, query or fragment, the first it prints; the
 address is never logged, and the run ends after 10 minutes. (h) Only
 `BackendState` and `Version` are read from `tailscale status --json` (4 MiB
 cap); peers, users and addresses are never kept or logged.

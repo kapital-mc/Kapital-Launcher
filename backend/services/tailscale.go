@@ -43,9 +43,9 @@ const (
 	maxTailscaleStatus     = 4 << 20 // the status lists every peer
 )
 
-// tailscaleLoginURL is the sign-in page `tailscale login` prints. Only an
-// address of this shape is opened in the browser.
-var tailscaleLoginURL = regexp.MustCompile(`https://login\.tailscale\.com/a/[A-Za-z0-9]+`)
+// tailscaleLoginKey is the last segment of the sign-in page `tailscale login`
+// prints, https://login.tailscale.com/a/<key>.
+var tailscaleLoginKey = regexp.MustCompile(`^[A-Za-z0-9]{1,128}$`)
 
 // TailscaleCLI finds and runs Tailscale's command line. Its OS calls are
 // injected so it is tested on a machine with no Tailscale.
@@ -222,8 +222,14 @@ func openLoginURL(r io.Reader, open func(string) error) (bool, error) {
 		if opened {
 			continue
 		}
-		link := tailscaleLoginURL.FindString(sc.Text())
-		if link == "" || !isTailscaleLoginURL(link) {
+		link := ""
+		for _, field := range strings.Fields(sc.Text()) {
+			if isTailscaleLoginURL(field) {
+				link = field
+				break
+			}
+		}
+		if link == "" {
 			continue
 		}
 		opened = true
@@ -236,7 +242,15 @@ func openLoginURL(r io.Reader, open func(string) error) (bool, error) {
 	return opened, errors.Join(openErr, sc.Err())
 }
 
+// isTailscaleLoginURL holds a word of the CLI's output to the whole sign-in
+// address: https, Tailscale's login host exactly, /a/ and a plain key, nothing
+// else.
 func isTailscaleLoginURL(link string) bool {
 	u, err := url.Parse(link)
-	return err == nil && u.Scheme == "https" && u.Host == "login.tailscale.com" && u.User == nil
+	if err != nil || u.Scheme != "https" || u.Host != "login.tailscale.com" || u.User != nil ||
+		u.RawQuery != "" || u.Fragment != "" {
+		return false
+	}
+	key, ok := strings.CutPrefix(u.Path, "/a/")
+	return ok && tailscaleLoginKey.MatchString(key)
 }
