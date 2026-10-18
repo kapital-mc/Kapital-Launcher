@@ -37,7 +37,18 @@ const decode = (s) =>
     return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match
   })
 
-const text = (html) => decode(html.replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim()
+// Tags are stripped until none is left, so "<<b>script>" cannot reassemble
+// into one. The text is plain text from here on and is escaped when rendered.
+function stripTags(html) {
+  let previous
+  do {
+    previous = html
+    html = html.replace(/<[^>]*>/g, '')
+  } while (html !== previous)
+  return html
+}
+
+const text = (html) => decode(stripTags(html)).replace(/\s+/g, ' ').trim()
 
 // GitHub's generated notes end an item with "by @user in #123", or with the
 // pull request's URL in place of "#123". The reader gets the sentence only.
