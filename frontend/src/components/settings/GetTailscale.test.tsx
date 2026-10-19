@@ -33,7 +33,7 @@ describe('GetTailscale', () => {
     const calls = popup(null, info('missing'))
     const dialog = screen.getByRole('dialog', { name: 'Get Tailscale' })
     expect(dialog).toHaveTextContent('Version 1.104.1 · 21.3 MB · pkgs.tailscale.com')
-    expect(dialog).toHaveTextContent('keeps working when playit has trouble')
+    expect(dialog).toHaveTextContent('still works when playit is down')
     fireEvent.click(screen.getByRole('button', { name: 'Download' }))
     expect(calls.onConfirm).toHaveBeenCalledOnce()
   })

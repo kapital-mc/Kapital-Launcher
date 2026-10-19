@@ -31,16 +31,10 @@ export function GetTailscale({ release, install, info, onConfirm, onClose, onCon
       facts={`Version ${release.version} · ${megabytes(release.size)} · pkgs.tailscale.com`}
       stage={installStage(install, tailscaleStepLine)}
       intro={
-        <>
-          <p className="m-0">
-            Tailscale is a private network the server can be reached through. The official installer
-            comes from Tailscale&apos;s own package server and is checked before it runs.
-          </p>
-          <p className="m-0">
-            It usually connects you straight to the server, so the ping is lower and the connection
-            steadier than through playit, and it keeps working when playit has trouble.
-          </p>
-        </>
+        <p className="m-0">
+          Tailscale connects you to the server over a private network. The connection is usually
+          direct, so the ping is lower than through playit, and it still works when playit is down.
+        </p>
       }
       done={<NextStep info={info} onConnect={onConnect} />}
       onConfirm={onConfirm}

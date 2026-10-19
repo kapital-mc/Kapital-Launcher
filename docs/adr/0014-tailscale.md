@@ -134,6 +134,12 @@ lower ping than playit, and keeps working when playit has trouble. The OS's
 own prompts are no longer announced in the popup; the installer step still
 says the installer is open.
 
+Later the same day the author asked for both paragraphs to be shorter: one
+paragraph now says Tailscale connects over a private network, usually
+directly, with a lower ping than playit, and still works when playit is down.
+Where the installer comes from is left to the facts line (`pkgs.tailscale.com`);
+the check before it runs is unchanged.
+
 Tailscale's download is cancelled from its row in the downloads section like
 Prism's (ADR-11 amendment of the same day, `CancelTailscaleInstall`): only
 while the installer downloads, never once it is being checked or has been
