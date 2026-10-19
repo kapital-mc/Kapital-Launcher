@@ -4,7 +4,10 @@ import { fade } from './fade'
 interface Props {
   /** Shown, or folded away to nothing. */
   open: boolean
-  /** `x` folds the width away, `y` the height. */
+  /**
+   * `y` folds the height away. `x` folds the width, and the height with it, so content taller
+   * than its row's other items leaves the row as short as they are.
+   */
   axis: 'x' | 'y'
   /** For the fold's place in its parent, such as `min-w-0 grow` in a row. */
   className?: string
@@ -22,7 +25,9 @@ interface Props {
 export function Fold({ open, axis, className = '', children }: Props) {
   const track =
     axis === 'x'
-      ? `transition-[grid-template-columns] ${open ? 'grid-cols-[1fr]' : 'grid-cols-[0fr]'}`
+      ? `transition-[grid-template-columns,grid-template-rows] ${
+          open ? 'grid-cols-[1fr] grid-rows-[1fr]' : 'grid-cols-[0fr] grid-rows-[0fr]'
+        }`
       : `transition-[grid-template-rows] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`
   return (
     <span

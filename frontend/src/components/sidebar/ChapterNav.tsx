@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useChapterStore } from '../../stores/useChapterStore'
 import { Fold } from '../ui/Fold'
 import { ChapterButton } from './ChapterButton'
@@ -17,10 +18,11 @@ interface Props {
  *
  * Its place is measured from the selected row before paint, so the first
  * render shows it in place with no transition; every later selection moves
- * it. A window resize is a re-measure, not a glide. A compact sidebar changes
- * no row's height, only its width, which the highlight follows by itself; the
- * heading sits outside the rows' frame, so folding it moves the frame, not the
- * offsets measured inside it.
+ * it. A window resize is a re-measure, not a glide, and so is a row changing
+ * size: compacting the sidebar folds each row to a square, and the highlight
+ * follows the selected row frame by frame rather than gliding after it. The
+ * heading sits outside the rows' frame, so folding it moves the frame, not
+ * the offsets measured inside it.
  */
 export function ChapterNav({ compact = false }: Props) {
   const chapters = useChapterStore((s) => s.manifest.chapters)
@@ -30,22 +32,40 @@ export function ChapterNav({ compact = false }: Props) {
   const rows = useRef(new Map<string, HTMLElement>())
   const [place, setPlace] = useState<{ top: number; height: number } | null>(null)
   const [settled, setSettled] = useState(false)
+  // Whether the last move was a selection, which glides; a re-measure snaps.
+  const [glide, setGlide] = useState(true)
+  const selected = useRef(selectedId)
+  selected.current = selectedId
+
+  const measure = (moving: boolean) => {
+    const row = rows.current.get(selected.current)
+    if (!row) return
+    setGlide(moving)
+    setPlace({ top: row.offsetTop, height: row.offsetHeight })
+  }
+  const measureRef = useRef(measure)
+  measureRef.current = measure
 
   useLayoutEffect(() => {
-    const measure = () => {
-      const row = rows.current.get(selectedId)
-      if (!row) return
-      setPlace({ top: row.offsetTop, height: row.offsetHeight })
-    }
-    measure()
+    measureRef.current(true)
     // The first placement is instant; after it, moves glide.
     const settle = requestAnimationFrame(() => setSettled(true))
-    window.addEventListener('resize', measure)
-    return () => {
-      cancelAnimationFrame(settle)
-      window.removeEventListener('resize', measure)
-    }
+    return () => cancelAnimationFrame(settle)
   }, [selectedId, chapters])
+
+  // Rows change size as the sidebar folds, and every frame of it is followed
+  // before it paints. jsdom has no ResizeObserver; the window's resize stands in.
+  useEffect(() => {
+    const follow = () => measureRef.current(false)
+    const ro =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => flushSync(follow))
+    rows.current.forEach((row) => ro?.observe(row))
+    window.addEventListener('resize', follow)
+    return () => {
+      ro?.disconnect()
+      window.removeEventListener('resize', follow)
+    }
+  }, [chapters])
 
   return (
     <nav aria-label="Chapters" className="flex flex-col">
@@ -63,7 +83,7 @@ export function ChapterNav({ compact = false }: Props) {
             // eslint-disable-next-line no-restricted-syntax
             style={{ transform: `translateY(${place.top}px)`, height: place.height }}
             className={`bg-raised border-accent-edge ease-glide pointer-events-none absolute inset-x-0 top-0 rounded-lg border motion-reduce:transition-none ${
-              settled ? 'duration-slow transition-[transform,height]' : ''
+              settled && glide ? 'duration-slow transition-[transform,height]' : ''
             }`}
           />
         )}

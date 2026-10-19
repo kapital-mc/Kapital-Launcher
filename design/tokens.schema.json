@@ -176,7 +176,7 @@
         "sidebarCompact": {
           "type": "integer",
           "minimum": 1,
-          "description": "The sidebar's width when compact: the chapter rows' icon column (an icon in its row's padding and border) between the sidebar's own side padding, so nothing moves sideways as it narrows."
+          "description": "The sidebar's width when compact: the chapter rows' icon column (an icon in its row's padding and border) between the sidebar's own side padding, plus its 1px right border, so nothing moves sideways as it narrows and the account tile is square."
         },
         "hero": {
           "type": "integer",

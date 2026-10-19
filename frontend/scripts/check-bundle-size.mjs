@@ -89,7 +89,11 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 93 since the compact sidebar (2026-10-19): the header's sidebar button, its two
 // glyphs, the folds that close the account tile to a square and the saved choice
 // are all on screen from the first paint. Measured 92.85 KB, from 92.3 KB before it.
-const BUDGET_KB = 93
+// 93.5 the same day: the header's tools (Settings, Open Prism, the wiki and the update
+// button) are drawn from the first paint, so the update store, which only the lazy popup
+// read before, is in the entry now, with the wiki's binding and two glyphs. The popup
+// itself still loads after the first paint. Measured 93.4 KB.
+const BUDGET_KB = 93.5
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

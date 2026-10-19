@@ -1,13 +1,13 @@
 import type { Ref } from 'react'
 import type { Chapter } from '../../types'
 import { chapterArt, chapterIcon } from '../../lib/art'
-import { fade } from '../ui/fade'
+import { Fold } from '../ui/Fold'
 
 interface Props {
   chapter: Chapter
   current: boolean
   onSelect: (id: string) => void
-  /** The sidebar is compact: the text fades and the row narrows to its icon, which keeps its place. */
+  /** The sidebar is compact: the text folds away and the row is a square around its icon, which keeps its place. */
   compact?: boolean
   /** The nav measures the row to place the gliding highlight behind it (#59). */
   ref?: Ref<HTMLButtonElement>
@@ -35,6 +35,8 @@ export function ChapterButton({ chapter, current, onSelect, compact = false, ref
       type="button"
       data-chapter={chapter.id}
       aria-current={current ? 'true' : undefined}
+      // Folded, the text is inert, so the row names itself.
+      aria-label={compact ? `${chapter.number} ${chapter.name}` : undefined}
       onClick={() => onSelect(chapter.id)}
       className={`duration-fast ease-standard relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors ${
         current ? '' : 'hover:bg-raised-2'
@@ -66,13 +68,16 @@ export function ChapterButton({ chapter, current, onSelect, compact = false, ref
           aria-hidden
         />
       )}
-      <div className={`flex min-w-0 grow flex-col gap-0.5 whitespace-nowrap ${fade(!compact)}`}>
-        <div className="flex items-baseline gap-2">
-          <span className="text-accent text-2xs font-mono">{chapter.number}</span>
-          <span className="font-display truncate text-lg font-semibold">{chapter.name}</span>
-        </div>
-        <span className="text-fg-faint text-xs">{chapter.era}</span>
-      </div>
+      {/* Compact, the text folds out of the row's width and height, so the row is a square. */}
+      <Fold open={!compact} axis="x" className="min-w-0 grow">
+        <span className="flex flex-col gap-0.5 whitespace-nowrap">
+          <span className="flex items-baseline gap-2">
+            <span className="text-accent text-2xs font-mono">{chapter.number}</span>
+            <span className="font-display truncate text-lg font-semibold">{chapter.name}</span>
+          </span>
+          <span className="text-fg-faint text-xs">{chapter.era}</span>
+        </span>
+      </Fold>
     </button>
   )
 }

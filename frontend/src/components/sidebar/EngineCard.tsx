@@ -66,67 +66,75 @@ export function EngineCard({ onOpenAccount, accountOpen = false, compact = false
 
   return (
     <div
-      className={`duration-fast ease-standard flex flex-col rounded-lg border transition-[background-color,border-color,padding] motion-reduce:transition-none ${
-        compact ? 'p-3.5' : 'p-3'
-      } ${accountOpen ? 'bg-accent-wash border-accent-edge' : 'bg-raised border-line'}`}
+      className={`duration-fast ease-standard rounded-lg border transition-colors ${
+        accountOpen ? 'bg-accent-wash border-accent-edge' : 'bg-raised border-line'
+      }`}
     >
-      <div className="flex items-center">
-        <button
-          type="button"
-          aria-label={`Account, ${name}`}
-          aria-pressed={accountOpen}
-          disabled={!onOpenAccount}
-          onClick={() => onOpenAccount?.()}
-          className="hover:bg-hover duration-fast ease-standard -m-1.5 flex min-w-0 grow cursor-pointer items-center rounded-md p-1.5 text-left transition-colors disabled:cursor-default disabled:hover:bg-transparent"
-        >
-          <span className="bg-hover flex size-8 shrink-0 items-center justify-center rounded-sm font-mono text-xs">
-            {initials || 'KK'}
-          </span>
-          <Fold open={!compact} axis="x" className="min-w-0 grow">
-            <span className="flex items-center gap-2.5 pl-2.5">
-              <span className="flex min-w-0 grow flex-col gap-0.5">
-                <span className="truncate text-sm font-semibold">{name}</span>
-                <span className="text-fg-faint text-2xs truncate" title={accountLine}>
-                  {accountLine}
+      {/* The padding moves with the folds, on their curve: faster, it would shrink the tile for a
+          moment as it widens again, before the folds have opened enough to outgrow it. */}
+      <div
+        className={`duration-slow ease-glide flex flex-col transition-[padding] motion-reduce:transition-none ${
+          compact ? 'p-3.5' : 'p-3'
+        }`}
+      >
+        <div className="flex items-center">
+          <button
+            type="button"
+            aria-label={`Account, ${name}`}
+            aria-pressed={accountOpen}
+            disabled={!onOpenAccount}
+            onClick={() => onOpenAccount?.()}
+            className="hover:bg-hover duration-fast ease-standard -m-1.5 flex min-w-0 grow cursor-pointer items-center rounded-md p-1.5 text-left transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+          >
+            <span className="bg-hover flex size-8 shrink-0 items-center justify-center rounded-sm font-mono text-xs">
+              {initials || 'KK'}
+            </span>
+            <Fold open={!compact} axis="x" className="min-w-0 grow">
+              <span className="flex items-center gap-2.5 pl-2.5">
+                <span className="flex min-w-0 grow flex-col gap-0.5">
+                  <span className="truncate text-sm font-semibold">{name}</span>
+                  <span className="text-fg-faint text-2xs truncate" title={accountLine}>
+                    {accountLine}
+                  </span>
                 </span>
+                {onOpenAccount && <Icon icon={ChevronRight} size="sm" className="text-fg-faint" />}
               </span>
-              {onOpenAccount && <Icon icon={ChevronRight} size="sm" className="text-fg-faint" />}
+            </Fold>
+          </button>
+          <Fold open={!compact} axis="x">
+            <span className="flex pl-1.5">
+              <IconButton
+                icon={RefreshCw}
+                title="Re-detect Prism"
+                size="sm"
+                onClick={() => void refresh()}
+              />
             </span>
           </Fold>
-        </button>
-        <Fold open={!compact} axis="x">
-          <span className="flex pl-1.5">
-            <IconButton
-              icon={RefreshCw}
-              title="Re-detect Prism"
-              size="sm"
-              onClick={() => void refresh()}
-            />
-          </span>
+        </div>
+        <Fold open={!compact} axis="y">
+          <div className="flex flex-col gap-2.5 pt-2.5">
+            <div className="bg-line h-px" />
+            <div className="text-fg-faint text-2xs flex justify-between gap-2 whitespace-nowrap">
+              <span>engine</span>
+              <span
+                className={`min-w-0 truncate font-mono ${
+                  engine !== null && !engine.found ? 'text-danger' : 'text-fg-muted'
+                }`}
+                title={engineLine}
+              >
+                {engineLine}
+              </span>
+            </div>
+            {offer && (
+              <TextLink size="xs" className="self-start" onClick={() => void installPrism()}>
+                Update Prism to {offer.version}
+              </TextLink>
+            )}
+            {updateFailed && <ErrorLine>Update failed: {updateFailed}</ErrorLine>}
+          </div>
         </Fold>
       </div>
-      <Fold open={!compact} axis="y">
-        <div className="flex flex-col gap-2.5 pt-2.5">
-          <div className="bg-line h-px" />
-          <div className="text-fg-faint text-2xs flex justify-between gap-2 whitespace-nowrap">
-            <span>engine</span>
-            <span
-              className={`min-w-0 truncate font-mono ${
-                engine !== null && !engine.found ? 'text-danger' : 'text-fg-muted'
-              }`}
-              title={engineLine}
-            >
-              {engineLine}
-            </span>
-          </div>
-          {offer && (
-            <TextLink size="xs" className="self-start" onClick={() => void installPrism()}>
-              Update Prism to {offer.version}
-            </TextLink>
-          )}
-          {updateFailed && <ErrorLine>Update failed: {updateFailed}</ErrorLine>}
-        </div>
-      </Fold>
     </div>
   )
 }

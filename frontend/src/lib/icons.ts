@@ -15,6 +15,7 @@ export type { LucideIcon } from 'lucide-react'
 export {
   ArrowDown,
   ArrowLeft,
+  BookOpen,
   Check,
   ChevronRight,
   ChevronDown,

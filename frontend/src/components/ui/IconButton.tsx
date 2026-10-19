@@ -17,6 +17,8 @@ interface Props {
    * fills the whole cell, and the group's own frame rounds the outer corners.
    */
   grouped?: boolean
+  /** `accent` draws the glyph in the chapter's colour, for a control that has news, such as an update. */
+  tone?: 'accent'
 }
 
 const BOX = {
@@ -26,14 +28,15 @@ const BOX = {
 } as const
 
 /** One square, centred box for every icon control, so a column of them lines up. */
-export function IconButton({ icon, title, onClick, size = 'md', disabled, grouped }: Props) {
+export function IconButton({ icon, title, onClick, size = 'md', disabled, grouped, tone }: Props) {
+  const colour = tone === 'accent' ? 'text-accent hover:text-accent' : 'text-fg-muted hover:text-fg'
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={title}
       disabled={disabled}
-      className={`${BOX[size]} text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard inline-flex shrink-0 cursor-pointer items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent`}
+      className={`${BOX[size]} ${colour} hover:bg-hover duration-fast ease-standard inline-flex shrink-0 cursor-pointer items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent`}
     >
       <Icon icon={icon} size={size} />
     </button>

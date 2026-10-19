@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { hasWailsBridge, readOr } from '../../lib/ipc'
-import { Copy, Minus, PanelLeftClose, PanelLeftOpen, Settings, Square, X } from '../../lib/icons'
+import { Copy, Minus, Square, X } from '../../lib/icons'
 import type { LucideIcon } from '../../lib/icons'
 import {
   Quit,
@@ -9,7 +9,7 @@ import {
   WindowToggleMaximise,
 } from '../../../wailsjs/runtime/runtime'
 import { Icon } from '../ui/Icon'
-import { IconButton } from '../ui/IconButton'
+import { HeaderTools } from './HeaderTools'
 
 interface Props {
   /** Wails' `Environment().platform`: "windows", "darwin" or "linux". */
@@ -28,13 +28,13 @@ interface Props {
  *
  * macOS keeps its native traffic lights at the top left, so no window buttons
  * are drawn there, and the bar is as tall as a macOS title bar so the lights
- * sit at its middle; the gear is inset from the right as far as the lights
- * are from the left. Everywhere else the bar ends in our own minimise, maximise
- * and close. The bar carries no wordmark (ADR-10 amendment, 2026-10-18).
+ * sit at its middle. Everywhere else the bar ends in our own minimise,
+ * maximise and close. The bar carries no wordmark (ADR-10 amendment,
+ * 2026-10-18).
  *
- * The sidebar's button opens the bar on the left: past the traffic lights on
- * macOS, and elsewhere over the column of chapter icons, which keep their place
- * when the sidebar is compact.
+ * Its tools (HeaderTools) open the bar on the left, the sidebar's button
+ * first: past the traffic lights on macOS, and elsewhere over the column of
+ * chapter icons, which keep their place when the sidebar is compact.
  */
 export function HeaderBar({
   platform,
@@ -52,27 +52,21 @@ export function HeaderBar({
         onDoubleClick={(e) => e.stopPropagation()}
         className={`flex h-full items-center [--wails-draggable:no-drag] ${mac ? 'pl-18' : 'pl-7.5'}`}
       >
-        <IconButton
-          icon={sidebarCompact ? PanelLeftOpen : PanelLeftClose}
-          title={sidebarCompact ? 'Expand sidebar' : 'Compact sidebar'}
+        <HeaderTools
           size={mac ? 'xs' : 'sm'}
-          onClick={() => onToggleSidebar?.()}
-          disabled={!onToggleSidebar}
+          sidebarCompact={sidebarCompact}
+          onToggleSidebar={onToggleSidebar}
+          onOpenSettings={onOpenSettings}
         />
       </div>
-      <div
-        onDoubleClick={(e) => e.stopPropagation()}
-        className="flex h-full items-center gap-1 [--wails-draggable:no-drag]"
-      >
-        <IconButton
-          icon={Settings}
-          title="Settings"
-          size={mac ? 'xs' : 'sm'}
-          onClick={() => onOpenSettings?.()}
-          disabled={!onOpenSettings}
-        />
-        {!mac && <WindowControls />}
-      </div>
+      {!mac && (
+        <div
+          onDoubleClick={(e) => e.stopPropagation()}
+          className="flex h-full items-center [--wails-draggable:no-drag]"
+        >
+          <WindowControls />
+        </div>
+      )}
     </header>
   )
 }
