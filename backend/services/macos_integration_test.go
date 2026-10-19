@@ -472,8 +472,10 @@ func TestMacLauncherStartsWithItsMenus(t *testing.T) {
 // windowChromeScript lists the launcher's first window and its title bar
 // buttons as "<subrole> x y w h" lines, in screen points.
 const windowChromeScript = `on box(e)
-	set p to position of e
-	set s to size of e
+	tell application "System Events"
+		set p to position of e
+		set s to size of e
+	end tell
 	return (item 1 of p as string) & " " & (item 2 of p as string) & " " & (item 1 of s as string) & " " & (item 2 of s as string)
 end box
 tell application "System Events" to tell (first process whose unix id is %s)
