@@ -108,7 +108,8 @@
   --layout-slide: 32px;
   --layout-drift: 20px;
   --layout-title: 68px;
-  --layout-titlebar-mac: 28px;
+  --layout-titlebar-mac: 52px;
+  --layout-controls-mac: 80px;
   --layout-sidebar-compact: 95px;
   --layout-play-min: 240px;
   --layout-icon-xs: 14px;

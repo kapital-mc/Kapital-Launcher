@@ -13,6 +13,7 @@ export function emitLayout(src, push) {
     push(`  --layout-${k}: ${src.layout[k]}${unit};`)
   }
   push(`  --layout-titlebar-mac: ${src.layout.titlebarMac}${unit};`)
+  push(`  --layout-controls-mac: ${src.layout.controlsMac}${unit};`)
   push(`  --layout-sidebar-compact: ${src.layout.sidebarCompact}${unit};`)
   push(`  --layout-play-min: ${src.layout.playMin}${unit};`)
   push(`  --layout-icon-xs: ${src.layout.icon.xs}${src.layout.unit};`)

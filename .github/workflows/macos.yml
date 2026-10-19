@@ -3,9 +3,11 @@ name: macOS
 # What a Mac has to show and the unit tests fake (#30, #31), on an Apple Silicon
 # and an Intel runner: the managed Prism installed from its latest release and
 # verified by codesign, its version read through detection, the roots Prism
-# itself creates, Prism quitting on SIGTERM, and the launcher's sync copy run
-# from outside its bundle. ci.yml's backend-macos job compiles and unit-tests
-# the Go on Apple Silicon; this one also runs the unit tests on Intel, the only
+# itself creates, Prism quitting on SIGTERM, the launcher's sync copy run from
+# outside its bundle, and the header sized to the title bar macOS drew, its
+# first button still taking a real click (a picture of it is kept as an
+# artefact). ci.yml's backend-macos job compiles and unit-tests the Go on
+# Apple Silicon; this one also runs the unit tests on Intel, the only
 # Mac the author has. It downloads Prism, so it runs when the macOS paths change,
 # once a week (a new Prism release is met within the week) and from the Actions
 # tab. Nothing here signs in, starts a game or needs a display beyond the
@@ -23,6 +25,8 @@ on:
       - 'backend/services/gameproc*'
       - 'backend/services/macos_integration_test.go'
       - 'backend/splashhost/*darwin*'
+      - 'backend/windowchrome/**'
+      - 'frontend/src/components/shell/HeaderBar.tsx'
       - 'main.go'
       - 'menu.go'
       - 'sync.go'
@@ -44,6 +48,8 @@ on:
       - 'backend/services/gameproc*'
       - 'backend/services/macos_integration_test.go'
       - 'backend/splashhost/*darwin*'
+      - 'backend/windowchrome/**'
+      - 'frontend/src/components/shell/HeaderBar.tsx'
       - 'main.go'
       - 'menu.go'
       - 'sync.go'
