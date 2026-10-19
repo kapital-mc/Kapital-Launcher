@@ -38,7 +38,7 @@ export function HeaderTools({ size, sidebarCompact, onToggleSidebar, onOpenSetti
     <div className="flex items-center gap-1">
       <IconButton
         icon={sidebarCompact ? PanelLeftOpen : PanelLeftClose}
-        title={sidebarCompact ? 'Expand sidebar' : 'Compact sidebar'}
+        title={sidebarCompact ? 'Expand Sidebar' : 'Compact Sidebar'}
         size={size}
         tooltip
         onClick={() => onToggleSidebar?.()}

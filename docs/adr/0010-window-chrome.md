@@ -93,6 +93,10 @@ the button clear of the traffic lights, and the fold animating in WKWebView
 (it moves grid tracks between 1fr and 0fr; a WebView that cannot interpolate
 them snaps instead).
 
+The downloads section above the account tile (Tailscale, 2026-10-19) keeps each
+bar and its percentage when compact; its heading, the names and the steps fold
+away with the rest of the sidebar's text.
+
 The author then asked for the bar's left side to carry the launcher's tools
 after the sidebar's button: Settings (moved from the right, which now holds
 only the window buttons off macOS), Open Prism (greyed out while there is no

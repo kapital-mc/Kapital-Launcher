@@ -27,6 +27,21 @@ const list: PreviewSituation[] = [
     playsInstall: false,
   },
   { id: 'prism-missing', label: 'Prism missing', scope: 'prism', card: false, playsInstall: false },
+  {
+    id: 'launcher-update',
+    label: 'Kapital Launcher update available',
+    scope: 'launcher',
+    card: false,
+    playsInstall: false,
+  },
+  {
+    id: 'tailscale-disconnected',
+    label: 'Tailscale installed, not connected',
+    scope: 'launcher',
+    card: false,
+    playsInstall: false,
+    page: 'settings',
+  },
 ]
 
 describe('PreviewSection', () => {
@@ -61,15 +76,17 @@ describe('PreviewSection', () => {
     Reflect.deleteProperty(window, 'go')
   })
 
-  it('lists the situations Go sends, the chapter ones apart from Prism', async () => {
+  it("lists the situations Go sends in the launcher's, Prism's and an instance's groups", async () => {
     render(<PreviewSection onStarted={() => undefined} />)
-    const chapterGroup = await screen.findByRole('group', { name: 'Chapter situations' })
-    expect(chapterGroup).toHaveTextContent('Crashed, with a crash report')
-    expect(chapterGroup).toHaveTextContent('Running, to try Stop')
-    expect(chapterGroup).not.toHaveTextContent('Prism missing')
-    expect(screen.getByRole('group', { name: 'Prism situations' })).toHaveTextContent(
-      'Prism missing',
-    )
+    const instance = await screen.findByRole('group', { name: 'Instance previews' })
+    expect(instance).toHaveTextContent('Crashed, with a crash report')
+    expect(instance).toHaveTextContent('Running, to try Stop')
+    expect(instance).not.toHaveTextContent('Prism missing')
+    expect(screen.getByRole('group', { name: 'Prism previews' })).toHaveTextContent('Prism missing')
+    const launcher = screen.getByRole('group', { name: 'Launcher previews' })
+    expect(launcher).toHaveTextContent('Kapital Launcher update available')
+    expect(launcher).toHaveTextContent('Tailscale installed, not connected')
+    expect(launcher).not.toHaveTextContent('Prism missing')
     expect(screen.getByText(/writes nothing, starts nothing and reaches no network/)).toBeVisible()
   })
 
@@ -80,6 +97,18 @@ describe('PreviewSection', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Crashed, with a crash report' }))
     await waitFor(() => expect(onStarted).toHaveBeenCalledExactlyOnceWith('frangfurd'))
     expect(App.StartPreview).toHaveBeenCalledExactlyOnceWith('frangfurd', 'crashed')
+  })
+
+  it("opens the Tailscale chapter's settings for a Tailscale preview", async () => {
+    useChapterStore.setState({ selectedId: 'luxemburg' })
+    const onStarted = vi.fn()
+    render(<PreviewSection onStarted={onStarted} />)
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Tailscale installed, not connected' }),
+    )
+    await waitFor(() => expect(onStarted).toHaveBeenCalledExactlyOnceWith('frangfurd', 'settings'))
+    expect(App.StartPreview).toHaveBeenCalledWith('frangfurd', 'tailscale-disconnected')
+    expect(App.GetTailscale).toHaveBeenCalled()
   })
 
   it('previews for the chapter picked instead', async () => {

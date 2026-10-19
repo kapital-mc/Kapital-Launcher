@@ -65,6 +65,8 @@ export interface PlayerProfile {
 export interface ServerAddress {
   label: string
   address: string
+  /** Reached only through Tailscale: offered once the chapter's Tailscale switch is on. */
+  tailscale?: boolean
 }
 
 export interface Server {
@@ -305,12 +307,17 @@ export interface PackChangelog {
 export interface PreviewSituation {
   id: string
   label: string
-  /** A chapter's own screens, or Prism's. */
-  scope: 'chapter' | 'prism'
+  /** A chapter's own screens, Prism's, or the launcher's (its update, the player's Tailscale). */
+  scope: 'chapter' | 'prism' | 'launcher'
   /** Whether it opens the loading card, which needs the loading splash on. */
   card: boolean
-  /** Whether the view then runs the Prism install, whose progress and failure are the situation. */
+  /**
+   * Whether the view then runs its scope's install (Prism's, or the launcher's one:
+   * Tailscale), whose progress and failure are the situation.
+   */
   playsInstall: boolean
+  /** The chapter page its screen is on; "settings" is that of the first chapter with a Tailscale address. */
+  page?: 'settings'
 }
 
 /** What StartPreview says happened. */
@@ -406,6 +413,8 @@ export interface AppSettings {
    * settings page, off for every chapter until the player turns it on.
    */
   joinServers?: string[]
+  /** The chapters whose Tailscale address the player turned on: an Address choice and an in-game server list entry. */
+  tailscaleServers?: string[]
   /**
    * Chapter id to the jars switched off (issue 156). Go's own: GetSettings never fills it and a
    * save never changes it; the mods section reads and writes the list through GetChapterMods and

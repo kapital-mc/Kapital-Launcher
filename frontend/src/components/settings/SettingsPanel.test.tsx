@@ -445,6 +445,12 @@ describe('SettingsPanel previews', () => {
     fireEvent.click(toggle)
     expect(toggle).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByLabelText('Local pack for Luxemburg')).toBeInTheDocument()
+    // The previews sit closed under their own heading, and load when it opens.
+    const preview = screen.getByRole('button', { name: 'Preview' })
+    expect(preview).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('group', { name: 'Instance previews' })).toBeNull()
+    fireEvent.click(preview)
+    expect(preview).toHaveAttribute('aria-expanded', 'true')
     fireEvent.click(await screen.findByRole('button', { name: 'Crashed, with a crash report' }))
     await waitFor(() => expect(onShowChapter).toHaveBeenCalledExactlyOnceWith('luxemburg'))
     expect(App.StartPreview).toHaveBeenCalledExactlyOnceWith('luxemburg', 'crashed')

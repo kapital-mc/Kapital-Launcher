@@ -22,6 +22,10 @@ export function ClearPreviews() {
   return window['go']['main']['App']['ClearPreviews']();
 }
 
+export function ConnectTailscale(arg1) {
+  return window['go']['main']['App']['ConnectTailscale'](arg1);
+}
+
 export function CopyPlayerUUID() {
   return window['go']['main']['App']['CopyPlayerUUID']();
 }
@@ -110,6 +114,14 @@ export function GetSettings() {
   return window['go']['main']['App']['GetSettings']();
 }
 
+export function GetTailscale() {
+  return window['go']['main']['App']['GetTailscale']();
+}
+
+export function GetTailscaleRelease() {
+  return window['go']['main']['App']['GetTailscaleRelease']();
+}
+
 export function GetUpdate() {
   return window['go']['main']['App']['GetUpdate']();
 }
@@ -132,6 +144,10 @@ export function InstallChapter(arg1) {
 
 export function InstallPrism() {
   return window['go']['main']['App']['InstallPrism']();
+}
+
+export function InstallTailscale() {
+  return window['go']['main']['App']['InstallTailscale']();
 }
 
 export function LaunchChapter(arg1) {
@@ -160,6 +176,10 @@ export function OpenInstanceFolder(arg1) {
 
 export function OpenPrism() {
   return window['go']['main']['App']['OpenPrism']();
+}
+
+export function OpenTailscale() {
+  return window['go']['main']['App']['OpenTailscale']();
 }
 
 export function OpenWikiPage(arg1) {

@@ -40,9 +40,10 @@ func TestBundledManifestIsValid(t *testing.T) {
 	if fra.Server == nil {
 		t.Errorf("Frangfurd has a server: %+v", fra.Server)
 	}
-	// Frangfurd's two addresses, Global the default; Lichdenstein's one
-	// (issue 151).
-	if got := fra.Server.Addresses; len(got) != 2 || got[0] != addr("Global", "female-specified.gl.joinmc.link") || got[1] != addr("Germany", "rails-enjoyed.tun.ply.gg") {
+	// Frangfurd's two public addresses, Global the default, then its
+	// Tailscale one; Lichdenstein's one (issue 151).
+	tail := models.ServerAddress{Label: "Tailscale", Address: "ts.frangfurd.click", Tailscale: true, Invite: "https://login.tailscale.com/admin/invite/ALNcG9hKCCNaCrtn659n11"}
+	if got := fra.Server.Addresses; len(got) != 3 || got[0] != addr("Global", "female-specified.gl.joinmc.link") || got[1] != addr("Germany", "rails-enjoyed.tun.ply.gg") || got[2] != tail {
 		t.Errorf("Frangfurd's addresses: %+v", got)
 	}
 	if got := lic.Server.Addresses; len(got) != 1 || got[0] != addr("Main", "stamina-berkshire.tun.ply.gg") {

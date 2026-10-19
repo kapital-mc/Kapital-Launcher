@@ -1,14 +1,33 @@
-/* The download popup's motion: it opens and closes with the app's reveal (a
-   short rise out of a slight blur, frontend/src/style.css), the page dims and
-   softens behind it, and the panel for the other system fades in when the
-   switch moves. All of it is CSS on the browser's own popover: display and
-   overlay are transitioned as discrete properties so the closing half plays
-   too, and @starting-style gives the opening half somewhere to start from.
-   A browser without either simply shows and hides the popup. */
-#download {
+/* The popups' motion (download, changelog, code signing policy): each opens
+   with the app's reveal (a short rise out of a slight blur,
+   frontend/src/style.css) and closes the same way in reverse, while the page
+   dims and softens behind it, and in the download popup the panel for the
+   other system fades in when the switch moves. Opening is CSS on the
+   browser's own popover: @starting-style gives it somewhere to start from,
+   and display and overlay are transitioned as discrete properties. Closing
+   is the data-closing animation below, which src/popup.js plays before it
+   hides the popup; the transitions remain for a page without the script. A
+   browser without either simply shows and hides the popup.
+
+   A transition runs with the timing of the state it goes to. Opening is the
+   reveal's fast-out curve, so the popup is nearly there at once. Closing is
+   the slow duration on the glide curve, the card's motion, so the fade is
+   seen rather than ending in its first frames as the fast-out curve would. */
+[popover] {
   opacity: 0;
   translate: 0 var(--layout-reveal-rise);
   filter: blur(var(--effect-reveal-blur));
+  transition:
+    opacity var(--duration-slow) var(--ease-glide),
+    translate var(--duration-slow) var(--ease-glide),
+    filter var(--duration-slow) var(--ease-glide),
+    display var(--duration-slow) allow-discrete,
+    overlay var(--duration-slow) allow-discrete;
+}
+[popover]:popover-open {
+  opacity: 1;
+  translate: 0 0;
+  filter: none;
   transition:
     opacity var(--duration-reveal) var(--ease-out),
     translate var(--duration-reveal) var(--ease-out),
@@ -16,34 +35,55 @@
     display var(--duration-reveal) allow-discrete,
     overlay var(--duration-reveal) allow-discrete;
 }
-#download:popover-open {
-  opacity: 1;
-  translate: 0 0;
-  filter: none;
-}
 @starting-style {
-  #download:popover-open {
+  [popover]:popover-open {
     opacity: 0;
     translate: 0 var(--layout-reveal-rise);
     filter: blur(var(--effect-reveal-blur));
   }
 }
 
-#download::backdrop {
+[popover]::backdrop {
   opacity: 0;
   backdrop-filter: blur(var(--effect-motion-blur));
+  transition:
+    opacity var(--duration-slow) var(--ease-glide),
+    display var(--duration-slow) allow-discrete,
+    overlay var(--duration-slow) allow-discrete;
+}
+[popover]:popover-open::backdrop {
+  opacity: 1;
   transition:
     opacity var(--duration-reveal) var(--ease-standard),
     display var(--duration-reveal) allow-discrete,
     overlay var(--duration-reveal) allow-discrete;
 }
-#download:popover-open::backdrop {
-  opacity: 1;
-}
 @starting-style {
-  #download:popover-open::backdrop {
+  [popover]:popover-open::backdrop {
     opacity: 0;
   }
+}
+
+/* The closing half when src/popup.js runs: it keeps the popup open, in the
+   top layer, while this plays, then hides it, so every browser shows it. The
+   reverse of the reveal, on the slow duration and the glide curve. */
+@keyframes popup-out {
+  to {
+    opacity: 0;
+    translate: 0 var(--layout-reveal-rise);
+    filter: blur(var(--effect-reveal-blur));
+  }
+}
+@keyframes popup-backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+[popover][data-closing] {
+  animation: popup-out var(--duration-slow) var(--ease-glide) forwards;
+}
+[popover][data-closing]::backdrop {
+  animation: popup-backdrop-out var(--duration-slow) var(--ease-glide) forwards;
 }
 
 /* The two systems' panels swap by display, so the one coming in starts clear
@@ -58,9 +98,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #download,
-  #download::backdrop,
+  [popover],
+  [popover]:popover-open,
+  [popover]::backdrop,
+  [popover]:popover-open::backdrop,
   .download-panel {
     transition: none;
+  }
+  [popover][data-closing],
+  [popover][data-closing]::backdrop {
+    animation: none;
   }
 }

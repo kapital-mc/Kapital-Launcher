@@ -47,6 +47,12 @@ type AppSettings struct {
 	// address; the address joined is the chapter's chosen one
 	// (services.ServerAddress). Kept sorted and without repeats.
 	JoinServers []string `json:"joinServers,omitempty"`
+	// TailscaleServers lists the chapter ids whose Tailscale address the player
+	// turned on: the address becomes a choice on the chapter's settings page and
+	// an entry in the instance's in-game server list. Chapter ids of the
+	// manifest whose server has a Tailscale address, never an address. Kept
+	// sorted and without repeats.
+	TailscaleServers []string `json:"tailscaleServers,omitempty"`
 	// DisabledMods maps a chapter id to the jar base names ("Mod-1.2.3.jar")
 	// the player has switched off in that chapter's instance (issue 156). Written
 	// only by SetModsDisabled, which checks each name against the instance's mods

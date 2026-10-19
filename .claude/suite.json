@@ -52,6 +52,11 @@
         "cwd": "site"
       },
       {
+        "name": "site changelog tests",
+        "run": "pnpm test",
+        "cwd": "site"
+      },
+      {
         "name": "gofmt",
         "run": "test -z \"$(gofmt -l .)\""
       },

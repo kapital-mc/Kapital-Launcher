@@ -27,26 +27,38 @@ export function isPlaceholderAddress(address: string | null | undefined): boolea
 }
 
 /**
- * The address a chapter's server is reached at: the one the saved choice (a
- * label) names, else the first, as Go's services.ServerAddress resolves it
- * (issue 151). Used only to tell a placeholder from a real address: the
- * address itself is never shown.
+ * The address entry in use: the one the saved choice (a label) names, else
+ * the first, as Go's services.ServerAddress resolves it (issue 151). The
+ * Tailscale address counts only while the chapter's Tailscale switch is on.
+ */
+function chosenEntry(
+  server: Server | null | undefined,
+  choice: string | undefined,
+  tailscaleOn: boolean,
+) {
+  const list = server?.addresses ?? []
+  return list.find((a) => a.label === choice && (!a.tailscale || tailscaleOn)) ?? list[0]
+}
+
+/**
+ * The address a chapter's server is reached at. Used only to tell a
+ * placeholder from a real address: the address itself is never shown.
  */
 export function chosenAddress(
   server: Server | null | undefined,
   choice: string | undefined,
+  tailscaleOn = false,
 ): string | undefined {
-  const list = server?.addresses ?? []
-  return (list.find((a) => a.label === choice) ?? list[0])?.address
+  return chosenEntry(server, choice, tailscaleOn)?.address
 }
 
 /** The label of the address in use: the saved choice when the manifest lists it, else the first. */
 export function chosenLabel(
   server: Server | null | undefined,
   choice: string | undefined,
+  tailscaleOn = false,
 ): string | undefined {
-  const list = server?.addresses ?? []
-  return (list.find((a) => a.label === choice) ?? list[0])?.label
+  return chosenEntry(server, choice, tailscaleOn)?.label
 }
 
 /** A server address formatted for a fact row: the placeholder marker when unsettled. */

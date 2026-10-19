@@ -94,6 +94,16 @@ type Server struct {
 type ServerAddress struct {
 	Label   string `json:"label"`
 	Address string `json:"address"`
+	// Tailscale marks the address reached only through Tailscale: a name for
+	// the server's tailnet address. A chapter has at most one and it is never
+	// the first, so the default always works without Tailscale. It is offered
+	// only once the player turns the chapter's Tailscale switch on
+	// (AppSettings.TailscaleServers).
+	Tailscale bool `json:"tailscale,omitempty"`
+	// Invite is the Tailscale share link that gives a player access to the
+	// server's machine (https://login.tailscale.com/admin/invite/<code>), for a
+	// Tailscale address only. Connect opens it in the browser.
+	Invite string `json:"invite,omitempty"`
 }
 
 // WikiTeaser is the "From the wiki" panel: a title, one line, and where to read on.

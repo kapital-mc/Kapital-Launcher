@@ -12,6 +12,8 @@ export function ChoosePrismRoot():Promise<string>;
 
 export function ClearPreviews():Promise<void>;
 
+export function ConnectTailscale(arg1:string):Promise<void>;
+
 export function CopyPlayerUUID():Promise<void>;
 
 export function CopyRedactedLog():Promise<number>;
@@ -56,6 +58,10 @@ export function GetServerStatus(arg1:string):Promise<models.ServerStatus>;
 
 export function GetSettings():Promise<models.AppSettings>;
 
+export function GetTailscale():Promise<models.TailscaleInfo>;
+
+export function GetTailscaleRelease():Promise<models.TailscaleRelease>;
+
 export function GetUpdate():Promise<models.UpdateInfo>;
 
 export function GetWikiArtStats():Promise<models.WikiArtStats>;
@@ -67,6 +73,8 @@ export function GetWikiShots():Promise<Array<models.WikiShot>>;
 export function InstallChapter(arg1:string):Promise<models.InstanceReport>;
 
 export function InstallPrism():Promise<void>;
+
+export function InstallTailscale():Promise<void>;
 
 export function LaunchChapter(arg1:string):Promise<void>;
 
@@ -81,6 +89,8 @@ export function OpenExternal(arg1:string):Promise<void>;
 export function OpenInstanceFolder(arg1:string):Promise<void>;
 
 export function OpenPrism():Promise<void>;
+
+export function OpenTailscale():Promise<void>;
 
 export function OpenWikiPage(arg1:string):Promise<void>;
 

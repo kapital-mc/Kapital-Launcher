@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Chapter, DHDownloadProgress, DHSnapshotInfo } from '../../types'
 import { errMsg } from '../../lib/ipc'
 import { Download, X } from '../../lib/icons'
@@ -8,6 +8,7 @@ import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
+import { ProgressBar } from '../ui/ProgressBar'
 import { ErrorLine, Hint } from '../ui/Notes'
 import { SubHeading } from '../ui/Section'
 import { SettingsCard } from '../ui/SettingsLayout'
@@ -22,7 +23,7 @@ interface Props {
  * generated, which otherwise fills in slowly while the player plays. The card reads what is
  * published when it opens (its date, size and dimensions) and downloads only on Download. Terrain
  * the instance already holds for the server is replaced only after the player confirms. While it
- * runs, the bar follows dh:download and Cancel keeps what was verified for the next try. Go
+ * runs, the bar follows dh:download (heard from App, so the sidebar's downloads follow it too) and Cancel keeps what was verified for the next try. Go
  * refuses while the game runs, and says why.
  */
 export function DistantHorizonsCard({ chapter }: Props) {
@@ -31,13 +32,11 @@ export function DistantHorizonsCard({ chapter }: Props) {
   const readError = useTerrainStore((s) => s.readError[chapter.id])
   const unavailable = useTerrainStore((s) => s.unavailable)
   const load = useTerrainStore((s) => s.load)
-  const listen = useTerrainStore((s) => s.listen)
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const downloading = isDownloading(info, progress)
 
-  useEffect(() => listen(), [listen])
   useEffect(() => {
     void load(chapter.id)
   }, [chapter.id, load, playing])
@@ -154,13 +153,9 @@ function Confirm({
   )
 }
 
-/** The bar, filled through a custom property: an inline `style` prop is refused. */
+/** The bar and the step it is on. */
 function Progress({ progress }: { progress: DHDownloadProgress }) {
-  const fill = useRef<HTMLDivElement>(null)
   const value = fillOf(progress)
-  useLayoutEffect(() => {
-    fill.current?.style.setProperty('--dh-fill', String(value))
-  }, [value])
   const percent = Math.floor(value * 100)
   const label =
     progress.phase === 'downloading'
@@ -168,19 +163,7 @@ function Progress({ progress }: { progress: DHDownloadProgress }) {
       : stepLabel(progress.phase)
   return (
     <div className="flex flex-col gap-1.5">
-      <div
-        role="progressbar"
-        aria-label="Terrain download"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
-        className="bg-line-strong rounded-pill h-1 overflow-hidden"
-      >
-        <div
-          ref={fill}
-          className="bg-accent duration-fast ease-standard size-full origin-left scale-x-(--dh-fill) transition-transform motion-reduce:transition-none"
-        />
-      </div>
+      <ProgressBar value={value} label="Terrain download" />
       <span className="text-fg-muted text-xs">{`${label} · ${percent}%`}</span>
     </div>
   )

@@ -16,7 +16,8 @@ import (
 // prism:install steps) and reads no file, starts no process and reaches no
 // network. A log tail is a constant in this file, never read from a disk.
 
-// The situations StartPreview takes. A chapter's, then Prism's.
+// The situations StartPreview takes. A chapter's, then Prism's, then the
+// launcher's (preview_tailscale.go has Tailscale's).
 const (
 	PreviewStartFailedSync  = "start-failed-sync"
 	PreviewStartFailedPrism = "start-failed-prism"
@@ -49,7 +50,11 @@ var previewSituations = []models.PreviewSituation{
 	{ID: PreviewPrismMissing, Label: "Prism missing", Scope: models.PreviewScopePrism},
 	{ID: PreviewPrismInstall, Label: "Prism install, then it fails", Scope: models.PreviewScopePrism, PlaysInstall: true},
 	{ID: PreviewPrismUpdate, Label: "Prism update available", Scope: models.PreviewScopePrism},
-	{ID: PreviewLauncherUpdate, Label: "Kapital Launcher update available", Scope: models.PreviewScopePrism},
+	{ID: PreviewLauncherUpdate, Label: "Kapital Launcher update available", Scope: models.PreviewScopeLauncher},
+	{ID: PreviewTailscaleMissing, Label: "Tailscale not installed", Scope: models.PreviewScopeLauncher, Page: previewTailscalePage},
+	{ID: PreviewTailscaleInstall, Label: "Tailscale install, then it fails", Scope: models.PreviewScopeLauncher, PlaysInstall: true, Page: previewTailscalePage},
+	{ID: PreviewTailscaleDisconnected, Label: "Tailscale installed, not connected", Scope: models.PreviewScopeLauncher, Page: previewTailscalePage},
+	{ID: PreviewTailscaleConnected, Label: "Tailscale connected", Scope: models.PreviewScopeLauncher, Page: previewTailscalePage},
 }
 
 // PreviewSituations is the list of situations, for the frontend to render.
@@ -299,12 +304,14 @@ type previewEntry struct {
 }
 
 // PreviewSet holds the previews that are on: per chapter at most one
-// situation, and at most one of Prism's. It holds names and a time and nothing
-// else; the zero value is ready, and nothing is persisted, so a restart clears it.
+// situation, at most one of Prism's and one of the launcher's. It holds names
+// and a time and nothing else; the zero value is ready, and nothing is
+// persisted, so a restart clears it.
 type PreviewSet struct {
 	mu       sync.Mutex
 	chapters map[string]previewEntry
 	prism    string
+	launcher string
 }
 
 // SetChapter makes the situation the chapter's preview, begun at, replacing its last.
@@ -372,5 +379,28 @@ func (p *PreviewSet) ClearPrism() string {
 	defer p.mu.Unlock()
 	was := p.prism
 	p.prism = ""
+	return was
+}
+
+// SetLauncher makes the situation the launcher's preview, replacing its last.
+func (p *PreviewSet) SetLauncher(situation string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.launcher = situation
+}
+
+// Launcher is the launcher's situation, or "" when it has none.
+func (p *PreviewSet) Launcher() string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.launcher
+}
+
+// ClearLauncher ends the launcher's preview and says which it was, "" for none.
+func (p *PreviewSet) ClearLauncher() string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	was := p.launcher
+	p.launcher = ""
 	return was
 }

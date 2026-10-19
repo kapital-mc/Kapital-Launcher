@@ -21,7 +21,7 @@ function open() {
     onOpenReleasePage: vi.fn(),
     onOpenPrismSite: vi.fn(),
   }
-  render(<GetPrism release={release} {...calls} />)
+  render(<GetPrism release={release} install={null} {...calls} />)
   return calls
 }
 
@@ -82,9 +82,47 @@ describe('GetPrism', () => {
       onOpenReleasePage: vi.fn(),
       onOpenPrismSite: vi.fn(),
     }
-    const { unmount } = render(<GetPrism release={release} {...calls} />)
+    const { unmount } = render(<GetPrism release={release} install={null} {...calls} />)
     expect(trigger).not.toHaveFocus()
     unmount()
     expect(trigger).toHaveFocus()
+  })
+
+  it('follows the install: the bar, then what is next, or the error and Try again', () => {
+    const calls = {
+      onConfirm: vi.fn(),
+      onCancel: vi.fn(),
+      onOpenReleasePage: vi.fn(),
+      onOpenPrismSite: vi.fn(),
+    }
+    const { rerender } = render(
+      <GetPrism
+        release={release}
+        install={{ phase: 'downloading', received: 10, total: 40, error: '' }}
+        {...calls}
+      />,
+    )
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
+    expect(screen.queryByRole('button', { name: 'Download' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Hide' }))
+    expect(calls.onCancel).toHaveBeenCalledOnce()
+    rerender(
+      <GetPrism
+        release={release}
+        install={{ phase: 'done', received: 0, total: 0, error: '' }}
+        {...calls}
+      />,
+    )
+    expect(screen.getByRole('dialog')).toHaveTextContent('Prism is ready')
+    rerender(
+      <GetPrism
+        release={release}
+        install={{ phase: 'failed', received: 0, total: 0, error: 'digest mismatch' }}
+        {...calls}
+      />,
+    )
+    expect(screen.getByRole('alert')).toHaveTextContent('digest mismatch')
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(calls.onConfirm).toHaveBeenCalledOnce()
   })
 })

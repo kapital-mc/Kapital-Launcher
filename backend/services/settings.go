@@ -150,20 +150,11 @@ func (s *SettingsService) load() (models.AppSettings, error) {
 		}
 		settings.DisabledMods[id] = kept
 	}
-	// The join switches are the app's too, and the file the player's: an id that
-	// is not chapter-shaped, or any past the cap, is dropped with a log line.
-	if len(settings.JoinServers) > 0 {
-		kept := make([]string, 0, len(settings.JoinServers))
-		for _, id := range settings.JoinServers {
-			if chapterIDPattern.MatchString(id) && len(kept) < maxJoinServers {
-				kept = append(kept, id)
-			}
-		}
-		if len(kept) != len(settings.JoinServers) {
-			slog.Warn("settings: join switches dropped", "dropped", len(settings.JoinServers)-len(kept))
-		}
-		settings.JoinServers = kept
-	}
+	// The join and Tailscale switches are the app's too, and the file the
+	// player's: an id that is not chapter-shaped, or any past the cap, is
+	// dropped with a log line.
+	settings.JoinServers = keepChapterIDs(settings.JoinServers, "join switches")
+	settings.TailscaleServers = keepChapterIDs(settings.TailscaleServers, "Tailscale switches")
 	// A heroArt that is no choice is dropped for the default, as the picture
 	// count is, so it never blocks a write. The older staticArt switch is
 	// migrated by normalize.
@@ -251,6 +242,15 @@ func ValidateSettings(s models.AppSettings) error {
 			return fmt.Errorf("settings: join switch for %q: not a chapter id", id)
 		}
 	}
+	// The Tailscale switches likewise (ValidateTailscaleServers).
+	if len(s.TailscaleServers) > maxJoinServers {
+		return fmt.Errorf("settings: Tailscale switches: more than %d chapters", maxJoinServers)
+	}
+	for _, id := range s.TailscaleServers {
+		if !chapterIDPattern.MatchString(id) {
+			return fmt.Errorf("settings: Tailscale switch for %q: not a chapter id", id)
+		}
+	}
 	// Shape only, as the server choices: that each name is in the instance's
 	// mods folder is checked where the list is written (ValidateDisabledMods).
 	for id, names := range s.DisabledMods {
@@ -319,6 +319,10 @@ func normalize(s models.AppSettings) models.AppSettings {
 	s.JoinServers = slices.Compact(slices.Sorted(slices.Values(s.JoinServers)))
 	if len(s.JoinServers) == 0 {
 		s.JoinServers = nil
+	}
+	s.TailscaleServers = slices.Compact(slices.Sorted(slices.Values(s.TailscaleServers)))
+	if len(s.TailscaleServers) == 0 {
+		s.TailscaleServers = nil
 	}
 	// A chapter with nothing disabled has no entry.
 	var kept map[string][]string
@@ -416,4 +420,22 @@ func AffectsDetection(before, after models.AppSettings) bool {
 // exist on disk before it is written (App.SaveSettings, #5).
 func ExecutableChanged(before, after models.AppSettings) bool {
 	return normalize(before).PrismExecutable != normalize(after).PrismExecutable
+}
+
+// keepChapterIDs drops from a list of chapter switches read from the file what
+// is not chapter-shaped, and any past the cap, with a log line naming what.
+func keepChapterIDs(ids []string, what string) []string {
+	if len(ids) == 0 {
+		return ids
+	}
+	kept := make([]string, 0, len(ids))
+	for _, id := range ids {
+		if chapterIDPattern.MatchString(id) && len(kept) < maxJoinServers {
+			kept = append(kept, id)
+		}
+	}
+	if len(kept) != len(ids) {
+		slog.Warn("settings: "+what+" dropped", "dropped", len(ids)-len(kept))
+	}
+	return kept
 }

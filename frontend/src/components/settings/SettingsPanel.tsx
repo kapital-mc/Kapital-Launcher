@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import type { AppSettings, Chapter } from '../../types'
+import type { ChapterPageSpec } from '../../lib/usePages'
 import { useArtStatsStore } from '../../stores/useArtStatsStore'
 import { useChapterStore } from '../../stores/useChapterStore'
 import { useEngineStore } from '../../stores/useEngineStore'
@@ -29,7 +30,7 @@ import { Button } from '../ui/Button'
 import { Hint } from '../ui/Notes'
 import { Icon } from '../ui/Icon'
 import { Page } from '../ui/Page'
-import { SubHeading } from '../ui/Section'
+import { SubSection } from '../ui/Section'
 import { Segmented } from '../ui/Segmented'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { TextField } from '../ui/TextField'
@@ -46,7 +47,8 @@ const PreviewSection = lazy(() =>
 interface Props {
   onClose: () => void
   /** Brings a chapter up on its main view, closing every page over it. */
-  onShowChapter: (chapterId: string) => void
+  /** Brings a chapter up, with one of its own pages when a preview's screen is there. */
+  onShowChapter: (chapterId: string, page?: ChapterPageSpec['kind']) => void
 }
 
 /** A field name, for filing its error; the pack fields are keyed by chapter. */
@@ -250,7 +252,10 @@ function DeveloperSection({
   save,
   chapters,
   onShowChapter,
-}: SectionProps & { chapters: readonly Chapter[]; onShowChapter: (chapterId: string) => void }) {
+}: SectionProps & {
+  chapters: readonly Chapter[]
+  onShowChapter: (chapterId: string, page?: ChapterPageSpec['kind']) => void
+}) {
   return (
     <SettingsSection title="Developer" icon={Code} collapsible>
       <Hint>
@@ -276,24 +281,14 @@ function DeveloperSection({
         ))}
       </SettingsCard>
       {/* A preview shows its screen, which is not this one: the chapter is
-          opened and every page over it closes (issue 124). */}
-      <Suspense fallback={<PreviewFallback />}>
-        <PreviewSection onStarted={onShowChapter} />
-      </Suspense>
+          opened and every page over it closes (issue 124). Closed until its
+          heading is clicked, and only then loaded. */}
+      <SubSection title="Preview">
+        <Suspense fallback={null}>
+          <PreviewSection onStarted={onShowChapter} />
+        </Suspense>
+      </SubSection>
     </SettingsSection>
-  )
-}
-
-/**
- * What the preview section's place holds while it loads: its heading and about
- * the room it takes, so Support and About do not jump when it arrives. The
- * loaded section keeps the same minimum.
- */
-function PreviewFallback() {
-  return (
-    <div className="flex min-h-128 flex-col gap-3">
-      <SubHeading>Preview</SubHeading>
-    </div>
   )
 }
 

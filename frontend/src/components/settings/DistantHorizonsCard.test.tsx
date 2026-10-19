@@ -45,6 +45,8 @@ describe('The Distant Horizons terrain card', () => {
       hear = cb
       return () => undefined
     }) as never)
+    // The sidebar's downloads section holds the listener for the app's lifetime.
+    useTerrainStore.getState().listen()
   })
   afterEach(() => {
     cleanup()
@@ -74,7 +76,7 @@ describe('The Distant Horizons terrain card', () => {
     )
     const bar = screen.getByRole('progressbar', { name: 'Terrain download' })
     expect(bar).toHaveAttribute('aria-valuenow', '25')
-    expect(bar.firstElementChild).toHaveStyle({ '--dh-fill': '0.25' })
+    expect(bar.firstElementChild).toHaveStyle({ '--progress-fill': '0.25' })
     expect(screen.getByText('Downloading · 1.0 GB of 4.0 GB · 25%')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
     await act(async () => finish({ ...published, existingBytes: published.sizeBytes }))

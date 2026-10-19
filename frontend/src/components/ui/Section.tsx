@@ -35,22 +35,14 @@ export function Section({ title, children, collapsible = false }: SectionProps) 
   return (
     <div className="flex flex-col gap-5">
       <h2 className={TITLE}>
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-controls={bodyId}
-          onClick={() => setOpen((o) => !o)}
-          className="hover:text-accent duration-fast ease-standard flex cursor-pointer items-center gap-2 transition-colors"
+        <Disclosure
+          open={open}
+          controls={bodyId}
+          onToggle={() => setOpen((o) => !o)}
+          className="hover:text-accent duration-fast ease-standard transition-colors"
         >
           {title}
-          <Icon
-            icon={ChevronDown}
-            size="sm"
-            className={`text-fg-muted duration-fast ease-standard transition-transform motion-reduce:transition-none ${
-              open ? 'rotate-180' : ''
-            }`}
-          />
-        </button>
+        </Disclosure>
       </h2>
       <div id={bodyId} className={open ? 'flex flex-col gap-5' : 'hidden'}>
         {open && children}
@@ -65,5 +57,66 @@ export function SubHeading({ id, children }: { id?: string; children: ReactNode 
     <h3 id={id} className="text-fg m-0 text-sm font-semibold">
       {children}
     </h3>
+  )
+}
+
+/**
+ * A block inside a section that starts closed behind its sub-heading, which
+ * opens and closes it, like a collapsible Section one level down. Its body is
+ * not rendered while closed, so what it loads on demand waits until it is opened.
+ */
+export function SubSection({ title, children }: { title: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const bodyId = useId()
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="m-0">
+        <Disclosure
+          open={open}
+          controls={bodyId}
+          onToggle={() => setOpen((o) => !o)}
+          className="group text-fg text-sm font-semibold"
+        >
+          {title}
+        </Disclosure>
+      </h3>
+      <div id={bodyId} className={open ? 'flex flex-col gap-3' : 'hidden'}>
+        {open && children}
+      </div>
+    </div>
+  )
+}
+
+/** A heading's button that opens and closes the body it controls, with its chevron. */
+function Disclosure({
+  open,
+  controls,
+  onToggle,
+  className,
+  children,
+}: {
+  open: boolean
+  controls: string
+  onToggle: () => void
+  className: string
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-controls={controls}
+      onClick={onToggle}
+      className={`flex cursor-pointer items-center gap-2 ${className}`}
+    >
+      {children}
+      <Icon
+        icon={ChevronDown}
+        size="sm"
+        className={`text-fg-muted group-hover:text-fg duration-fast ease-standard transition-transform motion-reduce:transition-none ${
+          open ? 'rotate-180' : ''
+        }`}
+      />
+    </button>
   )
 }

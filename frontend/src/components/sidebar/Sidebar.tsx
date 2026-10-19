@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { useSettingsStore } from '../../stores/useSettingsStore'
 import { ChapterNav } from './ChapterNav'
 import { EngineCard } from './EngineCard'
+
+// Only a download the player starts fills the section, from a page or popup
+// that loads later still, so the section and the stores it listens through
+// are fetched after the first paint rather than in it.
+const Downloads = lazy(() => import('./Downloads').then((m) => ({ default: m.Downloads })))
 
 interface Props {
   /** Opens or closes the account page (issue 192). */
@@ -51,6 +56,9 @@ export function Sidebar({ onOpenAccount, accountOpen = false }: Props) {
     >
       <ChapterNav compact={compact} />
       <div className="grow" />
+      <Suspense fallback={null}>
+        <Downloads compact={compact} />
+      </Suspense>
       <EngineCard onOpenAccount={onOpenAccount} accountOpen={accountOpen} compact={compact} />
     </aside>
   )

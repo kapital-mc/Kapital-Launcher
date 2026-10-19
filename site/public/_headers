@@ -1,7 +1,9 @@
 # Response headers for every file the site serves, applied by Cloudflare Pages
 # (https://developers.cloudflare.com/pages/configuration/headers/).
-# The page runs one script, its own src/detect.js (it only picks the OS in the
-# download popup), and loads nothing from another origin, so the policy allows
+# The page runs one script file, its own (src/detect.js picks the OS in the
+# download popup, src/showcase.js makes the window's chapter rows clickable,
+# src/popup.js closes the popups with motion),
+# and loads nothing from another origin, so the policy allows
 # its own scripts, styles, images and fonts and nothing else. No inline script.
 /*
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'

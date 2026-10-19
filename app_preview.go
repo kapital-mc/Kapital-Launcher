@@ -36,9 +36,10 @@ func (a *App) GetPreviewSituations() ([]models.PreviewSituation, error) {
 }
 
 // StartPreview shows a situation: for a chapter's, the chapter id names the
-// chapter and the situation one of the list; Prism's situations take no chapter
-// (an id, if one is given, must still be a chapter). A chapter has at most one
-// preview, so this replaces its last, and there is at most one of Prism's.
+// chapter and the situation one of the list; Prism's and the launcher's
+// situations take no chapter (an id, if one is given, must still be a
+// chapter). A chapter has at most one preview, so this replaces its last, and
+// there is at most one of Prism's and one of the launcher's.
 // Anything that is not in the manifest or the list is refused, and so is a
 // chapter whose real game is starting or running, because a real event wins.
 //
@@ -53,11 +54,15 @@ func (a *App) StartPreview(chapterID, situation string) (models.PreviewStart, er
 	if !ok {
 		return models.PreviewStart{}, fmt.Errorf("no preview %q", situation)
 	}
-	if sit.Scope == models.PreviewScopePrism {
+	if sit.Scope == models.PreviewScopePrism || sit.Scope == models.PreviewScopeLauncher {
 		if _, ok := a.chapter(chapterID); chapterID != "" && !ok {
 			return models.PreviewStart{}, fmt.Errorf("no chapter %q", chapterID)
 		}
-		a.previews.SetPrism(sit.ID)
+		if sit.Scope == models.PreviewScopePrism {
+			a.previews.SetPrism(sit.ID)
+		} else {
+			a.startLauncherPreview(sit.ID)
+		}
 		slog.Info("preview", "situation", sit.ID)
 		return models.PreviewStart{}, nil
 	}
@@ -97,12 +102,13 @@ func (a *App) StartPreview(chapterID, situation string) (models.PreviewStart, er
 }
 
 // ClearPreviews ends every preview: each chapter's, with its card closed and
-// its real state sent to the view, and Prism's.
+// its real state sent to the view, Prism's and the launcher's.
 func (a *App) ClearPreviews() error {
 	for id := range a.previews.Chapters() {
 		a.clearChapterPreview(id)
 	}
 	a.previews.ClearPrism()
+	a.clearLauncherPreview()
 	return nil
 }
 
@@ -251,14 +257,21 @@ func (a *App) previewPackState(chapterID string) (models.PackState, bool) {
 func (a *App) playPreviewInstall() error {
 	steps := services.PreviewInstallProgress()
 	for i, step := range steps {
-		if i > 0 {
-			select {
-			case <-a.context().Done():
-				return a.context().Err()
-			case <-time.After(a.previewStep):
-			}
+		if i > 0 && !a.previewPause() {
+			return a.context().Err()
 		}
 		a.emitPrismInstall(step)
 	}
 	return errors.New(steps[len(steps)-1].Error)
+}
+
+// previewPause waits one step of a made-up install; false when the app is
+// closing.
+func (a *App) previewPause() bool {
+	select {
+	case <-a.context().Done():
+		return false
+	case <-time.After(a.previewStep):
+		return true
+	}
 }

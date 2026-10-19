@@ -174,3 +174,42 @@ over skipping a version.
 - **From the next release on.** Builds up to `v1.0.0-beta.2` have no check;
   their players learn of the update the old way.
 
+
+## Amendment, 2026-10-18: a plain hero, clickable chapters and a changelog
+
+The author asked for three changes to the page.
+
+- **The hero is the name, the version and the buttons.** The description
+  under the logo, the line on supported systems (the download popup names
+  them) and the line on Prism Launcher are gone. The release tag the page
+  offers sits between the logo and the buttons, filled in at build time like
+  the popup's.
+- **A quieter download popup.** The notes under each download button are
+  gone, the Prism instance zips sit in a closed dropdown that slides open and
+  grows the popup with it (a checkbox and a grid row eased from `0fr` to
+  `1fr`; a `details` element cannot animate its height in Safari yet), and the
+  code signing notice is one line linking the release notes. Every popup
+  now closes visibly: the closing half runs over the slow duration on the
+  glide curve, where it had the opening's fast-out curve and was over in its
+  first frames. CSS alone plays it only in Chromium, the one engine that
+  keeps a closing popover in the top layer (the `overlay` transition), so a
+  third small script, `src/popup.js`, makes the popovers manual and hides
+  each one when its closing animation ends. Escape and a click outside still
+  close it, as the browser's light dismiss did.
+- **The window's chapter rows are buttons.** A click shows that chapter with
+  the app's own motion and restarts the cycle, so the chosen chapter stays a
+  full dwell before the next slides in. This needs a script: the CSS cycle
+  cannot be restarted from a chosen point without one. So the page now runs a
+  second small script, `src/showcase.js`, bundled with `src/detect.js` into
+  the same one classic script file. It touches neither the network nor
+  storage, and only sets attributes; the motion stays in `src/showcase.css`
+  on the tokens. Without it the CSS cycle runs as before. The rows are now
+  exposed to assistive technology as buttons; the rest of the window stays
+  hidden from it. The CSP is unchanged: the script is still `'self'`.
+- **A changelog popup.** The build already reads the releases feed to pick
+  the newest release; `changelog.js` now also renders each release's
+  Features, Fixes and Other changes from it, escaped, into a popup. It
+  follows a release on the same rebuild as the Download button. The code
+  signing policy moved from a `details` element into a popup of its own, and
+  the two open from a pair of quiet buttons above the footer. SignPath's
+  wording is unchanged.
