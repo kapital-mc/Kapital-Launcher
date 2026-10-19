@@ -426,6 +426,8 @@ export interface AppSettings {
   wikiPictures?: number
   /** Where the hero's map tool opens a chapter's map (issue 161). Absent is the launcher's own page. */
   mapIn?: MapIn | string
+  /** The sidebar narrowed to the chapter icons and a square account tile. Absent is the full sidebar. */
+  sidebarCompact?: boolean
 }
 
 /** What the hero shows behind a chapter: the slideshow, the chapter's own picture, or its panorama. */

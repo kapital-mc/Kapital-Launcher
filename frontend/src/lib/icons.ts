@@ -37,6 +37,8 @@ export {
   Minus,
   Package,
   Palette,
+  PanelLeftClose,
+  PanelLeftOpen,
   Pencil,
   Play,
   Plus,

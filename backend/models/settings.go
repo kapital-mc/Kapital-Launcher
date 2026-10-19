@@ -87,6 +87,9 @@ type AppSettings struct {
 	// inside the launcher, in a page over the chapter, or "browser" in the
 	// system browser. Empty means "app" (services.MapIn).
 	MapIn string `json:"mapIn,omitempty"`
+	// SidebarCompact narrows the sidebar to the chapter icons and a square
+	// account tile, from the button at the header's left. Off by default.
+	SidebarCompact bool `json:"sidebarCompact,omitempty"`
 }
 
 // DefaultSettings is a fresh install. Kept as a function so callers cannot

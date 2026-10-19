@@ -1,11 +1,14 @@
 import type { Ref } from 'react'
 import type { Chapter } from '../../types'
 import { chapterArt, chapterIcon } from '../../lib/art'
+import { fade } from '../ui/fade'
 
 interface Props {
   chapter: Chapter
   current: boolean
   onSelect: (id: string) => void
+  /** The sidebar is compact: the text fades and the row narrows to its icon, which keeps its place. */
+  compact?: boolean
   /** The nav measures the row to place the gliding highlight behind it (#59). */
   ref?: Ref<HTMLButtonElement>
 }
@@ -23,7 +26,7 @@ interface Props {
  * is showing. That is the whole accent mechanism: one attribute, no per-colour
  * classes.
  */
-export function ChapterButton({ chapter, current, onSelect, ref }: Props) {
+export function ChapterButton({ chapter, current, onSelect, compact = false, ref }: Props) {
   const art = chapterArt(chapter.id)
   const icon = chapterIcon(chapter.id) ?? art
   return (
@@ -63,7 +66,7 @@ export function ChapterButton({ chapter, current, onSelect, ref }: Props) {
           aria-hidden
         />
       )}
-      <div className="flex min-w-0 grow flex-col gap-0.5">
+      <div className={`flex min-w-0 grow flex-col gap-0.5 whitespace-nowrap ${fade(!compact)}`}>
         <div className="flex items-baseline gap-2">
           <span className="text-accent text-2xs font-mono">{chapter.number}</span>
           <span className="font-display truncate text-lg font-semibold">{chapter.name}</span>

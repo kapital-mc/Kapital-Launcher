@@ -74,3 +74,17 @@ gear is the smaller button, inset from the right as the lights are from the
 left. Windows and Linux keep 40px. The screenshot settles the `[verify]` above:
 the lights sit inside the bar; `pl-20` went with the logo. `[verify]` on the
 author's Mac: the lights centred in the 28px bar.
+
+## Amendment, 2026-10-19: the sidebar button on the left of the bar
+
+The author asked for a compact sidebar that shows only the chapter icons and a
+square account tile. Its button opens the bar on the left, where the wordmark
+was: on macOS 72px in, past the traffic lights, and elsewhere over the column
+of chapter icons. Compacting moves only the sidebar's right edge (to
+`layout.sidebarCompact`, an icon row's width between the sidebar's padding),
+so the icons and the initials never move sideways; the text fades out first and
+back in once there is room. The choice is saved as `sidebarCompact` in the
+settings and taken without animation on launch. `[verify]` on the author's Mac:
+the button clear of the traffic lights, and the fold animating in WKWebView
+(it moves grid tracks between 1fr and 0fr; a WebView that cannot interpolate
+them snaps instead).

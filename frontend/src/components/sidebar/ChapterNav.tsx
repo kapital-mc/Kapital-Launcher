@@ -1,6 +1,12 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useChapterStore } from '../../stores/useChapterStore'
+import { fade } from '../ui/fade'
 import { ChapterButton } from './ChapterButton'
+
+interface Props {
+  /** The sidebar is compact: the heading fades and each row shows only its icon. */
+  compact?: boolean
+}
 
 /**
  * The chapter list with one highlight behind it (#59). The highlight is a
@@ -11,9 +17,10 @@ import { ChapterButton } from './ChapterButton'
  *
  * Its place is measured from the selected row before paint, so the first
  * render shows it in place with no transition; every later selection moves
- * it. A window resize is a re-measure, not a glide.
+ * it. A window resize is a re-measure, not a glide. A compact sidebar changes
+ * no row's height, only its width, which the highlight follows by itself.
  */
-export function ChapterNav() {
+export function ChapterNav({ compact = false }: Props) {
   const chapters = useChapterStore((s) => s.manifest.chapters)
   const selectedId = useChapterStore((s) => s.selectedId)
   const select = useChapterStore((s) => s.select)
@@ -40,7 +47,9 @@ export function ChapterNav() {
 
   return (
     <nav aria-label="Chapters" className="relative flex flex-col gap-1">
-      <div className="text-fg-faint px-2.5 pb-1.5 text-xs">Chapters</div>
+      <div className={`text-fg-faint px-2.5 pb-1.5 text-xs whitespace-nowrap ${fade(!compact)}`}>
+        Chapters
+      </div>
       {place && (
         <div
           aria-hidden
@@ -63,6 +72,7 @@ export function ChapterNav() {
           chapter={c}
           current={c.id === selectedId}
           onSelect={select}
+          compact={compact}
         />
       ))}
     </nav>

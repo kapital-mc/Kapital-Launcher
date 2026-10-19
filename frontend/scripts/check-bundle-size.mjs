@@ -86,7 +86,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // its own chunk, and the account tile shows the name the game reported for Prism's
 // default account, read again once a game runs. What stays in the entry is the lazy
 // import, the read, the name's fallback and the new reason. Measured 92.3 KB.
-const BUDGET_KB = 92.4
+// 93 since the compact sidebar (2026-10-19): the header's sidebar button, its two
+// glyphs, the folds that close the account tile to a square and the saved choice
+// are all on screen from the first paint. Measured 92.85 KB, from 92.3 KB before it.
+const BUDGET_KB = 93
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

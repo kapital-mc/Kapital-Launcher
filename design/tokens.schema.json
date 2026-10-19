@@ -168,11 +168,16 @@
     },
     "layout": {
       "type": "object",
-      "required": ["unit", "sidebar", "hero", "titlebar", "titlebarMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "splash"],
+      "required": ["unit", "sidebar", "sidebarCompact", "hero", "titlebar", "titlebarMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "splash"],
       "additionalProperties": false,
       "properties": {
         "unit": { "const": "px" },
         "sidebar": { "type": "integer", "minimum": 1 },
+        "sidebarCompact": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The sidebar's width when compact: the chapter rows' icon column (an icon in its row's padding and border) between the sidebar's own side padding, so nothing moves sideways as it narrows."
+        },
         "hero": {
           "type": "integer",
           "minimum": 1,
