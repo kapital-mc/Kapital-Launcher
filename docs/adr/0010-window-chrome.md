@@ -83,7 +83,10 @@ was: on macOS 72px in, past the traffic lights, and elsewhere over the column
 of chapter icons. Compacting moves only the sidebar's right edge (to
 `layout.sidebarCompact`, an icon row's width between the sidebar's padding),
 so the icons and the initials never move sideways; the text fades out first and
-back in once there is room. The choice is saved as `sidebarCompact` in the
+back in once there is room. Compact, the Chapters heading folds away and the
+sidebar's padding matches the chapter card's, so the first chapter tile and the
+account tile line up with the card's top and bottom edges (the author asked,
+2026-10-19). The choice is saved as `sidebarCompact` in the
 settings and taken without animation on launch. `[verify]` on the author's Mac:
 the button clear of the traffic lights, and the fold animating in WKWebView
 (it moves grid tracks between 1fr and 0fr; a WebView that cannot interpolate

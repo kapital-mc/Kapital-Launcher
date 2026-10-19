@@ -15,7 +15,8 @@ interface Props {
  * saved as `sidebarCompact`) it narrows to the chapter icons and a square
  * account tile: only the right edge moves, the icons stay where they are, and
  * the text fades out before it could be seen cut and back in once there is
- * room for it.
+ * room for it. The heading folds away and the padding meets the chapter card's,
+ * so the first row and the account tile line up with the card's top and bottom.
  *
  * The saved width arrives with the settings, after the first paint, and is
  * taken without a transition; only a change after that animates.
@@ -40,11 +41,11 @@ export function Sidebar({ onOpenAccount, accountOpen = false }: Props) {
 
   return (
     <aside
-      className={`bg-sunken border-line flex shrink-0 flex-col gap-7 overflow-x-clip border-r px-4 pt-5.5 pb-4 ${
-        compact ? 'w-(--layout-sidebar-compact)' : 'w-(--layout-sidebar)'
+      className={`bg-sunken border-line flex shrink-0 flex-col gap-7 overflow-x-clip border-r px-4 ${
+        compact ? 'w-(--layout-sidebar-compact) pt-5 pb-5' : 'w-(--layout-sidebar) pt-5.5 pb-4'
       } ${
         settled
-          ? 'duration-slow ease-glide transition-[width] motion-reduce:transition-none'
+          ? 'duration-slow ease-glide transition-[width,padding] motion-reduce:transition-none'
           : '[&_*]:transition-none'
       }`}
     >
