@@ -71,6 +71,9 @@ type GameState struct {
 	// absent, and a chapter with no earlier start has no estimate. The same on
 	// every event of the run, so the card's bar needs nothing else.
 	Estimate map[string]int64 `json:"estimate,omitempty"`
+	// Preview is whether the state is a developer preview's (#124), made up
+	// rather than a run's.
+	Preview bool `json:"preview,omitempty"`
 }
 
 // LaunchTiming is how long one start took to reach each phase, in

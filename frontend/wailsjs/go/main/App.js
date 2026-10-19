@@ -6,6 +6,14 @@ export function CancelDHSnapshot(arg1) {
   return window['go']['main']['App']['CancelDHSnapshot'](arg1);
 }
 
+export function CancelPrismInstall() {
+  return window['go']['main']['App']['CancelPrismInstall']();
+}
+
+export function CancelTailscaleInstall() {
+  return window['go']['main']['App']['CancelTailscaleInstall']();
+}
+
 export function CheckChapterMap(arg1) {
   return window['go']['main']['App']['CheckChapterMap'](arg1);
 }

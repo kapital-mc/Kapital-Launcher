@@ -11,15 +11,9 @@ const release = {
   digest: 'sha256:00',
 }
 
-function popup(
-  install: TailscaleInstallProgress | null,
-  info: TailscaleInfo | null,
-  platform = 'darwin',
-) {
+function popup(install: TailscaleInstallProgress | null, info: TailscaleInfo | null) {
   const calls = { onConfirm: vi.fn(), onClose: vi.fn(), onConnect: vi.fn() }
-  render(
-    <GetTailscale release={release} install={install} info={info} platform={platform} {...calls} />,
-  )
+  render(<GetTailscale release={release} install={install} info={info} {...calls} />)
   return calls
 }
 
@@ -35,16 +29,13 @@ const info = (state: string, connected: string[] = []): TailscaleInfo => ({
 describe('GetTailscale', () => {
   afterEach(cleanup)
 
-  it('says what it downloads and what macOS and Windows will ask', () => {
+  it('says what it downloads and what it does for the connection', () => {
     const calls = popup(null, info('missing'))
     const dialog = screen.getByRole('dialog', { name: 'Get Tailscale' })
     expect(dialog).toHaveTextContent('Version 1.104.1 · 21.3 MB · pkgs.tailscale.com')
-    expect(dialog).toHaveTextContent('system extension')
+    expect(dialog).toHaveTextContent('keeps working when playit has trouble')
     fireEvent.click(screen.getByRole('button', { name: 'Download' }))
     expect(calls.onConfirm).toHaveBeenCalledOnce()
-    cleanup()
-    popup(null, info('missing'), 'windows')
-    expect(screen.getByRole('dialog')).toHaveTextContent('administrator approval')
   })
 
   it('shows the installer step while it runs', () => {

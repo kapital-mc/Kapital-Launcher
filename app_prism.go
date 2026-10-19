@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"time"
@@ -114,26 +115,49 @@ func (a *App) GetPrismRelease() (models.PrismRelease, error) {
 // what Prism published. Progress arrives as prism:install events; detection
 // re-runs once it is in place.
 func (a *App) InstallPrism() error {
+	ctx, end := a.prismInstall.begin(a.context())
+	emit := func(p models.PrismInstallProgress) {
+		if a.prismInstall.step(p.Phase) {
+			a.emitPrismInstall(p)
+		}
+	}
+	err := a.installPrism(ctx, emit)
+	if end() {
+		a.emitPrismInstall(models.PrismInstallProgress{Phase: "cancelled"})
+		return errInstallCancelled
+	}
+	return err
+}
+
+// installPrism is InstallPrism's work, under the context Cancel ends.
+func (a *App) installPrism(ctx context.Context, emit func(models.PrismInstallProgress)) error {
 	// Under a Prism preview (#124) the install is a made-up one that fails: it
 	// never reaches the installer, so nothing is downloaded or unpacked.
 	if a.previews.Prism() != "" {
-		return a.playPreviewInstall()
+		return a.playPreviewInstall(ctx, emit)
 	}
-	rel, err := a.managed.Latest(a.context())
+	rel, err := a.managed.Latest(ctx)
 	if err != nil {
-		a.emitPrismInstall(models.PrismInstallProgress{Phase: "failed", Error: err.Error()})
+		emit(models.PrismInstallProgress{Phase: "failed", Error: err.Error()})
 		return err
 	}
 	if err := a.refusePrismUpdateWhileOpen(rel); err != nil {
-		a.emitPrismInstall(models.PrismInstallProgress{Phase: "failed", Error: err.Error()})
+		emit(models.PrismInstallProgress{Phase: "failed", Error: err.Error()})
 		return err
 	}
-	if err := a.managed.Install(a.context(), rel, a.emitPrismInstall); err != nil {
+	if err := a.managed.Install(ctx, rel, emit); err != nil {
 		slog.Error("install prism", "version", rel.Version, "error", err)
 		return err
 	}
 	_, err = a.detectEngine()
 	return err
+}
+
+// CancelPrismInstall cancels the Prism download that is running, reporting
+// whether one was. Once the download is whole the install runs to its end
+// (installCancel).
+func (a *App) CancelPrismInstall() (bool, error) {
+	return a.prismInstall.stop(), nil
 }
 
 // refusePrismUpdateWhileOpen refuses an update of the managed Prism while a

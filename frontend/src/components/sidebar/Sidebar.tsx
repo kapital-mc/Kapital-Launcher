@@ -56,10 +56,14 @@ export function Sidebar({ onOpenAccount, accountOpen = false }: Props) {
     >
       <ChapterNav compact={compact} />
       <div className="grow" />
-      <Suspense fallback={null}>
-        <Downloads compact={compact} />
-      </Suspense>
-      <EngineCard onOpenAccount={onOpenAccount} accountOpen={accountOpen} compact={compact} />
+      {/* The downloads sit as far above the account tile as the tile sits from the sidebar's
+          sides, its own gap, not the chapter list's. */}
+      <div className="flex flex-col">
+        <Suspense fallback={null}>
+          <Downloads compact={compact} />
+        </Suspense>
+        <EngineCard onOpenAccount={onOpenAccount} accountOpen={accountOpen} compact={compact} />
+      </div>
     </aside>
   )
 }

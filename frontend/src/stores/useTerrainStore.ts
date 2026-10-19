@@ -32,6 +32,8 @@ interface TerrainStore {
   /** Downloads the chapter's terrain; rejects with Go's reason, except when the player cancelled. */
   download: (chapterId: string, replace: boolean) => Promise<void>
   cancel: (chapterId: string) => Promise<void>
+  /** Drops a cancelled download's progress, so its line is not said again. */
+  forgetCancel: (chapterId: string) => void
   /** Subscribes to dh:download, returning the unsubscribe. */
   listen: () => () => void
   receive: (p: DHDownloadProgress) => void
@@ -104,6 +106,11 @@ export const useTerrainStore = create<TerrainStore>((set, get) => ({
       set((s) => ({ cancelling: { ...s.cancelling, [chapterId]: false } }))
       throw e
     }
+  },
+
+  forgetCancel: (chapterId) => {
+    if (get().progress[chapterId]?.phase !== 'cancelled') return
+    set((s) => ({ progress: { ...s.progress, [chapterId]: undefined } }))
   },
 
   listen: () => {

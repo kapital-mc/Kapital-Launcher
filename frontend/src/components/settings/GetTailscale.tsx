@@ -13,8 +13,6 @@ interface Props {
   release: TailscaleRelease
   install: TailscaleInstallProgress | null
   info: TailscaleInfo | null
-  /** "darwin" or "windows": the two OSes ask for different things. */
-  platform: string
   onConfirm: () => void
   onClose: () => void
   /** The next step towards the server: Go opens Tailscale, signs in or opens the share link. */
@@ -22,21 +20,11 @@ interface Props {
 }
 
 /**
- * Getting Tailscale, in the same popup as getting Prism: the official
- * installer, what the OS will ask, then the next step. Tailscale has windows
- * of its own the launcher cannot hide (an installer, and on macOS the system
- * extension and VPN prompts), so the popup says what to expect instead.
+ * Getting Tailscale, in the same popup as getting Prism: what Tailscale is,
+ * what it does for the connection, and the official installer, then the next
+ * step once it is in place.
  */
-export function GetTailscale({
-  release,
-  install,
-  info,
-  platform,
-  onConfirm,
-  onClose,
-  onConnect,
-}: Props) {
-  const mac = platform === 'darwin'
+export function GetTailscale({ release, install, info, onConfirm, onClose, onConnect }: Props) {
   return (
     <InstallPopup
       title="Get Tailscale"
@@ -49,10 +37,8 @@ export function GetTailscale({
             comes from Tailscale&apos;s own package server and is checked before it runs.
           </p>
           <p className="m-0">
-            {mac
-              ? 'macOS asks for your password to install it. Tailscale then asks to add a system extension and a VPN configuration: allow both.'
-              : 'Windows asks for administrator approval to install it.'}{' '}
-            Then Connect signs you in and accepts the server&apos;s share link, in your browser.
+            It usually connects you straight to the server, so the ping is lower and the connection
+            steadier than through playit, and it keeps working when playit has trouble.
           </p>
         </>
       }

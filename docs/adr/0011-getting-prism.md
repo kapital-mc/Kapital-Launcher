@@ -142,3 +142,15 @@ Play, Install and Reinstall without a Prism open it; there is no separate
 Get Prism button. Closing it while the download runs only hides it, and the
 sidebar's downloads section, above the account tile, keeps the bar. What is
 asked and verified is unchanged.
+
+## Amendment, 2026-10-19: Cancel, while it downloads
+
+The author asked (2026-10-19) for a way to cancel a download from the
+sidebar's downloads section. Each row there has **Cancel**. For Prism it ends
+the install only while the zip downloads (`CancelPrismInstall`, the
+`installCancel` in `app_installcancel.go`): once the download is whole,
+unpacking, the signature check and placing run to their end, so a cancel
+never leaves a half-placed Prism. A cancelled install answers
+`errInstallCancelled` with a `cancelled` step instead of a failure, and the
+popup is back on its offer. The Developer section's Prism previews gain the
+popup itself on its offer, and the made-up install now plays inside it.

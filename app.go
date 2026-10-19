@@ -76,6 +76,9 @@ type App struct {
 	previews    services.PreviewSet
 	previewStep time.Duration
 
+	// prismInstall is Cancel on the Prism install that is running.
+	prismInstall installCancel
+
 	// update is the one look at the download site a start gets (app_update.go).
 	update updateCheck
 

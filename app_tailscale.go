@@ -42,6 +42,9 @@ type tailscaleState struct {
 	emitState   func(models.TailscaleInfo)
 	emitInstall func(models.TailscaleInstallProgress)
 
+	// install is Cancel on the install that is running.
+	install installCancel
+
 	mu        sync.Mutex
 	signingIn bool
 	watching  bool
@@ -79,23 +82,46 @@ func (a *App) GetTailscaleRelease() (models.TailscaleRelease, error) {
 // as tailscale:install events, and the state as tailscale:state once the
 // installer is done.
 func (a *App) InstallTailscale() error {
+	ctx, end := a.tailscale.install.begin(a.context())
+	emit := func(p models.TailscaleInstallProgress) {
+		if a.tailscale.install.step(p.Phase) {
+			a.emitTailscaleInstall(p)
+		}
+	}
+	err := a.installTailscale(ctx, emit)
+	if end() {
+		a.emitTailscaleInstall(models.TailscaleInstallProgress{Phase: "cancelled"})
+		return errInstallCancelled
+	}
+	return err
+}
+
+// installTailscale is InstallTailscale's work, under the context Cancel ends.
+func (a *App) installTailscale(ctx context.Context, emit func(models.TailscaleInstallProgress)) error {
 	// Under a Tailscale preview (#124) the install is a made-up one that fails.
 	if a.underTailscalePreview() {
-		return a.playPreviewTailscaleInstall()
+		return a.playPreviewTailscaleInstall(ctx, emit)
 	}
 	ts := a.tailscale
-	rel, err := ts.installer.Latest(a.context())
+	rel, err := ts.installer.Latest(ctx)
 	if err != nil {
-		a.emitTailscaleInstall(models.TailscaleInstallProgress{Phase: "failed", Error: err.Error()})
+		emit(models.TailscaleInstallProgress{Phase: "failed", Error: err.Error()})
 		return err
 	}
-	if err := ts.installer.Install(a.context(), rel, a.emitTailscaleInstall); err != nil {
+	if err := ts.installer.Install(ctx, rel, emit); err != nil {
 		slog.Error("install tailscale", "version", rel.Version, "error", err)
 		return err
 	}
 	slog.Info("tailscale installed", "version", rel.Version)
 	a.watchTailscale()
 	return nil
+}
+
+// CancelTailscaleInstall cancels the Tailscale download that is running,
+// reporting whether one was. Once the download is whole the installer runs
+// (installCancel).
+func (a *App) CancelTailscaleInstall() (bool, error) {
+	return a.tailscale.install.stop(), nil
 }
 
 // signInTailscale starts Tailscale's sign-in and returns: the sign-in page

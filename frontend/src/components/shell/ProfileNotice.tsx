@@ -9,6 +9,9 @@ import { Button } from '../ui/Button'
 import { Dialog } from '../ui/Dialog'
 import { Icon } from '../ui/Icon'
 
+/** The name a preview shows when the player has set none. */
+const PREVIEW_NAME = 'Steve'
+
 interface Props {
   /** Opens the account page, where the profile name is changed. */
   onOpenAccount: () => void
@@ -39,8 +42,9 @@ export function ProfileNotice({ onOpenAccount }: Props) {
     .filter((g) => g.phase === 'failed' && g.reason === 'profile')
     .sort((a, b) => b.since.localeCompare(a.since))[0]
   const stamp = failed ? `${failed.chapterId}:${failed.since}` : null
-  // A name cleared since has nothing left to correct.
-  if (!failed || stamp === dismissed || profile.trim() === '') return null
+  // A name cleared since has nothing left to correct; a developer preview (issue 124) names one.
+  const name = profile.trim() || (failed?.preview ? PREVIEW_NAME : '')
+  if (!failed || stamp === dismissed || name === '') return null
 
   const chapter = chapters.find((c) => c.id === failed.chapterId)?.name ?? failed.chapterId
   const close = () => {
@@ -48,6 +52,11 @@ export function ProfileNotice({ onOpenAccount }: Props) {
     setError(null)
   }
   const playWithDefault = async () => {
+    // A preview writes nothing and starts nothing: the name stays and no game runs.
+    if (failed.preview) {
+      close()
+      return
+    }
     try {
       await update({ profileName: '' })
     } catch (e) {
@@ -65,9 +74,9 @@ export function ProfileNotice({ onOpenAccount }: Props) {
   return (
     <Dialog title="Prism has no account by that name" facts={chapter} onCancel={close} closable>
       <p className="text-fg-soft m-0 leading-normal">
-        None of the accounts in Prism is called <span className="text-fg">{profile.trim()}</span>,
-        so the game did not start. Play with Prism&apos;s default account instead, or correct the
-        name on the account page.
+        None of the accounts in Prism is called <span className="text-fg">{name}</span>, so the game
+        did not start. Play with Prism&apos;s default account instead, or correct the name on the
+        account page.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <Button variant="play" onClick={() => void playWithDefault()}>

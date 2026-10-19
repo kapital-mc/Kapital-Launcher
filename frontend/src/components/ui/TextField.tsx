@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 import { ErrorLine, Hint } from './Notes'
+import { Grow } from './Grow'
 
 interface Props {
   label: string
@@ -82,7 +83,13 @@ export function TextField({
         />
         {trailing}
       </div>
-      {error ? <ErrorLine id={lineId}>{error}</ErrorLine> : hint && <Hint id={lineId}>{hint}</Hint>}
+      <Grow className="-mt-2" inner="pt-2">
+        {error ? (
+          <ErrorLine id={lineId}>{error}</ErrorLine>
+        ) : (
+          hint && <Hint id={lineId}>{hint}</Hint>
+        )}
+      </Grow>
     </div>
   )
 }

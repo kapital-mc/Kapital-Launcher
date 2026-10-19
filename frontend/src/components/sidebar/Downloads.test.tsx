@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import * as App from '../../../wailsjs/go/main/App'
 import { Downloads } from './Downloads'
 import { useEngineStore } from '../../stores/useEngineStore'
 import { useTailscaleStore } from '../../stores/useTailscaleStore'
@@ -17,8 +18,8 @@ describe('Downloads', () => {
   afterEach(cleanup)
 
   it('is not there while nothing downloads', () => {
-    const { container } = render(<Downloads />)
-    expect(container).toBeEmptyDOMElement()
+    render(<Downloads />)
+    expect(screen.queryByRole('region', { name: 'Downloads' })).toBeNull()
   })
 
   it('shows each running download with its bar', () => {
@@ -47,5 +48,36 @@ describe('Downloads', () => {
     expect(screen.getByRole('progressbar', { name: 'Prism Launcher' })).toBeInTheDocument()
     expect(screen.getByText('50%')).toBeVisible()
     expect(screen.getByText('Prism Launcher').closest('[inert]')).not.toBeNull()
+  })
+
+  it('cancels each download from its row, an install only while it downloads', async () => {
+    vi.mocked(App.CancelTailscaleInstall).mockResolvedValue(true)
+    vi.mocked(App.CancelDHSnapshot).mockResolvedValue(true)
+    useEngineStore.setState({
+      install: { phase: 'verifying', received: 100, total: 100, error: '' },
+    })
+    useTailscaleStore.setState({
+      install: { phase: 'downloading', received: 10, total: 20, error: '' },
+    })
+    useTerrainStore.setState({
+      progress: {
+        frangfurd: { chapterId: 'frangfurd', phase: 'downloading', received: 1, total: 4 },
+      },
+    })
+    render(<Downloads />)
+    expect(screen.queryByRole('button', { name: 'Cancel Prism Launcher' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel Tailscale' }))
+    await waitFor(() => expect(App.CancelTailscaleInstall).toHaveBeenCalledOnce())
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel Frangfurd terrain' }))
+    await waitFor(() => expect(App.CancelDHSnapshot).toHaveBeenCalledWith('frangfurd'))
+  })
+
+  it('draws its numbers with even-width digits', () => {
+    useTailscaleStore.setState({
+      install: { phase: 'downloading', received: 10, total: 20, error: '' },
+    })
+    render(<Downloads />)
+    expect(screen.getByText('Downloading 0.0 MB of 0.0 MB')).toHaveClass('tabular-nums')
+    expect(screen.getByText('50%')).toHaveClass('tabular-nums')
   })
 })

@@ -25,6 +25,9 @@ type PreviewSituation struct {
 	// (Prism's, or the launcher's one: Tailscale), whose progress and failure
 	// are the situation.
 	PlaysInstall bool `json:"playsInstall"`
+	// Popup is whether the view opens its scope's install popup (getting
+	// Prism, or Tailscale), on its offer or over the install it plays.
+	Popup bool `json:"popup,omitempty"`
 	// Page is the chapter page the screen is on, "" for the main screen: the
 	// Tailscale situations are "settings", the settings page of the first
 	// chapter whose server has a Tailscale address, where its row is.

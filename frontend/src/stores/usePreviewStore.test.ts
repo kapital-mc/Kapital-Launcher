@@ -149,4 +149,19 @@ describe('usePreviewStore', () => {
     expect(App.ClearPreviews).toHaveBeenCalledOnce()
     expect(useGameStore.getState().states.frangfurd?.phase).toBe('idle')
   })
+
+  it('asks the action bar for the Get Prism popup, and plays the install under it', async () => {
+    useEngineStore.setState({ offerPending: false })
+    vi.mocked(App.GetPrismRelease).mockResolvedValue(release)
+    await usePreviewStore
+      .getState()
+      .start('frangfurd', { ...missing, id: 'prism-offer', popup: true })
+    expect(useEngineStore.getState().offerPending).toBe(true)
+    expect(App.InstallPrism).not.toHaveBeenCalled()
+    useEngineStore.setState({ offerPending: false })
+    vi.mocked(App.InstallPrism).mockRejectedValue('The download failed (preview)')
+    await usePreviewStore.getState().start('frangfurd', { ...install, popup: true })
+    expect(useEngineStore.getState().offerPending).toBe(true)
+    expect(App.InstallPrism).toHaveBeenCalledOnce()
+  })
 })

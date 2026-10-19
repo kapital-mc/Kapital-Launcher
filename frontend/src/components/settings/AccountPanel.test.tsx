@@ -104,7 +104,7 @@ describe('AccountPanel', () => {
 
   it('turns offline on with the profile name, and shows the name field only then', async () => {
     render(<AccountPanel onClose={() => undefined} />)
-    expect(screen.queryByLabelText('Offline name')).toBeNull()
+    expect(screen.queryByRole('textbox', { name: 'Offline name' })).toBeNull()
     expect(screen.queryByText('Online servers refuse an offline player.')).toBeNull()
     expect(screen.getByText('Microsoft account · via Prism')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('switch', { name: 'Play offline' }))
@@ -143,7 +143,7 @@ describe('AccountPanel', () => {
         expect.objectContaining({ offline: false }),
       ),
     )
-    expect(screen.queryByLabelText('Offline name')).toBeNull()
+    expect(screen.queryByRole('textbox', { name: 'Offline name' })).toBeNull()
   })
 
   it('opens the name field first when there is no name to start from', async () => {

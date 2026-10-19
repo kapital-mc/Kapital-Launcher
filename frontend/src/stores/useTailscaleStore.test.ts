@@ -79,4 +79,19 @@ describe('useTailscaleStore', () => {
     await useTailscaleStore.getState().open()
     expect(useTailscaleStore.getState().error).toBeNull()
   })
+
+  it('goes back to an offer when the player cancels the download', async () => {
+    let refuse!: (e: unknown) => void
+    vi.mocked(App.InstallTailscale).mockReturnValue(new Promise((_, r) => (refuse = r)))
+    vi.mocked(App.CancelTailscaleInstall).mockResolvedValue(true)
+    const running = useTailscaleStore.getState().installTailscale()
+    await useTailscaleStore.getState().cancelInstall()
+    useTailscaleStore
+      .getState()
+      .receiveInstall({ phase: 'cancelled', received: 0, total: 0, error: '' })
+    expect(useTailscaleStore.getState().install).toBeNull()
+    refuse(new Error('the download was cancelled'))
+    await running
+    expect(useTailscaleStore.getState().install).toBeNull()
+  })
 })

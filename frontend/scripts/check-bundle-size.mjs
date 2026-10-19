@@ -99,7 +99,11 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 94 the same day: the account tile shows the skin's face from Go's cache, so the player
 // store, which only the lazy account page read before, is in the entry with its new
 // binding and the tile's picture. Measured 93.86 KB.
-const BUDGET_KB = 94
+// 94.2 since Cancel in the downloads section and the popup previews (2026-10-19): the
+// engine store cancels Prism's download and holds a preview's request for the Get Prism
+// popup, which the action bar takes from the first paint, and the bindings gain the two
+// cancels. The section and the popups still load after the first paint. Measured 94.01 KB.
+const BUDGET_KB = 94.2
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

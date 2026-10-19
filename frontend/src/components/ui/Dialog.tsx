@@ -13,7 +13,8 @@ interface Props {
   onCancel: () => void
   /**
    * The rectangle of what opened it. The box then grows out of it, and shrinks
-   * back into it before `onCancel` runs; without one it simply appears.
+   * back into it before `onCancel` runs; without one it rises into place and
+   * fades, and goes at once.
    */
   origin?: DOMRect
   /** The rectangle to centre the box on, such as the chapter card; the window without one. */
@@ -73,11 +74,12 @@ export function Dialog({ title, facts, onCancel, origin, frame, closable, childr
     setMeasured(true)
   }, [origin, frame])
 
-  const motion = !origin ? '' : !measured ? 'opacity-0' : leaving ? 'grow-out' : 'grow-in'
+  // Without an origin the box rises into place as a page's body does, and the cover fades in.
+  const motion = !origin ? 'reveal' : !measured ? 'opacity-0' : leaving ? 'grow-out' : 'grow-in'
   const place = frame ? 'left-(--frame-x) top-(--frame-y) h-(--frame-h) w-(--frame-w)' : 'inset-0'
   return createPortal(
     <div
-      className={`scrim-wash fixed inset-0 z-20 ${origin ? (leaving ? 'fade-out' : 'fade-in') : ''}`}
+      className={`scrim-wash fixed inset-0 z-20 ${leaving ? 'fade-out' : 'fade-in'}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) close()
       }}

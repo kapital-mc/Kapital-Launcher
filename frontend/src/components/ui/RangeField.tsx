@@ -1,4 +1,5 @@
 import { useId, useLayoutEffect, useRef } from 'react'
+import { Grow } from './Grow'
 import { Hint } from './Notes'
 import { SubHeading } from './Section'
 
@@ -101,7 +102,9 @@ export function RangeField({
           </button>
         </div>
       )}
-      {hint && <Hint>{hint}</Hint>}
+      <Grow className="-mt-3" inner="pt-3">
+        {hint && <Hint>{hint}</Hint>}
+      </Grow>
     </div>
   )
 }

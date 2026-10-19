@@ -4,6 +4,10 @@ import {models} from '../models';
 
 export function CancelDHSnapshot(arg1:string):Promise<boolean>;
 
+export function CancelPrismInstall():Promise<boolean>;
+
+export function CancelTailscaleInstall():Promise<boolean>;
+
 export function CheckChapterMap(arg1:string):Promise<models.MapStatus>;
 
 export function ChoosePrismExecutable():Promise<string>;

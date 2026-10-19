@@ -7,11 +7,13 @@ import (
 )
 
 // The launcher's Tailscale situations: the settings row's three faces
-// (Install, Connect, the switch) and the install popup failing. Like the rest
+// (Install, Connect, the switch), the install popup on its offer, and the
+// install popup failing. Like the rest
 // of preview.go, everything here is state and copy: no CLI runs, nothing is
 // downloaded and no page opens.
 const (
 	PreviewTailscaleMissing      = "tailscale-missing"
+	PreviewTailscaleOffer        = "tailscale-offer"
 	PreviewTailscaleInstall      = "tailscale-install"
 	PreviewTailscaleDisconnected = "tailscale-disconnected"
 	PreviewTailscaleConnected    = "tailscale-connected"
@@ -31,7 +33,7 @@ const (
 // Tailscale address; installed and not connected reaches none.
 func PreviewTailscale(situation string, chapters []models.Chapter) (models.TailscaleInfo, bool) {
 	switch situation {
-	case PreviewTailscaleMissing, PreviewTailscaleInstall:
+	case PreviewTailscaleMissing, PreviewTailscaleOffer, PreviewTailscaleInstall:
 		return models.TailscaleInfo{State: TailscaleMissing, CanInstall: true, Connected: []string{}}, true
 	case PreviewTailscaleDisconnected:
 		return models.TailscaleInfo{State: TailscaleRunning, Version: previewTailscaleVersion, CanInstall: true, Connected: []string{}}, true

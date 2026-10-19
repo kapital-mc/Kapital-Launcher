@@ -124,3 +124,18 @@ does. The hover line on the Tailscale choice under Address is gone.
   and Instance, as links. Launcher holds the launcher's update and four
   Tailscale situations (not installed, the install failing, not connected,
   connected), which open the first Tailscale chapter's settings page.
+
+## Amendment, 2026-10-19: what the popup says, and Cancel
+
+The author asked (2026-10-19) for the popup's second paragraph, which named
+what macOS and Windows ask while installing, to say instead what Tailscale
+does for the connection: it usually reaches the server directly, with a
+lower ping than playit, and keeps working when playit has trouble. The OS's
+own prompts are no longer announced in the popup; the installer step still
+says the installer is open.
+
+Tailscale's download is cancelled from its row in the downloads section like
+Prism's (ADR-11 amendment of the same day, `CancelTailscaleInstall`): only
+while the installer downloads, never once it is being checked or has been
+started. The Launcher previews gain the popup on its offer, and the install
+preview now plays inside the popup.

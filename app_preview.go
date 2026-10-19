@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -254,22 +255,22 @@ func (a *App) previewPackState(chapterID string) (models.PackState, bool) {
 // services.PreviewInstallProgress as prism:install events, a pause apart, then
 // the failure it ends in. It never reaches the installer, so nothing is
 // downloaded, verified or unpacked.
-func (a *App) playPreviewInstall() error {
+func (a *App) playPreviewInstall(ctx context.Context, emit func(models.PrismInstallProgress)) error {
 	steps := services.PreviewInstallProgress()
 	for i, step := range steps {
-		if i > 0 && !a.previewPause() {
-			return a.context().Err()
+		if i > 0 && !a.previewPause(ctx) {
+			return ctx.Err()
 		}
-		a.emitPrismInstall(step)
+		emit(step)
 	}
 	return errors.New(steps[len(steps)-1].Error)
 }
 
 // previewPause waits one step of a made-up install; false when the app is
-// closing.
-func (a *App) previewPause() bool {
+// closing or the player cancelled it.
+func (a *App) previewPause(ctx context.Context) bool {
 	select {
-	case <-a.context().Done():
+	case <-ctx.Done():
 		return false
 	case <-time.After(a.previewStep):
 		return true

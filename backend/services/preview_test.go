@@ -12,7 +12,7 @@ var previewNow = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
 
 func TestPreviewSituationsAreAFixedListWithUniqueIDs(t *testing.T) {
 	list := PreviewSituations()
-	if len(list) != 17 {
+	if len(list) != 20 {
 		t.Fatalf("got %d situations", len(list))
 	}
 	seen := map[string]bool{}
@@ -61,13 +61,14 @@ func TestPreviewGameStatePerSituation(t *testing.T) {
 		{PreviewStopped, models.GamePhaseCrashed, models.GameFailStopped, false},
 		{PreviewRunning, models.GamePhaseRunning, "", false},
 		{PreviewStarting, models.GamePhaseMods, "", true},
+		{PreviewProfile, models.GamePhaseFailed, models.GameFailProfile, false},
 	} {
 		t.Run(tc.situation, func(t *testing.T) {
 			s, ok := PreviewGameState(tc.situation, "frangfurd", previewNow)
 			if !ok || s.ChapterID != "frangfurd" || s.Phase != tc.phase || s.Reason != tc.reason {
 				t.Fatalf("%v %+v", ok, s)
 			}
-			if s.Since == "" || s.StartedAt == "" || s.Splash {
+			if s.Since == "" || s.StartedAt == "" || s.Splash || !s.Preview {
 				t.Fatalf("times are set, the splash flag is the app's: %+v", s)
 			}
 			if sit, _ := PreviewSituationByID(tc.situation); sit.Card != tc.card {

@@ -28,8 +28,10 @@ const (
 	PreviewConsole          = "console"
 	PreviewNotInstalled     = "not-installed"
 	PreviewSourceAhead      = "source-ahead"
+	PreviewProfile          = "profile"
 
 	PreviewPrismMissing = "prism-missing"
+	PreviewPrismOffer   = "prism-offer"
 	PreviewPrismInstall = "prism-install"
 	PreviewPrismUpdate  = "prism-update"
 
@@ -47,12 +49,15 @@ var previewSituations = []models.PreviewSituation{
 	{ID: PreviewStopped, Label: "Stopped by the player", Scope: models.PreviewScopeChapter},
 	{ID: PreviewNotInstalled, Label: "Not installed", Scope: models.PreviewScopeChapter},
 	{ID: PreviewSourceAhead, Label: "Pack source is ahead", Scope: models.PreviewScopeChapter},
+	{ID: PreviewProfile, Label: "No Prism account by that name", Scope: models.PreviewScopeChapter},
 	{ID: PreviewPrismMissing, Label: "Prism missing", Scope: models.PreviewScopePrism},
-	{ID: PreviewPrismInstall, Label: "Prism install, then it fails", Scope: models.PreviewScopePrism, PlaysInstall: true},
+	{ID: PreviewPrismOffer, Label: "Get Prism popup", Scope: models.PreviewScopePrism, Popup: true},
+	{ID: PreviewPrismInstall, Label: "Prism install, then it fails", Scope: models.PreviewScopePrism, PlaysInstall: true, Popup: true},
 	{ID: PreviewPrismUpdate, Label: "Prism update available", Scope: models.PreviewScopePrism},
 	{ID: PreviewLauncherUpdate, Label: "Kapital Launcher update available", Scope: models.PreviewScopeLauncher},
 	{ID: PreviewTailscaleMissing, Label: "Tailscale not installed", Scope: models.PreviewScopeLauncher, Page: previewTailscalePage},
-	{ID: PreviewTailscaleInstall, Label: "Tailscale install, then it fails", Scope: models.PreviewScopeLauncher, PlaysInstall: true, Page: previewTailscalePage},
+	{ID: PreviewTailscaleOffer, Label: "Get Tailscale popup", Scope: models.PreviewScopeLauncher, Popup: true, Page: previewTailscalePage},
+	{ID: PreviewTailscaleInstall, Label: "Tailscale install, then it fails", Scope: models.PreviewScopeLauncher, PlaysInstall: true, Popup: true, Page: previewTailscalePage},
 	{ID: PreviewTailscaleDisconnected, Label: "Tailscale installed, not connected", Scope: models.PreviewScopeLauncher, Page: previewTailscalePage},
 	{ID: PreviewTailscaleConnected, Label: "Tailscale connected", Scope: models.PreviewScopeLauncher, Page: previewTailscalePage},
 }
@@ -126,6 +131,7 @@ var previewRuns = map[string]previewRun{
 	},
 	PreviewStopped:  {phase: models.GamePhaseCrashed, reason: models.GameFailStopped, ago: time.Minute, phases: previewPhases},
 	PreviewRunning:  {phase: models.GamePhaseRunning, ago: 90 * time.Second, sinceAgo: 30 * time.Second, phases: previewPhases},
+	PreviewProfile:  {phase: models.GamePhaseFailed, reason: models.GameFailProfile, ago: 5 * time.Second, phases: previewPhases[:1]},
 	PreviewStarting: {phase: models.GamePhaseMods, ago: 20 * time.Second, sinceAgo: 14 * time.Second, phases: previewPhases[:2]},
 }
 
@@ -150,6 +156,7 @@ func (r previewRun) state(chapterID string, now time.Time) models.GameState {
 		StartedAt: stamp(r.ago),
 		Reason:    r.reason,
 		Estimate:  maps.Clone(previewEstimate),
+		Preview:   true,
 	}
 	if r.exitCode != nil {
 		code := *r.exitCode
@@ -229,7 +236,7 @@ func PreviewInstances(report models.InstanceReport, situation, chapterID string)
 // update is the launcher's own copy, which is the one it offers to update.
 func PreviewEngine(situation string) (models.EngineInfo, bool) {
 	switch situation {
-	case PreviewPrismMissing, PreviewPrismInstall:
+	case PreviewPrismMissing, PreviewPrismOffer, PreviewPrismInstall:
 		return models.EngineInfo{}, true
 	case PreviewPrismUpdate:
 		return models.EngineInfo{Found: true, Version: previewPrismInstalled, Source: "managed"}, true

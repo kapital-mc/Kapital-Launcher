@@ -459,6 +459,7 @@ export namespace models {
 	    reason?: string;
 	    splash?: boolean;
 	    estimate?: Record<string, number>;
+	    preview?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new GameState(source);
@@ -474,6 +475,7 @@ export namespace models {
 	        this.reason = source["reason"];
 	        this.splash = source["splash"];
 	        this.estimate = source["estimate"];
+	        this.preview = source["preview"];
 	    }
 	}
 	
@@ -706,6 +708,7 @@ export namespace models {
 	    scope: string;
 	    card: boolean;
 	    playsInstall: boolean;
+	    popup?: boolean;
 	    page?: string;
 	
 	    static createFrom(source: any = {}) {
@@ -719,6 +722,7 @@ export namespace models {
 	        this.scope = source["scope"];
 	        this.card = source["card"];
 	        this.playsInstall = source["playsInstall"];
+	        this.popup = source["popup"];
 	        this.page = source["page"];
 	    }
 	}

@@ -316,6 +316,8 @@ export interface PreviewSituation {
    * Tailscale), whose progress and failure are the situation.
    */
   playsInstall: boolean
+  /** Whether the view opens its scope's install popup, on its offer or over the install it plays. */
+  popup?: boolean
   /** The chapter page its screen is on; "settings" is that of the first chapter with a Tailscale address. */
   page?: 'settings'
 }

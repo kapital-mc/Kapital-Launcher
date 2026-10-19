@@ -54,7 +54,11 @@ async function readViews() {
     release: null,
     install: s.install && FINISHED.includes(s.install.phase) ? null : s.install,
   }))
-  await useTailscaleStore.getState().load()
+  const ts = useTailscaleStore.getState()
+  await ts.load()
+  // The row reads the installer only when its step changes, which a preview need not do.
+  const info = useTailscaleStore.getState().info
+  if (info?.state === 'missing' && info.canInstall) await ts.loadRelease()
 }
 
 export const usePreviewStore = create<PreviewStore>((set) => ({
@@ -69,10 +73,16 @@ export const usePreviewStore = create<PreviewStore>((set) => ({
     if (!hasWailsBridge()) throw new Error('Previews need the desktop app.')
     await StartPreview(chapterId, situation.id)
     await readViews()
+    const tailscale = situation.scope === 'launcher'
+    // The popup opens on its offer, or over the install it then plays.
+    if (situation.popup) {
+      if (tailscale) useTailscaleStore.setState({ offerPending: true })
+      else useEngineStore.setState({ offerPending: true })
+    }
     // The made-up install is the situation: it plays on its own, over
     // prism:install or tailscale:install, and fails.
     if (!situation.playsInstall) return
-    if (situation.scope === 'launcher') void useTailscaleStore.getState().installTailscale()
+    if (tailscale) void useTailscaleStore.getState().installTailscale()
     else void useEngineStore.getState().installPrism()
   },
 

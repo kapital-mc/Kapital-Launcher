@@ -10,6 +10,7 @@ import { OpenExternal } from '../../../wailsjs/go/main/App'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
+import { Grow } from '../ui/Grow'
 import { ErrorLine } from '../ui/Notes'
 import { Page } from '../ui/Page'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
@@ -235,35 +236,43 @@ function ProfileSection({ player }: { player: PlayerProfile | null }) {
             error={error}
             onCommit={(v) => void save(v)}
           />
-          {player?.status === 'found' && (
-            <p
-              role="status"
-              className="text-accent m-0 flex items-center gap-1.5 text-xs leading-normal"
-            >
-              <Icon icon={Check} size="sm" />
-              <span>Found on Mojang</span>
-            </p>
-          )}
-          {player?.status === 'not_found' && (
-            <ErrorLine>No Minecraft profile has this name</ErrorLine>
-          )}
+          <Grow className="-mt-2" inner="pt-2">
+            {player?.status === 'found' ? (
+              <p
+                role="status"
+                className="text-accent m-0 flex items-center gap-1.5 text-xs leading-normal"
+              >
+                <Icon icon={Check} size="sm" />
+                <span>Found on Mojang</span>
+              </p>
+            ) : (
+              player?.status === 'not_found' && (
+                <ErrorLine>No Minecraft profile has this name</ErrorLine>
+              )
+            )}
+          </Grow>
         </div>
-        <Toggle
-          label="Play offline"
-          checked={offlineShown}
-          hint={offlineShown ? 'Online servers refuse an offline player.' : undefined}
-          error={offlineError}
-          onChange={onOfflineSwitch}
-        />
-        {offlineShown && (
-          <TextField
-            label="Offline name"
-            value={offlineName}
-            placeholder={accountName(profile, playerName) || 'Your Minecraft name'}
-            hint={profileNameProblem(offlineName)}
-            onCommit={(v) => void saveOffline({ offlineName: v, offline: true })}
+        {/* The offline name opens under its switch, in the same row of the card. */}
+        <div className="flex flex-col">
+          <Toggle
+            label="Play offline"
+            checked={offlineShown}
+            hint={offlineShown ? 'Online servers refuse an offline player.' : undefined}
+            error={offlineError}
+            onChange={onOfflineSwitch}
           />
-        )}
+          <Grow inner="pt-4">
+            {offlineShown && (
+              <TextField
+                label="Offline name"
+                value={offlineName}
+                placeholder={accountName(profile, playerName) || 'Your Minecraft name'}
+                hint={profileNameProblem(offlineName)}
+                onCommit={(v) => void saveOffline({ offlineName: v, offline: true })}
+              />
+            )}
+          </Grow>
+        </div>
       </SettingsCard>
     </SettingsSection>
   )

@@ -83,4 +83,16 @@ describe('ProfileNotice', () => {
     })
     expect(screen.queryByRole('dialog')).toBeNull()
   })
+
+  it('names a made-up account under a preview, and starts nothing from it', async () => {
+    useSettingsStore.setState({ settings: { ...DEFAULT_SETTINGS, profileName: '' } })
+    useGameStore.setState({ states: { frangfurd: failed({ preview: true }) } })
+    render(<ProfileNotice onOpenAccount={() => undefined} />)
+    expect(screen.getByText('Steve')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Play with Prism's default account/ }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await act(async () => undefined)
+    expect(App.SaveSettings).not.toHaveBeenCalled()
+    expect(App.LaunchChapter).not.toHaveBeenCalled()
+  })
 })
