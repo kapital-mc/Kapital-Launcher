@@ -131,7 +131,7 @@ export function LogViewer({ chapter, logs }: { chapter: Chapter; logs: readonly 
             <button
               type="button"
               onClick={jump}
-              className="bg-raised-2 border-line-strong hover:bg-hover duration-fast ease-standard absolute right-5 bottom-3 inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border px-3 text-xs font-semibold transition-colors"
+              className="bg-raised-2 border-line-strong hover:bg-hover duration-fast ease-standard absolute right-5 bottom-3 inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-semibold transition-colors"
             >
               <Icon icon={ArrowDown} size="sm" />
               <span>Jump to latest</span>

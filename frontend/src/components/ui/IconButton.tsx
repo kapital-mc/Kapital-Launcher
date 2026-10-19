@@ -54,7 +54,7 @@ export function IconButton({
       onClick={onClick}
       aria-label={title}
       disabled={disabled}
-      className={`${BOX[size]} ${colour} hover:bg-hover duration-fast ease-standard ${tooltip ? 'group relative' : ''} inline-flex shrink-0 cursor-pointer items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent`}
+      className={`${BOX[size]} ${colour} hover:bg-hover duration-fast ease-standard ${tooltip ? 'group relative' : ''} inline-flex shrink-0 items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:opacity-50 disabled:hover:bg-transparent`}
     >
       <Icon icon={icon} size={size} />
       {tooltip && (

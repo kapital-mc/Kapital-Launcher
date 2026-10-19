@@ -128,7 +128,7 @@ function SettingsNav({ entries }: { entries: readonly NavEntry[] }) {
             onClick={() =>
               e.el.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' })
             }
-            className={`duration-fast ease-standard flex shrink-0 cursor-pointer items-center gap-2 rounded-sm px-2.5 py-1.5 text-left text-sm whitespace-nowrap transition-colors ${
+            className={`duration-fast ease-standard flex shrink-0 items-center gap-2 rounded-sm px-2.5 py-1.5 text-left text-sm whitespace-nowrap transition-colors ${
               on ? 'bg-raised-2 text-fg' : 'text-fg-muted hover:text-fg hover:bg-raised-2'
             }`}
           >
@@ -196,7 +196,7 @@ export function SettingsSection({
               aria-expanded={open}
               aria-controls={bodyId}
               onClick={() => setOpen((o) => !o)}
-              className="group flex w-full cursor-pointer items-center gap-3.5 text-left"
+              className="group flex w-full items-center gap-3.5 text-left"
             >
               {heading}
               <Icon

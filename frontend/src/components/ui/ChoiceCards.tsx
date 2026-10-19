@@ -81,7 +81,7 @@ export function ChoiceCards<T extends string>({
             onClick={() => onChange(c.value)}
             className={`${
               chosen ? 'bg-raised border-accent-edge' : 'border-line hover:bg-hover'
-            } duration-fast ease-standard flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border px-4 py-3 text-left transition-colors disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent motion-reduce:transition-none`}
+            } duration-fast ease-standard flex w-full items-center justify-between gap-4 rounded-lg border px-4 py-3 text-left transition-colors disabled:opacity-50 disabled:hover:bg-transparent motion-reduce:transition-none`}
           >
             <span className="flex min-w-0 flex-col gap-0.5">
               <span id={`${key}-title`} className="text-fg text-sm">

@@ -18,6 +18,18 @@
     /* The window is not a web page: no text selection on chrome, no rubber
        banding. Content that should be selectable opts back in. */
     user-select: none;
+    /* Nor a web page's cursors: the arrow everywhere, links and buttons
+       included, as in a native app (the author asked, 2026-10-19). The text
+       cursor shows only where text can be selected or typed. */
+    cursor: default;
+  }
+  a:any-link {
+    cursor: default;
+  }
+  .select-text,
+  textarea,
+  input:not([type='range']) {
+    cursor: text;
   }
   button {
     font: inherit;
@@ -583,7 +595,6 @@
   width: 100%;
   height: calc(var(--spacing) * 4.5);
   background: transparent;
-  cursor: pointer;
 }
 .range::-webkit-slider-runnable-track {
   box-sizing: border-box;

@@ -107,7 +107,7 @@ function Disclosure({
       aria-expanded={open}
       aria-controls={controls}
       onClick={onToggle}
-      className={`flex cursor-pointer items-center gap-2 ${className}`}
+      className={`flex items-center gap-2 ${className}`}
     >
       {children}
       <Icon

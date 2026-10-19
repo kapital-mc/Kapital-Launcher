@@ -90,7 +90,7 @@ export function RangeField({
             type="button"
             aria-pressed={value === shown.value}
             onClick={() => onChange(shown.value)}
-            className={`range-mark rounded-pill duration-fast ease-standard absolute top-0 flex cursor-pointer items-baseline gap-1.5 border px-2.5 py-1 text-xs whitespace-nowrap transition-colors ${
+            className={`range-mark rounded-pill duration-fast ease-standard absolute top-0 flex items-baseline gap-1.5 border px-2.5 py-1 text-xs whitespace-nowrap transition-colors ${
               value === shown.value
                 ? 'bg-accent-wash border-accent-edge text-fg'
                 : 'border-line text-fg-muted hover:border-line-strong hover:text-fg'

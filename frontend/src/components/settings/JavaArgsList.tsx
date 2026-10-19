@@ -110,7 +110,7 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
           type="button"
           disabled={disabled || full}
           onClick={() => setEditing('new')}
-          className="text-fg-soft hover:text-fg border-line-strong hover:border-accent-edge duration-fast ease-standard flex h-8 w-fit cursor-pointer items-center gap-1.5 rounded-md border border-dashed pr-3 pl-2 text-sm transition-colors disabled:cursor-default disabled:opacity-50"
+          className="text-fg-soft hover:text-fg border-line-strong hover:border-accent-edge duration-fast ease-standard flex h-8 w-fit items-center gap-1.5 rounded-md border border-dashed pr-3 pl-2 text-sm transition-colors disabled:opacity-50"
         >
           <Icon icon={Plus} size="sm" className="text-accent" />
           {full ? `At most ${MAX_JAVA_ARGS} arguments` : 'Add argument'}
@@ -181,7 +181,7 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
         aria-controls={open ? menuId : undefined}
         disabled={disabled}
         onClick={() => onOpen(!open)}
-        className="text-fg-muted hover:text-fg hover:bg-hover aria-expanded:bg-hover aria-expanded:text-fg duration-fast ease-standard flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-sm opacity-0 transition-[opacity,background-color] group-focus-within:opacity-100 group-hover:opacity-100 disabled:hidden aria-expanded:opacity-100"
+        className="text-fg-muted hover:text-fg hover:bg-hover aria-expanded:bg-hover aria-expanded:text-fg duration-fast ease-standard flex size-7 shrink-0 items-center justify-center rounded-sm opacity-0 transition-[opacity,background-color] group-focus-within:opacity-100 group-hover:opacity-100 disabled:hidden aria-expanded:opacity-100"
       >
         <Icon icon={Ellipsis} size="sm" />
       </button>
@@ -198,7 +198,7 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
             type="button"
             role="menuitem"
             onClick={onEdit}
-            className="text-fg hover:bg-hover focus-visible:bg-hover flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-left text-sm outline-none"
+            className="text-fg hover:bg-hover focus-visible:bg-hover flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-left text-sm outline-none"
           >
             <Icon icon={Pencil} size="sm" className="text-fg-muted" />
             Edit
@@ -207,7 +207,7 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
             type="button"
             role="menuitem"
             onClick={onRemove}
-            className="text-danger hover:bg-hover focus-visible:bg-hover flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-left text-sm outline-none"
+            className="text-danger hover:bg-hover focus-visible:bg-hover flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-left text-sm outline-none"
           >
             <Icon icon={Trash2} size="sm" />
             Remove
@@ -281,7 +281,7 @@ function ArgEditor({ initial, action, check, onCommit, onCancel }: EditorProps) 
       <button
         type="button"
         onClick={commit}
-        className="bg-hover text-fg h-7 cursor-pointer rounded-sm px-3 text-sm font-medium hover:brightness-(--effect-hover-brightness)"
+        className="bg-hover text-fg h-7 rounded-sm px-3 text-sm font-medium hover:brightness-(--effect-hover-brightness)"
       >
         {action}
       </button>
@@ -289,7 +289,7 @@ function ArgEditor({ initial, action, check, onCommit, onCancel }: EditorProps) 
         type="button"
         aria-label="Cancel"
         onClick={onCancel}
-        className="text-fg-muted hover:text-fg hover:bg-hover flex size-7 cursor-pointer items-center justify-center rounded-sm"
+        className="text-fg-muted hover:text-fg hover:bg-hover flex size-7 items-center justify-center rounded-sm"
       >
         <Icon icon={X} size="sm" />
       </button>

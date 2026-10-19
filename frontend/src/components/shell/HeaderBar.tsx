@@ -159,7 +159,7 @@ function WindowButton({
       type="button"
       onClick={onClick}
       aria-label={title}
-      className={`text-fg-muted duration-fast ease-standard flex h-full w-11.5 cursor-pointer items-center justify-center transition-colors ${hover}`}
+      className={`text-fg-muted duration-fast ease-standard flex h-full w-11.5 items-center justify-center transition-colors ${hover}`}
     >
       <Icon icon={icon} size="sm" />
     </button>

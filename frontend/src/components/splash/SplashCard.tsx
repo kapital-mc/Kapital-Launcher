@@ -116,7 +116,7 @@ export function SplashCard({
             <button
               type="button"
               onClick={onLeave}
-              className="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer text-xs transition-colors"
+              className="text-fg-muted hover:text-fg duration-fast ease-standard text-xs transition-colors"
             >
               Back to launcher
             </button>
