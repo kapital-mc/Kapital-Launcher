@@ -96,6 +96,10 @@ type AppSettings struct {
 	// SidebarCompact narrows the sidebar to the chapter icons and a square
 	// account tile, from the button at the header's left. Off by default.
 	SidebarCompact bool `json:"sidebarCompact,omitempty"`
+	// SeenVersion is the launcher version whose What's new the player last
+	// closed, or that was running when nothing was new. Set by the app, not
+	// the player: a save from the frontend keeps the stored one.
+	SeenVersion string `json:"seenVersion,omitempty"`
 }
 
 // DefaultSettings is a fresh install. Kept as a function so callers cannot

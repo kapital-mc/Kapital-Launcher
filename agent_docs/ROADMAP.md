@@ -128,6 +128,10 @@ What is left:
 - [x] Update notice: once a start the launcher reads the download site's
       `version.json`, and a newer release opens a popup to the site; Not now
       waits for the next start (ADR-9 amendment, 2026-10-14)
+- [x] What's new on the first start after an update: each release's
+      highlights, written by hand in `data/whatsnew.json`, small changes
+      grouped, and the full changelog from the site's `changelog.json` in a
+      dropdown (ADR-9 amendment, 2026-10-19)
 - [x] Release workflow with attested artefacts for Windows and macOS; code
       signing decision (ADR-6): `.github/workflows/build.yml` (#107) builds both
       and cuts an attested release, only from the Actions tab since issue 177;
@@ -179,4 +183,5 @@ download.
   Mojang's public profile lookup for the account page (`api.mojang.com`,
   `sessionserver.mojang.com`, `textures.minecraft.net`: the profile name, then
   the UUID, ADR-13), the download site's `version.json` once a start for the
-  update notice (nothing sent, ADR-9), and whatever Prism itself contacts.
+  update notice and its `changelog.json` when What's new's full changelog is
+  opened (nothing sent, ADR-9), and whatever Prism itself contacts.

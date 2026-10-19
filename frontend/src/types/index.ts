@@ -213,6 +213,51 @@ export interface UpdateInfo {
   reason: string
 }
 
+/**
+ * One change a release puts forward in What's new, written by hand for it: a
+ * name with a line, or with the small changes it groups, or both.
+ */
+export interface WhatsNewHighlight {
+  title: string
+  text?: string
+  items?: string[]
+}
+
+/** A release's highlights, under its tag. */
+export interface WhatsNewRelease {
+  version: string
+  highlights: WhatsNewHighlight[]
+}
+
+/**
+ * What the first start after an update shows: this build's version and the
+ * highlights of every release since the one last seen, newest first. No
+ * releases means nothing to show.
+ */
+export interface WhatsNew {
+  version: string
+  releases: WhatsNewRelease[] | null
+}
+
+/** One release of the full changelog, from the download site's changelog.json. */
+export interface ReleaseNotes {
+  tag: string
+  /** YYYY-MM-DD. */
+  date: string
+  sections: { title: string; items: string[] }[] | null
+}
+
+/**
+ * The full changelog under What's new: the releases it covers, or why there
+ * are none ("no answer", "timed out", "not a changelog") with the download
+ * site, whose page lists every release.
+ */
+export interface Changelog {
+  releases: ReleaseNotes[] | null
+  reason: string
+  page: string
+}
+
 /** A Prism release the launcher can install for a player without Prism (ADR-11). */
 export interface PrismRelease {
   version: string
@@ -439,6 +484,8 @@ export interface AppSettings {
   mapIn?: MapIn | string
   /** The sidebar narrowed to the chapter icons and a square account tile. Absent is the full sidebar. */
   sidebarCompact?: boolean
+  /** The launcher version whose What's new was last seen. Set by Go; a save keeps the stored one. */
+  seenVersion?: string
 }
 
 /** What the hero shows behind a chapter: the slideshow, the chapter's own picture, or its panorama. */

@@ -30,6 +30,12 @@ var assets embed.FS
 //go:embed data/launcher.json
 var bundledManifest []byte
 
+// bundledWhatsNew is each release's highlights, written by hand before its tag
+// and shown once on the first start after an update (app_whatsnew.go).
+//
+//go:embed data/whatsnew.json
+var bundledWhatsNew []byte
+
 func main() {
 	// Prism runs the launcher's own copy as the pre-launch command, with this
 	// flag: that run is the pack sync and never the app, so it is looked for

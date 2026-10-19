@@ -92,6 +92,15 @@ func (s *SettingsService) Load() (models.AppSettings, error) {
 	return s.load()
 }
 
+// Exists says whether a settings file has been written. A fresh install has
+// none until its first save.
+func (s *SettingsService) Exists() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	_, err := os.Stat(s.path)
+	return err == nil
+}
+
 // Update reads the settings, lets change edit them and saves the result, all
 // under the one lock, so a write the app makes on its own (the disabled mods)
 // never loses one the player's settings screen made at the same moment. A change

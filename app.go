@@ -81,6 +81,11 @@ type App struct {
 
 	// update is the one look at the download site a start gets (app_update.go).
 	update updateCheck
+	// whatsNew is every release's highlights, newest first, and freshInstall
+	// whether this start found no settings file (app_whatsnew.go).
+	whatsNew     []models.WhatsNewRelease
+	freshInstall bool
+	whatsNewRun  whatsNewState
 
 	// What CopyRedactedLog needs: where the log is, who to mask, and the
 	// clipboard. The clipboard is a field so a test needs no window.
@@ -116,6 +121,10 @@ type App struct {
 // it.
 func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 	m, err := services.ParseManifest(manifest)
+	if err != nil {
+		return nil, err
+	}
+	whatsNew, err := services.ParseWhatsNew(bundledWhatsNew)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +164,9 @@ func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 		terrain:     newTerrainDownloads(),
 		tailscale:   newTailscaleState(dataDir),
 		engineReady: make(chan struct{}),
+		whatsNew:    whatsNew,
 	}
+	a.freshInstall = !a.settings.Exists()
 	a.syncCopy = services.NewSyncCopy(dataDir, Version)
 	a.creator.UseSyncCopy(a.syncExe)
 	a.splash = a.newSplashCard(dist, splashhost.New)
@@ -457,8 +468,10 @@ func (a *App) SaveSettings(settings models.AppSettings) error {
 	// it against the instance's mods folder; the screen's copy is none, and a
 	// save from it never changes the stored one (issue 156).
 	settings.DisabledMods = before.DisabledMods
-	// So is the name learned from the game's log (learnPlayerName).
+	// So is the name learned from the game's log (learnPlayerName), and the
+	// version whose What's new was seen (MarkWhatsNewSeen).
 	settings.PlayerName = before.PlayerName
+	settings.SeenVersion = before.SeenVersion
 	if err := a.settings.Save(settings); err != nil {
 		return err
 	}

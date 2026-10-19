@@ -175,6 +175,10 @@ tries the feed and, if GitHub cannot be reached, links to the releases page
 instead; `SITE_RELEASE` builds do not try. `pnpm test` runs the parser against
 a saved copy of the real feed in `test/fixtures/releases.atom`.
 
+The same releases go into `changelog.json` beside `version.json`, as plain
+text without the links, for the full changelog under the launcher's What's new
+(`backend/services/releasenotes.go`). A build that read no feed writes none.
+
 ## The code signing policy
 
 Beside it, "Code signing policy" opens a popup the same way.

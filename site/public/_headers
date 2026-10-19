@@ -19,3 +19,8 @@
 # would keep offering the old release, or none.
 /version.json
   Cache-Control: no-cache
+
+# The launcher's What's new reads changelog.json when its full changelog is
+# opened; a cached copy would miss the release just installed.
+/changelog.json
+  Cache-Control: no-cache

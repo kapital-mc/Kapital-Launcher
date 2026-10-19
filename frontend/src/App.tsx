@@ -36,6 +36,10 @@ const ChapterPage = lazy(() =>
 const UpdateNotice = lazy(() =>
   import('./components/shell/UpdateNotice').then((m) => ({ default: m.UpdateNotice })),
 )
+// So does What's new, shown once on the first start after an update.
+const WhatsNew = lazy(() =>
+  import('./components/shell/WhatsNew').then((m) => ({ default: m.WhatsNew })),
+)
 // So does the popup for a Play Prism ignored over the profile name.
 const ProfileNotice = lazy(() =>
   import('./components/shell/ProfileNotice').then((m) => ({ default: m.ProfileNotice })),
@@ -258,6 +262,7 @@ export default function App() {
       <Toasts onOpenReport={pages.openReport} />
       <Suspense fallback={null}>
         <UpdateNotice />
+        <WhatsNew />
         <ProfileNotice onOpenAccount={pages.openAccount} />
       </Suspense>
     </div>

@@ -6,6 +6,7 @@ import { useEngineStore } from './useEngineStore'
 import { useGameStore } from './useGameStore'
 import { useTailscaleStore } from './useTailscaleStore'
 import { useUpdateStore } from './useUpdateStore'
+import { useWhatsNewStore } from './useWhatsNewStore'
 
 /**
  * The developer previews (#124): screens a run only shows when something goes
@@ -34,8 +35,8 @@ const FINISHED = ['done', 'failed']
 
 /**
  * Reads again what a preview changes that no event carries: the engine, the
- * release, the instances with the pack state, the launcher's update and the
- * player's Tailscale. The release goes first, so a
+ * release, the instances with the pack state, the launcher's update and What's
+ * new, and the player's Tailscale. The release goes first, so a
  * made-up one never outlives its preview; it is read again where the launcher
  * would read it (App does the same on the engine).
  */
@@ -50,6 +51,7 @@ async function readViews() {
   // The launcher's own update notice, and the player's Tailscale, which its
   // previews make up; a made-up installer is dropped like Prism's release.
   await useUpdateStore.getState().load()
+  await useWhatsNewStore.getState().load()
   useTailscaleStore.setState((s) => ({
     release: null,
     install: s.install && FINISHED.includes(s.install.phase) ? null : s.install,

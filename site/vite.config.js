@@ -90,10 +90,10 @@ async function hasAll(urls) {
 // releases instead. SITE_RELEASE means a build without network access, so it
 // does not try.
 function changelog(base, xml) {
-  if (base === null) return null
+  if (base === null) return { html: null, releases: [] }
   const releases = xml === null ? [] : parseChangelog(xml, base)
   if (xml !== null && releases.length === 0) console.warn('site: the releases feed gave no changelog entries')
-  return renderChangelog(releases, base)
+  return { html: renderChangelog(releases, base), releases }
 }
 
 async function readLinks() {
@@ -134,7 +134,8 @@ async function readLinks() {
       prism: (await hasAll(Object.values(zips))) ? zips : null,
     }
   }
-  return { ...all, release, changelog: changelog(github, xml) }
+  const notes = changelog(github, xml)
+  return { ...all, release, changelog: notes.html, releases: notes.releases }
 }
 
 const escapeAttr = (s) => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
@@ -208,14 +209,30 @@ function versionFile(release) {
   return `${JSON.stringify({ version: release.tag })}\n`
 }
 
+// changelog.json is the same releases as the Changelog popup, as plain text,
+// for the full changelog under the launcher's What's new
+// (backend/services/releasenotes.go). A build that read no feed writes none,
+// and the launcher links to this page instead.
+function changelogFile(releases) {
+  if (releases.length === 0) return ''
+  const plain = releases.map(({ tag, date, sections }) => ({
+    tag,
+    date,
+    sections: sections.map(({ title, items }) => ({ title, items: items.map((item) => item.text) })),
+  }))
+  return `${JSON.stringify({ releases: plain })}\n`
+}
+
 async function links() {
   const resolved = await readLinks()
   const version = versionFile(resolved.release)
+  const notes = changelogFile(resolved.releases)
   return {
     name: 'kapital:links',
     transformIndexHtml: { order: 'pre', handler: (html) => fillLinks(html, resolved) },
     generateBundle() {
       if (version) this.emitFile({ type: 'asset', fileName: 'version.json', source: version })
+      if (notes) this.emitFile({ type: 'asset', fileName: 'changelog.json', source: notes })
     },
   }
 }

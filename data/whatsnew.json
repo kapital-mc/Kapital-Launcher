@@ -1,0 +1,31 @@
+{
+  "releases": [
+    {
+      "version": "v1.0.0-beta.5",
+      "highlights": [
+        {
+          "title": "Tailscale",
+          "text": "Join Frangfurd over Tailscale: a direct connection with a lower ping that works when playit is down. Turn it on under Server in the chapter's settings."
+        },
+        {
+          "title": "Design overhaul",
+          "text": "A compact sidebar, tools in the header, a downloads section above your account, and popups that lift out of the chapter card."
+        },
+        {
+          "title": "Distant Horizons terrain for Frangfurd",
+          "text": "Download the server's distant terrain under World data in the chapter's settings and see the horizon from your first join."
+        },
+        {
+          "title": "UI improvements",
+          "items": [
+            "A taller title bar on macOS, with the header buttons beside the window controls",
+            "The arrow cursor everywhere, and the text cursor only where text can be selected",
+            "Java arguments open and close in place",
+            "The pack details set against the column's right edge",
+            "This page, once after each update"
+          ]
+        }
+      ]
+    }
+  ]
+}

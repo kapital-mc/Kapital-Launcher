@@ -35,7 +35,8 @@ const (
 	PreviewPrismInstall = "prism-install"
 	PreviewPrismUpdate  = "prism-update"
 
-	PreviewLauncherUpdate = "launcher-update"
+	PreviewLauncherUpdate   = "launcher-update"
+	PreviewLauncherWhatsNew = "launcher-whats-new"
 )
 
 // previewSituations is the fixed list, in the order the buttons show.
@@ -55,6 +56,7 @@ var previewSituations = []models.PreviewSituation{
 	{ID: PreviewPrismInstall, Label: "Prism install, then it fails", Scope: models.PreviewScopePrism, PlaysInstall: true, Popup: true},
 	{ID: PreviewPrismUpdate, Label: "Prism update available", Scope: models.PreviewScopePrism},
 	{ID: PreviewLauncherUpdate, Label: "Kapital Launcher update available", Scope: models.PreviewScopeLauncher},
+	{ID: PreviewLauncherWhatsNew, Label: "What's new after an update", Scope: models.PreviewScopeLauncher},
 	{ID: PreviewTailscaleMissing, Label: "Tailscale not installed", Scope: models.PreviewScopeLauncher, Page: previewTailscalePage},
 	{ID: PreviewTailscaleOffer, Label: "Get Tailscale popup", Scope: models.PreviewScopeLauncher, Popup: true, Page: previewTailscalePage},
 	{ID: PreviewTailscaleInstall, Label: "Tailscale install, then it fails", Scope: models.PreviewScopeLauncher, PlaysInstall: true, Popup: true, Page: previewTailscalePage},
