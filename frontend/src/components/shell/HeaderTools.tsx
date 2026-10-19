@@ -31,7 +31,7 @@ export function HeaderTools({ size, sidebarCompact, onToggleSidebar, onOpenSetti
   const prismFound = useEngineStore((s) => s.engine?.found === true)
   const openPrism = useEngineStore((s) => s.openPrism)
   const wikiHome = useChapterStore((s) => s.manifest.wiki.baseUrl)
-  const update = useUpdateStore((s) => (s.update?.available ? s.update : null))
+  const updateOut = useUpdateStore((s) => s.update?.available === true)
   const reopenUpdate = useUpdateStore((s) => s.reopen)
 
   return (
@@ -40,6 +40,7 @@ export function HeaderTools({ size, sidebarCompact, onToggleSidebar, onOpenSetti
         icon={sidebarCompact ? PanelLeftOpen : PanelLeftClose}
         title={sidebarCompact ? 'Expand sidebar' : 'Compact sidebar'}
         size={size}
+        tooltip
         onClick={() => onToggleSidebar?.()}
         disabled={!onToggleSidebar}
       />
@@ -48,6 +49,7 @@ export function HeaderTools({ size, sidebarCompact, onToggleSidebar, onOpenSetti
         icon={Settings}
         title="Settings"
         size={size}
+        tooltip
         onClick={() => onOpenSettings?.()}
         disabled={!onOpenSettings}
       />
@@ -55,22 +57,25 @@ export function HeaderTools({ size, sidebarCompact, onToggleSidebar, onOpenSetti
         icon={Triangle}
         title="Open Prism"
         size={size}
+        tooltip
         disabled={!prismFound}
         onClick={() => void openPrism().catch((e) => console.warn('open prism', errMsg(e)))}
       />
       <IconButton
         icon={BookOpen}
-        title="Open the wiki"
+        title="Open Wiki"
         size={size}
+        tooltip
         onClick={() =>
           void OpenExternal(wikiHome).catch((e) => console.warn('open wiki', errMsg(e)))
         }
       />
-      {update && (
+      {updateOut && (
         <IconButton
           icon={Download}
-          title={`Update to ${update.latest}`}
+          title="Update Launcher"
           size={size}
+          tooltip
           tone="accent"
           onClick={reopenUpdate}
         />

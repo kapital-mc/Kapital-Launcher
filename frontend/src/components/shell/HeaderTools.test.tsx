@@ -31,7 +31,7 @@ describe('HeaderTools', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'Open Prism' }))
     expect(Bindings.OpenPrism).toHaveBeenCalledOnce()
-    fireEvent.click(screen.getByRole('button', { name: 'Open the wiki' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open Wiki' }))
     expect(Bindings.OpenExternal).toHaveBeenCalledWith(
       useChapterStore.getState().manifest.wiki.baseUrl,
     )
@@ -40,14 +40,14 @@ describe('HeaderTools', () => {
 
   it('shows the update only while one is out, and brings its popup back', () => {
     tools()
-    expect(screen.queryByRole('button', { name: /^Update to/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Update Launcher/ })).toBeNull()
     act(() =>
       useUpdateStore.setState({
         update: { current: 'v1.0.0', latest: 'v1.1.0', available: true, page: '', reason: '' },
         dismissed: true,
       }),
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Update to v1.1.0' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Update Launcher' }))
     expect(useUpdateStore.getState().dismissed).toBe(false)
   })
 })

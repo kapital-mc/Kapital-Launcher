@@ -99,3 +99,9 @@ only the window buttons off macOS), Open Prism (greyed out while there is no
 Prism), the wiki's home page, and, only while a newer launcher is out,
 an update button in the accent that brings the update popup back after Not
 now (`components/shell/HeaderTools`).
+
+Each of those buttons names itself in a tooltip after two seconds of hover
+(`motion.duration.tooltip`), drawn by `IconButton`'s `tooltip` prop rather than
+the browser's own: the mono face, square corners and a hairline, under the
+button's left edge. Keyboard focus shows it at once. The button keeps its
+`aria-label`, so the tooltip is `aria-hidden`.
