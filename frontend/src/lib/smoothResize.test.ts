@@ -61,6 +61,20 @@ describe('smoothResize', () => {
     expect(outer.style.height).toBe('')
   })
 
+  it('lets the box go even when its transition never reports an end', () => {
+    vi.useFakeTimers()
+    try {
+      content = 90
+      report()
+      expect(outer).toHaveClass('smooth-resizing')
+      vi.runAllTimers()
+      expect(outer).not.toHaveClass('smooth-resizing')
+      expect(outer.style.height).toBe('')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('follows a part that runs its own height transition instead of chasing it', () => {
     const fold = document.createElement('div')
     inner.append(fold)
@@ -98,6 +112,9 @@ describe('morphFrom', () => {
     const grow = { onfinish: null as null | (() => void) }
     const animate = vi.fn(() => grow)
     el.animate = animate as never
+    // A morph still running from a first pass is cancelled before the size is measured.
+    const earlier = { cancel: vi.fn() }
+    el.getAnimations = (() => [earlier]) as never
     ;(el.firstElementChild as HTMLElement).animate = vi.fn() as never
 
     morphFrom(el, { width: 140, height: 32 } as DOMRect)
@@ -108,6 +125,7 @@ describe('morphFrom', () => {
       ],
       expect.anything(),
     )
+    expect(earlier.cancel).toHaveBeenCalled()
     expect(el.style.overflow).toBe('clip')
     grow.onfinish?.()
     expect(el.style.overflow).toBe('')

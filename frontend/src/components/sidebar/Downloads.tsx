@@ -22,10 +22,10 @@ import { Smooth } from '../ui/Smooth'
  * holds the terrain and Tailscale listeners for the app's lifetime (Prism's is
  * App's).
  *
- * Compact, it keeps each bar with a spinner over it in place of the
- * percentage; the heading, the names, the steps and Cancel fold away with the
- * rest of the sidebar's text. Every download runs at once, none waits behind
- * another, so the spinner is the only state a compact row shows. The numbers
+ * Compact, it keeps each bar and its percentage with a spinner beside it; the
+ * heading, the names, the steps and Cancel fold away with the rest of the
+ * sidebar's text. Every download runs at once, none waits behind another, so
+ * the spinner is the only state a compact row shows. The numbers
  * are drawn with even-width digits, so a count going up never moves the words
  * after it.
  */
@@ -92,17 +92,19 @@ function Row({ row, compact, first }: { row: DownloadRow; compact: boolean; firs
         <Fold open={!compact} axis="x" className={`min-w-0 ${compact ? '' : 'grow'}`}>
           <span className="text-fg block truncate font-medium">{row.title}</span>
         </Fold>
-        {compact ? (
-          <Icon
-            icon={LoaderCircle}
-            size="sm"
-            className="text-fg-muted animate-spin motion-reduce:animate-none"
-          />
-        ) : (
-          <span className="text-fg-muted font-mono tabular-nums">
-            {Math.floor(row.value * 100)}%
-          </span>
-        )}
+        <span className="text-fg-muted flex items-center font-mono tabular-nums">
+          {/* The space after the spinner is inside the fold, so it goes with it. */}
+          <Fold open={compact} axis="x">
+            <span className="flex pr-1">
+              <Icon
+                icon={LoaderCircle}
+                size="xs"
+                className="animate-spin motion-reduce:animate-none"
+              />
+            </span>
+          </Fold>
+          {Math.floor(row.value * 100)}%
+        </span>
       </div>
       <ProgressBar value={row.value} label={row.title} />
       <Fold open={!compact} axis="y">

@@ -135,18 +135,20 @@ export function ModsSection({ chapter }: Props) {
           <span>Advanced mod control</span>
         </button>
       </SettingsCard>
-      <Grow className="-mt-4" inner="pt-4">
+      <Grow className="-mt-3" inner="pt-3">
         {playing && <WarningLine>Close the game to change mods.</WarningLine>}
       </Grow>
-      <Grow className="-mt-4" inner="pt-4">
+      <Grow className="-mt-3" inner="pt-3">
         {!playing && view.running && <RunningHint chapterName={chapter.name} />}
       </Grow>
-      <Grow className="-mt-4" inner="pt-4">
+      <Grow className="-mt-3" inner="pt-3">
         {error && <ErrorLine>{error}</ErrorLine>}
       </Grow>
 
-      {/* The list opens as a hint does: the space grows, then the content fades in. */}
-      <Grow className="-mt-4" inner="pt-4">
+      {/* The list opens as a hint does: the space grows, then the content fades in. Each
+          fold takes back the section's 12px gap while it is closed; the list's opens a
+          little wider, 20px, so its search reads apart from the card's button. */}
+      <Grow className="-mt-3" inner="pt-5">
         {open && (
           <ModList
             id={panelId}

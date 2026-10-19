@@ -15,7 +15,6 @@ import { Dialog } from '../ui/Dialog'
 import { Drift } from '../ui/Drift'
 import { FactList } from '../ui/Fact'
 import { IconButton } from '../ui/IconButton'
-import { Reveal } from '../ui/Reveal'
 import { TextLink } from '../ui/TextLink'
 import type { PanelEntry, PanelFact } from './PanelDetails'
 import type * as Chunk from './PanelDetails'
@@ -23,7 +22,7 @@ import type * as Chunk from './PanelDetails'
 // The popups' bodies show only when a column is expanded, so they load then and
 // stay out of the first paint and its bundle budget (scripts/check-bundle-size.mjs).
 // The popup itself is the dialog every page already has, so it opens on the click
-// and its body fades in when it is there (Reveal), as a settings page's does.
+// and a body that arrives after the box fades in as the box grows to it (ui/Smooth).
 type Details = typeof Chunk
 /** The chunk once it has loaded, so a body renders at once rather than suspending. */
 let loaded: Details | undefined
@@ -100,7 +99,9 @@ function Popup({
       onCancel={onClose}
     >
       <Suspense fallback={null}>
-        <Reveal className="flex flex-col gap-4">{children}</Reveal>
+        {/* The popup's own entrance brings the content in; a body that loads later fades in
+            with the box growing to it. */}
+        <div className="flex flex-col gap-4">{children}</div>
       </Suspense>
     </Dialog>
   )

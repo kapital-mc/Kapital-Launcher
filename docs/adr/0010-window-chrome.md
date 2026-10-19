@@ -94,8 +94,8 @@ the button clear of the traffic lights, and the fold animating in WKWebView
 them snaps instead).
 
 The downloads section above the account tile (Tailscale, 2026-10-19) keeps each
-bar when compact, with a spinner over it in place of the percentage (the author
-found the bare number odd, 2026-10-19); its heading, the names and the steps
+bar and its percentage when compact, with a spinner beside the percentage (the
+author found the bare number odd, 2026-10-19); its heading, the names and the steps
 fold away with the rest of the sidebar's text. There is no paused state:
 every download runs at once, none waits behind another.
 

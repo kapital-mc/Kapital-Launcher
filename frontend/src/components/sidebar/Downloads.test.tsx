@@ -40,14 +40,14 @@ describe('Downloads', () => {
       '50',
     )
   })
-  it('keeps each bar under a spinner and folds the names away when compact', () => {
+  it('keeps each bar and its share with a spinner, and folds the names away when compact', () => {
     useEngineStore.setState({
       install: { phase: 'downloading', received: 50, total: 100, error: '' },
     })
     const { container } = render(<Downloads compact />)
     expect(screen.getByRole('progressbar', { name: 'Prism Launcher' })).toBeInTheDocument()
-    expect(screen.queryByText('50%')).toBeNull()
-    expect(container.querySelector('svg.animate-spin')).not.toBeNull()
+    expect(screen.getByText('50%')).toBeVisible()
+    expect(container.querySelector('svg.animate-spin')?.closest('[inert]')).toBeNull()
     expect(screen.getByText('Prism Launcher').closest('[inert]')).not.toBeNull()
   })
 
@@ -80,5 +80,7 @@ describe('Downloads', () => {
     render(<Downloads />)
     expect(screen.getByText('Downloading 0.0 MB of 0.0 MB')).toHaveClass('tabular-nums')
     expect(screen.getByText('50%')).toHaveClass('tabular-nums')
+    // Expanded, the spinner is folded away.
+    expect(document.querySelector('svg.animate-spin')?.closest('[inert]')).not.toBeNull()
   })
 })

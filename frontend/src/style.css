@@ -472,13 +472,30 @@
 @utility rise-in {
   animation: rise-in var(--duration-page) var(--ease-glide) both;
 }
+/* Closing lowers the surface at once, while the content fades over it. */
 @utility rise-out {
-  animation: rise-out var(--duration-reveal) var(--ease-glide) var(--duration-fast) both;
+  animation: rise-out var(--duration-reveal) var(--ease-glide) both;
 }
-/* The box's content, once the surface is there: the page's rise less the fast fade. */
+/* The box's content, as the surface lands: a soft edge moves down the box, so the
+   text arrives from top to bottom rather than all at once. The mask is a gradient
+   two and a half boxes tall, black above and clear below, slid from showing only
+   its clear part to only its black part. */
+@keyframes content-wipe {
+  from {
+    mask-position: 0 100%;
+    opacity: 0;
+  }
+  to {
+    mask-position: 0 0;
+    opacity: 1;
+  }
+}
 @utility rise-content-in {
-  animation: card-fade-in var(--duration-fast) var(--ease-standard)
-    calc(var(--duration-page) - var(--duration-fast) / 2) both;
+  mask-image: linear-gradient(to bottom, black 40%, transparent 60%);
+  mask-size: 100% 250%;
+  mask-repeat: no-repeat;
+  animation: content-wipe var(--duration-page) var(--ease-standard)
+    calc(var(--duration-page) - var(--duration-fast)) both;
 }
 @utility fade-in {
   animation: card-fade-in var(--duration-reveal) var(--ease-out) both;
@@ -486,17 +503,24 @@
 @utility fade-out {
   animation: card-fade-out var(--duration-fast) ease-in both;
 }
-/* The cover while a risen popup closes: it clears over the whole close, the
-   content's fade and the surface's way back, so the card lands on a lit page. */
+/* The cover of a column's popup: it dims as the surface rises and clears as it
+   lowers, on the same clock, so the page never cuts to dim or to lit. */
+@utility wash-in {
+  animation: card-fade-in var(--duration-page) ease-in-out both;
+}
 @utility wash-out {
-  animation: card-fade-out calc(var(--duration-fast) + var(--duration-reveal)) ease-in-out both;
+  animation: card-fade-out var(--duration-reveal) ease-in-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .rise-in {
     animation: card-fade-in var(--duration-page) ease-in-out both;
   }
   .rise-out {
-    animation: card-fade-out var(--duration-reveal) ease-in-out var(--duration-fast) both;
+    animation: card-fade-out var(--duration-reveal) ease-in-out both;
+  }
+  .rise-content-in {
+    mask-image: none;
+    animation: card-fade-in var(--duration-page) ease-in-out both;
   }
 }
 

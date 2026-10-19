@@ -31,14 +31,18 @@ function ms(name: string): number {
 /**
  * An element that takes the place of a control, such as the field that opens
  * where Add argument was: it grows from the control's rectangle to its own
- * over the reveal, clipped meanwhile, and its content fades in behind. Mark
+ * over the page's 320 ms, clipped meanwhile, and its content fades in behind. Mark
  * the element `data-smooth="self"` so the card it is in does not fade it
  * too. Nothing happens with reduced motion or without the Web Animations API.
  */
 export function morphFrom(el: HTMLElement, from: DOMRect): void {
   if (typeof el.animate !== 'function' || reducedMotion()) return
+  // A morph already running (an effect run twice) would hold the size being measured.
+  for (const a of el.getAnimations?.({ subtree: true }) ?? []) a.cancel()
   const to = el.getBoundingClientRect()
-  const timing = { duration: ms('--duration-reveal'), easing: token('--ease-glide') }
+  // Out quickly and settling, over the page's longer clock: an ease-in start reads as a
+  // jump at the end on so short a move.
+  const timing = { duration: ms('--duration-page'), easing: token('--ease-standard') }
   el.style.overflow = 'clip'
   el.animate(
     [
@@ -66,8 +70,13 @@ export function smoothResize(outer: HTMLElement, inner: HTMLElement): (() => voi
   let moving = false
   // Height transitions running on parts inside, which the box follows as they go.
   let following = 0
+  // Lets the box go even if its transition never reports an end (WebKit can skip
+  // transitionend, for one when the box was not being drawn), so it is never left
+  // pinned short and clipping its content.
+  let failsafe: ReturnType<typeof setTimeout> | undefined
 
   const settle = () => {
+    clearTimeout(failsafe)
     moving = false
     outer.classList.remove('smooth-resizing')
     outer.style.removeProperty('height')
@@ -95,6 +104,8 @@ export function smoothResize(outer: HTMLElement, inner: HTMLElement): (() => voi
     }
     outer.style.height = `${target}px`
     shown = target
+    clearTimeout(failsafe)
+    failsafe = setTimeout(settle, ms('--duration-reveal') + ms('--duration-fast'))
   })
   resize.observe(inner)
 
@@ -112,8 +123,22 @@ export function smoothResize(outer: HTMLElement, inner: HTMLElement): (() => voi
   outer.addEventListener('transitionend', onEnd)
   outer.addEventListener('transitioncancel', onEnd)
 
+  const enter = fadeInAdded(inner)
+
+  return () => {
+    resize.disconnect()
+    enter()
+    outer.removeEventListener('transitionrun', onRun)
+    outer.removeEventListener('transitionend', onEnd)
+    outer.removeEventListener('transitioncancel', onEnd)
+    settle()
+  }
+}
+
+/** Gives `smooth-enter` to each element added under `inner` from now on; returns the stop. */
+function fadeInAdded(inner: HTMLElement): () => void {
   const enter = new MutationObserver((records) => {
-    if (reduced()) return
+    if (reducedMotion()) return
     for (const r of records) {
       for (const node of r.addedNodes) {
         if (!(node instanceof HTMLElement)) continue
@@ -130,13 +155,5 @@ export function smoothResize(outer: HTMLElement, inner: HTMLElement): (() => voi
     }
   })
   enter.observe(inner, { childList: true, subtree: true })
-
-  return () => {
-    resize.disconnect()
-    enter.disconnect()
-    outer.removeEventListener('transitionrun', onRun)
-    outer.removeEventListener('transitionend', onEnd)
-    outer.removeEventListener('transitioncancel', onEnd)
-    settle()
-  }
+  return () => enter.disconnect()
 }

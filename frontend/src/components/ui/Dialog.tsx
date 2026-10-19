@@ -14,10 +14,12 @@ interface Props {
   onCancel: () => void
   /**
    * The rectangle of what opened it, such as a column of the chapter card. A
-   * surface then rises from it to the box, as if the column itself lifted and
-   * grew, and the box's content fades in once it is there; closing fades the
-   * content and lowers the surface back onto the column before `onCancel`
-   * runs. Without one the box rises into place and fades, and goes at once.
+   * surface in the card's colour then rises from it to the box, as if the
+   * column itself lifted and grew, while the cover dims; the box's content
+   * arrives from top to bottom as it lands. Closing lowers the surface back
+   * onto the column at once while the content fades and the cover clears, and
+   * `onCancel` runs when it is down. Without one the box rises into place and
+   * fades, and goes at once.
    */
   origin?: DOMRect
   /** The rectangle to centre the box on, such as the chapter card; the window without one. */
@@ -99,11 +101,15 @@ export function Dialog({ title, facts, onCancel, origin, frame, closable, childr
         ? 'fade-out'
         : 'rise-content-in'
   const lift = !measured ? 'opacity-0' : leaving ? 'rise-out' : risen ? 'invisible' : 'rise-in'
+  // A column's popup is the chapter card's own surface lifted, so it keeps the card's colour.
+  const tone = origin ? 'bg-raised border-line-strong' : 'bg-raised-2 border-line-strong'
   const place = frame ? 'left-(--frame-x) top-(--frame-y) h-(--frame-h) w-(--frame-w)' : 'inset-0'
   return createPortal(
     <div className="fixed inset-0 z-20">
       <div
-        className={`scrim-wash absolute inset-0 ${!leaving ? 'fade-in' : origin ? 'wash-out' : 'fade-out'}`}
+        className={`scrim-wash absolute inset-0 ${
+          !origin ? (leaving ? 'fade-out' : 'fade-in') : leaving ? 'wash-out' : 'wash-in'
+        }`}
         onClick={close}
       />
       {origin && (
@@ -111,11 +117,9 @@ export function Dialog({ title, facts, onCancel, origin, frame, closable, childr
           ref={surface}
           aria-hidden
           onAnimationEnd={(e) => {
-            if (e.target !== e.currentTarget) return
-            if (leaving) onCancel()
-            else setRisen(true)
+            if (e.target === e.currentTarget && leaving) onCancel()
           }}
-          className={`bg-raised-2 border-line-strong pointer-events-none fixed rounded-lg border ${lift}`}
+          className={`${tone} pointer-events-none fixed rounded-lg border ${lift}`}
         />
       )}
       <div
@@ -128,7 +132,11 @@ export function Dialog({ title, facts, onCancel, origin, frame, closable, childr
           aria-modal="true"
           aria-labelledby={titleId}
           tabIndex={-1}
-          className={`bg-raised-2 border-line-strong pointer-events-auto w-full max-w-120 rounded-lg border p-6 text-sm outline-none ${motion}`}
+          onAnimationEnd={(e) => {
+            // The content is all there: the box now stands alone over the page.
+            if (origin && e.target === e.currentTarget && !leaving) setRisen(true)
+          }}
+          className={`${tone} pointer-events-auto w-full max-w-120 rounded-lg border p-6 text-sm outline-none ${motion}`}
           inner="flex flex-col gap-4"
         >
           <div className="flex items-start justify-between gap-4">
