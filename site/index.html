@@ -119,9 +119,6 @@
             <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
             Download for Windows
           </a>
-          <p class="text-fg-soft m-0 text-sm leading-normal">
-            The setup installs for you alone, with no administrator prompt, and adds the WebView2 runtime if it is missing.
-          </p>
         </div>
 
         <div class="download-panel group-not-has-[#os-macos:checked]/dl:hidden flex flex-col gap-3">
@@ -132,53 +129,39 @@
             <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
             Download for macOS
           </a>
-          <p class="text-fg-soft m-0 text-sm leading-normal">
-            One disk image for Apple Silicon and Intel. Open it and drag Kapital Launcher to Applications.
-          </p>
         </div>
 
         <!--prism:start-->
         <!-- A chapter as a Prism instance zip, for a player who keeps Prism and
              not the launcher (issue 251). Left out by the build when the release
              has no zips; the URLs come from data/launcher.json. -->
-        <div class="border-line flex flex-col gap-3 border-t pt-6">
-          <h3 class="text-fg-muted m-0 text-xs font-normal tracking-label uppercase">
+        <details class="group/prism border-line border-t pt-5">
+          <summary
+            class="text-fg-muted hover:text-fg duration-fast ease-standard flex cursor-pointer list-none items-center justify-between gap-2 text-xs tracking-label uppercase transition-[color] [&::-webkit-details-marker]:hidden"
+          >
             Prism Launcher on its own
-          </h3>
-          <div class="flex flex-wrap gap-2">
-            <a
-              href="%PRISM_LUXEMBURG_URL%"
-              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
-              >Luxemburg</a
-            >
-            <a
-              href="%PRISM_LICHDENSTEIN_URL%"
-              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
-              >Lichdenstein</a
-            >
-            <a
-              href="%PRISM_FRANGFURD_URL%"
-              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
-              >Frangfurd</a
-            >
+            <svg class="size-(--layout-icon-sm) duration-fast ease-standard transition-transform group-open/prism:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          </summary>
+          <div class="flex flex-col gap-3 pt-4">
+            <div class="flex flex-wrap gap-2">
+              <a href="%PRISM_LUXEMBURG_URL%" class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]">Luxemburg</a>
+              <a href="%PRISM_LICHDENSTEIN_URL%" class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]">Lichdenstein</a>
+              <a href="%PRISM_FRANGFURD_URL%" class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]">Frangfurd</a>
+            </div>
+            <p class="text-fg-muted m-0 text-xs leading-normal">
+              In Prism, choose Add Instance, then Import.
+            </p>
           </div>
-          <p class="text-fg-soft m-0 text-sm leading-normal">
-            Import a chapter in Prism with Add Instance, then Import. The first
-            Play downloads the whole pack and every later Play updates it.
-            Kapital Launcher does not count it as installed.
-          </p>
-        </div>
+        </details>
         <!--prism:end-->
 
-        <p class="bg-sunken border-line text-fg-muted m-0 rounded-md border px-4 py-3 text-xs leading-normal">
-          This beta is not code-signed yet, so Windows and macOS warn before
-          the first run. The
+        <p class="text-fg-muted m-0 text-xs leading-normal">
+          Not code-signed yet, so your system warns on first run.
           <a
             href="%NOTES_URL%"
             class="text-accent underline-offset-2 hover:underline"
-            >release notes</a
+            >How to open it</a
           >
-          have the steps past SmartScreen and Gatekeeper.
         </p>
       </div>
     </div>
@@ -203,6 +186,12 @@
           />
         </h1>
 
+        <!--release:start-->
+        <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
+          %TAG%
+        </p>
+        <!--release:end-->
+
         <div class="flex flex-wrap items-center justify-center gap-3">
           <!--release:start-->
           <button
@@ -225,14 +214,6 @@
           >
         </div>
 
-        <p class="text-fg-muted m-0 text-sm">
-          Runs on
-          <a
-            href="https://prismlauncher.org"
-            class="text-accent underline-offset-2 hover:underline"
-            >Prism Launcher</a
-          >, free and open source, installed automatically.
-        </p>
       </div>
 
       <p class="sr-only">

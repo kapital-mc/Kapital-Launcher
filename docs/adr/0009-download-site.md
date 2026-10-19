@@ -179,10 +179,14 @@ over skipping a version.
 
 The author asked for three changes to the page.
 
-- **The hero is the name, the buttons and one line on Prism.** The
-  description under the logo and the line on supported systems are gone (the
-  download popup names the systems). The Prism line says the launcher runs on
-  Prism Launcher and installs it.
+- **The hero is the name, the version and the buttons.** The description
+  under the logo, the line on supported systems (the download popup names
+  them) and the line on Prism Launcher are gone. The release tag the page
+  offers sits between the logo and the buttons, filled in at build time like
+  the popup's.
+- **A quieter download popup.** The notes under each download button are
+  gone, the Prism instance zips sit in a closed `details` dropdown, and the
+  code signing notice is one line linking the release notes.
 - **The window's chapter rows are buttons.** A click shows that chapter with
   the app's own motion and restarts the cycle, so the chosen chapter stays a
   full dwell before the next slides in. This needs a script: the CSS cycle

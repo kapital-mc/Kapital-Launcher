@@ -1,7 +1,7 @@
 # Download site
 
-One static page: the launcher's name, the Download and GitHub buttons and a
-line on Prism Launcher, and under them the launcher window itself, cycling
+One static page: the launcher's name, the version it offers, the Download and
+GitHub buttons, and under them the launcher window itself, cycling
 through its three chapters, whose rows a visitor can click. Above the footer,
 Changelog and Code signing policy each open a popup. It is separate from the
 Kapitel Kapital wiki and runs two small scripts, bundled into one file: one
@@ -117,9 +117,9 @@ pnpm build` or `SITE_RELEASE=null pnpm build`.
 
 With a release set, Download is a button that opens a native popover
 (`popovertarget`), no script needed: a heading, a Windows or macOS switch, the
-one download for the chosen system, a line on what to expect, a note that the
-beta is not code-signed yet with a link to the release notes, and a close
-button. The switch is a fieldset of two radios and CSS `:has()`, so it works
+one download for the chosen system, the Prism instance zips folded into a
+`details` dropdown, a one-line note that the build is not code-signed yet with
+a link to the release notes, and a close button. The switch is a fieldset of two radios and CSS `:has()`, so it works
 without script. Windows is checked by default.
 
 `src/detect.js` is bundled with `src/showcase.js` into the page's one script
