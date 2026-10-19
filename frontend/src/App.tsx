@@ -73,6 +73,13 @@ export default function App() {
 
   const theme = useSettingsStore((s) => s.settings.theme)
   const loadSettings = useSettingsStore((s) => s.load)
+  const sidebarCompact = useSettingsStore((s) => s.settings.sidebarCompact === true)
+  const updateSettings = useSettingsStore((s) => s.update)
+  const toggleSidebar = () => {
+    updateSettings({ sidebarCompact: !sidebarCompact }).catch((e) =>
+      console.warn('save sidebar', errMsg(e)),
+    )
+  }
 
   // Which OS draws the window, for the header's controls: guessed from the
   // WebView at once, then Wails' answer (lib/platform).
@@ -201,7 +208,12 @@ export default function App() {
   return (
     <div className="bg-canvas flex h-full flex-col">
       <ChapterSelectionSync />
-      <HeaderBar platform={platform} onOpenSettings={pages.toggleSettings} />
+      <HeaderBar
+        platform={platform}
+        onOpenSettings={pages.toggleSettings}
+        sidebarCompact={sidebarCompact}
+        onToggleSidebar={toggleSidebar}
+      />
       <div className="flex min-h-0 grow">
         <Sidebar onOpenAccount={pages.toggleAccount} accountOpen={account.slot?.open === true} />
         {/* The chapter card scrolls under the header bar and beside the

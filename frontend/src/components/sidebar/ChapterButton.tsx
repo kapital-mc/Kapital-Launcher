@@ -1,11 +1,14 @@
 import type { Ref } from 'react'
 import type { Chapter } from '../../types'
 import { chapterArt, chapterIcon } from '../../lib/art'
+import { fade } from '../ui/fade'
 
 interface Props {
   chapter: Chapter
   current: boolean
   onSelect: (id: string) => void
+  /** The sidebar is compact: the text fades and the row is a square around its icon, which keeps its place. */
+  compact?: boolean
   /** The nav measures the row to place the gliding highlight behind it (#59). */
   ref?: Ref<HTMLButtonElement>
 }
@@ -23,7 +26,7 @@ interface Props {
  * is showing. That is the whole accent mechanism: one attribute, no per-colour
  * classes.
  */
-export function ChapterButton({ chapter, current, onSelect, ref }: Props) {
+export function ChapterButton({ chapter, current, onSelect, compact = false, ref }: Props) {
   const art = chapterArt(chapter.id)
   const icon = chapterIcon(chapter.id) ?? art
   return (
@@ -33,7 +36,7 @@ export function ChapterButton({ chapter, current, onSelect, ref }: Props) {
       data-chapter={chapter.id}
       aria-current={current ? 'true' : undefined}
       onClick={() => onSelect(chapter.id)}
-      className={`duration-fast ease-standard relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors ${
+      className={`duration-fast ease-standard relative isolate flex h-15.5 w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors ${
         current ? '' : 'hover:bg-raised-2'
       }`}
     >
@@ -63,13 +66,15 @@ export function ChapterButton({ chapter, current, onSelect, ref }: Props) {
           aria-hidden
         />
       )}
-      <div className="flex min-w-0 grow flex-col gap-0.5">
-        <div className="flex items-baseline gap-2">
+      {/* One height in both widths, a square when compact, so the text only fades and is clipped:
+          nothing in the row moves or reflows while the sidebar changes width. */}
+      <span className={`flex flex-col gap-0.5 whitespace-nowrap ${fade(!compact)}`}>
+        <span className="flex items-baseline gap-2">
           <span className="text-accent text-2xs font-mono">{chapter.number}</span>
-          <span className="font-display truncate text-lg font-semibold">{chapter.name}</span>
-        </div>
+          <span className="font-display text-lg leading-tight font-semibold">{chapter.name}</span>
+        </span>
         <span className="text-fg-faint text-xs">{chapter.era}</span>
-      </div>
+      </span>
     </button>
   )
 }

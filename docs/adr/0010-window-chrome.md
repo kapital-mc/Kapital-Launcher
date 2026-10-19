@@ -74,3 +74,43 @@ gear is the smaller button, inset from the right as the lights are from the
 left. Windows and Linux keep 40px. The screenshot settles the `[verify]` above:
 the lights sit inside the bar; `pl-20` went with the logo. `[verify]` on the
 author's Mac: the lights centred in the 28px bar.
+
+## Amendment, 2026-10-19: the sidebar button on the left of the bar
+
+The author asked for a compact sidebar that shows only the chapter icons and a
+square account tile. Its button opens the bar on the left, where the wordmark
+was: on macOS 64px in, past the traffic lights and inside the compact
+sidebar's width, and elsewhere 16px in, the sidebar's own padding, so the
+buttons' hover boxes line up with the chapter tiles' left edge. Compacting moves only the sidebar's right edge (to
+`layout.sidebarCompact`, an icon row's width between the sidebar's padding),
+so the icons and the initials never move sideways; the text fades out first and
+back in once there is room. Compact, the Chapters heading folds away and the
+sidebar's padding matches the chapter card's, so the first chapter tile and the
+account tile line up with the card's top and bottom edges (the author asked,
+2026-10-19). The choice is saved as `sidebarCompact` in the
+settings and taken without animation on launch. `[verify]` on the author's Mac:
+the button clear of the traffic lights, and the fold animating in WKWebView
+(it moves grid tracks between 1fr and 0fr; a WebView that cannot interpolate
+them snaps instead).
+
+The downloads section above the account tile (Tailscale, 2026-10-19) keeps each
+bar and its percentage when compact; its heading, the names and the steps fold
+away with the rest of the sidebar's text.
+
+The author then asked for the bar's left side to carry the launcher's tools
+after the sidebar's button: Settings (moved from the right, which now holds
+only the window buttons off macOS), Open Prism (greyed out while there is no
+Prism), the wiki's home page, and, only while a newer launcher is out,
+an update button in the accent that brings the update popup back after Not
+now (`components/shell/HeaderTools`).
+
+Each of those buttons names itself in a tooltip after two seconds of hover
+(`motion.duration.tooltip`), drawn by `IconButton`'s `tooltip` prop rather than
+the browser's own: the mono face, square corners and a hairline, under the
+button's left edge. Keyboard focus shows it at once. The button keeps its
+`aria-label`, so the tooltip is `aria-hidden`.
+
+A settings page's column grows with the card up to the other pages' measure
+(`max-w-200`), and the column and its nav are centred only past it, so
+compacting or widening the sidebar resizes the sections along with the card
+rather than sliding a fixed block (the author asked, 2026-10-19).

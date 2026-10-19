@@ -244,6 +244,31 @@ func TestMojangProfileUsesTheCacheForADayThenKeepsItOffline(t *testing.T) {
 	}
 }
 
+func TestMojangCachedReadsTheKeptLookupWithoutAsking(t *testing.T) {
+	f := newMojangFake(t)
+	m := f.service(t)
+	if p := m.Cached("Snadrochka"); p.Status != models.PlayerUnknown {
+		t.Fatalf("before any lookup: %+v", p)
+	}
+	if p := m.Cached("no spaces allowed"); p.Status != models.PlayerInvalid {
+		t.Fatalf("invalid name: %+v", p)
+	}
+	m.Profile(context.Background(), "Snadrochka")
+	now := time.Now().Add(3 * mojangTTL)
+	m.now = func() time.Time { return now }
+	f.srv.Close()
+	p := m.Cached("snadrochka")
+	if p.Status != models.PlayerFound || p.UUID != testDashed || !strings.HasPrefix(p.FaceSrc, "/mojang-face/"+testUUID) {
+		t.Fatalf("cached, stale and offline: %+v", p)
+	}
+	if f.lookups.Load() != 1 || f.skins.Load() != 1 {
+		t.Fatalf("Cached asked Mojang: %d lookups, %d skins", f.lookups.Load(), f.skins.Load())
+	}
+	if p := m.Cached("Another_Name"); p.Status != models.PlayerUnknown {
+		t.Fatalf("another name: %+v", p)
+	}
+}
+
 func TestMojangProfileForADifferentNameReplacesTheCache(t *testing.T) {
 	f := newMojangFake(t)
 	m := f.service(t)

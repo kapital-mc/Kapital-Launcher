@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { hasWailsBridge, readOr } from '../../lib/ipc'
-import { Copy, Minus, Settings, Square, X } from '../../lib/icons'
+import { Copy, Minus, Square, X } from '../../lib/icons'
 import type { LucideIcon } from '../../lib/icons'
 import {
   Quit,
@@ -9,12 +9,16 @@ import {
   WindowToggleMaximise,
 } from '../../../wailsjs/runtime/runtime'
 import { Icon } from '../ui/Icon'
-import { IconButton } from '../ui/IconButton'
+import { HeaderTools } from './HeaderTools'
 
 interface Props {
   /** Wails' `Environment().platform`: "windows", "darwin" or "linux". */
   platform: string
   onOpenSettings?: () => void
+  /** The sidebar is compact, for the button's glyph and name. */
+  sidebarCompact?: boolean
+  /** Narrows the sidebar to its icons, or widens it again. */
+  onToggleSidebar?: () => void
 }
 
 /**
@@ -24,30 +28,45 @@ interface Props {
  *
  * macOS keeps its native traffic lights at the top left, so no window buttons
  * are drawn there, and the bar is as tall as a macOS title bar so the lights
- * sit at its middle; the gear is inset from the right as far as the lights
- * are from the left. Everywhere else the bar ends in our own minimise, maximise
- * and close. The bar carries no wordmark (ADR-10 amendment, 2026-10-18).
+ * sit at its middle. Everywhere else the bar ends in our own minimise,
+ * maximise and close. The bar carries no wordmark (ADR-10 amendment,
+ * 2026-10-18).
+ *
+ * Its tools (HeaderTools) open the bar on the left, the sidebar's button
+ * first: past the traffic lights on macOS, and elsewhere at the sidebar's own
+ * padding, so the buttons line up with the chapter tiles' left edge.
  */
-export function HeaderBar({ platform, onOpenSettings }: Props) {
+export function HeaderBar({
+  platform,
+  onOpenSettings,
+  sidebarCompact = false,
+  onToggleSidebar,
+}: Props) {
   const mac = platform === 'darwin'
   return (
     <header
       onDoubleClick={() => bridged(WindowToggleMaximise)}
-      className={`bg-sunken border-line flex shrink-0 items-center justify-end border-b [--wails-draggable:drag] ${mac ? 'h-(--layout-titlebar-mac)' : 'h-(--layout-titlebar)'}`}
+      className={`bg-sunken border-line flex shrink-0 items-center justify-between border-b [--wails-draggable:drag] ${mac ? 'h-(--layout-titlebar-mac)' : 'h-(--layout-titlebar)'}`}
     >
       <div
         onDoubleClick={(e) => e.stopPropagation()}
-        className="flex h-full items-center gap-1 [--wails-draggable:no-drag]"
+        className={`flex h-full items-center [--wails-draggable:no-drag] ${mac ? 'pl-16' : 'pl-4'}`}
       >
-        <IconButton
-          icon={Settings}
-          title="Settings"
+        <HeaderTools
           size={mac ? 'xs' : 'sm'}
-          onClick={() => onOpenSettings?.()}
-          disabled={!onOpenSettings}
+          sidebarCompact={sidebarCompact}
+          onToggleSidebar={onToggleSidebar}
+          onOpenSettings={onOpenSettings}
         />
-        {!mac && <WindowControls />}
       </div>
+      {!mac && (
+        <div
+          onDoubleClick={(e) => e.stopPropagation()}
+          className="flex h-full items-center [--wails-draggable:no-drag]"
+        >
+          <WindowControls />
+        </div>
+      )}
     </header>
   )
 }

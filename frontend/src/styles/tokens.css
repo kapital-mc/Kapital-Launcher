@@ -91,6 +91,8 @@
   --transition-duration-cover: 2400ms;
   --duration-breathe: 16000ms;
   --transition-duration-breathe: 16000ms;
+  --duration-tooltip: 2000ms;
+  --transition-duration-tooltip: 2000ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
@@ -107,6 +109,7 @@
   --layout-drift: 20px;
   --layout-title: 68px;
   --layout-titlebar-mac: 28px;
+  --layout-sidebar-compact: 95px;
   --layout-play-min: 240px;
   --layout-icon-xs: 14px;
   --layout-icon-sm: 16px;

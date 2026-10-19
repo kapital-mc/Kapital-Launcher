@@ -3,7 +3,10 @@ import { Icon } from './Icon'
 
 interface Props {
   icon: LucideIcon
-  /** The accessible name; the icon carries none, and no tooltip is drawn (the author, 2026-09-30). */
+  /**
+   * The accessible name; the icon carries none. No tooltip is drawn unless `tooltip` asks for one
+   * (the author, 2026-09-30; the header's tools, 2026-10-19).
+   */
   title: string
   onClick: () => void
   /**
@@ -17,6 +20,14 @@ interface Props {
    * fills the whole cell, and the group's own frame rounds the outer corners.
    */
   grouped?: boolean
+  /** `accent` draws the glyph in the chapter's colour, for a control that has news, such as an update. */
+  tone?: 'accent'
+  /**
+   * Shows `title` in a tooltip under the button after a long hover or on keyboard focus: the
+   * header's tools, where nothing else names them. Square and in the mono face, drawn here
+   * rather than by the browser.
+   */
+  tooltip?: boolean
 }
 
 const BOX = {
@@ -26,16 +37,34 @@ const BOX = {
 } as const
 
 /** One square, centred box for every icon control, so a column of them lines up. */
-export function IconButton({ icon, title, onClick, size = 'md', disabled, grouped }: Props) {
+export function IconButton({
+  icon,
+  title,
+  onClick,
+  size = 'md',
+  disabled,
+  grouped,
+  tone,
+  tooltip,
+}: Props) {
+  const colour = tone === 'accent' ? 'text-accent hover:text-accent' : 'text-fg-muted hover:text-fg'
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={title}
       disabled={disabled}
-      className={`${BOX[size]} text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard inline-flex shrink-0 cursor-pointer items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent`}
+      className={`${BOX[size]} ${colour} hover:bg-hover duration-fast ease-standard ${tooltip ? 'group relative' : ''} inline-flex shrink-0 cursor-pointer items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent`}
     >
       <Icon icon={icon} size={size} />
+      {tooltip && (
+        <span
+          aria-hidden
+          className="border-line-strong bg-raised-2 text-fg duration-fast ease-standard text-2xs pointer-events-none absolute top-full left-0 z-50 mt-1.5 border px-2 py-1 font-mono whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-hover:delay-(--duration-tooltip) group-focus-visible:opacity-100 motion-reduce:transition-none"
+        >
+          {title}
+        </span>
+      )}
     </button>
   )
 }

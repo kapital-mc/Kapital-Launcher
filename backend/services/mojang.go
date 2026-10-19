@@ -182,12 +182,35 @@ func (m *MojangService) profile(ctx context.Context, name string) models.PlayerP
 			slog.Warn("mojang: write face", "error", err)
 		}
 	}
+	return m.found(entry)
+}
+
+// found is the kept lookup as a profile, with the face's address when there is one.
+func (m *MojangService) found(entry mojangEntry) models.PlayerProfile {
 	p := models.PlayerProfile{Name: entry.Name, UUID: dashUUID(entry.UUID), Status: models.PlayerFound}
 	if when, ok := m.faceTime(entry.UUID); ok {
 		// The version in the address lets the page see a face that changed.
 		p.FaceSrc = fmt.Sprintf("%s%s.png?v=%d", mojangFaceRoute, entry.UUID, when.Unix())
 	}
 	return p
+}
+
+// Cached is what the last lookup kept for name, whatever its age, without
+// asking Mojang: the sidebar's account tile shows the face from it at start.
+// Only the account page's Profile asks, so a name it never looked up is
+// unknown here. It leaves CopyUUID's profile alone.
+func (m *MojangService) Cached(name string) models.PlayerProfile {
+	name = strings.TrimSpace(name)
+	if !ValidMinecraftName(name) {
+		return models.PlayerProfile{Status: models.PlayerInvalid}
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	entry, ok := m.readEntry()
+	if !ok || entry.Key != strings.ToLower(name) {
+		return models.PlayerProfile{Status: models.PlayerUnknown}
+	}
+	return m.found(entry)
 }
 
 // errNoProfile is Mojang saying no profile has the name (404 or 204).

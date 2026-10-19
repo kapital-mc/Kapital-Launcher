@@ -39,4 +39,13 @@ describe('Downloads', () => {
       '50',
     )
   })
+  it('keeps each bar and folds the names away when compact', () => {
+    useEngineStore.setState({
+      install: { phase: 'downloading', received: 50, total: 100, error: '' },
+    })
+    render(<Downloads compact />)
+    expect(screen.getByRole('progressbar', { name: 'Prism Launcher' })).toBeInTheDocument()
+    expect(screen.getByText('50%')).toBeVisible()
+    expect(screen.getByText('Prism Launcher').closest('[inert]')).not.toBeNull()
+  })
 })

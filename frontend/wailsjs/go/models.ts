@@ -21,6 +21,7 @@ export namespace models {
 	    staticArt?: boolean;
 	    wikiPictures?: number;
 	    mapIn?: string;
+	    sidebarCompact?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppSettings(source);
@@ -48,6 +49,7 @@ export namespace models {
 	        this.staticArt = source["staticArt"];
 	        this.wikiPictures = source["wikiPictures"];
 	        this.mapIn = source["mapIn"];
+	        this.sidebarCompact = source["sidebarCompact"];
 	    }
 	}
 	export class ChangelogEntry {

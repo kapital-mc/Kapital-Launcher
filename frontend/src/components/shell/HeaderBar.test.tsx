@@ -61,4 +61,13 @@ describe('HeaderBar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(Runtime.Quit).not.toHaveBeenCalled()
   })
+
+  it('opens with the sidebar button, which names what it will do', () => {
+    const onToggleSidebar = vi.fn()
+    const { rerender } = render(<HeaderBar platform="windows" onToggleSidebar={onToggleSidebar} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Compact Sidebar' }))
+    expect(onToggleSidebar).toHaveBeenCalledOnce()
+    rerender(<HeaderBar platform="windows" sidebarCompact onToggleSidebar={onToggleSidebar} />)
+    expect(screen.getByRole('button', { name: 'Expand Sidebar' })).toBeEnabled()
+  })
 })

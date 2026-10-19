@@ -19,6 +19,8 @@ interface UpdateStore {
   error: string | null
   load: () => Promise<void>
   dismiss: () => void
+  /** Brings the popup back after Not now, from the header's update button. */
+  reopen: () => void
   /** Opens the download site in the browser, through Go's link checks. */
   openPage: () => Promise<void>
 }
@@ -34,6 +36,8 @@ export const useUpdateStore = create<UpdateStore>((set, get) => ({
   },
 
   dismiss: () => set({ dismissed: true, error: null }),
+
+  reopen: () => set({ dismissed: false, error: null }),
 
   openPage: async () => {
     const page = get().update?.page
