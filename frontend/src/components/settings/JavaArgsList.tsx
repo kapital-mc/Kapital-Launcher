@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { Ellipsis, Pencil, Plus, Trash2, X } from '../../lib/icons'
 import { MAX_JAVA_ARGS, javaArgProblem } from '../../lib/javaArgs'
+import { morphFrom } from '../../lib/smoothResize'
 import { Icon } from '../ui/Icon'
 
 interface Props {
@@ -26,6 +27,8 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
   const [editing, setEditing] = useState<Editing>(null)
   const [menuFor, setMenuFor] = useState<number | null>(null)
   const addRef = useRef<HTMLButtonElement>(null)
+  // Where Add argument stood when it was pressed: the new field grows out of it.
+  const [addFrom, setAddFrom] = useState<DOMRect | undefined>(undefined)
   const listId = useId()
   // After a commit, a removal or a cancel the field or the row is gone: focus goes to +.
   const [refocus, setRefocus] = useState(false)
@@ -96,6 +99,7 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
           {editing === 'new' && (
             <ArgEditor
               initial=""
+              from={addFrom}
               action="Add"
               check={(v) => javaArgProblem(v, args, null)}
               onCommit={(v) => commit(v, 'new')}
@@ -109,7 +113,10 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
           ref={addRef}
           type="button"
           disabled={disabled || full}
-          onClick={() => setEditing('new')}
+          onClick={() => {
+            setAddFrom(addRef.current?.getBoundingClientRect())
+            setEditing('new')
+          }}
           className="text-fg-soft hover:text-fg border-line-strong hover:border-accent-edge duration-fast ease-standard flex h-8 w-fit cursor-pointer items-center gap-1.5 rounded-md border border-dashed pr-3 pl-2 text-sm transition-colors disabled:cursor-default disabled:opacity-50"
         >
           <Icon icon={Plus} size="sm" className="text-accent" />
@@ -220,6 +227,8 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
 
 interface EditorProps {
   initial: string
+  /** The rectangle of the button it replaces, which it grows out of. */
+  from?: DOMRect
   /** The commit button's word: Add for a new argument, Save for an edit. */
   action: 'Add' | 'Save'
   check: (value: string) => string | null
@@ -228,11 +237,17 @@ interface EditorProps {
 }
 
 /** The field that adds or edits one argument, in the row's place. Enter commits, Escape cancels. */
-function ArgEditor({ initial, action, check, onCommit, onCancel }: EditorProps) {
+function ArgEditor({ initial, from, action, check, onCommit, onCancel }: EditorProps) {
   const [value, setValue] = useState(initial)
   const [problem, setProblem] = useState<string | null>(null)
   const input = useRef<HTMLInputElement>(null)
+  const row = useRef<HTMLLIElement>(null)
   const lineId = useId()
+  // Before the first paint, so the field is never seen at full size first.
+  useLayoutEffect(() => {
+    if (from && row.current) morphFrom(row.current, from)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only as it opens
+  }, [])
   useEffect(() => {
     input.current?.focus()
     input.current?.select()
@@ -260,7 +275,11 @@ function ArgEditor({ initial, action, check, onCommit, onCancel }: EditorProps) 
   }
 
   return (
-    <li className="bg-sunken border-accent-edge flex flex-wrap items-center gap-1 rounded-md border p-1">
+    <li
+      ref={row}
+      data-smooth={from ? 'self' : undefined}
+      className="bg-sunken border-accent-edge flex flex-wrap items-center gap-1 rounded-md border p-1"
+    >
       <input
         ref={input}
         type="text"

@@ -1,11 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import type { Chapter, ModToggleState } from '../../types'
+import type { Chapter, ModFile, ModToggleState } from '../../types'
 import { errMsg } from '../../lib/ipc'
 import { ChevronRight, Puzzle } from '../../lib/icons'
 import { filterMods, modLabel } from '../../lib/mods'
 import { formatBytes } from '../../lib/bytes'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
 import { useModStore } from '../../stores/useModStore'
+import { Grow } from '../ui/Grow'
 import { Icon } from '../ui/Icon'
 import { ErrorLine, Hint, WarningLine } from '../ui/Notes'
 import { Scrollable } from '../ui/Scrollable'
@@ -38,10 +39,8 @@ export function ModsSection({ chapter }: Props) {
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const wasPlaying = useRef(playing)
   const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState('')
   const [error, setError] = useState<string | null>(null)
   const panelId = useId()
-  const searchId = useId()
 
   useEffect(() => {
     void load(chapter.id)
@@ -77,8 +76,6 @@ export function ModsSection({ chapter }: Props) {
       setError(errMsg(e))
     }
   }
-  const shown = filterMods(view.mods, query)
-  const nothingYet = view.mods.length === 0
 
   // A switch says something under its name only when it cannot be used yet.
   const toggleHint = (t: ModToggleState): string | undefined =>
@@ -138,67 +135,93 @@ export function ModsSection({ chapter }: Props) {
           <span>Advanced mod control</span>
         </button>
       </SettingsCard>
-      <Hint>Changes apply on the next Play. A disabled mod is not downloaded again.</Hint>
-      {playing && <WarningLine>Close the game to change mods.</WarningLine>}
-      {!playing && view.running && <RunningHint chapterName={chapter.name} />}
-      {error && <ErrorLine>{error}</ErrorLine>}
+      <Grow className="-mt-4" inner="pt-4">
+        {playing && <WarningLine>Close the game to change mods.</WarningLine>}
+      </Grow>
+      <Grow className="-mt-4" inner="pt-4">
+        {!playing && view.running && <RunningHint chapterName={chapter.name} />}
+      </Grow>
+      <Grow className="-mt-4" inner="pt-4">
+        {error && <ErrorLine>{error}</ErrorLine>}
+      </Grow>
 
-      <div className="flex flex-col gap-3">
+      {/* The list opens as a hint does: the space grows, then the content fades in. */}
+      <Grow className="-mt-4" inner="pt-4">
         {open && (
-          <div id={panelId} className="flex flex-col gap-3">
-            {nothingYet ? (
-              <Hint>The pack's mods appear here after the first Play.</Hint>
-            ) : (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor={searchId} className="text-fg-muted text-sm">
-                    Search mods
-                  </label>
-                  <input
-                    id={searchId}
-                    type="search"
-                    value={query}
-                    placeholder="Name"
-                    spellCheck={false}
-                    autoComplete="off"
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="bg-sunken text-fg placeholder:text-fg-faint border-line-strong h-11 min-w-0 rounded-md border px-3 text-sm select-text"
-                  />
-                </div>
-                <div className="bg-sunken border-line box-content flex max-h-96 min-h-0 overflow-hidden rounded-md border">
-                  <Scrollable
-                    as="ul"
-                    aria-label="Mods"
-                    className="m-0 flex list-none flex-col gap-3 p-3"
-                  >
-                    {shown.map((m) => (
-                      <li key={m.name}>
-                        <Toggle
-                          label={modLabel(m.name)}
-                          checked={!m.disabled}
-                          hint={formatBytes(m.size)}
-                          disabled={busy}
-                          onChange={(on) => void set([m.name], !on)}
-                        />
-                      </li>
-                    ))}
-                    {shown.length === 0 && (
-                      <li>
-                        <Hint>No mod has that name.</Hint>
-                      </li>
-                    )}
-                  </Scrollable>
-                </div>
-                <Hint>
-                  {shown.length === view.mods.length
-                    ? `${view.mods.length} mods, ${view.mods.filter((m) => m.disabled).length} switched off.`
-                    : `${shown.length} of ${view.mods.length} mods.`}
-                </Hint>
-              </>
-            )}
-          </div>
+          <ModList
+            id={panelId}
+            mods={view.mods}
+            busy={busy}
+            onSet={(jars, off) => void set(jars, off)}
+          />
         )}
-      </div>
+      </Grow>
     </SettingsSection>
+  )
+}
+
+interface ListProps {
+  id: string
+  mods: readonly ModFile[]
+  /** The switches wait: the game is active or a write is in flight. */
+  busy: boolean
+  onSet: (jars: readonly string[], off: boolean) => void
+}
+
+/** Advanced mod control, open: every mod in the folder with a switch, and a search over them. */
+function ModList({ id, mods, busy, onSet }: ListProps) {
+  const [query, setQuery] = useState('')
+  const searchId = useId()
+  const shown = filterMods(mods, query)
+  if (mods.length === 0) {
+    return (
+      <div id={id}>
+        <Hint>The pack's mods appear here after the first Play.</Hint>
+      </div>
+    )
+  }
+  return (
+    <div id={id} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={searchId} className="text-fg-muted text-sm">
+          Search mods
+        </label>
+        <input
+          id={searchId}
+          type="search"
+          value={query}
+          placeholder="Name"
+          spellCheck={false}
+          autoComplete="off"
+          onChange={(e) => setQuery(e.target.value)}
+          className="bg-sunken text-fg placeholder:text-fg-faint border-line-strong h-11 min-w-0 rounded-md border px-3 text-sm select-text"
+        />
+      </div>
+      <div className="bg-sunken border-line box-content flex max-h-96 min-h-0 overflow-hidden rounded-md border">
+        <Scrollable as="ul" aria-label="Mods" className="m-0 flex list-none flex-col gap-3 p-3">
+          {shown.map((m) => (
+            <li key={m.name}>
+              <Toggle
+                label={modLabel(m.name)}
+                checked={!m.disabled}
+                hint={formatBytes(m.size)}
+                disabled={busy}
+                onChange={(on) => onSet([m.name], !on)}
+              />
+            </li>
+          ))}
+          {shown.length === 0 && (
+            <li>
+              <Hint>No mod has that name.</Hint>
+            </li>
+          )}
+        </Scrollable>
+      </div>
+      <Hint>
+        {shown.length === mods.length
+          ? `${mods.length} mods, ${mods.filter((m) => m.disabled).length} switched off.`
+          : `${shown.length} of ${mods.length} mods.`}
+      </Hint>
+    </div>
   )
 }

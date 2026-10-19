@@ -133,11 +133,16 @@ describe('Panels', () => {
     expect((await within(dialog).findByText('1.0.2')).closest('.reveal')).not.toBeNull()
     expect(within(dialog).getByText('Fixed Map 1.0.2')).toBeInTheDocument()
     expect(within(dialog).getAllByText('2026-10-03')).toHaveLength(4)
-    // Close shrinks it back into the column, and it goes when that animation ends.
+    // Close fades the content and lowers the surface back onto the column, and the popup
+    // goes when that animation ends.
     fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
-    expect(dialog).toHaveClass('grow-out')
+    expect(dialog).toHaveClass('fade-out')
+    const surface = document.querySelector('.rise-out')!
+    expect(surface).not.toBeNull()
     // jsdom has no AnimationEvent, so React listens for the prefixed name there.
     fireEvent(dialog, new Event('webkitAnimationEnd', { bubbles: true }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent(surface, new Event('webkitAnimationEnd', { bubbles: true }))
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
@@ -185,7 +190,9 @@ describe('Panels', () => {
       expect(screen.queryByRole('dialog')).toBeNull()
       fireEvent.click(screen.getByRole('button', { name: 'Pack details' }))
       const dialog = await screen.findByRole('dialog', { name: 'Pack' })
-      expect(dialog).toHaveClass('grow-in')
+      // A surface lifts from the column to the box, whose content fades in once it is there.
+      expect(dialog).toHaveClass('rise-content-in')
+      expect(document.querySelector('.rise-in')).not.toBeNull()
       expect(await within(dialog).findByText(chapter.blurb)).toBeInTheDocument()
       expect(await within(dialog).findByText('6.0 GB')).toBeInTheDocument()
       const off = await within(dialog).findByText('Distant Horizons')

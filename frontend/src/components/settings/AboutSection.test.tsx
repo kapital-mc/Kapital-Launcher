@@ -67,8 +67,11 @@ describe('AboutSection', () => {
       'true',
     )
 
+    // Closing folds it away: hidden at once, gone once the fold ends.
     fireEvent.click(screen.getByRole('button', { name: 'Hide licence, Inter' }))
-    expect(screen.queryByText(/SIL OPEN FONT LICENSE Version 1\.1/)).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/SIL OPEN FONT LICENSE Version 1\.1/).closest('[aria-hidden]'),
+    ).not.toBeNull()
   })
 
   it('has a licence text for every credit', async () => {

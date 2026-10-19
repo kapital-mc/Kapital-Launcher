@@ -72,10 +72,7 @@ describe('AccountPanel', () => {
     expect(screen.getByText('Snadrochka', { selector: 'span' })).toBeInTheDocument()
     expect(screen.getByText("Prism's default account", { selector: 'span' })).toBeInTheDocument()
     expect(screen.getByLabelText('Profile name')).toHaveValue('')
-    expect(screen.getByLabelText('Profile name')).toHaveAttribute(
-      'placeholder',
-      "Prism's default account, Snadrochka",
-    )
+    expect(screen.getByLabelText('Profile name')).toHaveAttribute('placeholder', 'Snadrochka')
     expect(App.GetPlayerProfile).toHaveBeenCalledWith('Snadrochka')
   })
 

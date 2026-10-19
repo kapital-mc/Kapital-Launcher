@@ -251,6 +251,38 @@
     opacity: 0.6;
   }
 }
+/* A card or a popup following its content's height (lib/smoothResize): the box is
+   pinned and moved by this transition, clipped while it moves, and content added
+   to it fades in a little behind the growth. smoothResize does nothing with
+   reduced motion, so neither class is ever set then. */
+@utility smooth-resizing {
+  transition: height var(--duration-reveal) var(--ease-glide);
+  overflow: clip;
+}
+@utility smooth-enter {
+  animation: card-fade-in var(--duration-reveal) var(--ease-out) calc(var(--duration-fast) / 2) both;
+}
+
+/* A line too long for its place fades out over its last 32px instead of ending in an
+   ellipsis (the sidebar's download steps); a line that fits never reaches the fade.
+   `fade-end-clear` moves the fade 20px further in, smoothly, to clear a control
+   shown over the line's end (a download's Cancel, on hover). */
+@property --fade-clear {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@utility fade-end {
+  mask-image: linear-gradient(
+    to right,
+    black calc(100% - var(--spacing) * 8 - var(--fade-clear)),
+    transparent calc(100% - var(--fade-clear))
+  );
+  transition: --fade-clear var(--duration-fast) var(--ease-standard);
+}
+@utility fade-end-clear {
+  --fade-clear: calc(var(--spacing) * 5);
+}
 @utility cover-spots {
   mask-image:
     radial-gradient(ellipse var(--cover-spot) var(--cover-spot) at 14% 22%, black, transparent),
@@ -376,41 +408,65 @@
   }
 }
 
-/* A popup growing out of what opened it (ui/Dialog with an origin): the box
-   starts on the origin's rectangle and grows to its own, and shrinks back
-   into it on close. Dialog sets --grow-x, --grow-y, --grow-sx and --grow-sy
-   from the two rectangles before the first paint. The cover fades with it.
-   Opening is the reveal's 200 ms on a fast-out curve, so the box is nearly
-   there at once; closing is quicker still, as nothing is being read then.
-   With reduced motion both only fade, over the same duration, so the closing
-   box's animationend still fires and the popup is still removed. */
-@keyframes grow-in {
+/* A popup lifting out of what opened it (ui/Dialog with an origin, a column
+   of the chapter card): a surface in the popup's colours starts on the
+   column's rectangle and moves and resizes to the box's, its colour fading in
+   over the first part of the way, so the column's content fades out under it.
+   The box's content fades in once the surface has arrived; closing fades the
+   content out first and lowers the surface back onto the column, fading its
+   colour as it lands. Nothing is scaled, so no text is ever stretched. Dialog
+   sets --rise-from-x/y/w/h and --rise-to-x/y/w/h from the two rectangles
+   before the first paint. With reduced motion the surface only fades, over
+   the same durations, so its animationend still fires and the popup is still
+   removed. */
+@keyframes rise-in {
   from {
+    left: var(--rise-from-x);
+    top: var(--rise-from-y);
+    width: var(--rise-from-w);
+    height: var(--rise-from-h);
     opacity: 0;
-    transform: translate(var(--grow-x), var(--grow-y)) scale(var(--grow-sx), var(--grow-sy));
+  }
+  40% {
+    opacity: 1;
   }
   to {
+    left: var(--rise-to-x);
+    top: var(--rise-to-y);
+    width: var(--rise-to-w);
+    height: var(--rise-to-h);
     opacity: 1;
-    transform: none;
   }
 }
-@keyframes grow-out {
+@keyframes rise-out {
   from {
+    left: var(--rise-to-x);
+    top: var(--rise-to-y);
+    width: var(--rise-to-w);
+    height: var(--rise-to-h);
     opacity: 1;
-    transform: none;
+  }
+  60% {
+    opacity: 1;
   }
   to {
+    left: var(--rise-from-x);
+    top: var(--rise-from-y);
+    width: var(--rise-from-w);
+    height: var(--rise-from-h);
     opacity: 0;
-    transform: translate(var(--grow-x), var(--grow-y)) scale(var(--grow-sx), var(--grow-sy));
   }
 }
-@utility grow-in {
-  transform-origin: top left;
-  animation: grow-in var(--duration-reveal) var(--ease-out) both;
+@utility rise-in {
+  animation: rise-in var(--duration-page) var(--ease-glide) both;
 }
-@utility grow-out {
-  transform-origin: top left;
-  animation: grow-out var(--duration-fast) ease-in both;
+@utility rise-out {
+  animation: rise-out var(--duration-reveal) var(--ease-glide) var(--duration-fast) both;
+}
+/* The box's content, once the surface is there: the page's rise less the fast fade. */
+@utility rise-content-in {
+  animation: card-fade-in var(--duration-fast) var(--ease-standard)
+    calc(var(--duration-page) - var(--duration-fast) / 2) both;
 }
 @utility fade-in {
   animation: card-fade-in var(--duration-reveal) var(--ease-out) both;
@@ -418,12 +474,17 @@
 @utility fade-out {
   animation: card-fade-out var(--duration-fast) ease-in both;
 }
+/* The cover while a risen popup closes: it clears over the whole close, the
+   content's fade and the surface's way back, so the card lands on a lit page. */
+@utility wash-out {
+  animation: card-fade-out calc(var(--duration-fast) + var(--duration-reveal)) ease-in-out both;
+}
 @media (prefers-reduced-motion: reduce) {
-  .grow-in {
-    animation: card-fade-in var(--duration-reveal) var(--ease-out) both;
+  .rise-in {
+    animation: card-fade-in var(--duration-page) ease-in-out both;
   }
-  .grow-out {
-    animation: card-fade-out var(--duration-fast) ease-in both;
+  .rise-out {
+    animation: card-fade-out var(--duration-reveal) ease-in-out var(--duration-fast) both;
   }
 }
 

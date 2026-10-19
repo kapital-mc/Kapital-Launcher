@@ -103,7 +103,11 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // engine store cancels Prism's download and holds a preview's request for the Get Prism
 // popup, which the action bar takes from the first paint, and the bindings gain the two
 // cancels. The section and the popups still load after the first paint. Measured 94.01 KB.
-const BUDGET_KB = 94.2
+// 95.1 the same day: every card and popup follows its content's height and fades in what is
+// added (ui/Smooth, lib/smoothResize), which the action bar's popups and the sidebar's
+// downloads section draw with, so it is in the entry; the column popups' rise and the
+// downloads section's spinner came with it. Measured 94.9 KB.
+const BUDGET_KB = 95.1
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

@@ -81,9 +81,7 @@ describe('ModsSection', () => {
     const better = screen.getByRole('switch', { name: 'Create Better FPS' })
     expect(better).toBeDisabled()
     expect(better).toHaveAccessibleDescription(/Not downloaded yet/)
-    expect(
-      screen.getByText('Changes apply on the next Play. A disabled mod is not downloaded again.'),
-    ).toBeInTheDocument()
+    expect(screen.queryByText(/Changes apply/)).toBeNull()
     expect(App.GetChapterMods).toHaveBeenCalledWith('frangfurd')
   })
 
@@ -180,8 +178,10 @@ describe('ModsSection', () => {
     fireEvent.change(screen.getByLabelText('Search mods'), { target: { value: 'nothing like it' } })
     expect(screen.getByText('No mod has that name.')).toBeInTheDocument()
 
+    // Closing folds the list away: hidden at once, gone once the fold ends.
     fireEvent.click(disclosure)
-    expect(screen.queryByLabelText('Search mods')).toBeNull()
+    expect(disclosure).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('list', { name: 'Mods' })).toBeNull()
   })
 
   it('says the mods appear after the first Play when the folder is empty', async () => {

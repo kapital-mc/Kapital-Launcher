@@ -1,0 +1,142 @@
+/**
+ * The motion behind `ui/Smooth`, on plain elements: a box (`outer`) that
+ * follows its content's height (`inner`) over the reveal's 200 ms instead of
+ * jumping, and content added to it later that fades in as it opens. It is one
+ * mechanism for every card and popup, so a part that grows (a licence shown, a
+ * field in place of a button, a line of progress) needs nothing of its own.
+ *
+ * The content is measured by a ResizeObserver, which reports after layout and
+ * before paint: the box is pinned at the height it showed, then moved to the new
+ * one by a CSS transition (`smooth-resizing`), and let go when it ends. A
+ * change mid-way moves on from where it is. While a part inside runs its own
+ * height transition (`ui/Grow`, `ui/Fold`) the box simply follows it, so the
+ * two never chase each other. Added elements get `smooth-enter`, a fade a
+ * little behind the growth. With reduced motion, or where the browser lacks a
+ * ResizeObserver (the tests), it does nothing and has nothing to undo.
+ */
+const SELF = '[data-smooth="self"]'
+
+const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+
+/** A motion token's value, read from the root: a duration in ms, or an easing as written. */
+function token(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+function ms(name: string): number {
+  const v = token(name)
+  const n = Number.parseFloat(v)
+  return v.endsWith('ms') ? n : n * 1000
+}
+
+/**
+ * An element that takes the place of a control, such as the field that opens
+ * where Add argument was: it grows from the control's rectangle to its own
+ * over the reveal, clipped meanwhile, and its content fades in behind. Mark
+ * the element `data-smooth="self"` so the card it is in does not fade it
+ * too. Nothing happens with reduced motion or without the Web Animations API.
+ */
+export function morphFrom(el: HTMLElement, from: DOMRect): void {
+  if (typeof el.animate !== 'function' || reducedMotion()) return
+  const to = el.getBoundingClientRect()
+  const timing = { duration: ms('--duration-reveal'), easing: token('--ease-glide') }
+  el.style.overflow = 'clip'
+  el.animate(
+    [
+      { width: `${from.width}px`, height: `${from.height}px` },
+      { width: `${to.width}px`, height: `${to.height}px` },
+    ],
+    timing,
+  ).onfinish = () => el.style.removeProperty('overflow')
+  for (const child of el.children) {
+    child.animate([{ opacity: 0 }, { opacity: 1 }], {
+      ...timing,
+      delay: ms('--duration-fast') / 2,
+      fill: 'backwards',
+    })
+  }
+}
+
+export function smoothResize(outer: HTMLElement, inner: HTMLElement): (() => void) | undefined {
+  if (typeof ResizeObserver === 'undefined' || typeof MutationObserver === 'undefined') {
+    return undefined
+  }
+  const reduced = reducedMotion
+  // The height the box showed after its last change: where a new change starts from.
+  let shown = outer.getBoundingClientRect().height
+  let moving = false
+  // Height transitions running on parts inside, which the box follows as they go.
+  let following = 0
+
+  const settle = () => {
+    moving = false
+    outer.classList.remove('smooth-resizing')
+    outer.style.removeProperty('height')
+  }
+  const chrome = () => {
+    const s = getComputedStyle(outer)
+    const px = (v: string) => Number.parseFloat(v) || 0
+    return px(s.paddingTop) + px(s.paddingBottom) + px(s.borderTopWidth) + px(s.borderBottomWidth)
+  }
+
+  const resize = new ResizeObserver(() => {
+    const target = inner.getBoundingClientRect().height + chrome()
+    if (Math.abs(target - shown) < 0.5) return
+    if (following > 0 || reduced()) {
+      if (moving) settle()
+      shown = target
+      return
+    }
+    if (!moving) {
+      // Pinned where it was, then moved: the transition needs a height to start from.
+      outer.style.height = `${shown}px`
+      outer.classList.add('smooth-resizing')
+      void outer.offsetHeight
+      moving = true
+    }
+    outer.style.height = `${target}px`
+    shown = target
+  })
+  resize.observe(inner)
+
+  const layout = (e: TransitionEvent) =>
+    e.target !== outer &&
+    (e.propertyName.startsWith('grid-template') || e.propertyName === 'height')
+  const onRun = (e: TransitionEvent) => {
+    if (layout(e)) following++
+  }
+  const onEnd = (e: TransitionEvent) => {
+    if (e.target === outer && e.propertyName === 'height') settle()
+    else if (layout(e)) following = Math.max(0, following - 1)
+  }
+  outer.addEventListener('transitionrun', onRun)
+  outer.addEventListener('transitionend', onEnd)
+  outer.addEventListener('transitioncancel', onEnd)
+
+  const enter = new MutationObserver((records) => {
+    if (reduced()) return
+    for (const r of records) {
+      for (const node of r.addedNodes) {
+        if (!(node instanceof HTMLElement)) continue
+        // A part that runs its own entrance (`morphFrom`) is left to it.
+        if (node.matches(SELF) || node.querySelector(SELF)) continue
+        node.classList.add('smooth-enter')
+        const done = (e: AnimationEvent) => {
+          if (e.target !== node) return
+          node.classList.remove('smooth-enter')
+          node.removeEventListener('animationend', done)
+        }
+        node.addEventListener('animationend', done)
+      }
+    }
+  })
+  enter.observe(inner, { childList: true, subtree: true })
+
+  return () => {
+    resize.disconnect()
+    enter.disconnect()
+    outer.removeEventListener('transitionrun', onRun)
+    outer.removeEventListener('transitionend', onEnd)
+    outer.removeEventListener('transitioncancel', onEnd)
+    settle()
+  }
+}

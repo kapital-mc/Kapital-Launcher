@@ -50,6 +50,19 @@ hover glow, never on a disabled one). Each has a reduced-motion fallback that
 only fades and still ends its animation, because a leaving page is unmounted
 by its `animationend`.
 
+Size changes animate in one place, not per component. `ui/Smooth` (with
+`lib/smoothResize`) is the box of every `SettingsCard`, `Dialog` and the
+sidebar's downloads section: its height follows its content over the reveal
+and whatever is added to it later fades in (`smooth-resizing`,
+`smooth-enter`). A new card or popup gets that by being drawn with one of
+them; draw a new kind of tile with `Smooth` rather than animating its parts.
+`ui/Grow` stays for a line or block that comes and goes (it also fades it
+out), and the box follows it. An element that takes a control's place grows
+out of it with `morphFrom` and `data-smooth="self"` (the Java argument field).
+A column's popup rises from the column (`rise-in`, `rise-out`,
+`rise-content-in`, `wash-out`), and a line too long for its place fades at its
+end (`fade-end`) rather than ending in an ellipsis where a control sits over it.
+
 Spacing is Tailwind's default 4px scale, which is what the reference was drawn
 on; `p-14` is 56px. Do not add a spacing token for a value the scale already has.
 

@@ -5,6 +5,7 @@ import { errMsg, readOr } from '../../lib/ipc'
 import { CREDITS, PRISM_SOURCE } from '../../lib/licences'
 import type { Credit } from '../../lib/licences'
 import { Info } from '../../lib/icons'
+import { Grow } from '../ui/Grow'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { TextLink } from '../ui/TextLink'
 
@@ -88,13 +89,16 @@ function CreditRow({ credit }: { credit: Credit }) {
           {open ? 'Hide licence' : 'Show licence'}
         </TextLink>
       </div>
-      <div id={panelId} hidden={!open}>
+      <Grow className="-mt-2" inner="pt-2">
         {open && (
-          <pre className="bg-sunken border-line text-fg-muted text-2xs m-0 max-h-80 overflow-auto rounded-md border p-4 font-mono leading-normal whitespace-pre-wrap select-text">
+          <pre
+            id={panelId}
+            className="bg-sunken border-line text-fg-muted text-2xs m-0 max-h-80 overflow-auto rounded-md border p-4 font-mono leading-normal whitespace-pre-wrap select-text"
+          >
             {error ?? text ?? 'Reading the licence.'}
           </pre>
         )}
-      </div>
+      </Grow>
     </div>
   )
 }

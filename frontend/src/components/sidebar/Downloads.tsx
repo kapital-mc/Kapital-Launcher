@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { downloadRows } from '../../lib/downloads'
 import type { DownloadRow } from '../../lib/downloads'
+import { LoaderCircle, X } from '../../lib/icons'
 import { errMsg } from '../../lib/ipc'
 import { useChapterStore } from '../../stores/useChapterStore'
 import { useEngineStore } from '../../stores/useEngineStore'
@@ -8,8 +9,10 @@ import { useTailscaleStore } from '../../stores/useTailscaleStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Fold } from '../ui/Fold'
 import { Grow } from '../ui/Grow'
-import { TextLink } from '../ui/TextLink'
+import { Icon } from '../ui/Icon'
+import { IconButton } from '../ui/IconButton'
 import { ProgressBar } from '../ui/ProgressBar'
+import { Smooth } from '../ui/Smooth'
 
 /**
  * What the launcher is downloading, above the account tile: Prism, Tailscale's
@@ -19,8 +22,10 @@ import { ProgressBar } from '../ui/ProgressBar'
  * holds the terrain and Tailscale listeners for the app's lifetime (Prism's is
  * App's).
  *
- * Compact, it keeps each bar and its percentage; the heading, the names, the
- * steps and Cancel fold away with the rest of the sidebar's text. The numbers
+ * Compact, it keeps each bar with a spinner over it in place of the
+ * percentage; the heading, the names, the steps and Cancel fold away with the
+ * rest of the sidebar's text. Every download runs at once, none waits behind
+ * another, so the spinner is the only state a compact row shows. The numbers
  * are drawn with even-width digits, so a count going up never moves the words
  * after it.
  */
@@ -42,9 +47,11 @@ export function Downloads({ compact = false }: { compact?: boolean }) {
   return (
     <Grow inner="pb-4">
       {rows.length > 0 && (
-        <section
+        <Smooth
+          role="region"
           aria-label="Downloads"
-          className="bg-raised border-line flex flex-col rounded-lg border p-3"
+          className="bg-raised border-line rounded-lg border p-3"
+          inner="flex flex-col"
         >
           <Fold open={!compact} axis="y">
             <span className="text-fg-faint text-2xs tracking-eyebrow block pb-3 font-mono whitespace-nowrap uppercase">
@@ -54,7 +61,7 @@ export function Downloads({ compact = false }: { compact?: boolean }) {
           {rows.map((r, i) => (
             <Row key={r.key} row={r} compact={compact} first={i === 0} />
           ))}
-        </section>
+        </Smooth>
       )}
     </Grow>
   )
@@ -76,28 +83,49 @@ function Row({ row, compact, first }: { row: DownloadRow; compact: boolean; firs
     }
   }
   return (
-    <div className={`flex flex-col ${first ? '' : 'pt-3'}`}>
-      <div className="text-2xs flex justify-between gap-2 pb-1.5 whitespace-nowrap">
-        <Fold open={!compact} axis="x" className="min-w-0 grow">
+    <div className={`group/row flex flex-col ${first ? '' : 'pt-3'}`}>
+      <div
+        className={`text-2xs flex items-center pb-1.5 whitespace-nowrap ${
+          compact ? 'justify-center' : 'justify-between gap-2'
+        }`}
+      >
+        <Fold open={!compact} axis="x" className={`min-w-0 ${compact ? '' : 'grow'}`}>
           <span className="text-fg block truncate font-medium">{row.title}</span>
         </Fold>
-        <span className="text-fg-muted font-mono tabular-nums">{Math.floor(row.value * 100)}%</span>
+        {compact ? (
+          <Icon
+            icon={LoaderCircle}
+            size="sm"
+            className="text-fg-muted animate-spin motion-reduce:animate-none"
+          />
+        ) : (
+          <span className="text-fg-muted font-mono tabular-nums">
+            {Math.floor(row.value * 100)}%
+          </span>
+        )}
       </div>
       <ProgressBar value={row.value} label={row.title} />
       <Fold open={!compact} axis="y">
-        <span className="text-2xs flex items-baseline justify-between gap-2 pt-1.5">
-          <span className="text-fg-faint min-w-0 truncate tabular-nums" title={row.line}>
+        <span className="text-2xs relative mt-1.5 block">
+          <span
+            className={`text-fg-faint fade-end block overflow-hidden whitespace-nowrap tabular-nums ${
+              cancel ? 'group-focus-within/row:fade-end-clear group-hover/row:fade-end-clear' : ''
+            }`}
+            title={row.line}
+          >
             {row.line}
           </span>
+          {/* Cancel shows while the row is hovered, or on keyboard focus, over the line's
+              faded end. */}
           {cancel && (
-            <TextLink
-              size="xs"
-              className="text-2xs shrink-0"
-              aria-label={`Cancel ${row.title}`}
-              onClick={() => void onCancel()}
-            >
-              Cancel
-            </TextLink>
+            <span className="duration-fast ease-standard absolute top-1/2 -right-1 flex -translate-y-1/2 opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 motion-reduce:transition-none">
+              <IconButton
+                icon={X}
+                size="2xs"
+                title={`Cancel ${row.title}`}
+                onClick={() => void onCancel()}
+              />
+            </span>
           )}
         </span>
         {error && <span className="text-danger text-2xs block pt-1">{error}</span>}

@@ -146,7 +146,9 @@ asked and verified is unchanged.
 ## Amendment, 2026-10-19: Cancel, while it downloads
 
 The author asked (2026-10-19) for a way to cancel a download from the
-sidebar's downloads section. Each row there has **Cancel**. For Prism it ends
+sidebar's downloads section. Each row there has **Cancel**, an X shown while
+the row is hovered or focused, over the step line's faded end (the author,
+the same day: no ellipsis, the line fades instead). For Prism it ends
 the install only while the zip downloads (`CancelPrismInstall`, the
 `installCancel` in `app_installcancel.go`): once the download is whole,
 unpacking, the signature check and placing run to their end, so a cancel

@@ -42,8 +42,11 @@ describe('GetPrism', () => {
     open()
     const dialog = screen.getByRole('dialog')
     expect(container).not.toContainElement(dialog)
-    // The cover is the box's grandparent: between them is the layer that centres it.
-    expect(dialog.parentElement?.parentElement).toHaveClass('fixed', 'inset-0', 'scrim-wash')
+    // The box's grandparent holds the whole window; between them is the layer that centres
+    // it, and the cover is the grandparent's first child.
+    const root = dialog.parentElement?.parentElement
+    expect(root).toHaveClass('fixed', 'inset-0')
+    expect(root?.firstElementChild).toHaveClass('scrim-wash')
   })
 
   it('downloads only on Download', () => {
@@ -59,7 +62,7 @@ describe('GetPrism', () => {
     expect(calls.onCancel).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Not now' }))
     fireEvent.keyDown(window, { key: 'Escape' })
-    fireEvent.click(screen.getByRole('dialog').parentElement!.parentElement!)
+    fireEvent.click(screen.getByRole('dialog').parentElement!.parentElement!.firstElementChild!)
     expect(calls.onCancel).toHaveBeenCalledTimes(3)
     expect(calls.onConfirm).not.toHaveBeenCalled()
   })

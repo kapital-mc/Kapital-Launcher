@@ -42,7 +42,8 @@ interface Props {
  * name Mojang does not know, the tile keeps the initials and an unreachable Mojang says nothing.
  *
  * With no profile name Prism plays its default account, and the page shows the name the game
- * reported for it on the last run (`playerName`, which Go learns from the game log).
+ * reported for it on the last run (`playerName`, which Go learns from the game log), alone in
+ * the empty field (the author, 2026-10-19), or "Prism's default account" before there is one.
  *
  * Play offline (Prism's `--offline`) swaps the profile for a player name of the launcher's own,
  * and the play time section shows what Prism has counted per chapter.
@@ -229,9 +230,7 @@ function ProfileSection({ player }: { player: PlayerProfile | null }) {
           <TextField
             label="Profile name"
             value={profile}
-            placeholder={
-              playerName ? `Prism's default account, ${playerName}` : "Prism's default account"
-            }
+            placeholder={playerName || "Prism's default account"}
             hint={profileNameProblem(profile)}
             error={error}
             onCommit={(v) => void save(v)}

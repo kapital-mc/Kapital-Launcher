@@ -11,7 +11,9 @@ import {
 import type { ReactNode } from 'react'
 import { ChevronDown } from '../../lib/icons'
 import type { LucideIcon } from '../../lib/icons'
+import { Grow } from './Grow'
 import { Icon } from './Icon'
+import { Smooth } from './Smooth'
 
 /** A section as the nav lists it. */
 interface NavEntry {
@@ -213,9 +215,13 @@ export function SettingsSection({
         )}
         {aside && <span className="text-fg-muted shrink-0 text-xs">{aside}</span>}
       </div>
-      <div id={bodyId} className={open ? 'flex flex-col gap-3' : 'hidden'}>
-        {open && children}
-      </div>
+      <Grow className="-mt-4" inner="pt-4">
+        {open && (
+          <div id={bodyId} className="flex flex-col gap-3">
+            {children}
+          </div>
+        )}
+      </Grow>
     </section>
   )
 }
@@ -226,12 +232,13 @@ export function SettingsSection({
  */
 export function SettingsCard({ children, label }: { children: ReactNode; label?: string }) {
   return (
-    <div
+    <Smooth
       role={label ? 'group' : undefined}
       aria-label={label}
-      className="bg-raised-2 border-line divide-line flex flex-col divide-y rounded-lg border *:px-4 *:py-3.5"
+      className="bg-raised-2 border-line rounded-lg border"
+      inner="divide-line flex flex-col divide-y *:px-4 *:py-3.5"
     >
       {children}
-    </div>
+    </Smooth>
   )
 }
