@@ -118,7 +118,8 @@ pnpm build` or `SITE_RELEASE=null pnpm build`.
 With a release set, Download is a button that opens a native popover
 (`popovertarget`), no script needed: a heading, a Windows or macOS switch, the
 one download for the chosen system, the Prism instance zips folded into a
-`details` dropdown, a one-line note that the build is not code-signed yet with
+dropdown that slides open (a checkbox and a grid row easing from `0fr` to
+`1fr`, so the popup grows with it and no script is needed), a one-line note that the build is not code-signed yet with
 a link to the release notes, and a close button. The switch is a fieldset of two radios and CSS `:has()`, so it works
 without script. Windows is checked by default.
 
@@ -136,11 +137,15 @@ Linux are neither, and keep Windows checked. With `release` set to `null`, the
 build leaves the popup out of the page.
 
 Its heading is in the display face, like the wiki's; the tag sits above it,
-filled in at build time. It opens and closes with the app's reveal (a short
-rise out of a slight blur) while the page dims and softens behind it, and the
-other system's panel fades in when the switch moves: `src/popup.css`, on the
-motion tokens, with no script. A browser without `@starting-style` shows and
-hides it plainly, and reduced motion turns the transitions off.
+filled in at build time. It opens with the app's reveal (a short rise out of
+a slight blur) while the page dims and softens behind it, and closes the same
+way in reverse over the slow duration on the glide curve, so the fade is seen.
+The other system's panel fades in when the switch moves: `src/popup.css`, on
+the motion tokens, with no script. The changelog and code signing popups move
+the same way. All three sit at the end of the body, so a browser that cannot
+keep a closing popup in the top layer still paints its fade above the page. A
+browser without `@starting-style` shows and hides them plainly, and reduced
+motion turns the transitions off.
 
 The CSP in `public/_headers` allows it with `script-src 'self'` and nothing
 more, so an inline script would be blocked.

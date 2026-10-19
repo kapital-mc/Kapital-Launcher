@@ -185,8 +185,13 @@ The author asked for three changes to the page.
   offers sits between the logo and the buttons, filled in at build time like
   the popup's.
 - **A quieter download popup.** The notes under each download button are
-  gone, the Prism instance zips sit in a closed `details` dropdown, and the
-  code signing notice is one line linking the release notes.
+  gone, the Prism instance zips sit in a closed dropdown that slides open and
+  grows the popup with it (a checkbox and a grid row eased from `0fr` to
+  `1fr`; a `details` element cannot animate its height in Safari yet), and the
+  code signing notice is one line linking the release notes. Every popup
+  now closes visibly: the closing half runs over the slow duration on the
+  glide curve, where it had the opening's fast-out curve and was over in its
+  first frames.
 - **The window's chapter rows are buttons.** A click shows that chapter with
   the app's own motion and restarts the cycle, so the chosen chapter stays a
   full dwell before the next slides in. This needs a script: the CSS cycle
