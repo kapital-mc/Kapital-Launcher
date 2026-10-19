@@ -83,7 +83,7 @@ func main() {
 		// buttons; macOS keeps a hidden title bar so its native traffic
 		// lights, full-screen and zoom stay the system's.
 		Frameless: runtime.GOOS != "darwin",
-		Mac:       &mac.Options{TitleBar: mac.TitleBarHidden()},
+		Mac:       &mac.Options{TitleBar: mac.TitleBarHiddenInset()},
 		// macOS's App, Edit and Window menus, which carry the Cmd shortcuts.
 		Menu: appMenu(runtime.GOOS),
 		// The wiki's screenshots are served from the app data dir (#141).

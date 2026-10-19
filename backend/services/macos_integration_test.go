@@ -449,6 +449,7 @@ func TestMacLauncherStartsWithItsMenus(t *testing.T) {
 	}
 	menus := strings.TrimSpace(string(out))
 	t.Logf("menu bar: %s", menus)
+	logWindowChrome(t, pid)
 	for _, want := range []string{"Edit", "Window"} {
 		if !strings.Contains(menus, want) {
 			t.Errorf("menu bar %q has no %s menu", menus, want)
@@ -465,5 +466,46 @@ func TestMacLauncherStartsWithItsMenus(t *testing.T) {
 		ended = true
 	case <-time.After(20 * time.Second):
 		t.Error("the launcher did not quit from its Quit menu item within 20 s")
+	}
+}
+
+// windowChromeScript lists the launcher's first window and its title bar
+// buttons as "<subrole> x y w h" lines, in screen points.
+const windowChromeScript = `on box(e)
+	set p to position of e
+	set s to size of e
+	return (item 1 of p as string) & " " & (item 2 of p as string) & " " & (item 1 of s as string) & " " & (item 2 of s as string)
+end box
+tell application "System Events" to tell (first process whose unix id is %s)
+	set w to window 1
+	set out to "window " & my box(w)
+	repeat with b in (buttons of w)
+		set out to out & linefeed & (subrole of b as string) & " " & my box(b)
+	end repeat
+	return out
+end tell`
+
+// logWindowChrome logs where macOS put the traffic lights in the launcher's
+// window and, when KAPITAL_IT_SHOTS names a folder, a picture of its top.
+func logWindowChrome(t *testing.T, pid string) {
+	t.Helper()
+	out, err := exec.Command("/usr/bin/osascript", "-e", strings.Replace(windowChromeScript, "%s", pid, 1)).CombinedOutput()
+	if err != nil {
+		t.Logf("window chrome unread: %v: %s", err, strings.TrimSpace(string(out)))
+		return
+	}
+	lines := strings.TrimSpace(string(out))
+	t.Logf("window chrome:\n%s", lines)
+	dir := os.Getenv("KAPITAL_IT_SHOTS")
+	if dir == "" {
+		return
+	}
+	f := strings.Fields(strings.SplitN(lines, "\n", 2)[0])
+	if len(f) != 5 {
+		return
+	}
+	rect := strings.Join([]string{f[1], f[2], "400", "120"}, ",")
+	if out, err := exec.Command("/usr/sbin/screencapture", "-x", "-R", rect, filepath.Join(dir, "header-"+runtime.GOARCH+".png")).CombinedOutput(); err != nil {
+		t.Logf("screencapture: %v: %s", err, out)
 	}
 }

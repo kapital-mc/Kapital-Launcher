@@ -161,4 +161,14 @@ jobs:
         env:
           KAPITAL_IT_APP: ${{ github.workspace }}/build/bin/Kapital Launcher.app
           KAPITAL_IT_DISPOSABLE: '1'
-        run: go test -tags macintegration -run '^TestMac' -count=1 -v -timeout 20m ./backend/services/
+          KAPITAL_IT_SHOTS: ${{ runner.temp }}/shots
+        run: |
+          mkdir -p "$KAPITAL_IT_SHOTS"
+          go test -tags macintegration -run '^TestMac' -count=1 -v -timeout 20m ./backend/services/
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: window-${{ matrix.runner }}
+          path: ${{ runner.temp }}/shots
+          if-no-files-found: ignore
