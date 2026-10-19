@@ -84,15 +84,15 @@ function Row({ row, compact, first }: { row: DownloadRow; compact: boolean; firs
   }
   return (
     <div className={`group/row flex flex-col ${first ? '' : 'pt-3'}`}>
-      <div
-        className={`text-2xs flex items-center pb-1.5 whitespace-nowrap ${
-          compact ? 'justify-center' : 'justify-between gap-2'
-        }`}
-      >
-        <Fold open={!compact} axis="x" className={`min-w-0 ${compact ? '' : 'grow'}`}>
-          <span className="text-fg block truncate font-medium">{row.title}</span>
+      {/* Nothing here changes its layout at once on compacting. The title's fold keeps its share
+          of the row while its text folds away at the left, and a space after the percentage grows
+          into an equal share on the folds' curve, so the percentage glides to the centre. The gap
+          after the title is inside its fold and goes with it. */}
+      <div className="text-2xs flex items-center pb-1.5 whitespace-nowrap">
+        <Fold open={!compact} axis="x" className="min-w-0 grow">
+          <span className="text-fg block truncate pr-2 font-medium">{row.title}</span>
         </Fold>
-        <span className="text-fg-muted flex items-center font-mono tabular-nums">
+        <span className="text-fg-muted flex shrink-0 items-center font-mono tabular-nums">
           {/* The space after the spinner is inside the fold, so it goes with it. */}
           <Fold open={compact} axis="x">
             <span className="flex pr-1">
@@ -105,6 +105,12 @@ function Row({ row, compact, first }: { row: DownloadRow; compact: boolean; firs
           </Fold>
           {Math.floor(row.value * 100)}%
         </span>
+        <span
+          aria-hidden
+          className={`duration-slow ease-glide transition-[flex-grow] motion-reduce:transition-none ${
+            compact ? 'grow' : 'grow-0'
+          }`}
+        />
       </div>
       <ProgressBar value={row.value} label={row.title} />
       <Fold open={!compact} axis="y">

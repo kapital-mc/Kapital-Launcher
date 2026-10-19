@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { Ellipsis, Pencil, Plus, Trash2, X } from '../../lib/icons'
 import { MAX_JAVA_ARGS, javaArgProblem } from '../../lib/javaArgs'
-import { morphFrom } from '../../lib/smoothResize'
+import { fadeIn, morphFrom, morphTo } from '../../lib/smoothResize'
 import { Icon } from '../ui/Icon'
 
 interface Props {
@@ -38,6 +38,13 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
       setRefocus(false)
     }
   }, [refocus])
+
+  // Add argument comes back drawn, and its words fade in where the field shrank into it.
+  const wasEditing = useRef(false)
+  useLayoutEffect(() => {
+    if (editing === null && wasEditing.current) fadeIn(addRef.current)
+    wasEditing.current = editing !== null
+  }, [editing])
 
   const done = () => {
     setEditing(null)
@@ -112,6 +119,7 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
         <button
           ref={addRef}
           type="button"
+          data-smooth="self"
           disabled={disabled || full}
           onClick={() => {
             setAddFrom(addRef.current?.getBoundingClientRect())
@@ -227,7 +235,7 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
 
 interface EditorProps {
   initial: string
-  /** The rectangle of the button it replaces, which it grows out of. */
+  /** The rectangle of the button it replaces, which it grows out of and shrinks back into. */
   from?: DOMRect
   /** The commit button's word: Add for a new argument, Save for an edit. */
   action: 'Add' | 'Save'
@@ -252,10 +260,18 @@ function ArgEditor({ initial, from, action, check, onCommit, onCancel }: EditorP
     input.current?.focus()
     input.current?.select()
   }, [])
+  // Grown out of a button, it shrinks back into it before it goes.
+  const closing = useRef(false)
+  const cancel = () => {
+    if (closing.current) return
+    if (!from || !row.current) return onCancel()
+    closing.current = true
+    morphTo(row.current, from, onCancel)
+  }
 
   const commit = () => {
     const v = value.trim()
-    if (v === '' || v === initial) return onCancel()
+    if (v === '' || v === initial) return cancel()
     const why = check(v)
     if (why) {
       setProblem(why)
@@ -270,7 +286,7 @@ function ArgEditor({ initial, from, action, check, onCommit, onCancel }: EditorP
       commit()
     } else if (e.key === 'Escape') {
       e.stopPropagation()
-      onCancel()
+      cancel()
     }
   }
 
@@ -307,7 +323,7 @@ function ArgEditor({ initial, from, action, check, onCommit, onCancel }: EditorP
       <button
         type="button"
         aria-label="Cancel"
-        onClick={onCancel}
+        onClick={cancel}
         className="text-fg-muted hover:text-fg hover:bg-hover flex size-7 items-center justify-center rounded-sm"
       >
         <Icon icon={X} size="sm" />

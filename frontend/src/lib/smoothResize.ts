@@ -9,8 +9,8 @@
  * before paint: the box is pinned at the height it showed, then moved to the new
  * one by a CSS transition (`smooth-resizing`), and let go when it ends. A
  * change mid-way moves on from where it is. While a part inside runs its own
- * height transition (`ui/Grow`, `ui/Fold`) the box simply follows it, so the
- * two never chase each other. Added elements get `smooth-enter`, a fade a
+ * height transition (`ui/Grow`, `ui/Fold`) or morphs (`morphFrom`, `morphTo`),
+ * the box simply follows it, so the two never chase each other. Added elements get `smooth-enter`, a fade a
  * little behind the growth. With reduced motion, or where the browser lacks a
  * ResizeObserver (the tests), it does nothing and has nothing to undo.
  */
@@ -51,13 +51,58 @@ export function morphFrom(el: HTMLElement, from: DOMRect): void {
     ],
     timing,
   ).onfinish = () => el.style.removeProperty('overflow')
+  fadeIn(el, { ...timing, delay: ms('--duration-fast') / 2 })
+}
+
+/**
+ * Fades the content of `el` in, its box shown at once: a control back where a morph ended (Add
+ * argument once its field has shrunk into it). Nothing happens with reduced motion.
+ */
+export function fadeIn(el: HTMLElement | null, timing?: KeyframeAnimationOptions): void {
+  if (!el || typeof el.animate !== 'function' || reducedMotion()) return
   for (const child of el.children) {
     child.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: ms('--duration-fast'),
+      easing: token('--ease-standard'),
       ...timing,
-      delay: ms('--duration-fast') / 2,
       fill: 'backwards',
     })
   }
+}
+
+/**
+ * The way back: `el` shrinks to `to` (the rectangle of the control it took the place of) over
+ * the reveal's 200 ms while its content fades out, then `done` removes it and puts the control
+ * back where it ends. Without the Web Animations API, or with reduced motion, `done` runs at once.
+ */
+export function morphTo(el: HTMLElement, to: DOMRect, done: () => void): void {
+  if (typeof el.animate !== 'function' || reducedMotion()) return done()
+  for (const a of el.getAnimations?.({ subtree: true }) ?? []) a.cancel()
+  const from = el.getBoundingClientRect()
+  const easing = token('--ease-standard')
+  el.style.overflow = 'clip'
+  for (const child of el.children) {
+    child.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: ms('--duration-fast'),
+      easing,
+      fill: 'forwards',
+    })
+  }
+  el.animate(
+    [
+      { width: `${from.width}px`, height: `${from.height}px` },
+      { width: `${to.width}px`, height: `${to.height}px` },
+    ],
+    { duration: ms('--duration-reveal'), easing, fill: 'forwards' },
+  ).onfinish = done
+}
+
+/** A part under `inner` is growing or shrinking by itself (`morphFrom`, `morphTo`). */
+function morphing(inner: HTMLElement): boolean {
+  for (const el of inner.querySelectorAll<HTMLElement>(SELF)) {
+    if (el.getAnimations?.().some((a) => a.playState === 'running')) return true
+  }
+  return false
 }
 
 export function smoothResize(outer: HTMLElement, inner: HTMLElement): (() => void) | undefined {
@@ -90,7 +135,7 @@ export function smoothResize(outer: HTMLElement, inner: HTMLElement): (() => voi
   const resize = new ResizeObserver(() => {
     const target = inner.getBoundingClientRect().height + chrome()
     if (Math.abs(target - shown) < 0.5) return
-    if (following > 0 || reduced()) {
+    if (following > 0 || reduced() || morphing(inner)) {
       if (moving) settle()
       shown = target
       return

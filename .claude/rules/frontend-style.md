@@ -58,7 +58,8 @@ and whatever is added to it later fades in (`smooth-resizing`,
 them; draw a new kind of tile with `Smooth` rather than animating its parts.
 `ui/Grow` stays for a line or block that comes and goes (it also fades it
 out), and the box follows it. An element that takes a control's place grows
-out of it with `morphFrom` and `data-smooth="self"` (the Java argument field).
+out of it with `morphFrom`, shrinks back into it with `morphTo`, and carries
+`data-smooth="self"` (the Java argument field).
 A column's popup rises from the column (`rise-in`, `rise-out`,
 `rise-content-in`, `wash-out`), and a line too long for its place fades at its
 end (`fade-end`) rather than ending in an ellipsis where a control sits over it.
