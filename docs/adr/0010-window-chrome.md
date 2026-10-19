@@ -79,8 +79,9 @@ author's Mac: the lights centred in the 28px bar.
 
 The author asked for a compact sidebar that shows only the chapter icons and a
 square account tile. Its button opens the bar on the left, where the wordmark
-was: on macOS 72px in, past the traffic lights, and elsewhere over the column
-of chapter icons. Compacting moves only the sidebar's right edge (to
+was: on macOS 64px in, past the traffic lights and inside the compact
+sidebar's width, and elsewhere 16px in, the sidebar's own padding, so the
+buttons' hover boxes line up with the chapter tiles' left edge. Compacting moves only the sidebar's right edge (to
 `layout.sidebarCompact`, an icon row's width between the sidebar's padding),
 so the icons and the initials never move sideways; the text fades out first and
 back in once there is room. Compact, the Chapters heading folds away and the

@@ -33,8 +33,8 @@ interface Props {
  * 2026-10-18).
  *
  * Its tools (HeaderTools) open the bar on the left, the sidebar's button
- * first: past the traffic lights on macOS, and elsewhere over the column of
- * chapter icons, which keep their place when the sidebar is compact.
+ * first: past the traffic lights on macOS, and elsewhere at the sidebar's own
+ * padding, so the buttons line up with the chapter tiles' left edge.
  */
 export function HeaderBar({
   platform,
@@ -50,7 +50,7 @@ export function HeaderBar({
     >
       <div
         onDoubleClick={(e) => e.stopPropagation()}
-        className={`flex h-full items-center [--wails-draggable:no-drag] ${mac ? 'pl-18' : 'pl-7.5'}`}
+        className={`flex h-full items-center [--wails-draggable:no-drag] ${mac ? 'pl-16' : 'pl-4'}`}
       >
         <HeaderTools
           size={mac ? 'xs' : 'sm'}
