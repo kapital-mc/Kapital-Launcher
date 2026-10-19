@@ -8,7 +8,7 @@ what it costs.
 The first seven follow the questions in `docs/HANDOFF.md` §3; 0008 was added
 while building the scaffold, 0009 with the download site, 0010 with the header bar,
 0011 with getting Prism for the player, 0012 with hiding the game window, 0013 with
-the player's profile from Mojang.
+the player's profile from Mojang, 0014 with Tailscale.
 
 | ADR | Decision | Status |
 |---|---|---|
@@ -25,3 +25,4 @@ the player's profile from Mojang.
 | [0011](0011-getting-prism.md) | On approval, a verified, launcher-managed portable Prism for players without one | accepted |
 | [0012](0012-hiding-the-game-window.md) | The launcher hides the game's window until the reload begins; the pack keeps its early window on | accepted |
 | [0013](0013-mojang-profile.md) | The account page asks Mojang's public profile endpoints for the player's UUID and skin face; only the profile name leaves, nothing from the response but the UUID, name and face is kept | accepted |
+| [0014](0014-tailscale.md) | A chapter's Tailscale address is the player's switch; the launcher gets the official installer on approval, signs in through the browser, and keeps the in-game server list in step | accepted |

@@ -85,6 +85,7 @@ The manifest writes an unsettled fact as `[PLACEHOLDER]` or `null`.
 
 One per domain (`useChapterStore`, `useEngineStore`, `useSettingsStore`,
 `useServerStore`, `useGameStore`, the account page's `usePlayerStore`, and the
-settings page's `useTerrainStore`); a component reads with a selector and never
-reaches into another store's data.
+settings page's `useTerrainStore` and `useTailscaleStore`, which the sidebar's
+downloads section, loaded after the first paint, also listens through); a
+component reads with a selector and never reaches into another store's data.
 `.claude/rules/ipc.md` has the rejection rules.

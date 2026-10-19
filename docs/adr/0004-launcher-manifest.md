@@ -136,3 +136,25 @@ shapes, as the **fallback**: it is what the panel shows for a chapter whose
 pack publishes no changelog (a 404) or whose file could not be read. It is
 still data a manifest names and never runs: one summary per version, shown as
 plain text.
+
+## Amendment, 2026-10-18: an address may be a Tailscale one
+
+An entry of `server.addresses` may carry **`tailscale: true`**: an address
+reached only from a machine in the server's tailnet (ADR-14). At most one per
+server, never the first, so a chapter's default stays one every player can
+reach; the schema and `services.ValidateManifest` both hold it, and a second
+or a first one refuses the manifest whole. It is a flag and runs nothing: the
+address is held to the same `host[:port]` rule as every other. Whether it is
+offered is the player's switch (`tailscaleServers` in settings), never the
+manifest's.
+
+## Amendment, 2026-10-19: a Tailscale address may carry its share link
+
+The Tailscale address may carry **`invite`**: the server's Tailscale share
+link, which Connect opens in the browser for a player whose Tailscale does
+not reach the server yet (ADR-14 amendment 2026-10-19). Only on the Tailscale
+address, and only the whole of
+`https://login.tailscale.com/admin/invite/<8 to 64 letters or digits>`; the
+schema and `services.ValidateManifest` both hold it, and anything else
+refuses the manifest whole. It is a page to open, like the wiki's, and runs
+nothing.

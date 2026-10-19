@@ -25,7 +25,7 @@ type updateCheck struct {
 // so the launcher simply shows no notice. Under the launcher update preview
 // (#124) the answer is made up and nothing is fetched.
 func (a *App) GetUpdate() (models.UpdateInfo, error) {
-	if info, ok := services.PreviewUpdate(a.previews.Prism(), Version); ok {
+	if info, ok := services.PreviewUpdate(a.previews.Launcher(), Version); ok {
 		return info, nil
 	}
 	a.update.once.Do(func() {

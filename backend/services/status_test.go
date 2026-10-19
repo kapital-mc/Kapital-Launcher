@@ -63,7 +63,7 @@ func TestRunPingsOnlyServerChaptersAndStopsOnCancel(t *testing.T) {
 	var got []models.ServerStatus
 	done := make(chan struct{})
 	go func() {
-		svc.Run(ctx, chapters, func(c models.Chapter) string { return ServerAddress(c, nil) }, func(s models.ServerStatus) {
+		svc.Run(ctx, chapters, func(c models.Chapter) string { return ServerAddress(c, models.AppSettings{}) }, func(s models.ServerStatus) {
 			got = append(got, s)
 			if len(got) == 2 {
 				cancel()

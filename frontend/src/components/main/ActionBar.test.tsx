@@ -44,7 +44,11 @@ const installProgress: PrismInstallProgress = {
 }
 
 function bar(over: Partial<ComponentProps<typeof ActionBar>> = {}) {
-  return render(
+  return render(barElement(over))
+}
+
+function barElement(over: Partial<ComponentProps<typeof ActionBar>> = {}) {
+  return (
     <ActionBar
       chapter={chapter}
       engine={{ found: true, executable: 'prism', version: '11', root: '', source: 'managed' }}
@@ -72,7 +76,7 @@ function bar(over: Partial<ComponentProps<typeof ActionBar>> = {}) {
       onOpenReleasePage={noop}
       onCheckServer={noop}
       {...over}
-    />,
+    />
   )
 }
 
@@ -302,16 +306,15 @@ describe('ActionBar game line', () => {
     expect(stop()).toHaveClass('min-w-(--layout-play-min)')
   })
 
-  it('keeps the width of the longer label on the Prism button, Try again or Get Prism Launcher', () => {
+  it('adds no button beside Play without Prism, so nothing in the bar moves', () => {
     bar({ engine: { found: false, executable: '', version: '', root: '', source: '' } })
-    const button = screen.getByRole('button', { name: 'Get Prism Launcher' })
-    expect(button).toHaveTextContent('Get Prism LauncherTry again')
-    expect(screen.getByText('Try again')).toHaveClass('invisible')
+    expect(screen.queryByRole('button', { name: /Get Prism/ })).toBeNull()
+    expect(play()).toBeEnabled()
   })
 
-  it('opens the approval for getting Prism as a popup, and hands the confirm on', async () => {
+  it('opens the popup for getting Prism from Play, keeps it through the install, and hands the confirm on', async () => {
     const onGetPrism = vi.fn()
-    bar({
+    const missing = {
       engine: { found: false, executable: '', version: '', root: '', source: '' },
       release: {
         version: '11.1.1',
@@ -324,12 +327,31 @@ describe('ActionBar game line', () => {
         updateAvailable: false,
       },
       onGetPrism,
-    })
-    fireEvent.click(screen.getByRole('button', { name: 'Get Prism Launcher' }))
+    }
+    const { rerender } = bar(missing)
+    fireEvent.click(play())
     const dialog = await screen.findByRole('dialog', { name: 'Get Prism Launcher' })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Download' }))
     expect(onGetPrism).toHaveBeenCalledOnce()
-    expect(screen.queryByRole('dialog')).toBeNull()
+    rerender(
+      barElement({
+        ...missing,
+        install: { phase: 'downloading', received: 512 * 1024, total: 1024 * 1024, error: '' },
+      }),
+    )
+    const working = screen.getByRole('dialog', { name: 'Get Prism Launcher' })
+    expect(within(working).getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
+    expect(play()).toBeDisabled()
+  })
+
+  it("opens Prism's website from Play when the release cannot be read", () => {
+    const onOpenPrismSite = vi.fn()
+    bar({
+      engine: { found: false, executable: '', version: '', root: '', source: '' },
+      onOpenPrismSite,
+    })
+    fireEvent.click(play())
+    expect(onOpenPrismSite).toHaveBeenCalledOnce()
   })
 
   it('shows the usual line once the game has closed', () => {
@@ -447,16 +469,22 @@ describe('ActionBar instance the launcher did not set up', () => {
     expect(onReinstall).toHaveBeenCalledOnce()
   })
 
-  it('holds Reinstall while it runs and without Prism', () => {
+  it('holds Reinstall while it runs, and gets Prism first without it', () => {
     bar({ instancePack: undefined, installing: true })
     expect(screen.getByRole('button', { name: 'Reinstall' })).toBeDisabled()
     expect(screen.getByText('◐ Installing')).toBeInTheDocument()
     cleanup()
+    const onOpenPrismSite = vi.fn()
+    const onReinstall = vi.fn()
     bar({
       instancePack: undefined,
       engine: { found: false, executable: '', version: '', root: '', source: '' },
+      onOpenPrismSite,
+      onReinstall,
     })
-    expect(screen.getByRole('button', { name: 'Reinstall' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Reinstall' }))
+    expect(onOpenPrismSite).toHaveBeenCalledOnce()
+    expect(onReinstall).not.toHaveBeenCalled()
   })
 
   it('keeps Play for an instance of unknown presence and Stop while its game runs', () => {

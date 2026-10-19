@@ -12,7 +12,7 @@ var previewNow = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
 
 func TestPreviewSituationsAreAFixedListWithUniqueIDs(t *testing.T) {
 	list := PreviewSituations()
-	if len(list) != 13 {
+	if len(list) != 17 {
 		t.Fatalf("got %d situations", len(list))
 	}
 	seen := map[string]bool{}
@@ -21,7 +21,7 @@ func TestPreviewSituationsAreAFixedListWithUniqueIDs(t *testing.T) {
 			t.Fatalf("%+v", s)
 		}
 		seen[s.ID] = true
-		if s.Scope != models.PreviewScopeChapter && s.Scope != models.PreviewScopePrism {
+		if s.Scope != models.PreviewScopeChapter && s.Scope != models.PreviewScopePrism && s.Scope != models.PreviewScopeLauncher {
 			t.Fatalf("%s has scope %q", s.ID, s.Scope)
 		}
 		if strings.Contains(s.Label, "—") {
@@ -250,5 +250,10 @@ func TestPreviewSetHoldsOnePerChapterAndOneForPrism(t *testing.T) {
 	p.SetPrism(PreviewPrismUpdate)
 	if p.Prism() != PreviewPrismUpdate || p.ClearPrism() != PreviewPrismUpdate || p.Prism() != "" {
 		t.Fatal("one for Prism, the last wins")
+	}
+	p.SetLauncher(PreviewLauncherUpdate)
+	p.SetLauncher(PreviewTailscaleMissing)
+	if p.Launcher() != PreviewTailscaleMissing || p.Prism() != "" || p.ClearLauncher() != PreviewTailscaleMissing || p.Launcher() != "" {
+		t.Fatal("one for the launcher, the last wins, apart from Prism's")
 	}
 }

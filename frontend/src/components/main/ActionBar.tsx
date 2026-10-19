@@ -25,7 +25,6 @@ import { Download, Play, RefreshCw, Square } from '../../lib/icons'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
-import { StableLabel } from '../ui/StableLabel'
 
 // The approval popup is shown only after the player asks to get Prism, so it
 // loads then and stays out of the launcher's first paint and its bundle budget
@@ -74,9 +73,6 @@ interface Props {
 }
 
 const WORKING = ['downloading', 'unpacking', 'verifying']
-
-/** What the button beside a missing Prism can say, so it keeps the width of the longer. */
-const GET_PRISM_LABELS = ['Get Prism Launcher', 'Try again'] as const
 
 /** Keeps the state line's second row when it has nothing to say, so the block stays two lines. */
 const BLANK = '\u00a0'
@@ -132,10 +128,11 @@ const CONFIRM_MS = 5000
  * corner (`shell/Toasts`), so the bar keeps its shape and the server's line
  * comes back.
  *
- * Without Prism, the bar offers to get it (ADR-11): the approval opens as a
- * popup over the window, so the card keeps its layout, and once confirmed the
- * state line follows the install step by step.
- * If the release cannot be read, the button falls back to Prism's website.
+ * Without Prism, Play and Install stay where they are and open the popup that
+ * gets it (ADR-11), so nothing in the bar moves. The popup follows the install
+ * to its end, the state line and the sidebar's downloads section follow it
+ * too, and Play waits until it is done. If the release cannot be read, the
+ * button opens Prism's website instead.
  */
 export function ActionBar({
   chapter,
@@ -187,6 +184,8 @@ export function ActionBar({
     setConfirming(false)
     onStop()
   }
+  // Without Prism, Play and Install are how the player gets it.
+  const getPrism = () => (release ? setOffering(true) : onOpenPrismSite())
   const gameRows = gameLine(game, chapter.name)
   const installShown =
     install !== null &&
@@ -260,29 +259,20 @@ export function ActionBar({
         ) : needsInstall || foreign ? (
           <Button
             variant="play"
-            onClick={foreign ? onReinstall : onInstall}
-            disabled={!published || installing || missing || working}
+            onClick={missing ? getPrism : foreign ? onReinstall : onInstall}
+            disabled={!published || installing || working}
           >
             <Icon icon={Download} size="sm" />
             <span>{foreign ? 'Reinstall' : installLabel(chapter)}</span>
           </Button>
         ) : (
-          <Button variant="play" onClick={onPlay} disabled={installing || missing || working}>
+          <Button
+            variant="play"
+            onClick={missing ? getPrism : onPlay}
+            disabled={installing || working}
+          >
             <Icon icon={Play} size="sm" className="fill-current" />
             <span>{playLabel(chapter, joinServer)}</span>
-          </Button>
-        )}
-        {missing && (
-          <Button
-            onClick={() => (release ? setOffering(true) : onOpenPrismSite())}
-            // Not disabled while the popup is open: the popup covers it, and a
-            // disabled button loses the focus the popup gives back on close.
-            disabled={working}
-          >
-            <StableLabel
-              current={install?.phase === 'failed' ? 'Try again' : 'Get Prism Launcher'}
-              labels={GET_PRISM_LABELS}
-            />
           </Button>
         )}
         {beside && (
@@ -315,14 +305,12 @@ export function ActionBar({
           )}
         </div>
       </div>
-      {missing && offering && release && !working && (
+      {offering && release && (
         <Suspense fallback={null}>
           <GetPrism
             release={release}
-            onConfirm={() => {
-              setOffering(false)
-              onGetPrism()
-            }}
+            install={install}
+            onConfirm={onGetPrism}
             onCancel={() => setOffering(false)}
             onOpenReleasePage={onOpenReleasePage}
             onOpenPrismSite={onOpenPrismSite}

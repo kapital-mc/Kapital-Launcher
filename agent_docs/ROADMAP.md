@@ -108,6 +108,9 @@ What is left:
 - [x] Frangfurd's real address (`rails-enjoyed.tun.ply.gg`, 2026-09-29), with the
       ping following the host's SRV record for the port
 - [ ] Lichdenstein's real address
+- [x] Frangfurd's Tailscale address (`ts.frangfurd.click`), behind a switch per
+      chapter that also keeps the in-game server list in step, and Get Tailscale
+      on approval (ADR-14, 2026-10-18)
 - [ ] Show the MOTD and the player sample somewhere the reference has room for
 - [ ] Drop the per-minute "connection refused" log line to debug once the
       addresses are real

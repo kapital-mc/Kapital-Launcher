@@ -131,3 +131,14 @@ again as an install does, Team ID included. A copy that no longer verifies is
 offered the latest release as a repair, which installs into its own folder as
 any update does. `managed.json` is not rewritten: its version is the program
 folder's name.
+
+## Amendment, 2026-10-18: the offer is a popup
+
+The offer opened as a card inline with the action bar and moved the chapter
+card (author's report, 2026-10-18). It is now a popup over the window, shared
+with Get Tailscale (ADR-14, `shell/InstallPopup`), and stays through the
+install: the offer, the bar and the step, then the next step or the error.
+Play, Install and Reinstall without a Prism open it; there is no separate
+Get Prism button. Closing it while the download runs only hides it, and the
+sidebar's downloads section, above the account tile, keeps the bar. What is
+asked and verified is unchanged.
