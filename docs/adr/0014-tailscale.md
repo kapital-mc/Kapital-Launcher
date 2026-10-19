@@ -92,3 +92,35 @@ would name `localhost` rather than the server.
 - To check on a real machine: `/passive` with `TS_NOLAUNCH`, the Windows CLI
   and tray app paths, the macOS CLI through `TAILSCALE_BE_CLI`, and catching
   the sign-in address. Each is marked `[verify]` in the code.
+
+## Amendment, 2026-10-19: Install, Connect, then the switch
+
+The author asked (2026-10-19) for the row to be the next step rather than a
+switch with a line under it: **Install** while Tailscale is missing,
+**Connect** while it does not reach the server, and the switch only once it
+does. The hover line on the Tailscale choice under Address is gone.
+
+- **Reaching the server is seen, not assumed.** `TailscaleInfo.connected`
+  lists the chapters whose Tailscale address is one of this machine's peers:
+  Go resolves the address's host and compares it with each peer's
+  `TailscaleIPs` in `tailscale status --json`. A machine shared with the
+  player shows up as a peer once they accept the link. Tailscale's sharing
+  page (read 2026-10-19) says a shared machine "will typically" keep its
+  address in the recipient's tailnet; when it does not, `ts.frangfurd.click`
+  does not reach it either, and the row rightly stays on Connect.
+- **Connect is one button for every step between.** `ConnectTailscale` opens
+  Tailscale when it is not running, signs in when it needs to and then opens
+  the share link, and opens the link when signed in. The link is the
+  manifest's `invite` (ADR-4 amendment 2026-10-19). Go watches until every
+  chapter with a Tailscale address is reached.
+- **The share link is public.** It ships in the launcher, so it has to be a
+  reusable link (Tailscale allows up to 1,000 uses) and anyone with the app
+  can use it. Sharing quarantines the machine (it takes connections and
+  starts none), and the author's tailnet policy can limit
+  `autogroup:shared` to the Minecraft port; that is the author's to set.
+  Changing the link needs a launcher release until the wiki publishes the
+  manifest (ADR-4).
+- **Previews.** The Developer section groups its previews as Launcher, Prism
+  and Instance, as links. Launcher holds the launcher's update and four
+  Tailscale situations (not installed, the install failing, not connected,
+  connected), which open the first Tailscale chapter's settings page.

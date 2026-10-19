@@ -1,9 +1,11 @@
 package models
 
-// The two places a preview applies to: one chapter's screens, or Prism's.
+// The places a preview applies to: one chapter's screens, Prism's, or the
+// launcher's own (its update, the player's Tailscale).
 const (
-	PreviewScopeChapter = "chapter"
-	PreviewScopePrism   = "prism"
+	PreviewScopeChapter  = "chapter"
+	PreviewScopePrism    = "prism"
+	PreviewScopeLauncher = "launcher"
 )
 
 // PreviewSituation is one situation the Developer section can fake (#124): a
@@ -14,14 +16,19 @@ type PreviewSituation struct {
 	ID string `json:"id"`
 	// Label is the button's text.
 	Label string `json:"label"`
-	// Scope is PreviewScopeChapter or PreviewScopePrism.
+	// Scope is PreviewScopeChapter, PreviewScopePrism or PreviewScopeLauncher.
 	Scope string `json:"scope"`
 	// Card is whether the situation opens the loading card, which needs the
 	// loading splash to be on.
 	Card bool `json:"card"`
-	// PlaysInstall is whether the view then runs the Prism install, whose
-	// progress and failure are the situation.
+	// PlaysInstall is whether the view then runs the install of its scope
+	// (Prism's, or the launcher's one: Tailscale), whose progress and failure
+	// are the situation.
 	PlaysInstall bool `json:"playsInstall"`
+	// Page is the chapter page the screen is on, "" for the main screen: the
+	// Tailscale situations are "settings", the settings page of the first
+	// chapter whose server has a Tailscale address, where its row is.
+	Page string `json:"page,omitempty"`
 }
 
 // PreviewStart is what StartPreview says happened.

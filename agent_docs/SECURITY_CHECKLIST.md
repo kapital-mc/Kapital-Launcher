@@ -138,11 +138,18 @@ chapter's optional `map` (issue 161, ADR-4's third amendment): a playit tunnel
 serves BlueMap without TLS, so `checkMapURL` takes http or https on a host of
 labels under `tun.ply.gg`, with an explicit port from 1 to 65535, lowercase, and
 nothing after it but an optional slash (no user info, query, fragment or path).
-Anything else is refused whole, and the exception reaches no other field.
+Anything else is refused whole, and the exception reaches no other field. A
+server's Tailscale address may carry an `invite` (ADR-14 amendment
+2026-10-19), held by the schema and `validateTailscaleAddress` to the whole of
+`https://login.tailscale.com/admin/invite/<8 to 64 letters or digits>` and
+only on the Tailscale address; Connect opens it in the browser and nothing else.
 Verify: `TestValidateManifestRefuses`, `TestChapterMapAcceptsOnlyATunnelWithAPort`,
-`TestParseManifestRefusesABadMapAndAcceptsNoneOrNull`.
+`TestParseManifestRefusesABadMapAndAcceptsNoneOrNull`,
+`TestValidateServerHoldsTheInviteToTailscalesShape`.
 Probe: a URL with credentials, an `http://` scheme off the tunnel family, a
-lookalike host (`x.tun.ply.gg.evil.example`), a missing port, `javascript:`.
+lookalike host (`x.tun.ply.gg.evil.example`), a missing port, `javascript:`;
+an invite on `login.tailscale.com.evil.example`, with a query, or on the
+public address.
 
 **S2.3 A remote manifest is fetched, verified and cached, never executed.**
 Not yet built (milestone 5). Holds when: fetched over https from the site only,
@@ -797,12 +804,17 @@ runs at a time. (g) Sign-in runs `tailscale login` and opens only a whole
 word of its output that is `https://login.tailscale.com/a/<key>` with a plain
 key and no user info, query or fragment, the first it prints; the
 address is never logged, and the run ends after 10 minutes. (h) Only
-`BackendState` and `Version` are read from `tailscale status --json` (4 MiB
-cap); peers, users and addresses are never kept or logged.
+`BackendState`, `Version` and each peer's `TailscaleIPs` are read from
+`tailscale status --json` (4 MiB cap); the addresses are compared with the
+resolved Tailscale address of each chapter (2 s a lookup) for
+`TailscaleInfo.connected` and dropped with the look, never kept or logged, and
+names, users and keys are not read. (i) Under a Tailscale preview no CLI runs,
+nothing is downloaded, no page opens and a switch is refused unsaved.
 Verify: `TestTailscaleLatestPicksThisOSsInstaller`,
 `TestTailscaleLatestRefusesAnOddIndex`, `TestTailscaleInstallVerifiesThenRuns`,
 `TestTailscaleInstallRefusesAMismatch`, `TestOpenLoginURLOpensOnlyTailscalesPage`,
-`TestTailscaleDetectReadsTheBackendState`.
+`TestTailscaleDetectReadsTheBackendState`, `TestDetectHandsOverThePeersOnlyWhileRunning`,
+`TestTailscaleConnectedComparesTheResolvedAddress`, `TestTailscalePreviewsAnswerForTheCLI`.
 Probe: an index naming `../x.pkg` or a file on another host; a `.sha256` that
 does not match; a login line naming `https://login.tailscale.com.evil.example/a/x`
 or `https://user@login.tailscale.com/a/x`.

@@ -78,18 +78,18 @@ func TestTailscaleDetectReadsTheBackendState(t *testing.T) {
 			}
 			return []byte(tc.out), tc.err
 		})
-		info := cli.Detect(context.Background())
+		info, _ := cli.Detect(context.Background())
 		if info.State != tc.state {
 			t.Errorf("%s: state %q want %q", name, info.State, tc.state)
 		}
 	}
-	running := fakeCLI("linux", nil, "/usr/bin/tailscale", func(...string) ([]byte, error) {
+	running, _ := fakeCLI("linux", nil, "/usr/bin/tailscale", func(...string) ([]byte, error) {
 		return []byte(`{"BackendState":"Running","Version":"1.104.1-t123-g456"}`), nil
 	}).Detect(context.Background())
 	if running.Version != "1.104.1" {
 		t.Errorf("version %q", running.Version)
 	}
-	stopped := fakeCLI("linux", nil, "/usr/bin/tailscale", func(args ...string) ([]byte, error) {
+	stopped, _ := fakeCLI("linux", nil, "/usr/bin/tailscale", func(args ...string) ([]byte, error) {
 		if args[0] == "version" {
 			return []byte("1.100.0\n"), nil
 		}
@@ -98,7 +98,7 @@ func TestTailscaleDetectReadsTheBackendState(t *testing.T) {
 	if stopped.Version != "1.100.0" {
 		t.Errorf("stopped version %q", stopped.Version)
 	}
-	missing := fakeCLI("windows", nil, "", nil).Detect(context.Background())
+	missing, _ := fakeCLI("windows", nil, "", nil).Detect(context.Background())
 	if missing.State != TailscaleMissing || !missing.CanInstall {
 		t.Errorf("missing: %+v", missing)
 	}

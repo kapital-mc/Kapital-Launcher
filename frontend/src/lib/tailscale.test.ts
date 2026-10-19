@@ -1,34 +1,25 @@
 import { describe, expect, it } from 'vitest'
-import { tailscaleAction, tailscaleHint, tailscaleStepLine } from './tailscale'
+import { tailscaleStep, tailscaleStepLine } from './tailscale'
 import type { TailscaleInfo } from '../types/tailscale'
 
-const info = (state: string, signingIn = false): TailscaleInfo => ({
+const info = (state: string, connected: string[] = []): TailscaleInfo => ({
   state,
   version: '1.104.1',
   canInstall: true,
-  signingIn,
+  signingIn: false,
+  connected,
 })
 
 describe('Tailscale lines', () => {
-  it('names the next step for each state', () => {
-    expect(tailscaleAction(null)).toBeNull()
-    expect(tailscaleAction(info('missing'))).toBe('get')
-    expect(tailscaleAction(info('stopped'))).toBe('open')
-    expect(tailscaleAction(info('needsLogin'))).toBe('signIn')
-    expect(tailscaleAction(info('needsLogin', true))).toBeNull()
-    expect(tailscaleAction(info('running'))).toBeNull()
-    expect(tailscaleAction(info('needsApproval'))).toBeNull()
-  })
-
-  it('says where Tailscale stands under the switch', () => {
-    expect(tailscaleHint(null, false)).toBe('Checking Tailscale')
-    expect(tailscaleHint(info('missing'), false)).toContain('not installed')
-    expect(tailscaleHint(info('running'), true)).toBe('Connected · in the in-game server list')
-    expect(tailscaleHint(info('running'), false)).toContain('adds the server')
-    expect(tailscaleHint(info('needsLogin', true), false)).toContain('browser')
+  it('offers Install, Connect or the switch', () => {
+    expect(tailscaleStep(null, 'frangfurd')).toBeNull()
+    expect(tailscaleStep(info('missing'), 'frangfurd')).toBe('install')
     for (const s of ['stopped', 'starting', 'needsLogin', 'needsApproval', 'odd']) {
-      expect(tailscaleHint(info(s), false)).not.toBe('')
+      expect(tailscaleStep(info(s), 'frangfurd')).toBe('connect')
     }
+    expect(tailscaleStep(info('running'), 'frangfurd')).toBe('connect')
+    expect(tailscaleStep(info('running', ['lichdenstein']), 'frangfurd')).toBe('connect')
+    expect(tailscaleStep(info('running', ['frangfurd']), 'frangfurd')).toBe('ready')
   })
 
   it('describes each install step', () => {

@@ -447,7 +447,7 @@ func (a *App) SaveSettings(settings models.AppSettings) error {
 	if err := services.ValidateJoinServers(a.manifest.Chapters, settings.JoinServers); err != nil {
 		return err
 	}
-	if err := a.checkTailscaleSave(&settings); err != nil {
+	if err := a.checkTailscaleSave(before, &settings); err != nil {
 		return err
 	}
 	// The list of disabled mods is written only by SetModsDisabled, which checks

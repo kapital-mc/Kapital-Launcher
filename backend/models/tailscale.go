@@ -2,7 +2,8 @@ package models
 
 // TailscaleInfo is what the launcher knows of the player's Tailscale, from its
 // own command line (services.Tailscale). Nothing about the account or the
-// tailnet is read: only whether Tailscale is there and connected.
+// tailnet is kept: only whether Tailscale is there, and which chapters' servers
+// it reaches.
 type TailscaleInfo struct {
 	// State is "missing" (not installed), "stopped" (installed, not running
 	// or switched off), "needsLogin" (running, not signed in) or "running".
@@ -15,6 +16,10 @@ type TailscaleInfo struct {
 	// SigningIn is whether a sign-in started from the launcher is waiting on
 	// the browser.
 	SigningIn bool `json:"signingIn"`
+	// Connected is the chapters whose Tailscale address this machine reaches:
+	// Tailscale is running and the player accepted the server's share link.
+	// Empty, never null, while it is not running.
+	Connected []string `json:"connected"`
 }
 
 // TailscaleRelease is the Tailscale installer the launcher would download, as

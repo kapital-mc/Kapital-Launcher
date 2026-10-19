@@ -332,7 +332,11 @@ Tailscale (`tailscale*.go`, `serverlist.go`, `nbt.go`, `app_tailscale.go`,
 ADR-14, SECURITY_CHECKLIST S3.12 and S4.11) is found, never bundled: its CLI
 at the official app's paths, then PATH (`TailscaleCLI`, injected like Prism's
 detection), run with `TAILSCALE_BE_CLI=1` for `status --json` (only
-`BackendState` and `Version` read), `version` and `login`. `login`'s first
+`BackendState`, `Version` and the peers' `TailscaleIPs` read; the addresses
+are compared with each chapter's resolved Tailscale address in
+`tailscalepeers.go` and dropped, never logged), `version` and `login`.
+`ConnectTailscale` is the row's one button between Install and the switch: it
+opens Tailscale, signs in, or opens the manifest's `invite`, whichever is due. `login`'s first
 `https://login.tailscale.com` address is opened in the browser and never
 logged. On approval `TailscaleInstaller` downloads this OS's package from
 `pkgs.tailscale.com` alone, checked against the published SHA-256 (and on

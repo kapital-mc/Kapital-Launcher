@@ -2,17 +2,26 @@ package services
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
 
 	"kapital/backend/models"
 )
 
-// validateTailscaleAddress holds a server's Tailscale address to its two
-// rules: at most one, and never the first. The first is the default every
-// player gets, and a player without Tailscale cannot reach a tailnet address.
+// tailscaleInvite is the one shape a Tailscale share link may have: the whole
+// string, so nothing can come before or after it.
+var tailscaleInvite = regexp.MustCompile(`^https://login\.tailscale\.com/admin/invite/[A-Za-z0-9]{8,64}$`)
+
+// validateTailscaleAddress holds a server's Tailscale address to its rules: at
+// most one, and never the first. The first is the default every player gets,
+// and a player without Tailscale cannot reach a tailnet address. A share link
+// belongs to the Tailscale address alone and has Tailscale's own shape.
 func validateTailscaleAddress(where string, s *models.Server) error {
 	n := 0
 	for i, a := range s.Addresses {
+		if a.Invite != "" && (!a.Tailscale || !tailscaleInvite.MatchString(a.Invite)) {
+			return fmt.Errorf("%s: server: %q: an invite is a Tailscale share link on the Tailscale address", where, a.Label)
+		}
 		if !a.Tailscale {
 			continue
 		}

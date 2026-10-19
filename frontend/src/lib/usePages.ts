@@ -45,11 +45,14 @@ export function usePages(selectedId: string, select: (chapterId: string) => void
     if (openPage?.chapterId !== selectedId) hideChapterPage()
   }, [openPage, selectedId, hideChapterPage])
 
-  const showChapter = (chapterId: string) => {
+  // Brings the chapter up with every page closed, or with one of its own
+  // pages open: a preview of the Tailscale row lands on its settings.
+  const showChapter = (chapterId: string, kind?: ChapterPageSpec['kind']) => {
     select(chapterId)
     hideSettings()
     hideAccount()
     hideChapterPage()
+    if (kind) showChapterPage({ kind, chapterId })
   }
   const showPage = (kind: ChapterPageSpec['kind']) => (chapterId: string) =>
     showChapterPage({ kind, chapterId })
@@ -77,10 +80,7 @@ export function usePages(selectedId: string, select: (chapterId: string) => void
       showAccount(true)
     },
     showChapter,
-    openReport: (chapterId: string) => {
-      showChapter(chapterId)
-      showChapterPage({ kind: 'report', chapterId })
-    },
+    openReport: (chapterId: string) => showChapter(chapterId, 'report'),
     openChapterSettings: showPage('settings'),
     openLogs: showPage('logs'),
     openMap: showPage('map'),

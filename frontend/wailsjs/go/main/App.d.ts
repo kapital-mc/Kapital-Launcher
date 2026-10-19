@@ -12,6 +12,8 @@ export function ChoosePrismRoot():Promise<string>;
 
 export function ClearPreviews():Promise<void>;
 
+export function ConnectTailscale(arg1:string):Promise<void>;
+
 export function CopyPlayerUUID():Promise<void>;
 
 export function CopyRedactedLog():Promise<number>;
@@ -111,8 +113,6 @@ export function ShowInstanceInPrism(arg1:string):Promise<void>;
 export function ShowPrismConsole(arg1:string):Promise<boolean>;
 
 export function ShowStashedInstance(arg1:string):Promise<void>;
-
-export function SignInTailscale():Promise<void>;
 
 export function StartPreview(arg1:string,arg2:string):Promise<models.PreviewStart>;
 

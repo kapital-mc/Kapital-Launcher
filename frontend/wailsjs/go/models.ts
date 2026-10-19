@@ -84,6 +84,7 @@ export namespace models {
 	    label: string;
 	    address: string;
 	    tailscale?: boolean;
+	    invite?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ServerAddress(source);
@@ -94,6 +95,7 @@ export namespace models {
 	        this.label = source["label"];
 	        this.address = source["address"];
 	        this.tailscale = source["tailscale"];
+	        this.invite = source["invite"];
 	    }
 	}
 	export class Server {
@@ -702,6 +704,7 @@ export namespace models {
 	    scope: string;
 	    card: boolean;
 	    playsInstall: boolean;
+	    page?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new PreviewSituation(source);
@@ -714,6 +717,7 @@ export namespace models {
 	        this.scope = source["scope"];
 	        this.card = source["card"];
 	        this.playsInstall = source["playsInstall"];
+	        this.page = source["page"];
 	    }
 	}
 	export class PreviewStart {
@@ -909,6 +913,7 @@ export namespace models {
 	    version: string;
 	    canInstall: boolean;
 	    signingIn: boolean;
+	    connected: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new TailscaleInfo(source);
@@ -920,6 +925,7 @@ export namespace models {
 	        this.version = source["version"];
 	        this.canInstall = source["canInstall"];
 	        this.signingIn = source["signingIn"];
+	        this.connected = source["connected"];
 	    }
 	}
 	export class TailscaleRelease {

@@ -100,6 +100,10 @@ type ServerAddress struct {
 	// only once the player turns the chapter's Tailscale switch on
 	// (AppSettings.TailscaleServers).
 	Tailscale bool `json:"tailscale,omitempty"`
+	// Invite is the Tailscale share link that gives a player access to the
+	// server's machine (https://login.tailscale.com/admin/invite/<code>), for a
+	// Tailscale address only. Connect opens it in the browser.
+	Invite string `json:"invite,omitempty"`
 }
 
 // WikiTeaser is the "From the wiki" panel: a title, one line, and where to read on.

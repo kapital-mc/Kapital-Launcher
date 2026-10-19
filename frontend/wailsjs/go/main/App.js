@@ -22,6 +22,10 @@ export function ClearPreviews() {
   return window['go']['main']['App']['ClearPreviews']();
 }
 
+export function ConnectTailscale(arg1) {
+  return window['go']['main']['App']['ConnectTailscale'](arg1);
+}
+
 export function CopyPlayerUUID() {
   return window['go']['main']['App']['CopyPlayerUUID']();
 }
@@ -220,10 +224,6 @@ export function ShowPrismConsole(arg1) {
 
 export function ShowStashedInstance(arg1) {
   return window['go']['main']['App']['ShowStashedInstance'](arg1);
-}
-
-export function SignInTailscale() {
-  return window['go']['main']['App']['SignInTailscale']();
 }
 
 export function StartPreview(arg1, arg2) {

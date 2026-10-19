@@ -8,6 +8,8 @@ export interface TailscaleInfo {
   canInstall: boolean
   /** A sign-in the launcher started is waiting on the browser. */
   signingIn: boolean
+  /** The chapters whose Tailscale address this machine reaches: the share link was accepted. */
+  connected: string[]
 }
 
 /** The installer InstallTailscale would download, from Tailscale's package server. */

@@ -307,12 +307,17 @@ export interface PackChangelog {
 export interface PreviewSituation {
   id: string
   label: string
-  /** A chapter's own screens, or Prism's. */
-  scope: 'chapter' | 'prism'
+  /** A chapter's own screens, Prism's, or the launcher's (its update, the player's Tailscale). */
+  scope: 'chapter' | 'prism' | 'launcher'
   /** Whether it opens the loading card, which needs the loading splash on. */
   card: boolean
-  /** Whether the view then runs the Prism install, whose progress and failure are the situation. */
+  /**
+   * Whether the view then runs its scope's install (Prism's, or the launcher's one:
+   * Tailscale), whose progress and failure are the situation.
+   */
   playsInstall: boolean
+  /** The chapter page its screen is on; "settings" is that of the first chapter with a Tailscale address. */
+  page?: 'settings'
 }
 
 /** What StartPreview says happened. */

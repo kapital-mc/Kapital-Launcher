@@ -131,6 +131,11 @@
                       "tailscale": {
                         "type": "boolean",
                         "description": "The address is reached only through Tailscale. At most one per chapter and never the first: the player turns it on in the chapter's settings, which also adds it to the in-game server list."
+                      },
+                      "invite": {
+                        "type": "string",
+                        "pattern": "^https://login\\.tailscale\\.com/admin/invite/[A-Za-z0-9]{8,64}$",
+                        "description": "The Tailscale share link for the server's machine, on a Tailscale address only. Connect opens it in the browser so the player can accept it."
                       }
                     }
                   }

@@ -42,7 +42,7 @@ func TestBundledManifestIsValid(t *testing.T) {
 	}
 	// Frangfurd's two public addresses, Global the default, then its
 	// Tailscale one; Lichdenstein's one (issue 151).
-	tail := models.ServerAddress{Label: "Tailscale", Address: "ts.frangfurd.click", Tailscale: true}
+	tail := models.ServerAddress{Label: "Tailscale", Address: "ts.frangfurd.click", Tailscale: true, Invite: "https://login.tailscale.com/admin/invite/ALNcG9hKCCNaCrtn659n11"}
 	if got := fra.Server.Addresses; len(got) != 3 || got[0] != addr("Global", "female-specified.gl.joinmc.link") || got[1] != addr("Germany", "rails-enjoyed.tun.ply.gg") || got[2] != tail {
 		t.Errorf("Frangfurd's addresses: %+v", got)
 	}

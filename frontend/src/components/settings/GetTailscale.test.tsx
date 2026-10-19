@@ -16,7 +16,7 @@ function popup(
   info: TailscaleInfo | null,
   platform = 'darwin',
 ) {
-  const calls = { onConfirm: vi.fn(), onClose: vi.fn(), onSignIn: vi.fn(), onOpen: vi.fn() }
+  const calls = { onConfirm: vi.fn(), onClose: vi.fn(), onConnect: vi.fn() }
   render(
     <GetTailscale release={release} install={install} info={info} platform={platform} {...calls} />,
   )
@@ -24,11 +24,12 @@ function popup(
 }
 
 const done = { phase: 'done', received: 0, total: 0, error: '' }
-const info = (state: string): TailscaleInfo => ({
+const info = (state: string, connected: string[] = []): TailscaleInfo => ({
   state,
   version: '',
   canInstall: true,
   signingIn: false,
+  connected,
 })
 
 describe('GetTailscale', () => {
@@ -53,15 +54,13 @@ describe('GetTailscale', () => {
   })
 
   it('offers the next step once installed', () => {
-    let calls = popup(done, info('needsLogin'))
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
-    expect(calls.onSignIn).toHaveBeenCalledOnce()
-    cleanup()
-    calls = popup(done, info('stopped'))
-    fireEvent.click(screen.getByRole('button', { name: 'Open Tailscale' }))
-    expect(calls.onOpen).toHaveBeenCalledOnce()
-    cleanup()
-    popup(done, info('running'))
+    for (const state of ['needsLogin', 'stopped', 'running']) {
+      const calls = popup(done, info(state))
+      fireEvent.click(screen.getByRole('button', { name: 'Connect' }))
+      expect(calls.onConnect).toHaveBeenCalledOnce()
+      cleanup()
+    }
+    popup(done, info('running', ['frangfurd']))
     expect(screen.getByRole('dialog')).toHaveTextContent('Tailscale is connected')
     cleanup()
     popup(done, { ...info('needsLogin'), signingIn: true })

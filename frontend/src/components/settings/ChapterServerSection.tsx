@@ -32,7 +32,8 @@ type Field = 'address' | 'join' | 'tailscale'
  * whose pack has Distant Horizons gets the world data card under it (issue 136).
  *
  * A server with a Tailscale address offers it under Address too, greyed out
- * until the Tailscale switch below Address is on (TailscaleRow). Turning the
+ * until the Tailscale switch below Address is on (TailscaleRow), which itself
+ * shows only once Tailscale is installed and reaches the server. Turning the
  * switch off moves a chapter that had picked it back to its first address.
  */
 export function ChapterServerSection({ chapter }: Props) {
@@ -69,7 +70,6 @@ export function ChapterServerSection({ chapter }: Props) {
               value: a.label,
               label: a.label,
               disabled: a.tailscale === true && !tailscaleOn,
-              title: a.tailscale && !tailscaleOn ? 'Turn on Tailscale below first' : undefined,
             }))}
             error={errors.address}
             onChange={(next) =>
@@ -86,6 +86,7 @@ export function ChapterServerSection({ chapter }: Props) {
         )}
         {hasTailscale && (
           <TailscaleRow
+            chapterId={chapter.id}
             on={tailscaleOn}
             error={errors.tailscale}
             onChange={(on) =>

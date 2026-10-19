@@ -188,8 +188,10 @@ one, the icon check on the PC is what is left), #35 (decided on 2026-10-01).
   the game's pid at the handover; the card does not know the pid yet. Not
   reproducible on the iMac (macOS 13).
 - **Tailscale (ADR-14).** Who may join the server's tailnet is the author's
-  to grant (an invite, or sharing the machine, which does not work for a
-  tagged one). Still to see on a real PC and the iMac: `/passive` with
+  to grant: the launcher ships the machine's share link (`invite`, which must
+  be a reusable one), and sharing does not work for a tagged machine.
+  Limiting `autogroup:shared` to the Minecraft port in the tailnet policy is
+  the author's to decide. Still to see on a real PC and the iMac: `/passive` with
   `TS_NOLAUNCH`, the Windows CLI and tray app paths, the macOS CLI through
   `TAILSCALE_BE_CLI`, and catching the sign-in address. `[verify]`
 - **Server addresses**: #33. (`joinOnLaunch` is retired: joining is the

@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import type { AppSettings, Chapter } from '../../types'
+import type { ChapterPageSpec } from '../../lib/usePages'
 import { useArtStatsStore } from '../../stores/useArtStatsStore'
 import { useChapterStore } from '../../stores/useChapterStore'
 import { useEngineStore } from '../../stores/useEngineStore'
@@ -46,7 +47,8 @@ const PreviewSection = lazy(() =>
 interface Props {
   onClose: () => void
   /** Brings a chapter up on its main view, closing every page over it. */
-  onShowChapter: (chapterId: string) => void
+  /** Brings a chapter up, with one of its own pages when a preview's screen is there. */
+  onShowChapter: (chapterId: string, page?: ChapterPageSpec['kind']) => void
 }
 
 /** A field name, for filing its error; the pack fields are keyed by chapter. */
@@ -250,7 +252,10 @@ function DeveloperSection({
   save,
   chapters,
   onShowChapter,
-}: SectionProps & { chapters: readonly Chapter[]; onShowChapter: (chapterId: string) => void }) {
+}: SectionProps & {
+  chapters: readonly Chapter[]
+  onShowChapter: (chapterId: string, page?: ChapterPageSpec['kind']) => void
+}) {
   return (
     <SettingsSection title="Developer" icon={Code} collapsible>
       <Hint>
@@ -291,7 +296,7 @@ function DeveloperSection({
  */
 function PreviewFallback() {
   return (
-    <div className="flex min-h-128 flex-col gap-3">
+    <div className="flex min-h-96 flex-col gap-3">
       <SubHeading>Preview</SubHeading>
     </div>
   )

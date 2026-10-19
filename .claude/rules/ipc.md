@@ -62,8 +62,8 @@ step and per MiB while `DownloadDHSnapshot` runs, heard by the terrain store
 (`EVENT_DH_DOWNLOAD`) for the app's lifetime from the sidebar's downloads
 section, the download's outcome still coming from the promise; and
 `tailscale:state` and `tailscale:install` (ADR-14), a `models.TailscaleInfo` on
-each change Go sees while it watches after an install, a sign-in or Open
-Tailscale, and a `models.TailscaleInstallProgress` per step and per MiB while
+each change Go sees while it watches after an install, Connect or Open
+Tailscale (it carries the chapters whose server Tailscale reaches), and a `models.TailscaleInstallProgress` per step and per MiB while
 `InstallTailscale` runs, both heard by the Tailscale store
 (`EVENT_TAILSCALE_STATE`, `EVENT_TAILSCALE_INSTALL`) from the same section.
 

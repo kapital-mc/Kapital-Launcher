@@ -147,3 +147,14 @@ or a first one refuses the manifest whole. It is a flag and runs nothing: the
 address is held to the same `host[:port]` rule as every other. Whether it is
 offered is the player's switch (`tailscaleServers` in settings), never the
 manifest's.
+
+## Amendment, 2026-10-19: a Tailscale address may carry its share link
+
+The Tailscale address may carry **`invite`**: the server's Tailscale share
+link, which Connect opens in the browser for a player whose Tailscale does
+not reach the server yet (ADR-14 amendment 2026-10-19). Only on the Tailscale
+address, and only the whole of
+`https://login.tailscale.com/admin/invite/<8 to 64 letters or digits>`; the
+schema and `services.ValidateManifest` both hold it, and anything else
+refuses the manifest whole. It is a page to open, like the wiki's, and runs
+nothing.

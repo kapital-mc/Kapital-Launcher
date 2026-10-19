@@ -110,25 +110,30 @@ func (t *TailscaleCLI) Exe() string {
 // CanInstall is whether the launcher can get Tailscale on this OS.
 func (t *TailscaleCLI) CanInstall() bool { return t.goos == "windows" || t.goos == "darwin" }
 
-// Detect asks the CLI for Tailscale's state. A CLI that cannot reach its
-// daemon, or answers with something unreadable, is a Tailscale that is not
-// running.
-func (t *TailscaleCLI) Detect(ctx context.Context) models.TailscaleInfo {
+// Detect asks the CLI for Tailscale's state, and the addresses of the
+// machines it reaches, for TailscaleConnected to compare. A CLI that cannot
+// reach its daemon, or answers with something unreadable, is a Tailscale that
+// is not running.
+func (t *TailscaleCLI) Detect(ctx context.Context) (models.TailscaleInfo, TailscalePeers) {
 	info := models.TailscaleInfo{State: TailscaleMissing, CanInstall: t.CanInstall()}
 	exe := t.Exe()
 	if exe == "" {
-		return info
+		return info, nil
 	}
 	ctx, cancel := context.WithTimeout(ctx, tailscaleStatusTimeout)
 	defer cancel()
 	// `status` exits non-zero when Tailscale is stopped but still prints its
 	// JSON, so the output is read whatever the exit.
 	out, err := t.run(ctx, exe, "status", "--json")
-	info.State, info.Version = parseTailscaleStatus(out)
+	var peers TailscalePeers
+	info.State, info.Version, peers = parseTailscaleStatus(out)
 	if info.State == TailscaleStopped && err != nil {
 		info.Version = t.version(ctx, exe)
 	}
-	return info
+	if info.State != TailscaleRunning {
+		peers = nil
+	}
+	return info, peers
 }
 
 // version is `tailscale version`'s first line, for a Tailscale whose status
@@ -142,32 +147,34 @@ func (t *TailscaleCLI) version(ctx context.Context, exe string) string {
 	return shortTailscaleVersion(first)
 }
 
-// parseTailscaleStatus reads the two fields of `tailscale status --json` the
-// launcher uses: BackendState and Version. Everything else (peers, users,
-// addresses) is ignored and never kept.
-func parseTailscaleStatus(out []byte) (state, version string) {
+// parseTailscaleStatus reads what the launcher uses of `tailscale status
+// --json`: BackendState, Version and each peer's TailscaleIPs. Everything else
+// (names, users, keys, routes) is ignored, and the addresses are only compared
+// (TailscaleConnected), never kept past the look or logged.
+func parseTailscaleStatus(out []byte) (state, version string, peers TailscalePeers) {
 	if len(out) > maxTailscaleStatus {
-		return TailscaleStopped, ""
+		return TailscaleStopped, "", nil
 	}
 	var doc struct {
 		BackendState string
 		Version      string
+		Peer         map[string]struct{ TailscaleIPs []string }
 	}
 	if json.Unmarshal(out, &doc) != nil {
-		return TailscaleStopped, ""
+		return TailscaleStopped, "", nil
 	}
 	version = shortTailscaleVersion(doc.Version)
 	switch doc.BackendState {
 	case "Running":
-		return TailscaleRunning, version
+		return TailscaleRunning, version, newTailscalePeers(doc.Peer)
 	case "NeedsLogin":
-		return TailscaleNeedsLogin, version
+		return TailscaleNeedsLogin, version, nil
 	case "NeedsMachineAuth":
-		return TailscaleNeedsApproval, version
+		return TailscaleNeedsApproval, version, nil
 	case "Starting":
-		return TailscaleStarting, version
+		return TailscaleStarting, version, nil
 	}
-	return TailscaleStopped, version
+	return TailscaleStopped, version, nil
 }
 
 // shortTailscaleVersion drops the build suffix: "1.104.1-t1234-g5678" is "1.104.1".

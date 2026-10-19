@@ -82,3 +82,30 @@ func TestDropTailscaleChoicesWhenTheSwitchIsOff(t *testing.T) {
 		t.Errorf("another choice: %v", got)
 	}
 }
+
+func TestValidateServerHoldsTheInviteToTailscalesShape(t *testing.T) {
+	good := "https://login.tailscale.com/admin/invite/ALNcG9hKCCNaCrtn659n11"
+	c := withTailscale()
+	c.Server.Addresses[1].Invite = good
+	if err := validateServer("c", c.Server); err != nil {
+		t.Errorf("a valid invite: %v", err)
+	}
+	for _, bad := range []string{
+		"http://login.tailscale.com/admin/invite/ALNcG9hKCCNaCrtn659n11",
+		"https://login.tailscale.com.evil.example/admin/invite/ALNcG9hKCCNaCrtn659n11",
+		good + "?next=https://evil.example",
+		good + "\nhttps://evil.example",
+		"https://evil.example/" + good,
+	} {
+		c := withTailscale()
+		c.Server.Addresses[1].Invite = bad
+		if err := validateServer("c", c.Server); err == nil {
+			t.Errorf("%q: accepted", bad)
+		}
+	}
+	public := withTailscale()
+	public.Server.Addresses[0].Invite = good
+	if err := validateServer("c", public.Server); err == nil {
+		t.Error("an invite on the public address: accepted")
+	}
+}

@@ -40,9 +40,10 @@ describe('The Server section of a chapter settings page', () => {
       'Germany',
       'Tailscale',
     ])
-    // Tailscale is shown but held until its switch is on.
+    // Tailscale is shown but held until its switch is on, and the switch
+    // waits for Tailscale's first look.
     expect(screen.getByRole('radio', { name: 'Tailscale' })).toBeDisabled()
-    expect(screen.getByRole('switch', { name: 'Tailscale' })).not.toBeChecked()
+    expect(screen.queryByRole('switch', { name: 'Tailscale' })).toBeNull()
     // The default, the first, is on until the player picks.
     expect(screen.getByRole('radio', { name: 'Global' })).toBeChecked()
     expect(screen.getByRole('radio', { name: 'Germany' })).not.toBeChecked()
@@ -165,27 +166,28 @@ describe('The Server section of a chapter settings page', () => {
     expect(screen.queryByText('World data')).toBeNull()
   })
 
-  const tailscale = (state: string): TailscaleInfo => ({
+  const tailscale = (state: string, connected: string[] = []): TailscaleInfo => ({
     state,
     version: '1.104.1',
     canInstall: true,
     signingIn: false,
+    connected,
   })
 
   it('offers the Tailscale address once its switch is on, and saves it by chapter id', async () => {
-    vi.mocked(App.GetTailscale).mockResolvedValue(tailscale('running'))
+    vi.mocked(App.GetTailscale).mockResolvedValue(tailscale('running', ['frangfurd']))
     useSettingsStore.setState({
       settings: { ...DEFAULT_SETTINGS, joinServers: [], tailscaleServers: ['lichdenstein'] },
     })
     render(<ChapterServerSection chapter={frangfurd} />)
-    await waitFor(() => expect(screen.getByText(/Connected/)).toBeInTheDocument())
-    fireEvent.click(screen.getByRole('switch', { name: 'Tailscale' }))
+    fireEvent.click(await screen.findByRole('switch', { name: 'Tailscale' }))
     await waitFor(() =>
       expect(App.SaveSettings).toHaveBeenCalledWith(
         expect.objectContaining({ tailscaleServers: ['lichdenstein', 'frangfurd'] }),
       ),
     )
     expect(screen.getByRole('radio', { name: 'Tailscale' })).toBeEnabled()
+    expect(screen.getByRole('radio', { name: 'Tailscale' })).not.toHaveAttribute('title')
     fireEvent.click(screen.getByRole('radio', { name: 'Tailscale' }))
     await waitFor(() =>
       expect(App.SaveSettings).toHaveBeenLastCalledWith(
@@ -194,7 +196,7 @@ describe('The Server section of a chapter settings page', () => {
     )
   })
 
-  it('opens the install popup when Tailscale is missing, and saves nothing yet', async () => {
+  it('offers Install while Tailscale is missing, which opens the popup and saves nothing', async () => {
     vi.mocked(App.GetTailscale).mockResolvedValue(tailscale('missing'))
     vi.mocked(App.GetTailscaleRelease).mockResolvedValue({
       version: '1.104.1',
@@ -204,18 +206,29 @@ describe('The Server section of a chapter settings page', () => {
       digest: 'sha256:00',
     })
     render(<ChapterServerSection chapter={frangfurd} />)
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Get Tailscale' })).toBeEnabled())
     await waitFor(() => expect(useTailscaleStore.getState().release).not.toBeNull())
-    fireEvent.click(screen.getByRole('switch', { name: 'Tailscale' }))
+    expect(screen.queryByRole('switch', { name: 'Tailscale' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Install' }))
     expect(await screen.findByRole('dialog', { name: 'Get Tailscale' })).toBeInTheDocument()
     expect(App.SaveSettings).not.toHaveBeenCalled()
   })
 
-  it('offers Sign in when Tailscale needs it', async () => {
-    vi.mocked(App.GetTailscale).mockResolvedValue(tailscale('needsLogin'))
-    vi.mocked(App.SignInTailscale).mockResolvedValue()
-    render(<ChapterServerSection chapter={frangfurd} />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Sign in' }))
-    await waitFor(() => expect(App.SignInTailscale).toHaveBeenCalled())
+  it('offers Connect until Tailscale reaches this server', async () => {
+    vi.mocked(App.ConnectTailscale).mockResolvedValue()
+    for (const info of [
+      tailscale('needsLogin'),
+      tailscale('stopped'),
+      tailscale('running'),
+      tailscale('running', ['lichdenstein']),
+    ]) {
+      vi.mocked(App.GetTailscale).mockResolvedValue(info)
+      render(<ChapterServerSection chapter={frangfurd} />)
+      fireEvent.click(await screen.findByRole('button', { name: 'Connect' }))
+      expect(screen.queryByRole('switch', { name: 'Tailscale' })).toBeNull()
+      cleanup()
+      useTailscaleStore.setState({ info: null })
+    }
+    await waitFor(() => expect(App.ConnectTailscale).toHaveBeenCalledTimes(4))
+    expect(App.ConnectTailscale).toHaveBeenCalledWith('frangfurd')
   })
 })

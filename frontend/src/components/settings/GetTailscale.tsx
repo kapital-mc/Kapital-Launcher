@@ -17,8 +17,8 @@ interface Props {
   platform: string
   onConfirm: () => void
   onClose: () => void
-  onSignIn: () => void
-  onOpen: () => void
+  /** The next step towards the server: Go opens Tailscale, signs in or opens the share link. */
+  onConnect: () => void
 }
 
 /**
@@ -34,8 +34,7 @@ export function GetTailscale({
   platform,
   onConfirm,
   onClose,
-  onSignIn,
-  onOpen,
+  onConnect,
 }: Props) {
   const mac = platform === 'darwin'
   return (
@@ -53,52 +52,33 @@ export function GetTailscale({
             {mac
               ? 'macOS asks for your password to install it. Tailscale then asks to add a system extension and a VPN configuration: allow both.'
               : 'Windows asks for administrator approval to install it.'}{' '}
-            You sign in once in your browser.
+            Then Connect signs you in and accepts the server&apos;s share link, in your browser.
           </p>
         </>
       }
-      done={<NextStep info={info} onSignIn={onSignIn} onOpen={onOpen} />}
+      done={<NextStep info={info} onConnect={onConnect} />}
       onConfirm={onConfirm}
       onClose={onClose}
     />
   )
 }
 
-/** What the player does after the installer: start Tailscale, sign in, or nothing. */
-function NextStep({
-  info,
-  onSignIn,
-  onOpen,
-}: {
-  info: TailscaleInfo | null
-  onSignIn: () => void
-  onOpen: () => void
-}) {
+/** What the player does after the installer: Connect, or nothing more. */
+function NextStep({ info, onConnect }: { info: TailscaleInfo | null; onConnect: () => void }) {
   if (info?.signingIn) return <p className="m-0">Finish signing in in your browser.</p>
-  switch (info?.state) {
-    case 'running':
-      return <p className="m-0">Tailscale is connected.</p>
-    case 'needsLogin':
-      return (
-        <>
-          <p className="m-0">Tailscale is installed. Sign in to join its network.</p>
-          <div>
-            <Button onClick={onSignIn}>Sign in</Button>
-          </div>
-        </>
-      )
-    case 'missing':
-      return <p className="m-0">Tailscale is not installed yet. Finish its installer first.</p>
-    default:
-      return (
-        <>
-          <p className="m-0">
-            Tailscale is installed. Open it once and allow what it asks for, then sign in.
-          </p>
-          <div>
-            <Button onClick={onOpen}>Open Tailscale</Button>
-          </div>
-        </>
-      )
-  }
+  if (info?.state === 'missing')
+    return <p className="m-0">Tailscale is not installed yet. Finish its installer first.</p>
+  if (info?.state === 'running' && info.connected.length > 0)
+    return <p className="m-0">Tailscale is connected to the server.</p>
+  return (
+    <>
+      <p className="m-0">
+        Tailscale is installed. Connect opens it, signs you in and accepts the server&apos;s share
+        link.
+      </p>
+      <div>
+        <Button onClick={onConnect}>Connect</Button>
+      </div>
+    </>
+  )
 }

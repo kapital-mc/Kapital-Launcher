@@ -2,11 +2,11 @@ import { create } from 'zustand'
 import type { TailscaleInfo, TailscaleInstallProgress, TailscaleRelease } from '../types/tailscale'
 import { errMsg, hasWailsBridge, readOr } from '../lib/ipc'
 import {
+  ConnectTailscale,
   GetTailscale,
   GetTailscaleRelease,
   InstallTailscale,
   OpenTailscale,
-  SignInTailscale,
 } from '../../wailsjs/go/main/App'
 import { EventsOff, EventsOn } from '../../wailsjs/runtime/runtime'
 
@@ -20,8 +20,8 @@ export const TAILSCALE_WORKING = ['downloading', 'verifying', 'installing']
 /**
  * The player's Tailscale: whether it is installed and connected, the installer
  * the launcher would download, and an install in progress. The state is read
- * when the settings page opens; after an install, a sign-in or Open Tailscale
- * Go watches it and emits tailscale:state, so nothing here polls.
+ * when the settings page opens; after an install, a sign-in, Connect or Open
+ * Tailscale Go watches it and emits tailscale:state, so nothing here polls.
  */
 interface TailscaleStore {
   info: TailscaleInfo | null
@@ -32,7 +32,8 @@ interface TailscaleStore {
   loadRelease: () => Promise<void>
   /** A write the player approved; progress arrives as events, the outcome from the promise. */
   installTailscale: () => Promise<void>
-  signIn: () => Promise<void>
+  /** The next step towards reaching the chapter's server; Go picks it, the state follows as events. */
+  connect: (chapterId: string) => Promise<void>
   open: () => Promise<void>
   listen: () => () => void
   receiveInstall: (p: TailscaleInstallProgress) => void
@@ -65,10 +66,10 @@ export const useTailscaleStore = create<TailscaleStore>((set, get) => ({
     }
   },
 
-  signIn: async () => {
+  connect: async (chapterId) => {
     set({ error: null })
     try {
-      await SignInTailscale()
+      await ConnectTailscale(chapterId)
       await get().load()
     } catch (e) {
       set({ error: errMsg(e) })

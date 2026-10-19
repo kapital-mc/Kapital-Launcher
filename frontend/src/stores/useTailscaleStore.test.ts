@@ -11,7 +11,13 @@ import {
 vi.mock('../../wailsjs/go/main/App')
 vi.mock('../../wailsjs/runtime/runtime')
 
-const running = { state: 'running', version: '1.104.1', canInstall: true, signingIn: false }
+const running = {
+  state: 'running',
+  version: '1.104.1',
+  canInstall: true,
+  signingIn: false,
+  connected: ['frangfurd'],
+}
 
 describe('useTailscaleStore', () => {
   beforeEach(() => {
@@ -64,9 +70,10 @@ describe('useTailscaleStore', () => {
     expect(Runtime.EventsOff).toHaveBeenCalledTimes(2)
   })
 
-  it('records a refused sign-in or open', async () => {
-    vi.mocked(App.SignInTailscale).mockRejectedValue(new Error('not installed'))
-    await useTailscaleStore.getState().signIn()
+  it('records a refused Connect or open', async () => {
+    vi.mocked(App.ConnectTailscale).mockRejectedValue(new Error('not installed'))
+    await useTailscaleStore.getState().connect('frangfurd')
+    expect(App.ConnectTailscale).toHaveBeenCalledWith('frangfurd')
     expect(useTailscaleStore.getState().error).toBe('not installed')
     vi.mocked(App.OpenTailscale).mockResolvedValue()
     await useTailscaleStore.getState().open()
