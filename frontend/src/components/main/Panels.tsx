@@ -220,7 +220,7 @@ export function Panels({
   return (
     <section className="grid shrink-0 grid-cols-3">
       <Column title="Pack" label="Pack details" onExpand={expand('pack')}>
-        <FactList facts={facts} />
+        <FactList facts={facts} spread />
       </Column>
       <Column title="Changelog" label="Full changelog" onExpand={expand('changelog')}>
         <div className="flex flex-col gap-3">

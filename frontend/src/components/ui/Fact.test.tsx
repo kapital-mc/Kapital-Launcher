@@ -15,6 +15,11 @@ describe('Fact', () => {
     expect(screen.getByText('1.21.1')).toHaveClass('font-mono')
   })
 
+  it('sets the values at the right edge when spread', () => {
+    const { container } = render(<FactList facts={[{ label: 'Mods', value: '98' }]} spread />)
+    expect(container.querySelector('dl')).toHaveClass('[&_dd]:text-right')
+  })
+
   it('sets a word in the UI face when it is plain', () => {
     render(
       <FactList>
