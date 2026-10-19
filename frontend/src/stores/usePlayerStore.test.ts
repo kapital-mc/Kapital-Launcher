@@ -87,4 +87,23 @@ describe('usePlayerStore', () => {
     Reflect.deleteProperty(window, 'go')
     await expect(usePlayerStore.getState().copyUuid()).rejects.toThrow(/app window/)
   })
+  it("reads the tile's face from Go's cache, and each check keeps it in step", async () => {
+    usePlayerStore.setState({ face: '' })
+    vi.mocked(Bindings.GetCachedPlayerProfile).mockResolvedValue(FOUND)
+    await usePlayerStore.getState().loadFace('Snadrochka')
+    expect(Bindings.GetCachedPlayerProfile).toHaveBeenCalledExactlyOnceWith('Snadrochka')
+    expect(Bindings.GetPlayerProfile).not.toHaveBeenCalled()
+    expect(usePlayerStore.getState().face).toBe(FOUND.faceSrc)
+    // Offline keeps the face; a name Mojang does not know takes it away.
+    vi.mocked(Bindings.GetPlayerProfile).mockResolvedValueOnce({ ...FOUND, status: 'unknown' })
+    await usePlayerStore.getState().check('Snadrochka')
+    expect(usePlayerStore.getState().face).toBe(FOUND.faceSrc)
+    vi.mocked(Bindings.GetPlayerProfile).mockResolvedValueOnce({ ...FOUND, status: 'not_found' })
+    await usePlayerStore.getState().check('Snadrochka')
+    expect(usePlayerStore.getState().face).toBe('')
+    // Leaving the account page empties the profile, not the tile.
+    usePlayerStore.setState({ face: FOUND.faceSrc })
+    usePlayerStore.getState().clear()
+    expect(usePlayerStore.getState().face).toBe(FOUND.faceSrc)
+  })
 })

@@ -20,6 +20,13 @@ func (a *App) GetPlayerProfile(name string) (models.PlayerProfile, error) {
 	return profile, nil
 }
 
+// GetCachedPlayerProfile is what GetPlayerProfile kept for name, read from
+// the cache alone: the sidebar's account tile shows the face from it at start.
+// Nothing is asked of Mojang, so nothing leaves the machine (ADR-13).
+func (a *App) GetCachedPlayerProfile(name string) (models.PlayerProfile, error) {
+	return a.mojang.Cached(name), nil
+}
+
 // CopyPlayerUUID puts the UUID of the profile the latest GetPlayerProfile found
 // on the clipboard. It takes no argument from the page: the value is the one Go
 // holds, so the clipboard only ever gets a UUID Mojang returned.

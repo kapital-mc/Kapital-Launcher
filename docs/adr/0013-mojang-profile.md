@@ -97,3 +97,14 @@ ADR, and that only the profile name leaves the machine.
   ADR is amended.
 - Mojang's endpoints are rate limited. A day's cache and a lookup only on the
   account page keep the launcher far below it, and a refusal is `unknown`.
+
+## Amendment, 2026-10-19: the face on the sidebar's tile
+
+The author asked for the skin on the sidebar's account tile, not only on the
+account page. The tile reads what the account page's last lookup kept
+(`GetCachedPlayerProfile`, `MojangService.Cached`), whatever its age, and never
+asks Mojang: the lookup still runs only on the account page, so nothing more
+leaves the machine and a launch makes no request. Until the page has looked the
+name up once, the tile shows the initials. Each lookup on the page updates the
+tile; a name Mojang does not know takes the face away, and being offline keeps it.
+

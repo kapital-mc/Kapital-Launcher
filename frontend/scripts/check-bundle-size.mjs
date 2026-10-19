@@ -96,7 +96,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 93.7 with main's Tailscale work merged in: the sidebar's lazy Downloads section and
 // its Suspense, and the compact flag passed to it. The section itself still loads
 // after the first paint. Measured 93.52 KB.
-const BUDGET_KB = 93.7
+// 94 the same day: the account tile shows the skin's face from Go's cache, so the player
+// store, which only the lazy account page read before, is in the entry with its new
+// binding and the tile's picture. Measured 93.86 KB.
+const BUDGET_KB = 94
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

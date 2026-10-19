@@ -350,8 +350,8 @@ removes one entry with the manifest's Tailscale address in the instance's
 as read, on a switch and before each Play; a missing list is seeded from the
 pack's `config/defaultoptions/servers.dat`.
 
-The player's profile (`mojang.go`, `app_mojang.go`, `GetPlayerProfile` and
-`CopyPlayerUUID`, issue 193, ADR-13) is the one lookup that sends something about
+The player's profile (`mojang.go`, `app_mojang.go`, `GetPlayerProfile`,
+`GetCachedPlayerProfile` and `CopyPlayerUUID`, issue 193, ADR-13) is the one lookup that sends something about
 the player off the machine: the profile name to `api.mojang.com`, then the UUID
 it returned to `sessionserver.mojang.com`, then a hash it named to
 `textures.minecraft.net` (the skin address is held to that host and shape by
@@ -363,7 +363,9 @@ and one profile at a time. The route `/mojang-face/` (`FaceMiddleware`) is the
 wiki art's twin: GET and HEAD, one name shape, an `os.Root`. Not finding the
 name, being offline or an invalid name is a `models.PlayerProfile` status and
 never an error, and the log carries the status alone, never the name or an
-address (an `error` from `net/http` holds the URL, so none is logged).
+address (an `error` from `net/http` holds the URL, so none is logged). `GetCachedPlayerProfile`
+(`Cached`) reads the kept lookup and face alone, whatever their age, for the
+sidebar's account tile, and asks Mojang nothing.
 
 ## Data shapes
 

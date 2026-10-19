@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { useEngineStore } from '../../stores/useEngineStore'
 import { installLine } from '../../lib/prismInstall'
 import { accountName, profileInitials } from '../../lib/profileName'
 import { useSettingsStore } from '../../stores/useSettingsStore'
+import { usePlayerStore } from '../../stores/usePlayerStore'
 import { IconButton } from '../ui/IconButton'
 import { ErrorLine } from '../ui/Notes'
 import { TextLink } from '../ui/TextLink'
@@ -27,7 +29,8 @@ interface Props {
  * Prism's default account, and nothing more: the Microsoft
  * account itself lives inside Prism and this app never reads it. The account
  * half is a button that opens the account page (issue 192); Re-detect stays a
- * button of its own beside it.
+ * button of its own beside it. The tile is the skin's face once the account
+ * page has looked the name up (ADR-13), read from Go's cache, else the initials.
  *
  * Compact, everything but the initials folds away: the name and Re-detect
  * sideways, the engine lines downwards, and the padding grows by the 2px that
@@ -43,6 +46,14 @@ export function EngineCard({ onOpenAccount, accountOpen = false, compact = false
     accountName(s.settings.profileName, s.settings.playerName),
   )
   const offline = useSettingsStore((s) => s.settings.offline)
+  const loaded = useSettingsStore((s) => s.loaded)
+  const face = usePlayerStore((s) => s.face)
+  const loadFace = usePlayerStore((s) => s.loadFace)
+  // The face that failed to load, so a broken picture falls back to the initials.
+  const [brokenFace, setBrokenFace] = useState<string | null>(null)
+  useEffect(() => {
+    if (loaded) void loadFace(profile)
+  }, [loaded, profile, loadFace])
 
   const name = profile || 'Default profile'
   const initials = profileInitials(name)
@@ -86,9 +97,18 @@ export function EngineCard({ onOpenAccount, accountOpen = false, compact = false
             onClick={() => onOpenAccount?.()}
             className="hover:bg-hover duration-fast ease-standard -m-1.5 flex min-w-0 grow cursor-pointer items-center rounded-md p-1.5 text-left transition-colors disabled:cursor-default disabled:hover:bg-transparent"
           >
-            <span className="bg-hover flex size-8 shrink-0 items-center justify-center rounded-sm font-mono text-xs">
-              {initials || 'KK'}
-            </span>
+            {face && face !== brokenFace ? (
+              <img
+                src={face}
+                alt=""
+                onError={() => setBrokenFace(face)}
+                className="pixelated size-8 shrink-0 rounded-sm"
+              />
+            ) : (
+              <span className="bg-hover flex size-8 shrink-0 items-center justify-center rounded-sm font-mono text-xs">
+                {initials || 'KK'}
+              </span>
+            )}
             <Fold open={!compact} axis="x" className="min-w-0 grow">
               <span className="flex items-center gap-2.5 pl-2.5">
                 <span className="flex min-w-0 grow flex-col gap-0.5">

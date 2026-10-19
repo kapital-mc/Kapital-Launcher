@@ -1,12 +1,25 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { DEFAULT_SETTINGS, useSettingsStore } from '../../stores/useSettingsStore'
+import { usePlayerStore } from '../../stores/usePlayerStore'
 import { EngineCard } from './EngineCard'
 
 describe('EngineCard', () => {
   afterEach(() => {
     cleanup()
     useSettingsStore.setState({ settings: DEFAULT_SETTINGS })
+    usePlayerStore.setState({ face: '' })
+  })
+
+  it("shows the skin's face once there is one, and the initials when it fails to load", () => {
+    useSettingsStore.setState({ settings: { ...DEFAULT_SETTINGS, profileName: 'Sandro_G' } })
+    usePlayerStore.setState({ face: '/mojang-face/a.png?v=1' })
+    const { container } = render(<EngineCard />)
+    const img = container.querySelector('img')
+    expect(img).toHaveAttribute('src', '/mojang-face/a.png?v=1')
+    fireEvent.error(img!)
+    expect(container.querySelector('img')).toBeNull()
+    expect(screen.getByText('SG')).toBeInTheDocument()
   })
 
   it('says the account is a Microsoft one through Prism, until the player plays offline', () => {

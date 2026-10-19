@@ -22,6 +22,8 @@ export function DownloadDHSnapshot(arg1:string,arg2:boolean):Promise<models.DHSn
 
 export function GetAppVersion():Promise<string>;
 
+export function GetCachedPlayerProfile(arg1:string):Promise<models.PlayerProfile>;
+
 export function GetChangelogs():Promise<Array<models.PackChangelog>>;
 
 export function GetChapterMods(arg1:string):Promise<models.ChapterMods>;
