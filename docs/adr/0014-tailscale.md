@@ -136,7 +136,7 @@ says the installer is open.
 
 Later the same day the author asked for both paragraphs to be shorter: one
 paragraph now says Tailscale connects over a private network, usually
-directly, with a lower ping than playit, and still works when playit is down.
+direct, with a lower ping, and independent of playit.
 Where the installer comes from is left to the facts line (`pkgs.tailscale.com`);
 the check before it runs is unchanged.
 

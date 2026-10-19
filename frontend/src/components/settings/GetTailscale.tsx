@@ -32,8 +32,8 @@ export function GetTailscale({ release, install, info, onConfirm, onClose, onCon
       stage={installStage(install, tailscaleStepLine)}
       intro={
         <p className="m-0">
-          Tailscale connects you to the server over a private network. The connection is usually
-          direct, so the ping is lower than through playit, and it still works when playit is down.
+          Tailscale connects you to the server over a private network: usually direct, with a lower
+          ping, and independent of playit.
         </p>
       }
       done={<NextStep info={info} onConnect={onConnect} />}
