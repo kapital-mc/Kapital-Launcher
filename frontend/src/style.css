@@ -52,10 +52,10 @@
    main area scroll for the length of the slide, and for as long as a slide
    stalled in a hidden window (issue 145). Clipped at the gap, it paints up to the
    main area's edge and never past it, so it adds nothing to scroll. The gap is
-   the stage's m-5. */
+   the stage's m-4, the sidebar's own padding. */
 .card-stage {
   overflow: clip;
-  overflow-clip-margin: calc(var(--spacing) * 5);
+  overflow-clip-margin: calc(var(--spacing) * 4);
 }
 
 /* The chapter card's slide on a switch (#59, #67). The card moves the way the

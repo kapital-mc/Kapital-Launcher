@@ -21,10 +21,10 @@ describe('Sidebar', () => {
     })
     render(<Sidebar />)
     expect(aside()).toHaveClass('w-(--layout-sidebar-compact)')
-    expect(aside()).not.toHaveClass('transition-[width,padding]')
+    expect(aside()).not.toHaveClass('transition-[width]')
     // Two frames later the width is settled and a change is a transition.
     await act(() => new Promise((r) => setTimeout(r, 50)))
-    expect(aside()).toHaveClass('transition-[width,padding]')
+    expect(aside()).toHaveClass('transition-[width]')
     act(() => useSettingsStore.setState({ settings: DEFAULT_SETTINGS }))
     expect(aside()).toHaveClass('w-(--layout-sidebar)')
   })

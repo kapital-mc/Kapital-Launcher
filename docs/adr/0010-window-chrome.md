@@ -84,10 +84,12 @@ sidebar's width, and elsewhere 16px in, the sidebar's own padding, so the
 buttons' hover boxes line up with the chapter tiles' left edge. Compacting moves only the sidebar's right edge (to
 `layout.sidebarCompact`, an icon row's width between the sidebar's padding),
 so the icons and the initials never move sideways; the text fades out first and
-back in once there is room. Compact, the Chapters heading folds away and the
-sidebar's padding matches the chapter card's, so the first chapter tile and the
-account tile line up with the card's top and bottom edges (the author asked,
-2026-10-19). The choice is saved as `sidebarCompact` in the
+back in once there is room. The sidebar's padding and the chapter card's gap
+are one 16px in both widths (the card's was 20px until the author found the
+account tile 4px below the card, 2026-10-19), so the Chapters heading, or
+compact the first chapter tile, starts level with the card's top and the
+account tile ends level with its bottom; compacting moves nothing up or down.
+Compact, the Chapters heading folds away. The choice is saved as `sidebarCompact` in the
 settings and taken without animation on launch. `[verify]` on the author's Mac:
 the button clear of the traffic lights, and the fold animating in WKWebView
 (it moves grid tracks between 1fr and 0fr; a WebView that cannot interpolate
