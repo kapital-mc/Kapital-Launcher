@@ -421,33 +421,34 @@
 }
 
 /* A popup lifting out of what opened it (ui/Dialog with an origin, a column
-   of the chapter card): a surface in the popup's colours starts on the
-   column's rectangle and moves and resizes to the box's, its colour fading in
-   over the first part of the way, so the column's content fades out under it.
-   The box's content fades in once the surface has arrived; closing fades the
-   content out first and lowers the surface back onto the column, fading its
-   colour as it lands. Nothing is scaled, so no text is ever stretched. Dialog
-   sets --rise-from-x/y/w/h and --rise-to-x/y/w/h from the two rectangles
-   before the first paint. With reduced motion the surface only fades, over
-   the same durations, so its animationend still fires and the popup is still
-   removed. */
+   of the chapter card): the column itself seems to lift. A surface in the
+   card's colour starts exactly on the column's rectangle, square and with no
+   edge of its own, carrying a copy of the column's content, while the column
+   underneath is emptied; it takes the popup's edge and corners as it moves and
+   resizes to the box's rectangle over the slow clock as the cover dims, and
+   the copy rides along with it, fading out (`lift-ghost-out`). The box's own
+   content arrives a grace period after the surface has landed, from top to
+   bottom (`rise-content-in`). Closing fades the content at once and lowers the
+   surface back onto the column on the reveal's clock, the copy fading back in
+   (`lift-ghost-in`), so the column is whole again when it lands. Nothing is
+   scaled, so no text is ever stretched. Dialog sets --rise-from-x/y/w/h and
+   --rise-to-x/y/w/h from the two rectangles before the first paint. With
+   reduced motion the surface only fades, over the same durations, so its
+   animationend still fires and the popup is still removed. */
 @keyframes rise-in {
   from {
     left: var(--rise-from-x);
     top: var(--rise-from-y);
     width: var(--rise-from-w);
     height: var(--rise-from-h);
-    opacity: 0;
-  }
-  40% {
-    opacity: 1;
+    border-color: transparent;
+    border-radius: 0;
   }
   to {
     left: var(--rise-to-x);
     top: var(--rise-to-y);
     width: var(--rise-to-w);
     height: var(--rise-to-h);
-    opacity: 1;
   }
 }
 @keyframes rise-out {
@@ -456,30 +457,35 @@
     top: var(--rise-to-y);
     width: var(--rise-to-w);
     height: var(--rise-to-h);
-    opacity: 1;
-  }
-  60% {
-    opacity: 1;
   }
   to {
     left: var(--rise-from-x);
     top: var(--rise-from-y);
     width: var(--rise-from-w);
     height: var(--rise-from-h);
-    opacity: 0;
+    border-color: transparent;
+    border-radius: 0;
   }
 }
 @utility rise-in {
-  animation: rise-in var(--duration-page) var(--ease-glide) both;
+  animation: rise-in var(--duration-slow) var(--ease-glide) both;
 }
 /* Closing lowers the surface at once, while the content fades over it. */
 @utility rise-out {
   animation: rise-out var(--duration-reveal) var(--ease-glide) both;
 }
-/* The box's content, as the surface lands: a soft edge moves down the box, so the
-   text arrives from top to bottom rather than all at once. The mask is a gradient
-   two and a half boxes tall, black above and clear below, slid from showing only
-   its clear part to only its black part. */
+/* The column's copy on the surface: gone over the first half of the lift, and back
+   over the lowering, whole as it lands. */
+@utility lift-ghost-out {
+  animation: card-fade-out calc(var(--duration-slow) / 2) var(--ease-standard) both;
+}
+@utility lift-ghost-in {
+  animation: card-fade-in var(--duration-reveal) ease-in both;
+}
+/* The box's content, once the surface has landed and a grace period has passed: a
+   soft edge moves down the box, so the text arrives from top to bottom rather than
+   all at once. The mask is a gradient two and a half boxes tall, black above and
+   clear below, slid from showing only its clear part to only its black part. */
 @keyframes content-wipe {
   from {
     mask-position: 0 100%;
@@ -495,7 +501,7 @@
   mask-size: 100% 250%;
   mask-repeat: no-repeat;
   animation: content-wipe var(--duration-page) var(--ease-standard)
-    calc(var(--duration-page) - var(--duration-fast)) both;
+    calc(var(--duration-slow) + var(--duration-grace)) both;
 }
 @utility fade-in {
   animation: card-fade-in var(--duration-reveal) var(--ease-out) both;
@@ -506,21 +512,26 @@
 /* The cover of a column's popup: it dims as the surface rises and clears as it
    lowers, on the same clock, so the page never cuts to dim or to lit. */
 @utility wash-in {
-  animation: card-fade-in var(--duration-page) ease-in-out both;
+  animation: card-fade-in var(--duration-slow) ease-in-out both;
 }
 @utility wash-out {
   animation: card-fade-out var(--duration-reveal) ease-in-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .rise-in {
-    animation: card-fade-in var(--duration-page) ease-in-out both;
+    animation: card-fade-in var(--duration-slow) ease-in-out both;
+  }
+  .lift-ghost-out,
+  .lift-ghost-in {
+    animation: none;
+    opacity: 0;
   }
   .rise-out {
     animation: card-fade-out var(--duration-reveal) ease-in-out both;
   }
   .rise-content-in {
     mask-image: none;
-    animation: card-fade-in var(--duration-page) ease-in-out both;
+    animation: card-fade-in var(--duration-page) ease-in-out var(--duration-slow) both;
   }
 }
 

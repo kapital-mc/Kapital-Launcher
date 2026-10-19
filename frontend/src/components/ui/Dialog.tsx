@@ -16,12 +16,19 @@ interface Props {
    * The rectangle of what opened it, such as a column of the chapter card. A
    * surface in the card's colour then rises from it to the box, as if the
    * column itself lifted and grew, while the cover dims; the box's content
-   * arrives from top to bottom as it lands. Closing lowers the surface back
-   * onto the column at once while the content fades and the cover clears, and
-   * `onCancel` runs when it is down. Without one the box rises into place and
-   * fades, and goes at once.
+   * arrives from top to bottom a moment after it lands. Closing lowers the
+   * surface back onto the column at once while the content fades and the cover
+   * clears, and `onCancel` runs when it is down. Without one the box rises into
+   * place and fades, and goes at once.
    */
   origin?: DOMRect
+  /**
+   * A copy of what `origin` is the rectangle of, taken as it was pressed: the
+   * surface carries it, fading as it rises and coming back as it lowers. The
+   * opener empties the original while the popup is open, so the column is what
+   * seems to lift.
+   */
+  lifting?: HTMLElement
   /** The rectangle to centre the box on, such as the chapter card; the window without one. */
   frame?: DOMRect
   /** An X in the top right corner that closes it, for a popup with no question to answer. */
@@ -49,8 +56,18 @@ function setRect(
  * theme are on the root element and still apply.
  * Focus moves into it when it opens and back to where it was when it closes.
  */
-export function Dialog({ title, facts, onCancel, origin, frame, closable, children }: Props) {
+export function Dialog({
+  title,
+  facts,
+  onCancel,
+  origin,
+  lifting,
+  frame,
+  closable,
+  children,
+}: Props) {
   const layer = useRef<HTMLDivElement>(null)
+  const ghost = useRef<HTMLDivElement>(null)
   const box = useRef<HTMLDivElement>(null)
   const surface = useRef<HTMLDivElement>(null)
   const titleId = useId()
@@ -90,6 +107,15 @@ export function Dialog({ title, facts, onCancel, origin, frame, closable, childr
     setRect(surface.current, 'rise-to', box.current.getBoundingClientRect())
     setMeasured(true)
   }, [origin, frame])
+  // The copy of the column: a picture of it, inert and unnamed, so nothing in it can be
+  // reached or found twice.
+  useLayoutEffect(() => {
+    const host = ghost.current
+    if (!host || !lifting) return
+    for (const el of [lifting, ...lifting.querySelectorAll('[id]')]) el.removeAttribute('id')
+    host.replaceChildren(lifting)
+    return () => host.replaceChildren()
+  }, [lifting])
 
   // Without an origin the box rises into place as a page's body does. With one, the
   // surface does the moving and the box's content fades in once it is there.
@@ -119,8 +145,18 @@ export function Dialog({ title, facts, onCancel, origin, frame, closable, childr
           onAnimationEnd={(e) => {
             if (e.target === e.currentTarget && leaving) onCancel()
           }}
-          className={`${tone} pointer-events-none fixed rounded-lg border ${lift}`}
-        />
+          className={`${tone} pointer-events-none fixed overflow-hidden rounded-lg border ${lift}`}
+        >
+          {/* The copy keeps the column's size and sits where the column's content sat, so it
+              moves with the surface without reflowing; the column's own divider stays behind. */}
+          <div
+            ref={ghost}
+            inert
+            className={`absolute -top-px -left-px h-(--rise-from-h) w-(--rise-from-w) *:h-full *:border-0 ${
+              leaving ? 'lift-ghost-in' : 'lift-ghost-out'
+            }`}
+          />
+        </div>
       )}
       <div
         ref={layer}

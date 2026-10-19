@@ -60,8 +60,10 @@ them; draw a new kind of tile with `Smooth` rather than animating its parts.
 out), and the box follows it. An element that takes a control's place grows
 out of it with `morphFrom`, shrinks back into it with `morphTo`, and carries
 `data-smooth="self"` (the Java argument field).
-A column's popup rises from the column (`rise-in`, `rise-out`,
-`rise-content-in`, `wash-out`), and a line too long for its place fades at its
+A column's popup is the column lifting out: the surface starts as the column,
+carrying a copy of it that fades as it rises, while the column stays empty
+(`rise-in`, `rise-out`, `lift-ghost-out`, `lift-ghost-in`, `rise-content-in`,
+`wash-in`, `wash-out`; Dialog's `origin` and `lifting`), and a line too long for its place fades at its
 end (`fade-end`) rather than ending in an ellipsis where a control sits over it.
 
 Spacing is Tailwind's default 4px scale, which is what the reference was drawn

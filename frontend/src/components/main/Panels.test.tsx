@@ -195,6 +195,14 @@ describe('Panels', () => {
       expect(dialog).toHaveClass('rise-content-in', 'bg-raised')
       const surface = document.querySelector('.rise-in')
       expect(surface).not.toBeNull()
+      // The column lifts out: the surface carries a copy of it, inert, and the column is
+      // left empty until the popup has gone.
+      const copy = surface!.querySelector('.lift-ghost-out')!
+      expect(copy).toHaveAttribute('inert')
+      expect(within(copy as HTMLElement).getByText('Loader')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Pack details' }).closest('.group')).toHaveClass(
+        '*:invisible',
+      )
       fireEvent(dialog, new Event('webkitAnimationEnd', { bubbles: true }))
       expect(surface).toHaveClass('invisible')
       expect(await within(dialog).findByText(chapter.blurb)).toBeInTheDocument()

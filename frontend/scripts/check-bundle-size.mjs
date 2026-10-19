@@ -110,7 +110,9 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 95.2 the same day: a field that grew out of a button shrinks back into it (`morphTo`), and
 // a card follows only a morph's size animation, not a colour fading on the same element.
 // Measured 95.11 KB.
-const BUDGET_KB = 95.2
+// 95.4 the same day: a column's popup lifts the column itself out, carrying a copy of its
+// content (Dialog's `lifting`, the lift keyframes in the entry's CSS). Measured 95.27 KB.
+const BUDGET_KB = 95.4
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)
