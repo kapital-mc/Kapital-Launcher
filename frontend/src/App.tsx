@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { HeaderBar } from './components/shell/HeaderBar'
 import { Toasts } from './components/shell/Toasts'
+import { LaunchIntro } from './components/shell/LaunchIntro'
 import { Sidebar } from './components/sidebar/Sidebar'
 import { ChapterStage } from './components/main/ChapterStage'
 import { PageLayer } from './components/main/PageLayer'
@@ -265,6 +266,7 @@ export default function App() {
         <WhatsNew />
         <ProfileNotice onOpenAccount={pages.openAccount} />
       </Suspense>
+      <LaunchIntro />
     </div>
   )
 }

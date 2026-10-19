@@ -150,3 +150,17 @@ in, rather than at 64px, so on macOS it no longer sits over the compact
 sidebar's icon column. `[verify]` on the author's Mac: the bar's height and the
 buttons centred on the lights, every header button clickable, the window
 dragged by the bar's empty space, and full screen entered and left.
+
+## Amendment, 2026-10-19: the launch intro
+
+The author asked for a short animation on start that builds the wordmark from
+its lines and fades into the launcher. The compact wordmark picture was traced
+into vector outlines (`assets/brand/kapital-launcher-wordmark.svg`: the whole
+mark's outline and each letter's face, in reading order), and `LaunchIntro`
+covers the window on every start while the launcher loads under it: the lines
+draw in letter by letter over the slow duration, the picture fills them over
+the reveal, and the cover fades and grows slightly over the grace, about a
+second in all, from the motion tokens. Only the cover is in the first paint's
+bundle; the lines load behind it. Reduced motion skips it. `[verify]` on the
+author's Mac: it plays once, ends on its own, and the window shows no flash
+between the native background and the cover.

@@ -18,13 +18,14 @@ const SELF = '[data-smooth="self"]'
 /** The id of a morph's own size animation, so a colour fading on the same element is not one. */
 const MORPH = 'smooth-morph'
 
-const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+export const reducedMotion = () =>
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
 
 /** A motion token's value, read from the root: a duration in ms, or an easing as written. */
-function token(name: string): string {
+export function token(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
-function ms(name: string): number {
+export function ms(name: string): number {
   const v = token(name)
   const n = Number.parseFloat(v)
   return v.endsWith('ms') ? n : n * 1000

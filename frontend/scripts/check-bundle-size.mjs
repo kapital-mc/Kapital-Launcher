@@ -112,7 +112,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // Measured 95.11 KB.
 // 95.4 the same day: a column's popup lifts the column itself out, carrying a copy of its
 // content (Dialog's `lifting`, the lift keyframes in the entry's CSS). Measured 95.27 KB.
-const BUDGET_KB = 95.4
+// 95.9 on 2026-10-19: the launch intro's cover and its animation are in the entry, since they
+// are the first paint; the traced wordmark's lines load in a chunk of their own behind the
+// cover. Measured 95.8 KB.
+const BUDGET_KB = 95.9
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

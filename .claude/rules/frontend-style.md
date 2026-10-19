@@ -63,7 +63,9 @@ out of it with `morphFrom`, shrinks back into it with `morphTo`, and carries
 A column's popup is the column lifting out: the surface starts as the column,
 carrying a copy of it that fades as it rises, while the column stays empty
 (`rise-in`, `rise-out`, `lift-ghost-out`, `lift-ghost-in`, `rise-content-in`,
-`wash-in`, `wash-out`; Dialog's `origin` and `lifting`), and a line too long for its place fades at its
+`wash-in`, `wash-out`; Dialog's `origin` and `lifting`). The launch intro
+(`shell/LaunchIntro`) runs its timeline with the Web Animations API from the
+same tokens (`ms`, `token` from `lib/smoothResize`), and a line too long for its place fades at its
 end (`fade-end`) rather than ending in an ellipsis where a control sits over it.
 
 Spacing is Tailwind's default 4px scale, which is what the reference was drawn

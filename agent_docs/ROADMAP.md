@@ -132,6 +132,8 @@ What is left:
       highlights, written by hand in `data/whatsnew.json`, small changes
       grouped, and the full changelog from the site's `changelog.json` in a
       dropdown (ADR-9 amendment, 2026-10-19)
+- [x] Launch intro: the traced wordmark draws in and fades into the launcher,
+      about a second, skipped with reduced motion (ADR-10 amendment, 2026-10-19)
 - [x] Release workflow with attested artefacts for Windows and macOS; code
       signing decision (ADR-6): `.github/workflows/build.yml` (#107) builds both
       and cuts an attested release, only from the Actions tab since issue 177;
