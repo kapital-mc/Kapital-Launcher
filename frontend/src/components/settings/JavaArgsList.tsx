@@ -76,8 +76,10 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
           </span>
         )}
       </div>
+      {/* The rows are as far apart as the list is from Add argument, and a row keeps its height
+          while its menu button is hidden, so a new field starts exactly where the button stood. */}
       {(args.length > 0 || editing === 'new') && (
-        <ul aria-labelledby={listId} className="m-0 flex list-none flex-col gap-1.5 p-0">
+        <ul aria-labelledby={listId} className="m-0 flex list-none flex-col gap-2 p-0">
           {args.map((arg, i) =>
             editing === i ? (
               <ArgEditor
@@ -196,7 +198,7 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
         aria-controls={open ? menuId : undefined}
         disabled={disabled}
         onClick={() => onOpen(!open)}
-        className="text-fg-muted hover:text-fg hover:bg-hover aria-expanded:bg-hover aria-expanded:text-fg duration-fast ease-standard flex size-7 shrink-0 items-center justify-center rounded-sm opacity-0 transition-[opacity,background-color] group-focus-within:opacity-100 group-hover:opacity-100 disabled:hidden aria-expanded:opacity-100"
+        className="text-fg-muted hover:text-fg hover:bg-hover aria-expanded:bg-hover aria-expanded:text-fg duration-fast ease-standard flex size-7 shrink-0 items-center justify-center rounded-sm opacity-0 transition-[opacity,background-color] group-focus-within:opacity-100 group-hover:opacity-100 disabled:invisible aria-expanded:opacity-100"
       >
         <Icon icon={Ellipsis} size="sm" />
       </button>

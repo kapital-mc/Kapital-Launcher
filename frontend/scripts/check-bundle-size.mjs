@@ -107,7 +107,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // added (ui/Smooth, lib/smoothResize), which the action bar's popups and the sidebar's
 // downloads section draw with, so it is in the entry; the column popups' rise and the
 // downloads section's spinner came with it. Measured 94.9 KB.
-const BUDGET_KB = 95.1
+// 95.2 the same day: a field that grew out of a button shrinks back into it (`morphTo`), and
+// a card follows only a morph's size animation, not a colour fading on the same element.
+// Measured 95.11 KB.
+const BUDGET_KB = 95.2
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

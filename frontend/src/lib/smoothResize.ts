@@ -15,6 +15,8 @@
  * ResizeObserver (the tests), it does nothing and has nothing to undo.
  */
 const SELF = '[data-smooth="self"]'
+/** The id of a morph's own size animation, so a colour fading on the same element is not one. */
+const MORPH = 'smooth-morph'
 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
 
@@ -44,13 +46,15 @@ export function morphFrom(el: HTMLElement, from: DOMRect): void {
   // jump at the end on so short a move.
   const timing = { duration: ms('--duration-page'), easing: token('--ease-standard') }
   el.style.overflow = 'clip'
-  el.animate(
+  const grow = el.animate(
     [
       { width: `${from.width}px`, height: `${from.height}px` },
       { width: `${to.width}px`, height: `${to.height}px` },
     ],
     timing,
-  ).onfinish = () => el.style.removeProperty('overflow')
+  )
+  grow.id = MORPH
+  grow.onfinish = () => el.style.removeProperty('overflow')
   fadeIn(el, { ...timing, delay: ms('--duration-fast') / 2 })
 }
 
@@ -88,19 +92,21 @@ export function morphTo(el: HTMLElement, to: DOMRect, done: () => void): void {
       fill: 'forwards',
     })
   }
-  el.animate(
+  const shrink = el.animate(
     [
       { width: `${from.width}px`, height: `${from.height}px` },
       { width: `${to.width}px`, height: `${to.height}px` },
     ],
     { duration: ms('--duration-reveal'), easing, fill: 'forwards' },
-  ).onfinish = done
+  )
+  shrink.id = MORPH
+  shrink.onfinish = done
 }
 
 /** A part under `inner` is growing or shrinking by itself (`morphFrom`, `morphTo`). */
 function morphing(inner: HTMLElement): boolean {
   for (const el of inner.querySelectorAll<HTMLElement>(SELF)) {
-    if (el.getAnimations?.().some((a) => a.playState === 'running')) return true
+    if (el.getAnimations?.().some((a) => a.id === MORPH && a.playState === 'running')) return true
   }
   return false
 }

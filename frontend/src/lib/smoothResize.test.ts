@@ -93,12 +93,22 @@ describe('smoothResize', () => {
   it('follows a part that morphs by itself instead of chasing it', () => {
     const field = document.createElement('li')
     field.dataset.smooth = 'self'
-    field.getAnimations = (() => [{ playState: 'running' }]) as never
+    field.getAnimations = (() => [{ id: 'smooth-morph', playState: 'running' }]) as never
     inner.append(field)
     content = 90
     report()
     expect(outer).not.toHaveClass('smooth-resizing')
     expect(outer.style.height).toBe('')
+  })
+
+  it('still moves the box when a part that morphs only fades a colour', () => {
+    const button = document.createElement('button')
+    button.dataset.smooth = 'self'
+    button.getAnimations = (() => [{ id: '', playState: 'running' }]) as never
+    inner.append(button)
+    content = 90
+    report()
+    expect(outer).toHaveClass('smooth-resizing')
   })
 
   it('fades in what is added later, but not a part that runs its own entrance', async () => {
