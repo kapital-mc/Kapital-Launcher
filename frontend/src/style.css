@@ -427,8 +427,8 @@
    underneath is emptied; it takes the popup's edge and corners as it moves and
    resizes to the box's rectangle over the slow clock as the cover dims, and
    the copy rides along with it, fading out (`lift-ghost-out`). The box's own
-   content arrives a grace period after the surface has landed, from top to
-   bottom (`rise-content-in`). Closing fades the content at once and lowers the
+   content arrives a beat (the fast clock) after the surface has landed, from
+   top to bottom (`rise-content-in`). Closing fades the content at once and lowers the
    surface back onto the column on the reveal's clock, the copy fading back in
    (`lift-ghost-in`), so the column is whole again when it lands. Nothing is
    scaled, so no text is ever stretched. Dialog sets --rise-from-x/y/w/h and
@@ -482,7 +482,7 @@
 @utility lift-ghost-in {
   animation: card-fade-in var(--duration-reveal) ease-in both;
 }
-/* The box's content, once the surface has landed and a grace period has passed: a
+/* The box's content, a beat after the surface has landed: a
    soft edge moves down the box, so the text arrives from top to bottom rather than
    all at once. The mask is a gradient two and a half boxes tall, black above and
    clear below, slid from showing only its clear part to only its black part. */
@@ -501,7 +501,7 @@
   mask-size: 100% 250%;
   mask-repeat: no-repeat;
   animation: content-wipe var(--duration-page) var(--ease-standard)
-    calc(var(--duration-slow) + var(--duration-grace)) both;
+    calc(var(--duration-slow) + var(--duration-fast)) both;
 }
 @utility fade-in {
   animation: card-fade-in var(--duration-reveal) var(--ease-out) both;
