@@ -1065,6 +1065,21 @@ export namespace models {
 	        this.subject = source["subject"];
 	    }
 	}
+	
+	export class WindowChrome {
+	    titlebarHeight: number;
+	    controlsEnd: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WindowChrome(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.titlebarHeight = source["titlebarHeight"];
+	        this.controlsEnd = source["controlsEnd"];
+	    }
+	}
 
 }
 

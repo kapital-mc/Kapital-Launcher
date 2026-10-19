@@ -125,7 +125,7 @@ export function ModsSection({ chapter }: Props) {
           aria-expanded={open}
           aria-controls={panelId}
           onClick={() => setOpen((o) => !o)}
-          className="text-fg-soft hover:text-fg hover:bg-hover duration-fast ease-standard flex w-full cursor-pointer items-center gap-2 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg"
+          className="text-fg-soft hover:text-fg hover:bg-hover duration-fast ease-standard flex w-full items-center gap-2 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg"
         >
           <Icon
             icon={ChevronRight}

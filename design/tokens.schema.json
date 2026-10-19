@@ -168,7 +168,7 @@
     },
     "layout": {
       "type": "object",
-      "required": ["unit", "sidebar", "sidebarCompact", "hero", "titlebar", "titlebarMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "splash"],
+      "required": ["unit", "sidebar", "sidebarCompact", "hero", "titlebar", "titlebarMac", "controlsMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "splash"],
       "additionalProperties": false,
       "properties": {
         "unit": { "const": "px" },
@@ -187,7 +187,12 @@
         "titlebarMac": {
           "type": "integer",
           "minimum": 1,
-          "description": "The header bar's height on macOS, where it holds the system's traffic lights: the height of a standard macOS title bar, so the lights sit at its middle (ADR-10)."
+          "description": "The header bar's height on macOS before the window is measured: the unified toolbar bar macOS 26 draws, with the traffic lights at its middle. The launcher reads the real height from AppKit at start (ADR-10, 2026-10-19 amendment)."
+        },
+        "controlsMac": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The traffic lights' right edge on macOS before the window is measured, where the header's tools may begin (ADR-10, 2026-10-19 amendment)."
         },
         "slide": {
           "type": "integer",

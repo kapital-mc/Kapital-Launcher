@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
+import { GetWindowChrome } from '../../../wailsjs/go/main/App'
 import { hasWailsBridge, readOr } from '../../lib/ipc'
 import { Copy, Minus, Square, X } from '../../lib/icons'
 import type { LucideIcon } from '../../lib/icons'
@@ -8,6 +10,7 @@ import {
   WindowMinimise,
   WindowToggleMaximise,
 } from '../../../wailsjs/runtime/runtime'
+import type { WindowChrome } from '../../types'
 import { Icon } from '../ui/Icon'
 import { HeaderTools } from './HeaderTools'
 
@@ -26,11 +29,12 @@ interface Props {
  * (docs/adr/0010-window-chrome.md). Its empty area drags the window and a
  * double-click maximises; anything interactive opts out of the drag.
  *
- * macOS keeps its native traffic lights at the top left, so no window buttons
- * are drawn there, and the bar is as tall as a macOS title bar so the lights
- * sit at its middle. Everywhere else the bar ends in our own minimise,
- * maximise and close. The bar carries no wordmark (ADR-10 amendment,
- * 2026-10-18).
+ * macOS keeps its native traffic lights at the top left, in the unified
+ * toolbar's taller bar, so no window buttons are drawn there and the bar takes
+ * the height and the lights' edge Go measured from AppKit, which differ
+ * between macOS versions (ADR-10 amendment, 2026-10-19). Everywhere else the
+ * bar ends in our own minimise, maximise and close. The bar carries no
+ * wordmark (ADR-10 amendment, 2026-10-18).
  *
  * Its tools (HeaderTools) open the bar on the left, the sidebar's button
  * first: past the traffic lights on macOS, and elsewhere at the sidebar's own
@@ -43,14 +47,20 @@ export function HeaderBar({
   onToggleSidebar,
 }: Props) {
   const mac = platform === 'darwin'
+  const chrome = useWindowChrome(mac)
   return (
     <header
       onDoubleClick={() => bridged(WindowToggleMaximise)}
+      // The bar's height and the lights' edge are measured by AppKit at start:
+      // the computed-value exception the style rule allows. Until then, and if
+      // nothing was measured, the layout tokens stand.
+      // eslint-disable-next-line no-restricted-syntax
+      style={chrome ? chromeVars(chrome) : undefined}
       className={`bg-sunken border-line flex shrink-0 items-center justify-between border-b [--wails-draggable:drag] ${mac ? 'h-(--layout-titlebar-mac)' : 'h-(--layout-titlebar)'}`}
     >
       <div
         onDoubleClick={(e) => e.stopPropagation()}
-        className={`flex h-full items-center [--wails-draggable:no-drag] ${mac ? 'pl-16' : 'pl-4'}`}
+        className={`flex h-full items-center [--wails-draggable:no-drag] ${mac ? 'ml-(--layout-controls-mac) pl-3' : 'pl-4'}`}
       >
         <HeaderTools
           size={mac ? 'xs' : 'sm'}
@@ -69,6 +79,33 @@ export function HeaderBar({
       )}
     </header>
   )
+}
+
+/**
+ * Where macOS drew its title bar, read once from Go. Null off macOS, without a
+ * bridge, and when nothing was measured.
+ */
+function useWindowChrome(mac: boolean): WindowChrome | null {
+  const [chrome, setChrome] = useState<WindowChrome | null>(null)
+  useEffect(() => {
+    if (!mac) return
+    let live = true
+    void readOr(GetWindowChrome, null).then((c) => {
+      if (live && c && c.titlebarHeight > 0 && c.controlsEnd > 0) setChrome(c)
+    })
+    return () => {
+      live = false
+    }
+  }, [mac])
+  return chrome
+}
+
+/** The measured values, as the layout tokens they stand in for. */
+function chromeVars(c: WindowChrome): CSSProperties {
+  return {
+    '--layout-titlebar-mac': `${c.titlebarHeight}px`,
+    '--layout-controls-mac': `${c.controlsEnd}px`,
+  } as CSSProperties
 }
 
 /** Minimise, maximise or restore, and close, sized and ordered as Windows draws them. */
@@ -122,7 +159,7 @@ function WindowButton({
       type="button"
       onClick={onClick}
       aria-label={title}
-      className={`text-fg-muted duration-fast ease-standard flex h-full w-11.5 cursor-pointer items-center justify-center transition-colors ${hover}`}
+      className={`text-fg-muted duration-fast ease-standard flex h-full w-11.5 items-center justify-center transition-colors ${hover}`}
     >
       <Icon icon={icon} size="sm" />
     </button>

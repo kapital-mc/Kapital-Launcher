@@ -183,7 +183,7 @@ export function Select<T extends string>({
         aria-labelledby={`${labelId} ${buttonId}`}
         onClick={() => (open ? close(false) : show())}
         onKeyDown={onButtonKey}
-        className="bg-sunken border-line-strong hover:bg-hover duration-fast ease-standard disabled:hover:bg-sunken flex h-11 max-w-full cursor-pointer items-center gap-3 rounded-md border pr-3 pl-4 text-left transition-colors disabled:cursor-default disabled:opacity-50"
+        className="bg-sunken border-line-strong hover:bg-hover duration-fast ease-standard disabled:hover:bg-sunken flex h-11 max-w-full items-center gap-3 rounded-md border pr-3 pl-4 text-left transition-colors disabled:opacity-50"
       >
         {/* Every entry in one cell, so the button is as wide as the widest;
             the chosen one is seen and the others only take room. */}
@@ -224,7 +224,7 @@ export function Select<T extends string>({
                   aria-selected={i === chosen}
                   onClick={() => pick(i)}
                   onMouseMove={() => setActive(i)}
-                  className={`flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2 ${
+                  className={`flex items-center gap-3 rounded-sm px-3 py-2 ${
                     i === active ? 'bg-hover' : ''
                   }`}
                 >

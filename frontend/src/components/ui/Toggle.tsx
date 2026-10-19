@@ -38,7 +38,7 @@ export function Toggle({ label, checked, hint, error, disabled, onChange, badge,
       <div className="flex min-w-0 flex-col gap-1">
         <label
           htmlFor={id}
-          className={`flex w-fit items-center gap-2 text-sm font-medium ${muted ? 'text-fg-faint' : 'text-fg'} ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
+          className={`flex w-fit items-center gap-2 text-sm font-medium ${muted ? 'text-fg-faint' : 'text-fg'}`}
         >
           {label}
           {badge}
@@ -59,7 +59,7 @@ export function Toggle({ label, checked, hint, error, disabled, onChange, badge,
         aria-describedby={error || hint ? lineId : undefined}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`${track} duration-fast ease-standard rounded-pill inline-flex h-6 w-11 shrink-0 cursor-pointer items-center border p-0.5 transition-colors disabled:cursor-default disabled:opacity-50 motion-reduce:transition-none`}
+        className={`${track} duration-fast ease-standard rounded-pill inline-flex h-6 w-11 shrink-0 items-center border p-0.5 transition-colors disabled:opacity-50 motion-reduce:transition-none`}
       >
         <span
           aria-hidden

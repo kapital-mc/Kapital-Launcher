@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import * as Bindings from '../../../wailsjs/go/main/App'
 import * as Runtime from '../../../wailsjs/runtime/runtime'
 import { HeaderBar } from './HeaderBar'
 
+vi.mock('../../../wailsjs/go/main/App')
 vi.mock('../../../wailsjs/runtime/runtime')
 
 describe('HeaderBar', () => {
@@ -49,10 +51,30 @@ describe('HeaderBar', () => {
   })
 
   it('leaves the window buttons to macOS, in a bar as tall as its title bar', () => {
+    vi.mocked(Bindings.GetWindowChrome).mockResolvedValue({ titlebarHeight: 0, controlsEnd: 0 })
     const { container } = render(<HeaderBar platform="darwin" onOpenSettings={() => undefined} />)
     expect(container.querySelector('header')).toHaveClass('h-(--layout-titlebar-mac)')
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Settings' })).toBeEnabled()
+  })
+
+  it('takes the bar and the lights edge macOS measured, and keeps the tokens without one', async () => {
+    vi.mocked(Bindings.GetWindowChrome).mockResolvedValue({ titlebarHeight: 38, controlsEnd: 67 })
+    const { container } = render(<HeaderBar platform="darwin" />)
+    const header = container.querySelector('header')!
+    await waitFor(() => expect(header.style.getPropertyValue('--layout-titlebar-mac')).toBe('38px'))
+    expect(header.style.getPropertyValue('--layout-controls-mac')).toBe('67px')
+    cleanup()
+
+    vi.mocked(Bindings.GetWindowChrome).mockResolvedValue({ titlebarHeight: 0, controlsEnd: 0 })
+    const unmeasured = render(<HeaderBar platform="darwin" />).container.querySelector('header')!
+    await act(async () => {})
+    expect(unmeasured.getAttribute('style')).toBeNull()
+  })
+
+  it('asks for no measurement off macOS', () => {
+    render(<HeaderBar platform="windows" />)
+    expect(Bindings.GetWindowChrome).not.toHaveBeenCalled()
   })
 
   it('does nothing without a bridge', () => {

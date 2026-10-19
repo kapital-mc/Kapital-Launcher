@@ -73,7 +73,7 @@ export function Segmented<T extends string>({
             tabIndex={selected && !off ? 0 : -1}
             disabled={off}
             onClick={() => onChange(o.value)}
-            className={`duration-fast ease-standard cursor-pointer rounded-sm px-3.5 text-sm whitespace-nowrap transition-colors disabled:cursor-default ${
+            className={`duration-fast ease-standard rounded-sm px-3.5 text-sm whitespace-nowrap transition-colors ${
               selected ? 'bg-hover text-fg font-medium' : 'text-fg-muted enabled:hover:text-fg'
             } ${off && !disabled ? 'opacity-50' : ''}`}
           >

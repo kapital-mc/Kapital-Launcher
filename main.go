@@ -81,9 +81,11 @@ func main() {
 		// The app draws its own header bar (docs/adr/0010-window-chrome.md).
 		// Windows and Linux go frameless and get the header's own window
 		// buttons; macOS keeps a hidden title bar so its native traffic
-		// lights, full-screen and zoom stay the system's.
+		// lights, full-screen and zoom stay the system's. The inset style adds
+		// an empty toolbar, whose taller bar backend/windowchrome sets to
+		// unified and measures for the header (ADR-10, 2026-10-19).
 		Frameless: runtime.GOOS != "darwin",
-		Mac:       &mac.Options{TitleBar: mac.TitleBarHidden()},
+		Mac:       &mac.Options{TitleBar: mac.TitleBarHiddenInset()},
 		// macOS's App, Edit and Window menus, which carry the Cmd shortcuts.
 		Menu: appMenu(runtime.GOOS),
 		// The wiki's screenshots are served from the app data dir (#141).

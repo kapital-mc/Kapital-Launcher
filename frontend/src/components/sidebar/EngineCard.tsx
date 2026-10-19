@@ -95,7 +95,7 @@ export function EngineCard({ onOpenAccount, accountOpen = false, compact = false
             aria-pressed={accountOpen}
             disabled={!onOpenAccount}
             onClick={() => onOpenAccount?.()}
-            className="hover:bg-hover duration-fast ease-standard -m-1.5 flex min-w-0 grow cursor-pointer items-center rounded-md p-1.5 text-left transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+            className="hover:bg-hover duration-fast ease-standard -m-1.5 flex min-w-0 grow items-center rounded-md p-1.5 text-left transition-colors disabled:hover:bg-transparent"
           >
             {face && face !== brokenFace ? (
               <img

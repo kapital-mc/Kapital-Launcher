@@ -60,10 +60,7 @@ describe('ChoiceCards', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Beta' }))
     expect(onChange).not.toHaveBeenCalled()
     expect(screen.getByRole('radio', { name: 'Beta' })).toBeDisabled()
-    expect(screen.getByRole('radio', { name: 'Beta' })).toHaveClass(
-      'disabled:opacity-50',
-      'disabled:cursor-default',
-    )
+    expect(screen.getByRole('radio', { name: 'Beta' })).toHaveClass('disabled:opacity-50')
   })
 
   it('picks an enabled card on a click', () => {
