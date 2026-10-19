@@ -72,6 +72,8 @@ export function GetWikiPages():Promise<Array<models.WikiPage>>;
 
 export function GetWikiShots():Promise<Array<models.WikiShot>>;
 
+export function GetWindowChrome():Promise<models.WindowChrome>;
+
 export function InstallChapter(arg1:string):Promise<models.InstanceReport>;
 
 export function InstallPrism():Promise<void>;

@@ -12,6 +12,8 @@ import (
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	// On macOS the window's toolbar style is set before the page measures it.
+	go logWindowChrome()
 	a.detectStartupEngine()
 	// The copy Prism's pre-launch command runs follows this build, when there is
 	// one, off the startup path (it is the size of the launcher).

@@ -18,7 +18,7 @@ export function TextLink({ size = 'sm', strong, className = '', ...rest }: Props
   return (
     <button
       type="button"
-      className={`text-accent cursor-pointer underline-offset-2 hover:underline ${SIZE[size]} ${
+      className={`text-accent underline-offset-2 hover:underline ${SIZE[size]} ${
         strong ? 'font-semibold' : ''
       } ${className}`}
       {...rest}

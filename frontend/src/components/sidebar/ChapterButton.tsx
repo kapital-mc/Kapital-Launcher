@@ -36,7 +36,7 @@ export function ChapterButton({ chapter, current, onSelect, compact = false, ref
       data-chapter={chapter.id}
       aria-current={current ? 'true' : undefined}
       onClick={() => onSelect(chapter.id)}
-      className={`duration-fast ease-standard relative isolate flex h-15.5 w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors ${
+      className={`duration-fast ease-standard relative isolate flex h-15.5 w-full items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors ${
         current ? '' : 'hover:bg-raised-2'
       }`}
     >

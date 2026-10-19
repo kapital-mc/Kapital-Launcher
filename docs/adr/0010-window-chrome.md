@@ -114,3 +114,35 @@ A settings page's column grows with the card up to the other pages' measure
 (`max-w-200`), and the column and its nav are centred only past it, so
 compacting or widening the sidebar resizes the sections along with the card
 rather than sliding a fixed block (the author asked, 2026-10-19).
+
+## Amendment, 2026-10-19: a macOS bar measured from AppKit
+
+The author compared the 28px bar with the Claude app, whose buttons have room
+above and below and share the traffic lights' centre line, and asked whether
+the launcher could match it. The 2026-10-18 amendment was wrong that Wails v2
+cannot: it cannot move the lights, but it can make the title bar taller, which
+moves them down with it. `mac.TitleBarHiddenInset()` gives the window an empty
+`NSToolbar`, and a window with a toolbar has a taller title bar.
+
+How tall depends on the toolbar style, which Wails leaves on automatic, and
+automatic resolves differently by macOS version: the macOS CI runners measured
+a 38pt bar on macOS 15 and a 52pt bar on macOS 26. So `backend/windowchrome`
+sets the style to unified at start (one Objective-C call, on the main thread)
+and measures the lights: twice their centre's distance from the window's top is
+the bar's height, and the zoom button's right edge is where the header's
+buttons may start. Unified measured 52pt on both, with the lights ending at
+73pt on macOS 15 and 79pt on macOS 26. The header reads that through
+`GetWindowChrome` and sets its height and left inset from it (two computed
+custom properties, the one inline style). `layout.titlebarMac` (52px) and
+`layout.controlsMac` (80px) are the fallback when nothing was measured.
+
+The Mac CI job now checks this on both runners: the measurement must match
+what System Events reports for the lights, a real click on the header's first
+button must compact the sidebar (the toolbar does not swallow clicks over the
+WebView), and pictures of the bar before and after are uploaded.
+
+The sidebar button now starts about 12px past the lights, around 85 to 91px
+in, rather than at 64px, so on macOS it no longer sits over the compact
+sidebar's icon column. `[verify]` on the author's Mac: the bar's height and the
+buttons centred on the lights, every header button clickable, the window
+dragged by the bar's empty space, and full screen entered and left.

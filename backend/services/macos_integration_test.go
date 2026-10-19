@@ -5,9 +5,12 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -449,6 +452,7 @@ func TestMacLauncherStartsWithItsMenus(t *testing.T) {
 	}
 	menus := strings.TrimSpace(string(out))
 	t.Logf("menu bar: %s", menus)
+	checkWindowChrome(t, pid, stderr.String())
 	for _, want := range []string{"Edit", "Window"} {
 		if !strings.Contains(menus, want) {
 			t.Errorf("menu bar %q has no %s menu", menus, want)
@@ -466,4 +470,113 @@ func TestMacLauncherStartsWithItsMenus(t *testing.T) {
 	case <-time.After(20 * time.Second):
 		t.Error("the launcher did not quit from its Quit menu item within 20 s")
 	}
+}
+
+// windowChromeScript lists the launcher's first window and its title bar
+// buttons as "<subrole> x y w h" lines, in screen points.
+const windowChromeScript = `on box(e)
+	tell application "System Events"
+		set p to position of e
+		set s to size of e
+	end tell
+	return (item 1 of p as string) & " " & (item 2 of p as string) & " " & (item 1 of s as string) & " " & (item 2 of s as string)
+end box
+tell application "System Events" to tell (first process whose unix id is %s)
+	set frontmost to true
+	set w to window 1
+	set out to "window " & my box(w)
+	repeat with b in (buttons of w)
+		set out to out & linefeed & (subrole of b as string) & " " & my box(b)
+	end repeat
+	return out
+end tell`
+
+// clickScript posts a real left click at a screen point, so it goes through
+// AppKit's hit testing as a person's would (System Events' own click presses an
+// accessibility element instead).
+const clickScript = `ObjC.import('CoreGraphics')
+function run(argv) {
+	const p = { x: Number(argv[0]), y: Number(argv[1]) }
+	$.CGEventPost(0, $.CGEventCreateMouseEvent(null, 5, p, 0))
+	delay(0.3)
+	$.CGEventPost(0, $.CGEventCreateMouseEvent(null, 1, p, 0))
+	$.CGEventPost(0, $.CGEventCreateMouseEvent(null, 2, p, 0))
+}`
+
+var chromeLogLine = regexp.MustCompile(`msg="window chrome" titlebar=([0-9.]+) controlsEnd=([0-9.]+)`)
+
+// checkWindowChrome holds the header to where macOS put the traffic lights
+// (ADR-10, 2026-10-19 amendment): the bar the launcher measured and logged
+// must be the one System Events reports, and the header's first button, which
+// sits in that bar, must still take a click. With KAPITAL_IT_SHOTS set it also
+// keeps a picture of the window's top before and after the click.
+func checkWindowChrome(t *testing.T, pid, stderr string) {
+	t.Helper()
+	m := chromeLogLine.FindStringSubmatch(stderr)
+	if m == nil {
+		t.Errorf("no window chrome line in the launcher's log:\n%s", stderr)
+		return
+	}
+	titlebar, _ := strconv.ParseFloat(m[1], 64)    //nolint:errcheck // the pattern admits only digits and dots
+	controlsEnd, _ := strconv.ParseFloat(m[2], 64) //nolint:errcheck // the pattern admits only digits and dots
+	t.Logf("measured: titlebar %v, controls end %v", titlebar, controlsEnd)
+
+	out, err := exec.Command("/usr/bin/osascript", "-e", strings.Replace(windowChromeScript, "%s", pid, 1)).CombinedOutput()
+	if err != nil {
+		t.Logf("window chrome unread: %v: %s", err, strings.TrimSpace(string(out)))
+		return
+	}
+	boxes := map[string][4]float64{}
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		f := strings.Fields(line)
+		if len(f) != 5 {
+			continue
+		}
+		var b [4]float64
+		for i := range b {
+			b[i], _ = strconv.ParseFloat(f[i+1], 64) //nolint:errcheck // a field that is not a number reads as 0 and fails the checks below
+		}
+		boxes[f[0]] = b
+	}
+	t.Logf("window chrome: %v", boxes)
+	win, closeBox, zoom := boxes["window"], boxes["AXCloseButton"], boxes["AXFullScreenButton"]
+	if centre := 2 * (closeBox[1] + closeBox[3]/2 - win[1]); math.Abs(centre-titlebar) > 2 {
+		t.Errorf("the lights centre a %v pt bar, the launcher measured %v", centre, titlebar)
+	}
+	if end := zoom[0] + zoom[2] - win[0]; math.Abs(end-controlsEnd) > 3 {
+		t.Errorf("the lights end %v pt in, the launcher measured %v", end, controlsEnd)
+	}
+
+	shot := func(name string) {
+		dir := os.Getenv("KAPITAL_IT_SHOTS")
+		if dir == "" {
+			return
+		}
+		rect := fmt.Sprintf("%v,%v,400,120", win[0], win[1])
+		if out, err := exec.Command("/usr/sbin/screencapture", "-x", "-R", rect, filepath.Join(dir, name+"-"+runtime.GOARCH+".png")).CombinedOutput(); err != nil {
+			t.Logf("screencapture: %v: %s", err, out)
+		}
+	}
+	shot("header")
+
+	// The sidebar's button: 12 px past the lights (pl-3) and half of its 28 px
+	// box, on the bar's middle. A click that lands saves the compact sidebar.
+	x, y := win[0]+controlsEnd+12+14, win[1]+titlebar/2
+	if out, err := exec.Command("/usr/bin/osascript", "-l", "JavaScript", "-e", clickScript, fmt.Sprint(x), fmt.Sprint(y)).CombinedOutput(); err != nil {
+		t.Logf("click unsent: %v: %s", err, out)
+		return
+	}
+	settings := filepath.Join(DataDir(), SettingsFileName)
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		if b, err := os.ReadFile(settings); err == nil && strings.Contains(string(b), `"sidebarCompact": true`) {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Errorf("a click on the sidebar's button at (%v, %v) did not compact the sidebar", x, y)
+			break
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
+	shot("header-clicked")
 }

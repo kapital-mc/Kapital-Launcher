@@ -69,7 +69,7 @@ export function TailscaleRow({ chapterId, on, error, onChange }: Props) {
               strong
               disabled={busy}
               onClick={step === 'install' ? get : () => void connect(chapterId)}
-              className="disabled:text-fg-faint disabled:cursor-default disabled:no-underline"
+              className="disabled:text-fg-faint disabled:no-underline"
             >
               {step === 'install' ? 'Install' : 'Connect'}
             </TextLink>

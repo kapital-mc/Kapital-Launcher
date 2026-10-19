@@ -142,6 +142,10 @@ export function GetWikiShots() {
   return window['go']['main']['App']['GetWikiShots']();
 }
 
+export function GetWindowChrome() {
+  return window['go']['main']['App']['GetWindowChrome']();
+}
+
 export function InstallChapter(arg1) {
   return window['go']['main']['App']['InstallChapter'](arg1);
 }

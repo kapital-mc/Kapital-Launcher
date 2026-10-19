@@ -92,7 +92,7 @@ export function Scrollable({ children, as: Tag = 'div', className, ...rest }: Pr
           // every scroll: the one computed value the style rule allows.
           // eslint-disable-next-line no-restricted-syntax
           style={{ top: thumb.top, height: thumb.height }}
-          className="bg-line-strong rounded-pill hover:bg-fg-faint duration-fast ease-standard absolute right-1 w-(--layout-scrollbar) cursor-default transition-colors"
+          className="bg-line-strong rounded-pill hover:bg-fg-faint duration-fast ease-standard absolute right-1 w-(--layout-scrollbar) transition-colors"
         />
       )}
     </div>

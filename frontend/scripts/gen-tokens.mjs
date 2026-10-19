@@ -336,6 +336,7 @@ export const LAYOUT = {
   hero: ${src.layout.hero},
   titlebar: ${src.layout.titlebar},
   titlebarMac: ${src.layout.titlebarMac},
+  controlsMac: ${src.layout.controlsMac},
   icon: { xs: ${src.layout.icon.xs}, sm: ${src.layout.icon.sm}, md: ${src.layout.icon.md}, stroke: ${src.layout.icon.stroke} },
   splash: { width: ${src.layout.splash.width}, height: ${src.layout.splash.height} },
 } as const

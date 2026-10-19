@@ -444,3 +444,15 @@ export type HeroArt = 'slideshow' | 'default' | 'panorama'
 
 /** Where a chapter's map opens: a page in the launcher, or the system browser. */
 export type MapIn = 'app' | 'browser'
+
+/**
+ * Where macOS drew its title bar in the launcher's window, in CSS pixels
+ * (ADR-10, 2026-10-19 amendment). Zero when it was not measured: another OS,
+ * or no window yet.
+ */
+export interface WindowChrome {
+  /** The bar macOS centres the traffic lights in. */
+  titlebarHeight: number
+  /** The zoom button's right edge, from the window's left. */
+  controlsEnd: number
+}

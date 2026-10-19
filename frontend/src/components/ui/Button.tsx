@@ -34,7 +34,7 @@ export function Button({ children, onClick, variant = 'ghost', disabled, live, t
       disabled={disabled}
       title={title}
       aria-live={live ? 'polite' : undefined}
-      className={`${VARIANT[variant]} ease-standard inline-flex cursor-pointer items-center gap-2 rounded-md font-semibold transition-[background-color,filter,box-shadow] disabled:cursor-default disabled:opacity-50 motion-reduce:transition-none`}
+      className={`${VARIANT[variant]} ease-standard inline-flex items-center gap-2 rounded-md font-semibold transition-[background-color,filter,box-shadow] disabled:opacity-50 motion-reduce:transition-none`}
     >
       {children}
     </button>
