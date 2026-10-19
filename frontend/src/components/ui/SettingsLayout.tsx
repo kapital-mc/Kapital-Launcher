@@ -43,6 +43,10 @@ function scroller(el: HTMLElement | null): HTMLElement | null {
  * that are actually there, each registering itself as it mounts, so a section that renders
  * nothing (a chapter without a server, the lazy mods list before it loads) is not listed.
  * In a narrow page the nav becomes a bar along the top that stays in view.
+ *
+ * The column grows with the card up to the other pages' measure (`max-w-200`) and the pair is
+ * centred only past it, so when the sidebar compacts or widens the sections resize with the
+ * card, frame by frame, rather than drifting as a fixed block in a wider space.
  */
 export function SettingsLayout({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<readonly NavEntry[]>([])
@@ -60,7 +64,7 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
       <div className="@container">
         <div className="flex flex-col gap-6 @2xl:flex-row @2xl:justify-center @2xl:gap-10">
           <SettingsNav entries={entries} />
-          <div className="flex max-w-160 min-w-0 grow flex-col">{children}</div>
+          <div className="flex max-w-200 min-w-0 grow flex-col">{children}</div>
         </div>
       </div>
     </NavContext.Provider>
