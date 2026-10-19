@@ -11,21 +11,25 @@
     />
     <link rel="stylesheet" href="/src/style.css" />
     <script type="module" src="/src/detect.js"></script>
+    <script type="module" src="/src/showcase.js"></script>
+    <script type="module" src="/src/popup.js"></script>
   </head>
   <!--
-    One page, one small script (src/detect.js, it only picks the OS in the
-    download popup). The build makes it a classic script after the
-    stylesheet, so the body is not parsed, and cannot be painted unstyled,
+    One page and three small scripts: src/detect.js picks the OS in the
+    download popup, src/showcase.js makes the window's chapter rows
+    clickable, src/popup.js closes the popups with motion. Vite bundles them into one file, and the build makes it a
+    classic script after the stylesheet, so the body is not parsed, and cannot be painted unstyled,
     until the stylesheet has loaded (stylesheetFirst in vite.config.js). The links are filled in at build time by
     vite.config.js from links.json and the manifest; see site/README.md. The
     classes on the buttons are the app's Button variants (play and ghost).
 
     Below the buttons is the launcher window, drawn with the app's own
     components' classes (frontend/src/components) and cycling through its
-    three chapters on CSS animations alone (src/showcase.css). It is a
-    picture, not a control: nothing in it is focusable, its text cannot be
-    selected, and it is hidden from assistive technology in favour of the
-    sentence before it. The hero's tools do without the app's backdrop blur:
+    three chapters (src/showcase.css). Its chapter rows are buttons: with
+    src/showcase.js a click shows that chapter and restarts the cycle from
+    it; without the script the window cycles on CSS animations alone. The
+    rest of the window is a picture: its text cannot be selected, and it is
+    hidden from assistive technology in favour of the sentence before it. The hero's tools do without the app's backdrop blur:
     a backdrop filter inside the card's blur animation left the hero's text
     unpainted in the author's browser.
 
@@ -33,153 +37,6 @@
     root): the artwork and the window are drawn for the dark palette.
   -->
   <body class="flex min-h-dvh flex-col">
-    <!--release:start-->
-    <!-- The download popup: the browser's own popover, opened by the Download
-         button with no script. The OS switch is two radios and :has() in the
-         group classes, so it works without script too; src/detect.js only
-         checks the radio for the visitor's OS. %TAG% and the URLs are filled
-         in by vite.config.js from links.json. Its opening, closing and panel
-         fade are src/popup.css; the icons are lucide's x and download. -->
-    <div
-      id="download"
-      popover
-      aria-labelledby="download-title"
-      class="bg-raised text-fg border-line-strong m-auto w-[min(calc(100vw-2rem),30rem)] rounded-lg border p-0 shadow-2xl backdrop:scrim-wash"
-    >
-      <div class="group/dl flex flex-col gap-6 p-8">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex flex-col gap-2">
-            <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
-              %TAG%
-            </p>
-            <h2 id="download-title" class="font-display m-0 text-2xl leading-tight font-semibold">
-              Get Kapital Launcher
-            </h2>
-          </div>
-          <button
-            type="button"
-            popovertarget="download"
-            popovertargetaction="hide"
-            aria-label="Close"
-            class="text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard -mt-2 -mr-2 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent transition-[background-color,color]"
-          >
-            <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-          </button>
-        </div>
-
-        <fieldset class="m-0 flex flex-col border-0 p-0">
-          <legend class="text-fg-muted mb-3 p-0 text-xs tracking-label uppercase">
-            Your system
-          </legend>
-          <div class="flex gap-3">
-            <div class="relative flex-1">
-              <input
-                type="radio"
-                name="os"
-                id="os-windows"
-                value="windows"
-                checked
-                class="peer sr-only"
-              />
-              <label
-                for="os-windows"
-                class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-hover peer-checked:text-fg peer-checked:border-accent peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-fast ease-standard flex cursor-pointer flex-col gap-1 rounded-lg border px-4 py-3.5 transition-[background-color,border-color,color]"
-              >
-                <span class="text-md font-semibold">Windows</span>
-                <span class="text-fg-muted text-xs">Windows 11</span>
-              </label>
-            </div>
-            <div class="relative flex-1">
-              <input
-                type="radio"
-                name="os"
-                id="os-macos"
-                value="macos"
-                class="peer sr-only"
-              />
-              <label
-                for="os-macos"
-                class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-hover peer-checked:text-fg peer-checked:border-accent peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-fast ease-standard flex cursor-pointer flex-col gap-1 rounded-lg border px-4 py-3.5 transition-[background-color,border-color,color]"
-              >
-                <span class="text-md font-semibold">macOS</span>
-                <span class="text-fg-muted text-xs">12 or later</span>
-              </label>
-            </div>
-          </div>
-        </fieldset>
-
-        <div class="download-panel group-has-[#os-macos:checked]/dl:hidden flex flex-col gap-3">
-          <a
-            href="%WINDOWS_URL%"
-            class="showcase-accent bg-accent text-canvas duration-fast ease-standard inline-flex h-13 items-center justify-center gap-2.5 rounded-lg px-7.5 text-md font-semibold tracking-control no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)"
-          >
-            <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
-            Download for Windows
-          </a>
-          <p class="text-fg-soft m-0 text-sm leading-normal">
-            The setup installs for you alone, with no administrator prompt, and adds the WebView2 runtime if it is missing.
-          </p>
-        </div>
-
-        <div class="download-panel group-not-has-[#os-macos:checked]/dl:hidden flex flex-col gap-3">
-          <a
-            href="%MACOS_URL%"
-            class="showcase-accent bg-accent text-canvas duration-fast ease-standard inline-flex h-13 items-center justify-center gap-2.5 rounded-lg px-7.5 text-md font-semibold tracking-control no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)"
-          >
-            <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
-            Download for macOS
-          </a>
-          <p class="text-fg-soft m-0 text-sm leading-normal">
-            One disk image for Apple Silicon and Intel. Open it and drag Kapital Launcher to Applications.
-          </p>
-        </div>
-
-        <!--prism:start-->
-        <!-- A chapter as a Prism instance zip, for a player who keeps Prism and
-             not the launcher (issue 251). Left out by the build when the release
-             has no zips; the URLs come from data/launcher.json. -->
-        <div class="border-line flex flex-col gap-3 border-t pt-6">
-          <h3 class="text-fg-muted m-0 text-xs font-normal tracking-label uppercase">
-            Prism Launcher on its own
-          </h3>
-          <div class="flex flex-wrap gap-2">
-            <a
-              href="%PRISM_LUXEMBURG_URL%"
-              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
-              >Luxemburg</a
-            >
-            <a
-              href="%PRISM_LICHDENSTEIN_URL%"
-              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
-              >Lichdenstein</a
-            >
-            <a
-              href="%PRISM_FRANGFURD_URL%"
-              class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]"
-              >Frangfurd</a
-            >
-          </div>
-          <p class="text-fg-soft m-0 text-sm leading-normal">
-            Import a chapter in Prism with Add Instance, then Import. The first
-            Play downloads the whole pack and every later Play updates it.
-            Kapital Launcher does not count it as installed.
-          </p>
-        </div>
-        <!--prism:end-->
-
-        <p class="bg-sunken border-line text-fg-muted m-0 rounded-md border px-4 py-3 text-xs leading-normal">
-          This beta is not code-signed yet, so Windows and macOS warn before
-          the first run. The
-          <a
-            href="%NOTES_URL%"
-            class="text-accent underline-offset-2 hover:underline"
-            >release notes</a
-          >
-          have the steps past SmartScreen and Gatekeeper.
-        </p>
-      </div>
-    </div>
-    <!--release:end-->
 
     <main
       class="relative flex min-w-0 grow flex-col items-center overflow-hidden px-4 pt-16 pb-12 md:px-10 md:pt-24"
@@ -200,11 +57,11 @@
           />
         </h1>
 
-        <p class="text-fg-soft m-0 text-lg leading-normal">
-          One place to play the three chapters of Kapitel Kapital. It keeps each
-          pack ready and starts the game through Prism Launcher, which handles
-          your Microsoft sign-in.
+        <!--release:start-->
+        <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
+          %TAG%
         </p>
+        <!--release:end-->
 
         <div class="flex flex-wrap items-center justify-center gap-3">
           <!--release:start-->
@@ -228,17 +85,6 @@
           >
         </div>
 
-        <p class="text-fg-muted m-0 text-sm">
-          <span class="block">For Windows 11 and macOS 12 or later, on Apple Silicon and Intel.</span>
-          <span class="block"
-            >Needs
-            <a
-              href="https://prismlauncher.org"
-              class="text-accent underline-offset-2 hover:underline"
-              >Prism Launcher</a
-            >, free and open source.</span
-          >
-        </p>
       </div>
 
       <p class="sr-only">
@@ -255,11 +101,11 @@
 
         <figure
           class="showcase bg-canvas border-line relative m-0 flex w-full flex-col overflow-hidden rounded-lg border shadow-2xl select-none lg:h-(--layout-window-height)"
-          aria-hidden="true"
         >
           <!-- The header bar: shell/HeaderBar.tsx, as Windows draws it. -->
           <div
             class="bg-sunken border-line flex h-(--layout-titlebar) shrink-0 items-center border-b pl-5"
+            aria-hidden="true"
           >
             <img
               src="../frontend/src/assets/brand/kapital-launcher-logo.png"
@@ -351,15 +197,18 @@
               class="bg-sunken border-line hidden w-(--layout-sidebar) shrink-0 flex-col gap-7 border-r px-4 pt-5.5 pb-4 md:flex"
             >
               <div class="flex flex-col gap-1">
-                <div class="text-fg-faint px-2.5 pb-1.5 text-xs">Chapters</div>
+                <div class="text-fg-faint px-2.5 pb-1.5 text-xs" aria-hidden="true">Chapters</div>
                 <div class="relative">
                   <div
                     class="showcase-highlight bg-raised pointer-events-none absolute inset-x-0 top-0 rounded-lg border"
+                    aria-hidden="true"
                   ></div>
-                  <div class="showcase-rows flex flex-col gap-1">
-                    <div
+                  <div class="showcase-rows flex flex-col gap-1" role="group" aria-label="Chapters in the preview">
+                    <button
+                      type="button"
                       data-chapter="luxemburg"
-                      class="relative isolate flex w-full items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left"
+                      aria-label="Show Luxemburg"
+                      class="duration-fast ease-standard not-aria-[current=true]:hover:bg-raised-2 relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors"
                     >
                       <div
                         class="showcase-row-art pointer-events-none absolute inset-0 -z-10"
@@ -389,10 +238,12 @@
                         </div>
                         <span class="text-fg-faint text-xs">1200 – 2300</span>
                       </div>
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       data-chapter="lichdenstein"
-                      class="relative isolate flex w-full items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left"
+                      aria-label="Show Lichdenstein"
+                      class="duration-fast ease-standard not-aria-[current=true]:hover:bg-raised-2 relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors"
                     >
                       <div
                         class="showcase-row-art pointer-events-none absolute inset-0 -z-10"
@@ -422,10 +273,12 @@
                         </div>
                         <span class="text-fg-faint text-xs">2300 – 2500</span>
                       </div>
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       data-chapter="frangfurd"
-                      class="relative isolate flex w-full items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left"
+                      aria-label="Show Frangfurd"
+                      class="duration-fast ease-standard not-aria-[current=true]:hover:bg-raised-2 relative isolate flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg border border-transparent p-2.5 text-left transition-colors"
                     >
                       <div
                         class="showcase-row-art pointer-events-none absolute inset-0 -z-10"
@@ -457,13 +310,14 @@
                           >2500 – present</span
                         >
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
               <div class="grow"></div>
               <div
                 class="bg-raised border-line flex flex-col gap-2.5 rounded-lg border p-3"
+                aria-hidden="true"
               >
                 <div class="flex items-center gap-2.5">
                   <div
@@ -523,7 +377,7 @@
                  all three in the one grid cell so the tallest sets the height
                  and the others stretch to it. Each card is scoped to its
                  chapter for its accent. -->
-            <div class="flex min-w-0 grow flex-col">
+            <div class="flex min-w-0 grow flex-col" aria-hidden="true">
               <div
                 class="showcase-stage relative m-5 mb-8 grid min-h-0 min-w-0 grow grid-cols-1"
               >
@@ -1277,19 +1131,76 @@
       </div>
     </main>
 
+    <!--changelog:start-->
+    <!-- The changelog: each release's notes from the repository's releases
+         feed, read when the site is built (changelog.js, vite.config.js), so
+         it follows a release the way the Download button does. The build
+         replaces the placeholder below and drops the popup with no GitHub
+         link. Features, Fixes and Other changes only: documentation and
+         maintenance change nothing a player runs. -->
+    <div
+      id="changelog"
+      popover
+      aria-labelledby="changelog-title"
+      class="bg-raised text-fg border-line-strong m-auto max-h-[calc(100dvh-2rem)] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain rounded-lg border p-0 shadow-2xl backdrop:scrim-wash"
+    >
+      <div class="bg-raised border-line sticky top-0 z-10 flex items-start justify-between gap-4 border-b px-8 pt-8 pb-5">
+        <div class="flex flex-col gap-2">
+          <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
+            Kapital Launcher
+          </p>
+          <h2 id="changelog-title" class="font-display m-0 text-2xl leading-tight font-semibold">
+            Changelog
+          </h2>
+        </div>
+        <button
+          type="button"
+          popovertarget="changelog"
+          popovertargetaction="hide"
+          aria-label="Close"
+          class="text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard -mt-2 -mr-2 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent transition-[background-color,color]"
+        >
+          <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+        </button>
+      </div>
+      <div class="px-8 pt-6 pb-8">
+        <!--changelog-->
+      </div>
+    </div>
+    <!--changelog:end-->
+
     <!-- The code signing policy SignPath Foundation asks a project to publish
          on its download page (signpath.org/terms; issue 179). The heading,
          the attribution sentence, the two roles and the privacy sentence are
          theirs to word; keep them as they are. The same text is in the
-         README and in .github/release-body.md. It is a details element, closed
-         until a visitor opens it: one quiet line above the footer, no script. -->
-    <details class="group border-line border-t px-6 py-4">
-      <summary
-        class="text-fg-muted hover:text-fg duration-fast ease-standard mx-auto w-fit cursor-pointer text-xs transition-[color]"
-      >
-        <h2 class="m-0 inline text-xs font-normal">Code signing policy</h2>
-      </summary>
-      <div class="text-fg-soft mx-auto flex max-w-140 flex-col gap-4 pt-6 pb-6 text-sm leading-normal">
+         README and in .github/release-body.md. A popup opened by the quiet
+         line above the footer, with no script. -->
+    <div
+      id="signing"
+      popover
+      aria-labelledby="signing-title"
+      class="bg-raised text-fg border-line-strong m-auto max-h-[calc(100dvh-2rem)] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain rounded-lg border p-0 shadow-2xl backdrop:scrim-wash"
+    >
+      <div class="bg-raised border-line sticky top-0 z-10 flex items-start justify-between gap-4 border-b px-8 pt-8 pb-5">
+        <div class="flex flex-col gap-2">
+          <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
+            Kapital Launcher
+          </p>
+          <h2 id="signing-title" class="font-display m-0 text-2xl leading-tight font-semibold">
+            Code signing policy
+          </h2>
+        </div>
+        <button
+          type="button"
+          popovertarget="signing"
+          popovertargetaction="hide"
+          aria-label="Close"
+          class="text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard -mt-2 -mr-2 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent transition-[background-color,color]"
+        >
+          <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+        </button>
+      </div>
+      <div class="text-fg-soft flex flex-col gap-4 px-8 pt-6 pb-8 text-sm leading-normal">
         <p class="m-0">
           Free code signing provided by
           <a
@@ -1357,7 +1268,18 @@
           worlds stay where they are until you delete them yourself.
         </p>
       </div>
-    </details>
+    </div>
+
+    <div class="border-line flex justify-center gap-6 border-t px-6 py-4">
+      <!--changelog:start-->
+      <button type="button" popovertarget="changelog" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-xs transition-[color]">
+        Changelog
+      </button>
+      <!--changelog:end-->
+      <button type="button" popovertarget="signing" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-xs transition-[color]">
+        Code signing policy
+      </button>
+    </div>
 
     <footer
       class="text-fg-muted border-line border-t px-6 py-4 text-center text-xs"
@@ -1365,5 +1287,147 @@
       Not an official Minecraft product. Not approved by or associated with
       Mojang or Microsoft.
     </footer>
+
+    <!--release:start-->
+    <!-- The download popup: the browser's own popover, opened by the Download
+         button with no script. The OS switch is two radios and :has() in the
+         group classes, so it works without script too; src/detect.js only
+         checks the radio for the visitor's OS. %TAG% and the URLs are filled
+         in by vite.config.js from links.json. Its opening, closing and panel
+         fade are src/popup.css; the icons are lucide's x and download. -->
+    <div
+      id="download"
+      popover
+      aria-labelledby="download-title"
+      class="bg-raised text-fg border-line-strong m-auto w-[min(calc(100vw-2rem),30rem)] rounded-lg border p-0 shadow-2xl backdrop:scrim-wash"
+    >
+      <div class="group/dl flex flex-col gap-6 p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex flex-col gap-2">
+            <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
+              %TAG%
+            </p>
+            <h2 id="download-title" class="font-display m-0 text-2xl leading-tight font-semibold">
+              Get Kapital Launcher
+            </h2>
+          </div>
+          <button
+            type="button"
+            popovertarget="download"
+            popovertargetaction="hide"
+            aria-label="Close"
+            class="text-fg-muted hover:bg-hover hover:text-fg duration-fast ease-standard -mt-2 -mr-2 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent transition-[background-color,color]"
+          >
+            <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          </button>
+        </div>
+
+        <fieldset class="m-0 flex flex-col border-0 p-0">
+          <legend class="text-fg-muted mb-3 p-0 text-xs tracking-label uppercase">
+            Your system
+          </legend>
+          <div class="flex gap-3">
+            <div class="relative flex-1">
+              <input
+                type="radio"
+                name="os"
+                id="os-windows"
+                value="windows"
+                checked
+                class="peer sr-only"
+              />
+              <label
+                for="os-windows"
+                class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-hover peer-checked:text-fg peer-checked:border-accent peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-fast ease-standard flex cursor-pointer flex-col gap-1 rounded-lg border px-4 py-3.5 transition-[background-color,border-color,color]"
+              >
+                <span class="text-md font-semibold">Windows</span>
+                <span class="text-fg-muted text-xs">Windows 11</span>
+              </label>
+            </div>
+            <div class="relative flex-1">
+              <input
+                type="radio"
+                name="os"
+                id="os-macos"
+                value="macos"
+                class="peer sr-only"
+              />
+              <label
+                for="os-macos"
+                class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-hover peer-checked:text-fg peer-checked:border-accent peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-fast ease-standard flex cursor-pointer flex-col gap-1 rounded-lg border px-4 py-3.5 transition-[background-color,border-color,color]"
+              >
+                <span class="text-md font-semibold">macOS</span>
+                <span class="text-fg-muted text-xs">12 or later</span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="download-panel group-has-[#os-macos:checked]/dl:hidden flex flex-col gap-3">
+          <a
+            href="%WINDOWS_URL%"
+            class="showcase-accent bg-accent text-canvas duration-fast ease-standard inline-flex h-13 items-center justify-center gap-2.5 rounded-lg px-7.5 text-md font-semibold tracking-control no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)"
+          >
+            <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
+            Download for Windows
+          </a>
+        </div>
+
+        <div class="download-panel group-not-has-[#os-macos:checked]/dl:hidden flex flex-col gap-3">
+          <a
+            href="%MACOS_URL%"
+            class="showcase-accent bg-accent text-canvas duration-fast ease-standard inline-flex h-13 items-center justify-center gap-2.5 rounded-lg px-7.5 text-md font-semibold tracking-control no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)"
+          >
+            <svg class="size-(--layout-icon-md)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
+            Download for macOS
+          </a>
+        </div>
+
+        <!--prism:start-->
+        <!-- A chapter as a Prism instance zip, for a player who keeps Prism and
+             not the launcher (issue 251). Left out by the build when the release
+             has no zips; the URLs come from data/launcher.json. -->
+        <!-- A disclosure on a checkbox rather than details, so it can open
+             and close with motion in every browser and still need no script:
+             the panel's grid row eases from 0fr to 1fr, which grows the popup
+             with it, and it stays invisible while closed so its links are not
+             in the tab order. -->
+        <div class="group/prism border-line border-t pt-5">
+          <input type="checkbox" id="prism-toggle" class="peer sr-only" />
+          <label
+            for="prism-toggle"
+            class="text-fg-muted hover:text-fg peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-fast ease-standard flex cursor-pointer items-center justify-between gap-2 rounded-sm text-xs tracking-label uppercase transition-[color]"
+          >
+            Prism Launcher on its own
+            <svg class="size-(--layout-icon-sm) duration-slow ease-glide transition-transform group-has-checked/prism:rotate-180 motion-reduce:transition-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          </label>
+          <div
+            class="duration-slow ease-glide invisible grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity,visibility] peer-checked:visible peer-checked:grid-rows-[1fr] peer-checked:opacity-100 motion-reduce:transition-none"
+          >
+            <div class="flex min-h-0 flex-col gap-3 overflow-hidden pt-4">
+              <div class="flex flex-wrap gap-2">
+                <a href="%PRISM_LUXEMBURG_URL%" class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]">Luxemburg</a>
+                <a href="%PRISM_LICHDENSTEIN_URL%" class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]">Lichdenstein</a>
+                <a href="%PRISM_FRANGFURD_URL%" class="border-line-strong hover:bg-hover text-fg duration-fast ease-standard inline-flex h-11 items-center gap-2 rounded-md border px-4.5 text-base font-semibold no-underline transition-[background-color]">Frangfurd</a>
+              </div>
+              <p class="text-fg-muted m-0 text-xs leading-normal">
+                In Prism, choose Add Instance, then Import.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!--prism:end-->
+
+        <p class="text-fg-muted m-0 text-xs leading-normal">
+          Not code-signed yet, so your system warns on first run.
+          <a
+            href="%NOTES_URL%"
+            class="text-accent underline-offset-2 hover:underline"
+            >How to open it</a
+          >
+        </p>
+      </div>
+    </div>
+    <!--release:end-->
   </body>
 </html>

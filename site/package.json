@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "preview": "vite build && vite preview"
+    "preview": "vite build && vite preview",
+    "test": "node --test"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

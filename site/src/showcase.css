@@ -203,3 +203,117 @@
     animation-timing-function: step-end;
   }
 }
+
+/* Clickable rows (src/showcase.js). With the script the root carries
+   data-showcase="live": the animations above stop, and the same motion runs
+   from attributes the script sets. data-showcase-open is the open chapter's
+   place in the list, data-open marks its card, aria-current its row, and
+   data-motion a card entering or leaving and which way it travels. */
+:root[data-showcase="live"] {
+  animation: none;
+  --showcase-index: 0;
+  --showcase-accent: var(--chapter-luxemburg);
+  transition: --showcase-accent var(--duration-slow) var(--ease-glide);
+}
+:root[data-showcase="live"][data-showcase-open="1"] {
+  --showcase-index: 1;
+  --showcase-accent: var(--chapter-lichdenstein);
+}
+:root[data-showcase="live"][data-showcase-open="2"] {
+  --showcase-index: 2;
+  --showcase-accent: var(--chapter-frangfurd);
+}
+
+[data-showcase="live"] .showcase-highlight {
+  animation: none;
+  transform: translateY(calc(var(--showcase-index) * (100% + var(--spacing))));
+  border-color: color-mix(
+    in srgb,
+    var(--showcase-accent) var(--accent-edge-mix),
+    transparent
+  );
+  transition: transform var(--duration-slow) var(--ease-glide);
+}
+
+[data-showcase="live"] .showcase-row-art {
+  animation: none;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-glide);
+}
+[data-showcase="live"] [aria-current="true"] > .showcase-row-art {
+  opacity: 1;
+}
+
+/* A card travels the slide distance, blurring at the middle of its travel,
+   the way the cycle above moves it. */
+[data-showcase="live"] .showcase-card {
+  animation: none;
+  opacity: 0;
+}
+[data-showcase="live"] .showcase-card[data-open] {
+  opacity: 1;
+}
+[data-showcase="live"] .showcase-card[data-motion="enter-up"],
+[data-showcase="live"] .showcase-card[data-motion="leave-down"] {
+  --showcase-shift: var(--layout-slide);
+}
+[data-showcase="live"] .showcase-card[data-motion="enter-down"],
+[data-showcase="live"] .showcase-card[data-motion="leave-up"] {
+  --showcase-shift: calc(-1 * var(--layout-slide));
+}
+@keyframes showcase-enter {
+  from {
+    transform: translateY(var(--showcase-shift));
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes showcase-leave {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateY(var(--showcase-shift));
+    opacity: 0;
+  }
+}
+@keyframes showcase-travel-blur {
+  0%,
+  100% {
+    filter: blur(0);
+  }
+  50% {
+    filter: blur(var(--effect-motion-blur));
+  }
+}
+[data-showcase="live"] .showcase-card[data-motion^="enter"] {
+  animation:
+    showcase-enter var(--duration-slow) var(--ease-glide) both,
+    showcase-travel-blur var(--duration-slow) ease-in-out;
+}
+[data-showcase="live"] .showcase-card[data-motion^="leave"] {
+  animation:
+    showcase-leave var(--duration-slow) var(--ease-glide) both,
+    showcase-travel-blur var(--duration-slow) ease-in-out;
+}
+
+/* Reduced motion, as for the cycle: the cards cross-fade in place and the
+   highlight steps to its row. */
+@media (prefers-reduced-motion: reduce) {
+  [data-showcase="live"] .showcase-card[data-motion] {
+    --showcase-shift: 0;
+  }
+  [data-showcase="live"] .showcase-card[data-motion^="enter"] {
+    animation: showcase-enter var(--duration-slow) ease-in-out both;
+  }
+  [data-showcase="live"] .showcase-card[data-motion^="leave"] {
+    animation: showcase-leave var(--duration-slow) ease-in-out both;
+  }
+  [data-showcase="live"] .showcase-highlight {
+    transition: none;
+  }
+}
