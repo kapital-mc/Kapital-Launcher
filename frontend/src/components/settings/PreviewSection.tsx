@@ -8,7 +8,6 @@ import { useSettingsStore } from '../../stores/useSettingsStore'
 import { errMsg } from '../../lib/ipc'
 import { ErrorLine, Hint } from '../ui/Notes'
 import { Segmented } from '../ui/Segmented'
-import { SubHeading } from '../ui/Section'
 import { TextLink } from '../ui/TextLink'
 
 interface Props {
@@ -30,9 +29,8 @@ interface Props {
  * A start brings the chapter up, closing every page over it, because the
  * screen under review is not this one; a Tailscale situation opens the
  * settings of the first chapter with a Tailscale address, where its row is.
- * Loaded on demand, like the pack source section, to stay out of the entry
- * bundle. Its root keeps a minimum height, as SettingsPanel's fallback does
- * while it loads, so Support and About below it stay where they are.
+ * It sits closed under its Preview heading (SettingsPanel), and is loaded on
+ * demand when that opens, to stay out of the entry bundle.
  */
 export function PreviewSection({ onStarted }: Props) {
   const chapters = useChapterStore((s) => s.manifest.chapters)
@@ -88,8 +86,7 @@ export function PreviewSection({ onStarted }: Props) {
     situations.filter((s) => s.scope === scope).map(link)
 
   return (
-    <div className="flex min-h-96 flex-col gap-3">
-      <SubHeading>Preview</SubHeading>
+    <div className="flex flex-col gap-3">
       <Hint>
         Shows a screen that a run only has when something goes wrong, so it can be looked at. A
         preview is made up: it writes nothing, starts nothing and reaches no network, and a real

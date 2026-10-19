@@ -30,7 +30,7 @@ import { Button } from '../ui/Button'
 import { Hint } from '../ui/Notes'
 import { Icon } from '../ui/Icon'
 import { Page } from '../ui/Page'
-import { SubHeading } from '../ui/Section'
+import { SubSection } from '../ui/Section'
 import { Segmented } from '../ui/Segmented'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { TextField } from '../ui/TextField'
@@ -281,24 +281,14 @@ function DeveloperSection({
         ))}
       </SettingsCard>
       {/* A preview shows its screen, which is not this one: the chapter is
-          opened and every page over it closes (issue 124). */}
-      <Suspense fallback={<PreviewFallback />}>
-        <PreviewSection onStarted={onShowChapter} />
-      </Suspense>
+          opened and every page over it closes (issue 124). Closed until its
+          heading is clicked, and only then loaded. */}
+      <SubSection title="Preview">
+        <Suspense fallback={null}>
+          <PreviewSection onStarted={onShowChapter} />
+        </Suspense>
+      </SubSection>
     </SettingsSection>
-  )
-}
-
-/**
- * What the preview section's place holds while it loads: its heading and about
- * the room it takes, so Support and About do not jump when it arrives. The
- * loaded section keeps the same minimum.
- */
-function PreviewFallback() {
-  return (
-    <div className="flex min-h-96 flex-col gap-3">
-      <SubHeading>Preview</SubHeading>
-    </div>
   )
 }
 

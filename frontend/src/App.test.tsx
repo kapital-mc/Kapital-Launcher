@@ -561,6 +561,7 @@ describe('App', () => {
       expect(await screen.findByRole('region', { name: 'Settings' })).toBeInTheDocument()
 
       fireEvent.click(screen.getByRole('button', { name: 'Developer' }))
+      fireEvent.click(await screen.findByRole('button', { name: 'Preview' }))
       // The previews are a lazy chunk; under a full run its first load can take past a second.
       fireEvent.click(
         await screen.findByRole(
