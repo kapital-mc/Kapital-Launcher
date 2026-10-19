@@ -158,9 +158,14 @@ its lines and fades into the launcher. The compact wordmark picture was traced
 into vector outlines (`assets/brand/kapital-launcher-wordmark.svg`: the whole
 mark's outline and each letter's face, in reading order), and `LaunchIntro`
 covers the window on every start while the launcher loads under it: the lines
-draw in letter by letter over the slow duration, the picture fills them over
-the reveal, and the cover fades and grows slightly over the grace, about a
-second in all, from the motion tokens. Only the cover is in the first paint's
-bundle; the lines load behind it. Reduced motion skips it. `[verify]` on the
+draw in letter by letter over the slow duration, the picture fills them from
+the outside inward, and the cover fades and grows slightly over the grace,
+about a second in all, from the motion tokens. The fill was a plain fade at
+first; the author asked for it to close in from the edges with some variety.
+So the mark's dark rim fills from its silhouette inward, then each letter's
+face from its own edge, each at a random moment and pace within the tokens:
+a mask per part whose stroke along the part's edge grows to twice the part's
+`data-reach`, clipped to the part. Only the cover and its timeline are in the
+first paint's bundle; the drawing (`IntroMark`) loads behind it. Reduced motion skips it. `[verify]` on the
 author's Mac: it plays once, ends on its own, and the window shows no flash
 between the native background and the cover.

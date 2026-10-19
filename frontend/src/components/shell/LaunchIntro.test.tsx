@@ -24,9 +24,10 @@ describe('LaunchIntro', () => {
     try {
       render(<LaunchIntro />)
       const intro = screen.getByTestId('launch-intro')
-      await vi.waitFor(() => expect(intro.querySelectorAll('path')).toHaveLength(16))
-      // A line each, the drawing, the picture and the cover.
-      expect(animate).toHaveBeenCalledTimes(19)
+      await vi.waitFor(() => expect(intro.querySelectorAll('[data-line]')).toHaveLength(16))
+      expect(intro.querySelectorAll('[data-fill] path')).toHaveLength(16)
+      // A line and a fill each, the lines' fade and the cover.
+      expect(animate).toHaveBeenCalledTimes(34)
       const cover = finished.at(-1)
       act(() => cover?.onfinish?.call(cover, new Event('finish') as AnimationPlaybackEvent))
       expect(screen.queryByTestId('launch-intro')).toBeNull()
