@@ -12,11 +12,12 @@
     <link rel="stylesheet" href="/src/style.css" />
     <script type="module" src="/src/detect.js"></script>
     <script type="module" src="/src/showcase.js"></script>
+    <script type="module" src="/src/popup.js"></script>
   </head>
   <!--
-    One page and two small scripts: src/detect.js picks the OS in the
+    One page and three small scripts: src/detect.js picks the OS in the
     download popup, src/showcase.js makes the window's chapter rows
-    clickable. Vite bundles them into one file, and the build makes it a
+    clickable, src/popup.js closes the popups with motion. Vite bundles them into one file, and the build makes it a
     classic script after the stylesheet, so the body is not parsed, and cannot be painted unstyled,
     until the stylesheet has loaded (stylesheetFirst in vite.config.js). The links are filled in at build time by
     vite.config.js from links.json and the manifest; see site/README.md. The

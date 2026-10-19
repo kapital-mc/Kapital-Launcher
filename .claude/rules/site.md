@@ -8,10 +8,11 @@ paths:
 `site/README.md` covers the page, its links and the Cloudflare setup, and
 `docs/adr/0009-download-site.md` records why it is built this way. The rules:
 
-- **Two small scripts, bundled into one, with no network and no storage.**
+- **Three small scripts, bundled into one, with no network and no storage.**
   `src/detect.js` checks the download popup's Windows or macOS radio;
   `src/showcase.js` makes the window's chapter rows clickable and runs the
-  cycle itself once loaded. Vite bundles both into one file, and the build
+  cycle itself once loaded; `src/popup.js` plays the popups' closing
+  animation before it hides them. Vite bundles all three into one file, and the build
   places it after the stylesheet as a classic script, so the parser waits for
   the stylesheet and no browser paints the page unstyled (`stylesheetFirst` in
   `vite.config.js`); keep it free of imports, exports and `import.meta`, which

@@ -191,7 +191,11 @@ The author asked for three changes to the page.
   code signing notice is one line linking the release notes. Every popup
   now closes visibly: the closing half runs over the slow duration on the
   glide curve, where it had the opening's fast-out curve and was over in its
-  first frames.
+  first frames. CSS alone plays it only in Chromium, the one engine that
+  keeps a closing popover in the top layer (the `overlay` transition), so a
+  third small script, `src/popup.js`, makes the popovers manual and hides
+  each one when its closing animation ends. Escape and a click outside still
+  close it, as the browser's light dismiss did.
 - **The window's chapter rows are buttons.** A click shows that chapter with
   the app's own motion and restarts the cycle, so the chosen chapter stays a
   full dwell before the next slides in. This needs a script: the CSS cycle

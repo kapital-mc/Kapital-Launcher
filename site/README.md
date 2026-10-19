@@ -4,9 +4,10 @@ One static page: the launcher's name, the version it offers, the Download and
 GitHub buttons, and under them the launcher window itself, cycling
 through its three chapters, whose rows a visitor can click. Above the footer,
 Changelog and Code signing policy each open a popup. It is separate from the
-Kapitel Kapital wiki and runs two small scripts, bundled into one file: one
-picks the operating system in the download popup, the other makes the
-window's rows clickable. Neither touches the network or storage.
+Kapitel Kapital wiki and runs three small scripts, bundled into one file: one
+picks the operating system in the download popup, one makes the window's rows
+clickable, and one closes the popups with motion. None touches the network or
+storage.
 The decision record is `docs/adr/0009-download-site.md`.
 
 ## Where the look comes from
@@ -141,11 +142,15 @@ filled in at build time. It opens with the app's reveal (a short rise out of
 a slight blur) while the page dims and softens behind it, and closes the same
 way in reverse over the slow duration on the glide curve, so the fade is seen.
 The other system's panel fades in when the switch moves: `src/popup.css`, on
-the motion tokens, with no script. The changelog and code signing popups move
-the same way. All three sit at the end of the body, so a browser that cannot
-keep a closing popup in the top layer still paints its fade above the page. A
-browser without `@starting-style` shows and hides them plainly, and reduced
-motion turns the transitions off.
+the motion tokens. The changelog and code signing popups move the same way.
+Opening is the browser's own popover with CSS alone. Closing needs
+`src/popup.js`: only Chromium keeps a closing popover in the top layer while it
+fades, and other browsers drop it at once. The script makes each popover
+manual, plays the closing animation on the Close button, Escape or a click
+outside, and hides the popup when it ends. Without the script the popups still
+open and close, without the closing motion. A browser without
+`@starting-style` shows and hides them plainly, and reduced motion turns the
+motion off.
 
 The CSP in `public/_headers` allows it with `script-src 'self'` and nothing
 more, so an inline script would be blocked.
@@ -172,7 +177,7 @@ a saved copy of the real feed in `test/fixtures/releases.atom`.
 
 ## The code signing policy
 
-Beside it, "Code signing policy" opens a popup the same way, with no script.
+Beside it, "Code signing policy" opens a popup the same way.
 It holds the section SignPath Foundation
 asks a project to publish on its download page (signpath.org/terms, issue
 179): the attribution sentence, the two team roles, the privacy sentence, and
