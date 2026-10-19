@@ -12,7 +12,7 @@ describe('HeaderTools', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Bindings.OpenPrism).mockResolvedValue()
-    vi.mocked(Bindings.OpenChapterWiki).mockResolvedValue()
+    vi.mocked(Bindings.OpenExternal).mockResolvedValue()
     useEngineStore.setState({ engine: null })
     useUpdateStore.setState({ update: null, dismissed: false, error: null })
   })
@@ -21,7 +21,7 @@ describe('HeaderTools', () => {
   const tools = () =>
     render(<HeaderTools size="sm" sidebarCompact={false} onOpenSettings={() => undefined} />)
 
-  it('opens Prism only once there is one, and the open chapter wiki page', () => {
+  it('opens Prism only once there is one, and the wiki home page', () => {
     tools()
     expect(screen.getByRole('button', { name: 'Open Prism' })).toBeDisabled()
     act(() =>
@@ -32,7 +32,9 @@ describe('HeaderTools', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open Prism' }))
     expect(Bindings.OpenPrism).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByRole('button', { name: 'Open the wiki' }))
-    expect(Bindings.OpenChapterWiki).toHaveBeenCalledWith(useChapterStore.getState().selectedId)
+    expect(Bindings.OpenExternal).toHaveBeenCalledWith(
+      useChapterStore.getState().manifest.wiki.baseUrl,
+    )
     expect(screen.getByRole('button', { name: 'Settings' })).toBeEnabled()
   })
 

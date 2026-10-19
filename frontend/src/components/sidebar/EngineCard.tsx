@@ -101,7 +101,7 @@ export function EngineCard({ onOpenAccount, accountOpen = false, compact = false
               </span>
             </Fold>
           </button>
-          <Fold open={!compact} axis="x">
+          <Fold open={!compact} axis="x" className="shrink-0">
             <span className="flex pl-1.5">
               <IconButton
                 icon={RefreshCw}

@@ -1,4 +1,4 @@
-import { OpenChapterWiki } from '../../../wailsjs/go/main/App'
+import { OpenExternal } from '../../../wailsjs/go/main/App'
 import { errMsg } from '../../lib/ipc'
 import {
   BookOpen,
@@ -24,13 +24,13 @@ interface Props {
 /**
  * The tools at the left of the header bar: the sidebar's button, then the
  * settings, Prism itself (for accounts and mods, greyed out while there is no
- * Prism), the open chapter's wiki page, and, only while a newer launcher is
+ * Prism), the wiki's home page, and, only while a newer launcher is
  * out, a button in the accent that brings its popup back.
  */
 export function HeaderTools({ size, sidebarCompact, onToggleSidebar, onOpenSettings }: Props) {
   const prismFound = useEngineStore((s) => s.engine?.found === true)
   const openPrism = useEngineStore((s) => s.openPrism)
-  const chapterId = useChapterStore((s) => s.selectedId)
+  const wikiHome = useChapterStore((s) => s.manifest.wiki.baseUrl)
   const update = useUpdateStore((s) => (s.update?.available ? s.update : null))
   const reopenUpdate = useUpdateStore((s) => s.reopen)
 
@@ -63,7 +63,7 @@ export function HeaderTools({ size, sidebarCompact, onToggleSidebar, onOpenSetti
         title="Open the wiki"
         size={size}
         onClick={() =>
-          void OpenChapterWiki(chapterId).catch((e) => console.warn('open wiki', errMsg(e)))
+          void OpenExternal(wikiHome).catch((e) => console.warn('open wiki', errMsg(e)))
         }
       />
       {update && (

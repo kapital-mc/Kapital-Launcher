@@ -96,6 +96,6 @@ them snaps instead).
 The author then asked for the bar's left side to carry the launcher's tools
 after the sidebar's button: Settings (moved from the right, which now holds
 only the window buttons off macOS), Open Prism (greyed out while there is no
-Prism), the open chapter's wiki page, and, only while a newer launcher is out,
+Prism), the wiki's home page, and, only while a newer launcher is out,
 an update button in the accent that brings the update popup back after Not
 now (`components/shell/HeaderTools`).

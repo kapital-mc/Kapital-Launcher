@@ -34,7 +34,11 @@ export function Fold({ open, axis, className = '', children }: Props) {
       inert={!open}
       className={`duration-slow ease-glide grid motion-reduce:transition-none ${track} ${className}`}
     >
-      <span className={`block min-h-0 min-w-0 overflow-hidden ${fade(open)}`}>{children}</span>
+      {/* The clip reaches 4px past the content (the focus ring's width and offset), so a
+          control's ring at the fold's edge is drawn whole. */}
+      <span className={`-m-1 block min-h-0 min-w-0 overflow-hidden p-1 ${fade(open)}`}>
+        {children}
+      </span>
     </span>
   )
 }
