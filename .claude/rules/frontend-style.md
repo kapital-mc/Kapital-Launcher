@@ -30,7 +30,8 @@ percentages. A component's look is its utility classes.
 Colours: `bg-sunken bg-canvas bg-raised bg-raised-2 bg-hover`,
 `text-fg text-fg-soft text-fg-muted text-fg-faint`, `border-line
 border-line-strong`, `text-accent bg-accent bg-accent-wash border-accent-edge`,
-`text-warning text-danger`, and `bg-chapter-<id>` for the rare place a chapter's
+`text-success text-warning text-danger` (and `value-tone`, a readout whose colour fades
+through the three as its value gets worse: `RangeField`'s `tone`, the memory slider), and `bg-chapter-<id>` for the rare place a chapter's
 colour is needed outside its own scope. Type: `text-2xs` to `text-2xl` and
 `text-display`; `font-ui font-display font-mono`; `tracking-control
 tracking-label tracking-eyebrow`. Radius: `rounded-sm rounded-md
@@ -67,6 +68,9 @@ carrying a copy of it that fades as it rises, while the column stays empty
 (`shell/LaunchIntro`) runs its timeline with the Web Animations API from the
 same tokens (`ms`, `token` from `lib/smoothResize`), and a line too long for its place fades at its
 end (`fade-end`) rather than ending in an ellipsis where a control sits over it.
+
+Every `ui/Scrollable` glides on the wheel (`lib/smoothWheel`): WebKit moves a mouse wheel's
+steps at once.
 
 Spacing is Tailwind's default 4px scale, which is what the reference was drawn
 on; `p-14` is 56px. Do not add a spacing token for a value the scale already has.

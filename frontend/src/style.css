@@ -760,3 +760,21 @@
     animation: none;
   }
 }
+
+/* A readout coloured by how good its value is (ui/RangeField's `tone`): success
+   mixed towards warning by --tone-warning, then that towards danger by
+   --tone-danger, both set on the element. The colour follows the value, and a
+   step between two values fades. */
+@utility value-tone {
+  color: color-mix(
+    in oklab,
+    var(--danger) var(--tone-danger),
+    color-mix(in oklab, var(--warning) var(--tone-warning), var(--success))
+  );
+  transition: color var(--duration-reveal) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  .value-tone {
+    transition: none;
+  }
+}

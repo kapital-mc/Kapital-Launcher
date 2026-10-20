@@ -25,6 +25,7 @@
   --color-chapter-luxemburg: var(--chapter-luxemburg);
   --color-chapter-lichdenstein: var(--chapter-lichdenstein);
   --color-chapter-frangfurd: var(--chapter-frangfurd);
+  --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-logo-gradient-top: var(--logo-gradient-top);
@@ -179,6 +180,7 @@
   --chapter-luxemburg: #e0aa4e;
   --chapter-lichdenstein: #5cbfa2;
   --chapter-frangfurd: #7cbfe0;
+  --success: #8fcf7a;
   --warning: #e0aa4e;
   --danger: #ef7a5e;
   --logo-gradient-top: #f9ae9f;
@@ -202,6 +204,7 @@
   --chapter-luxemburg: #8a6512;
   --chapter-lichdenstein: #1a6b55;
   --chapter-frangfurd: #1c6a8e;
+  --success: #3d7a2b;
   --warning: #8a6512;
   --danger: #b23e21;
 }
@@ -224,6 +227,7 @@
     --chapter-luxemburg: #8a6512;
     --chapter-lichdenstein: #1a6b55;
     --chapter-frangfurd: #1c6a8e;
+    --success: #3d7a2b;
     --warning: #8a6512;
     --danger: #b23e21;
   }

@@ -118,7 +118,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 96.0 on 2026-10-20: the busy mark is drawn by ui/Spinner, an arc run round by its dash
 // offset (and its keyframes in the entry's CSS) instead of a rotated icon, which wobbled in
 // WebKit; the downloads section and the hero both show it. Measured 95.96 KB.
-const BUDGET_KB = 96.0
+// 96.5 the same day: every Scrollable glides on the wheel (lib/smoothWheel), and the main
+// view is one, so it is in the entry. Loading it later split smoothResize into a chunk of its
+// own and saved nothing. Measured 96.43 KB.
+const BUDGET_KB = 96.5
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

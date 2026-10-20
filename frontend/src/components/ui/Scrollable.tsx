@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ElementType, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import { smoothWheel } from '../../lib/smoothWheel'
 
 interface Props {
   children: ReactNode
@@ -17,8 +18,8 @@ const MIN_THUMB = 32
  * A scroll container whose scrollbar is a pill drawn over the content (#56).
  * The native bar is hidden app-wide (style.css) because it takes a strip
  * beside the content and draws its own track and buttons; this thumb follows
- * the element's own scrolling and drags it back, and nothing else changes:
- * the wheel, the keys and touch still scroll the element itself.
+ * the element's own scrolling and drags it back. The keys and touch still
+ * scroll the element itself; the wheel glides (`lib/smoothWheel`).
  */
 export function Scrollable({ children, as: Tag = 'div', className, ...rest }: Props) {
   const ref = useRef<HTMLElement>(null)
@@ -53,6 +54,8 @@ export function Scrollable({ children, as: Tag = 'div', className, ...rest }: Pr
       ro?.disconnect()
     }
   }, [measure])
+
+  useEffect(() => (ref.current ? smoothWheel(ref.current) : undefined), [])
 
   // Dragging the thumb scrolls the element by the same proportion.
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {

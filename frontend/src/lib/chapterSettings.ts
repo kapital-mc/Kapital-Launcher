@@ -40,3 +40,23 @@ export function presetLabel(name: string): string {
 export function presetNote(name: string): string | undefined {
   return name === 'zgc' ? 'Java 21 and later' : undefined
 }
+
+const GB = 1024
+
+/**
+ * How far a memory setting is from comfortable, from 0 (fine) through 1
+ * (worth a look) to 2 (likely trouble), for the readout's colour. Within a
+ * gigabyte of the pack's recommendation is fine, and four away is trouble,
+ * either side: too little runs out mid-game, too much buys nothing the pack
+ * uses. Whatever the pack says, the machine keeps some for itself and for the
+ * game's memory outside Java's heap: six gigabytes left is fine, three is
+ * trouble. The two measures are linear between their ends, so the colour
+ * moves with the slider rather than jumping at a line.
+ */
+export function memoryTone(mb: number, packMb: number, machineMb: number): number {
+  const span = (from: number, to: number, v: number) => (2 * (v - from)) / (to - from)
+  const below = packMb > 0 ? span(packMb - GB, packMb - 4 * GB, mb) : 0
+  const above = packMb > 0 ? span(packMb + GB, packMb + 4 * GB, mb) : 0
+  const left = machineMb > 0 ? span(6 * GB, 3 * GB, machineMb - mb) : 0
+  return Math.min(2, Math.max(0, below, above, left))
+}
