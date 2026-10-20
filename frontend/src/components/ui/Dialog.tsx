@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from '../../lib/icons'
+import { ms } from '../../lib/smoothResize'
 import { useEscapeClose } from '../../lib/useEscapeClose'
 import { IconButton } from './IconButton'
 import { Smooth } from './Smooth'
@@ -80,6 +81,13 @@ export function Dialog({
   const [measured, setMeasured] = useState(false)
   // The surface has reached the box, which now stands alone.
   const [risen, setRisen] = useState(false)
+  // Called once, however the popup was closed and whichever of its ends fires first.
+  const gone = useRef(false)
+  const done = () => {
+    if (gone.current) return
+    gone.current = true
+    onCancel()
+  }
   const close = origin
     ? () => {
         // The box may have grown since it opened (a body that loaded late): the surface
@@ -90,7 +98,13 @@ export function Dialog({
         setRisen(false)
         setLeaving(true)
       }
-    : onCancel
+    : () => {
+        // Without the Web Animations API (the tests) nothing would end the sinking.
+        if (typeof box.current?.getAnimations !== 'function') return onCancel()
+        setLeaving(true)
+        // WebKit has been seen to drop an animationend; the box goes regardless.
+        window.setTimeout(done, ms('--duration-reveal') + ms('--duration-fast'))
+      }
   useEscapeClose(close)
   useEffect(() => {
     const before = document.activeElement
@@ -123,7 +137,9 @@ export function Dialog({
   // Without an origin the box rises into place as a page's body does. With one, the
   // surface does the moving and the box's content fades in once it is there.
   const motion = !origin
-    ? 'reveal'
+    ? leaving
+      ? 'reveal-out'
+      : 'reveal'
     : !measured
       ? 'opacity-0'
       : leaving
@@ -146,7 +162,7 @@ export function Dialog({
           ref={surface}
           aria-hidden
           onAnimationEnd={(e) => {
-            if (e.target === e.currentTarget && leaving) onCancel()
+            if (e.target === e.currentTarget && leaving) done()
           }}
           className={`${tone} pointer-events-none fixed overflow-hidden rounded-lg border ${lift}`}
         >
@@ -172,8 +188,11 @@ export function Dialog({
           aria-labelledby={titleId}
           tabIndex={-1}
           onAnimationEnd={(e) => {
+            if (e.target !== e.currentTarget) return
             // The content is all there: the box now stands alone over the page.
-            if (origin && e.target === e.currentTarget && !leaving) setRisen(true)
+            if (origin && !leaving) setRisen(true)
+            // Sunk out of sight: now it may go.
+            if (!origin && leaving) done()
           }}
           className={`${tone} pointer-events-auto w-full max-w-120 rounded-lg border p-6 text-sm outline-none ${motion}`}
           inner="flex flex-col gap-4"

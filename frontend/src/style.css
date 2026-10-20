@@ -232,12 +232,31 @@
 @utility reveal {
   animation: reveal-in var(--duration-reveal) var(--ease-standard) both;
 }
+/* The way back: a popup with no column to lower into sinks the same few px into
+   the same blur as it fades (ui/Dialog), and is unmounted by its animationend.
+   Keyframes of its own, not reveal-in reversed: a browser keeps an animation
+   whose name did not change and only turns it round, already finished. */
+@keyframes reveal-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--layout-reveal-rise));
+    filter: blur(var(--effect-reveal-blur));
+  }
+}
+@utility reveal-out {
+  animation: reveal-out var(--duration-reveal) var(--ease-standard) both;
+}
 @utility reveal-wait {
   animation: card-fade-in var(--duration-fast) var(--ease-standard) var(--duration-grace) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     animation: card-fade-in var(--duration-fast) ease-in-out both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-out {
+    animation: card-fade-out var(--duration-fast) ease-in-out both;
   }
 }
 

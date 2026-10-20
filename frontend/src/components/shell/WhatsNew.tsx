@@ -54,7 +54,10 @@ export function WhatsNew() {
   const releases = whatsNew.releases
 
   return (
+    // Closing sinks the popup out of sight before the version is recorded; when that fails,
+    // the popup comes back with the error.
     <Dialog
+      key={error ?? ''}
       title="What's new"
       facts={`Kapital Launcher ${whatsNew.version}`}
       onCancel={() => void close()}
