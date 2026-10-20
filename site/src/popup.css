@@ -2,11 +2,11 @@
    with the app's reveal (a short rise out of a slight blur,
    frontend/src/style.css) and closes the same way in reverse, while the page
    dims and softens behind it, and in the download popup the panel for the
-   other system fades in when the switch moves. Opening is CSS on the
-   browser's own popover: @starting-style gives it somewhere to start from,
-   and display and overlay are transitioned as discrete properties. Closing
-   is the data-closing animation below, which src/popup.js plays before it
-   hides the popup; the transitions remain for a page without the script. A
+   other system fades in when the switch moves. With src/popup.js the
+   opening waits for the popup's first frame (data-opening) and the closing
+   is the data-closing animation, played before the popup is hidden. Without
+   it, @starting-style gives the opening somewhere to start from and display
+   and overlay are transitioned as discrete properties for the closing. A
    browser without either simply shows and hides the popup.
 
    A transition runs with the timing of the state it goes to. Opening is the
@@ -62,6 +62,20 @@
   [popover]:popover-open::backdrop {
     opacity: 0;
   }
+}
+
+/* The opening half when src/popup.js runs: it shows the popup with
+   data-opening, which holds it at the start of the reveal until its first
+   frame is drawn, then removes it, and the transition above plays. */
+[popover][data-opening]:popover-open {
+  opacity: 0;
+  translate: 0 var(--layout-reveal-rise);
+  filter: blur(var(--effect-reveal-blur));
+  transition: none;
+}
+[popover][data-opening]:popover-open::backdrop {
+  opacity: 0;
+  transition: none;
 }
 
 /* The closing half when src/popup.js runs: it keeps the popup open, in the
