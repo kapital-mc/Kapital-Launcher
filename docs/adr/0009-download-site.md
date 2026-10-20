@@ -199,7 +199,10 @@ The author asked for three changes to the page.
   found no opening motion in Safari either: there the first frame of an open
   popup can outlast the 200 ms fade, so the fade was over before it was
   drawn. The script now holds the popup clear for two frames before the
-  opening transition runs.
+  opening transition runs. The author also saw a clipped glow flash when hovering the
+  Download button: the glow behind the window was a box under a large blur
+  filter, which Safari repaints in pieces when something beside it changes.
+  It is now a radial gradient, with no filter.
 - **The window's chapter rows are buttons.** A click shows that chapter with
   the app's own motion and restarts the cycle, so the chosen chapter stays a
   full dwell before the next slides in. This needs a script: the CSS cycle
