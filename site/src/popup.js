@@ -1,10 +1,15 @@
-// Closes the page's popups with motion in every browser. CSS alone can only
-// play a popover's closing half where the browser keeps it in the top layer
-// while it fades (the overlay transition); elsewhere it is removed at once.
-// So this script takes the closing over: it makes each popover manual, plays
-// the closing animation (data-closing in src/popup.css) on the Close button,
-// Escape or a click outside, and only then hides it. Opening stays the
-// browser's own. Without the script the popovers close as before.
+// Opens and closes the page's popups with motion in every browser. CSS alone
+// can only play a popover's closing half where the browser keeps it in the
+// top layer while it fades (the overlay transition); elsewhere it is removed
+// at once. So this script takes the closing over: it makes each popover
+// manual, plays the closing animation (data-closing in src/popup.css) on the
+// Close button, Escape or a click outside, and only then hides it.
+//
+// The opening is held too. The first frame of an open popup, with the page
+// blurred behind it, can take longer than the whole fade in Safari, so the
+// fade was over before anything was drawn. data-opening keeps the popup clear
+// for two frames, then lets the opening transition run. Without the script
+// the popovers open and close on CSS alone, as before.
 //
 // Like detect.js it runs as part of one classic script, so nothing is
 // declared at the top level.
@@ -18,6 +23,7 @@ document.addEventListener(
 
     const close = (popup) => {
       if (!isOpen(popup) || popup.hasAttribute('data-closing')) return
+      popup.removeAttribute('data-opening')
       popup.setAttribute('data-closing', '')
       const done = () => {
         popup.hidePopover()
@@ -30,6 +36,13 @@ document.addEventListener(
 
     for (const popup of popups) {
       popup.popover = 'manual'
+      popup.addEventListener('beforetoggle', (event) => {
+        if (event.newState === 'open') popup.setAttribute('data-opening', '')
+      })
+      popup.addEventListener('toggle', (event) => {
+        if (event.newState !== 'open') return
+        requestAnimationFrame(() => requestAnimationFrame(() => popup.removeAttribute('data-opening')))
+      })
       for (const button of popup.querySelectorAll('[popovertargetaction="hide"]')) {
         button.addEventListener('click', (event) => {
           event.preventDefault()

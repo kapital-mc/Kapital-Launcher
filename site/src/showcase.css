@@ -180,6 +180,12 @@
 .showcase-accent {
   background-color: var(--showcase-accent);
 }
+/* The glow behind the window is a radial gradient, not a blurred box. Safari
+   repaints a large blur filter in pieces when something beside it changes,
+   such as the Download button's hover, and the glow flashed clipped. */
+.showcase-glow {
+  background: radial-gradient(closest-side, var(--showcase-accent) 40%, transparent);
+}
 
 /* With reduced motion the cards only cross-fade, on the same clock, and the
    highlight steps to its row instead of gliding; the colours still ease. */

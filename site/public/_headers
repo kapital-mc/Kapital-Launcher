@@ -2,7 +2,7 @@
 # (https://developers.cloudflare.com/pages/configuration/headers/).
 # The page runs one script file, its own (src/detect.js picks the OS in the
 # download popup, src/showcase.js makes the window's chapter rows clickable,
-# src/popup.js closes the popups with motion),
+# src/popup.js opens and closes the popups with motion),
 # and loads nothing from another origin, so the policy allows
 # its own scripts, styles, images and fonts and nothing else. No inline script.
 /*

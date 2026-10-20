@@ -11,8 +11,8 @@ paths:
 - **Three small scripts, bundled into one, with no network and no storage.**
   `src/detect.js` checks the download popup's Windows or macOS radio;
   `src/showcase.js` makes the window's chapter rows clickable and runs the
-  cycle itself once loaded; `src/popup.js` plays the popups' closing
-  animation before it hides them. Vite bundles all three into one file, and the build
+  cycle itself once loaded; `src/popup.js` starts the popups' opening
+  fade after their first frame and plays the closing before it hides them. Vite bundles all three into one file, and the build
   places it after the stylesheet as a classic script, so the parser waits for
   the stylesheet and no browser paints the page unstyled (`stylesheetFirst` in
   `vite.config.js`); keep it free of imports, exports and `import.meta`, which

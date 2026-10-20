@@ -143,12 +143,14 @@ a slight blur) while the page dims and softens behind it, and closes the same
 way in reverse over the slow duration on the glide curve, so the fade is seen.
 The other system's panel fades in when the switch moves: `src/popup.css`, on
 the motion tokens. The changelog and code signing popups move the same way.
-Opening is the browser's own popover with CSS alone. Closing needs
-`src/popup.js`: only Chromium keeps a closing popover in the top layer while it
-fades, and other browsers drop it at once. The script makes each popover
-manual, plays the closing animation on the Close button, Escape or a click
-outside, and hides the popup when it ends. Without the script the popups still
-open and close, without the closing motion. A browser without
+Both halves go through `src/popup.js`. Only Chromium keeps a closing popover
+in the top layer while it fades, and other browsers drop it at once, so the
+script makes each popover manual, plays the closing animation on the Close
+button, Escape or a click outside, and hides the popup when it ends. In
+Safari the first frame of an open popup, with the page blurred behind it, can
+take longer than the whole opening fade, so the script also holds the popup
+clear until that frame is drawn and only then lets the fade run. Without the
+script the popups still open and close on CSS alone. A browser without
 `@starting-style` shows and hides them plainly, and reduced motion turns the
 motion off.
 
