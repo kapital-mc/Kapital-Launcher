@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { downloadRows } from '../../lib/downloads'
 import type { DownloadRow } from '../../lib/downloads'
-import { LoaderCircle, X } from '../../lib/icons'
+import { X } from '../../lib/icons'
 import { errMsg } from '../../lib/ipc'
 import { useChapterStore } from '../../stores/useChapterStore'
 import { useEngineStore } from '../../stores/useEngineStore'
@@ -9,8 +9,8 @@ import { useTailscaleStore } from '../../stores/useTailscaleStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Fold } from '../ui/Fold'
 import { Grow } from '../ui/Grow'
-import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
+import { Spinner } from '../ui/Spinner'
 import { ProgressBar } from '../ui/ProgressBar'
 import { Smooth } from '../ui/Smooth'
 
@@ -96,11 +96,7 @@ function Row({ row, compact, first }: { row: DownloadRow; compact: boolean; firs
           {/* The space after the spinner is inside the fold, so it goes with it. */}
           <Fold open={compact} axis="x">
             <span className="flex pr-1">
-              <Icon
-                icon={LoaderCircle}
-                size="xs"
-                className="animate-spin motion-reduce:animate-none"
-              />
+              <Spinner size="2xs" />
             </span>
           </Fold>
           {Math.floor(row.value * 100)}%

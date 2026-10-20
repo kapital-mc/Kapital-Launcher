@@ -35,6 +35,6 @@ export const LAYOUT = {
   titlebar: 40,
   titlebarMac: 52,
   controlsMac: 80,
-  icon: { xs: 14, sm: 16, md: 18, stroke: 1.2 },
+  icon: { '2xs': 10, xs: 14, sm: 16, md: 18, stroke: 1.2 },
   splash: { width: 720, height: 405 },
 } as const

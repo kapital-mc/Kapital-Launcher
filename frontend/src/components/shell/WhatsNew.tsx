@@ -2,7 +2,6 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { selectWhatsNewShown, useWhatsNewStore } from '../../stores/useWhatsNewStore'
 import type { Changelog, WhatsNewHighlight } from '../../types'
 import { ChevronDown } from '../../lib/icons'
-import { Button } from '../ui/Button'
 import { Dialog } from '../ui/Dialog'
 import { Grow } from '../ui/Grow'
 import { Icon } from '../ui/Icon'
@@ -36,8 +35,8 @@ function longDate(iso: string) {
  * since the last one seen puts forward, written by hand for it
  * (data/whatsnew.json), with small ones grouped under a heading such as Bug
  * fixes. The full changelog folds away under them and is read from the download
- * site only when opened. Continue, Escape or a click outside records the
- * version as seen, so it shows once.
+ * site only when opened. The X in its corner (or Escape) records the version as
+ * seen, so it shows once; a click outside does not close it.
  *
  * App mounts it once for the app's lifetime, in a chunk of its own: it asks Go
  * on mount and renders nothing unless something is new.
@@ -59,11 +58,13 @@ export function WhatsNew() {
       title="What's new"
       facts={`Kapital Launcher ${whatsNew.version}`}
       onCancel={() => void close()}
+      closable
+      holdOnCover
     >
       {/* The highlights and the changelog scroll inside the box, which then fits the smallest
-          window: its 640px less the layer's padding, the title and Continue. The thumb sits in
+          window: its 640px less the layer's padding and the title. The thumb sits in
           the box's right padding. */}
-      <div className="-mr-4 flex max-h-92 min-h-0">
+      <div className="-mr-4 flex max-h-104 min-h-0">
         <Scrollable aria-label="Changes">
           <div className="flex flex-col gap-4 pr-4">
             {releases.map((r) => (
@@ -84,9 +85,6 @@ export function WhatsNew() {
           </div>
         </Scrollable>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={() => void close()}>Continue</Button>
-      </div>
       {error && <p className="text-danger m-0 text-xs">{error}</p>}
     </Dialog>
   )
@@ -96,9 +94,9 @@ export function WhatsNew() {
 function Highlight({ highlight: h }: { highlight: WhatsNewHighlight }) {
   return (
     <li className="flex gap-3">
-      <span aria-hidden className="bg-accent rounded-pill mt-1.5 size-1.5 shrink-0" />
+      <span aria-hidden className="bg-accent rounded-pill mt-2 size-2 shrink-0" />
       <div className="flex min-w-0 flex-col gap-1">
-        <span className="text-fg font-medium">{h.title}</span>
+        <span className="text-fg text-base font-semibold">{h.title}</span>
         {h.text && <p className="text-fg-soft m-0 leading-normal">{h.text}</p>}
         {h.items && h.items.length > 0 && (
           <ul className="text-fg-soft m-0 flex list-disc flex-col gap-0.5 pl-4 leading-normal">

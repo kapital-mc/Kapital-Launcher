@@ -115,7 +115,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 95.9 on 2026-10-19: the launch intro's cover and its animation are in the entry, since they
 // are the first paint; the traced wordmark's lines load in a chunk of their own behind the
 // cover. Measured 95.8 KB.
-const BUDGET_KB = 95.9
+// 96.0 on 2026-10-20: the busy mark is drawn by ui/Spinner, an arc run round by its dash
+// offset (and its keyframes in the entry's CSS) instead of a rotated icon, which wobbled in
+// WebKit; the downloads section and the hero both show it. Measured 95.96 KB.
+const BUDGET_KB = 96.0
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

@@ -337,7 +337,7 @@ export const LAYOUT = {
   titlebar: ${src.layout.titlebar},
   titlebarMac: ${src.layout.titlebarMac},
   controlsMac: ${src.layout.controlsMac},
-  icon: { xs: ${src.layout.icon.xs}, sm: ${src.layout.icon.sm}, md: ${src.layout.icon.md}, stroke: ${src.layout.icon.stroke} },
+  icon: { '2xs': ${src.layout.icon['2xs']}, xs: ${src.layout.icon.xs}, sm: ${src.layout.icon.sm}, md: ${src.layout.icon.md}, stroke: ${src.layout.icon.stroke} },
   splash: { width: ${src.layout.splash.width}, height: ${src.layout.splash.height} },
 } as const
 `

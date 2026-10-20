@@ -742,3 +742,21 @@
     transition: filter var(--duration-fast) var(--ease-standard);
   }
 }
+
+/* The busy mark's arc (ui/Spinner): four fifths of a ring of radius 9, moved one
+   whole circumference (2π·9) along it per turn, so it runs round without the
+   element turning. With reduced motion it stands still. */
+@keyframes spin-arc {
+  to {
+    stroke-dashoffset: -56.55;
+  }
+}
+@utility spin-arc {
+  stroke-dasharray: 45.24 11.31;
+  animation: spin-arc var(--duration-spin) linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin-arc {
+    animation: none;
+  }
+}

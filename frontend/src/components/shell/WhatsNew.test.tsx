@@ -69,13 +69,17 @@ describe('useWhatsNewStore', () => {
 })
 
 describe('WhatsNew', () => {
-  it('shows the highlights with grouped items, and Continue records them as seen', async () => {
+  it('shows the highlights with grouped items, and the X records them as seen', async () => {
     render(<WhatsNew />)
     expect(await screen.findByText('Tailscale')).toBeInTheDocument()
     expect(screen.getByText('Join over Tailscale.')).toBeInTheDocument()
     expect(screen.getByText('Another fix')).toBeInTheDocument()
     expect(screen.getByText('Kapital Launcher v1.0.0')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(screen.queryByRole('button', { name: 'Continue' })).toBeNull()
+    fireEvent.click(document.querySelector('.scrim-wash')!)
+    expect(screen.getByText('Tailscale')).toBeInTheDocument()
+    expect(Bindings.MarkWhatsNewSeen).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     await vi.waitFor(() => expect(screen.queryByText('Tailscale')).toBeNull())
     expect(Bindings.MarkWhatsNewSeen).toHaveBeenCalledTimes(1)
   })

@@ -47,7 +47,7 @@ describe('Downloads', () => {
     const { container } = render(<Downloads compact />)
     expect(screen.getByRole('progressbar', { name: 'Prism Launcher' })).toBeInTheDocument()
     expect(screen.getByText('50%')).toBeVisible()
-    expect(container.querySelector('svg.animate-spin')?.closest('[inert]')).toBeNull()
+    expect(container.querySelector('.spin-arc')?.closest('[inert]')).toBeNull()
     expect(screen.getByText('Prism Launcher').closest('[inert]')).not.toBeNull()
   })
 
@@ -81,6 +81,6 @@ describe('Downloads', () => {
     expect(screen.getByText('Downloading 0.0 MB of 0.0 MB')).toHaveClass('tabular-nums')
     expect(screen.getByText('50%')).toHaveClass('tabular-nums')
     // Expanded, the spinner is folded away.
-    expect(document.querySelector('svg.animate-spin')?.closest('[inert]')).not.toBeNull()
+    expect(document.querySelector('.spin-arc')?.closest('[inert]')).not.toBeNull()
   })
 })

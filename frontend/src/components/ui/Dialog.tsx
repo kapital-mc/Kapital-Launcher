@@ -10,7 +10,7 @@ interface Props {
   title: string
   /** A small line under the title, in the data face: versions, sizes, a chapter's name. */
   facts?: string
-  /** Escape, a click on the cover, the X when it has one, and whatever the body's own cancel does. */
+  /** Escape, a click on the cover unless `holdOnCover`, the X when it has one, and whatever the body's own cancel does. */
   onCancel: () => void
   /**
    * The rectangle of what opened it, such as a column of the chapter card. A
@@ -33,6 +33,8 @@ interface Props {
   frame?: DOMRect
   /** An X in the top right corner that closes it, for a popup with no question to answer. */
   closable?: boolean
+  /** A click on the cover leaves it open: only the X (and Escape) close it. */
+  holdOnCover?: boolean
   children: ReactNode
 }
 
@@ -64,6 +66,7 @@ export function Dialog({
   lifting,
   frame,
   closable,
+  holdOnCover,
   children,
 }: Props) {
   const layer = useRef<HTMLDivElement>(null)
@@ -136,7 +139,7 @@ export function Dialog({
         className={`scrim-wash absolute inset-0 ${
           !origin ? (leaving ? 'fade-out' : 'fade-in') : leaving ? 'wash-out' : 'wash-in'
         }`}
-        onClick={close}
+        onClick={holdOnCover ? undefined : close}
       />
       {origin && (
         <div

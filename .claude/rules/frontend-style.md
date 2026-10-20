@@ -92,6 +92,8 @@ variant. If you find yourself writing one, the token is wrong.
 `lib/icons.ts` as a component. A control's icon goes inside
 `components/ui/IconButton`, which owns the hit area, hover and accessible name;
 the icon itself stays `aria-hidden`. Adding an icon is one line in `icons.ts`.
+The busy mark is `ui/Spinner`, never a rotated icon: WebKit draws an SVG turned by
+CSS at a shifting fraction of a pixel, so it wobbles (WebKit bug 252385).
 
 ## Placeholders
 

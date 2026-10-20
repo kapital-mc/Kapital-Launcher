@@ -16,6 +16,7 @@ export function emitLayout(src, push) {
   push(`  --layout-controls-mac: ${src.layout.controlsMac}${unit};`)
   push(`  --layout-sidebar-compact: ${src.layout.sidebarCompact}${unit};`)
   push(`  --layout-play-min: ${src.layout.playMin}${unit};`)
+  push(`  --layout-icon-2xs: ${src.layout.icon['2xs']}${src.layout.unit};`)
   push(`  --layout-icon-xs: ${src.layout.icon.xs}${src.layout.unit};`)
   push(`  --layout-icon-sm: ${src.layout.icon.sm}${src.layout.unit};`)
   push(`  --layout-icon-md: ${src.layout.icon.md}${src.layout.unit};`)
