@@ -31,6 +31,13 @@ describe('downloadRows', () => {
       ['Frangfurd terrain', 0.25],
     ])
     expect(rows[1]!.line).toContain('installer is open')
+    expect(rows[2]!.line).toBe('Downloading 1 B of 4 B')
+    // An install is cancelled only while it downloads; the terrain at any step.
+    expect(rows.map((r) => r.cancel)).toEqual([
+      { kind: 'prism' },
+      null,
+      { kind: 'terrain', chapterId: 'frangfurd' },
+    ])
   })
 
   it('counts the steps after a download as full', () => {

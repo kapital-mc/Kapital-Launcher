@@ -15,7 +15,6 @@ import { Dialog } from '../ui/Dialog'
 import { Drift } from '../ui/Drift'
 import { FactList } from '../ui/Fact'
 import { IconButton } from '../ui/IconButton'
-import { Reveal } from '../ui/Reveal'
 import { TextLink } from '../ui/TextLink'
 import type { PanelEntry, PanelFact } from './PanelDetails'
 import type * as Chunk from './PanelDetails'
@@ -23,7 +22,7 @@ import type * as Chunk from './PanelDetails'
 // The popups' bodies show only when a column is expanded, so they load then and
 // stay out of the first paint and its bundle budget (scripts/check-bundle-size.mjs).
 // The popup itself is the dialog every page already has, so it opens on the click
-// and its body fades in when it is there (Reveal), as a settings page's does.
+// and a body that arrives after the box fades in as the box grows to it (ui/Smooth).
 type Details = typeof Chunk
 /** The chunk once it has loaded, so a body renders at once rather than suspending. */
 let loaded: Details | undefined
@@ -73,6 +72,8 @@ function PanelTitle({ children }: { children: string }) {
 /** Where a popup opens: the column it grows out of, and the chapter card it is centred on. */
 interface Opening {
   origin: DOMRect
+  /** A copy of the column as it looked when pressed, which the popup's surface carries. */
+  column: HTMLElement
   frame?: DOMRect
 }
 
@@ -95,12 +96,15 @@ function Popup({
       title={title}
       facts={subtitle}
       origin={at.origin}
+      lifting={at.column}
       frame={at.frame}
       closable
       onCancel={onClose}
     >
       <Suspense fallback={null}>
-        <Reveal className="flex flex-col gap-4">{children}</Reveal>
+        {/* The popup's own entrance brings the content in; a body that loads later fades in
+            with the box growing to it. */}
+        <div className="flex flex-col gap-4">{children}</div>
       </Suspense>
     </Dialog>
   )
@@ -124,6 +128,7 @@ function Column({
   label,
   onExpand,
   last,
+  lifted,
   children,
 }: {
   title: string
@@ -131,6 +136,8 @@ function Column({
   label: string
   onExpand: (at: Opening) => void
   last?: boolean
+  /** Its popup is open: the column is empty, its content having lifted out with the popup. */
+  lifted?: boolean
   children: ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -139,7 +146,9 @@ function Column({
       ref={ref}
       onPointerEnter={preload}
       onFocus={preload}
-      className={`group border-line relative flex flex-col gap-3 p-7 ${last ? '' : 'border-r'}`}
+      className={`group border-line relative flex flex-col gap-3 p-7 ${last ? '' : 'border-r'} ${
+        lifted ? '*:invisible' : ''
+      }`}
     >
       <PanelTitle>{title}</PanelTitle>
       <div className="duration-fast ease-standard absolute top-5 right-5 opacity-0 transition-opacity group-hover:opacity-100 has-focus-visible:opacity-100">
@@ -151,7 +160,12 @@ function Column({
             const el = ref.current
             if (!el) return
             const frame = el.closest('[data-popup-frame]')?.getBoundingClientRect()
-            onExpand({ origin: el.getBoundingClientRect(), frame })
+            onExpand({
+              origin: el.getBoundingClientRect(),
+              // Taken before the column empties for the popup.
+              column: el.cloneNode(true) as HTMLElement,
+              frame,
+            })
           }}
         />
       </div>
@@ -218,10 +232,20 @@ export function Panels({
 
   return (
     <section className="grid shrink-0 grid-cols-3">
-      <Column title="Pack" label="Pack details" onExpand={expand('pack')}>
-        <FactList facts={facts} />
+      <Column
+        title="Pack"
+        label="Pack details"
+        onExpand={expand('pack')}
+        lifted={open?.kind === 'pack'}
+      >
+        <FactList facts={facts} spread />
       </Column>
-      <Column title="Changelog" label="Full changelog" onExpand={expand('changelog')}>
+      <Column
+        title="Changelog"
+        label="Full changelog"
+        onExpand={expand('changelog')}
+        lifted={open?.kind === 'changelog'}
+      >
         <div className="flex flex-col gap-3">
           {entries.length === 0 ? (
             <span className="text-fg-faint text-sm">No entries yet.</span>
@@ -240,7 +264,13 @@ export function Panels({
           )}
         </div>
       </Column>
-      <Column title="From the wiki" label="Wiki details" onExpand={expand('wiki')} last>
+      <Column
+        title="From the wiki"
+        label="Wiki details"
+        onExpand={expand('wiki')}
+        lifted={open?.kind === 'wiki'}
+        last
+      >
         {/* The post drifts to the next with the hero's picture (issue 142). */}
         <Drift
           id={wikiPage?.url ?? 'teaser'}

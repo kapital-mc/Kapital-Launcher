@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { TailscaleInfo, TailscaleInstallProgress, TailscaleRelease } from '../types/tailscale'
 import { errMsg, hasWailsBridge, readOr } from '../lib/ipc'
 import {
+  CancelTailscaleInstall,
   ConnectTailscale,
   GetTailscale,
   GetTailscaleRelease,
@@ -32,6 +33,13 @@ interface TailscaleStore {
   loadRelease: () => Promise<void>
   /** A write the player approved; progress arrives as events, the outcome from the promise. */
   installTailscale: () => Promise<void>
+  /** Cancels the install while it downloads; it goes back to being an offer. */
+  cancelInstall: () => Promise<void>
+  /**
+   * A developer preview asks for the install popup (#124): the row opens it on its next render
+   * and takes the request back.
+   */
+  offerPending: boolean
   /** The next step towards reaching the chapter's server; Go picks it, the state follows as events. */
   connect: (chapterId: string) => Promise<void>
   open: () => Promise<void>
@@ -39,11 +47,15 @@ interface TailscaleStore {
   receiveInstall: (p: TailscaleInstallProgress) => void
 }
 
+/** Whether the player cancelled the install that runs, which then fails as no failure. */
+let cancelled = false
+
 export const useTailscaleStore = create<TailscaleStore>((set, get) => ({
   info: null,
   release: null,
   install: null,
   error: null,
+  offerPending: false,
 
   load: async () => {
     set({ info: (await readOr(GetTailscale, null)) ?? null })
@@ -57,12 +69,26 @@ export const useTailscaleStore = create<TailscaleStore>((set, get) => ({
     set({
       install: { phase: 'downloading', received: 0, total: get().release?.size ?? 0, error: '' },
     })
+    cancelled = false
     try {
       await InstallTailscale()
       set({ install: { phase: 'done', received: 0, total: 0, error: '' } })
       await get().load()
     } catch (e) {
-      set({ install: { phase: 'failed', received: 0, total: 0, error: errMsg(e) } })
+      set({
+        install: cancelled ? null : { phase: 'failed', received: 0, total: 0, error: errMsg(e) },
+      })
+    }
+  },
+
+  // Marked before Go is asked, as the install's own answer can come back first.
+  cancelInstall: async () => {
+    cancelled = true
+    try {
+      cancelled = await CancelTailscaleInstall()
+    } catch (e) {
+      cancelled = false
+      set({ error: errMsg(e) })
     }
   },
 
@@ -96,12 +122,12 @@ export const useTailscaleStore = create<TailscaleStore>((set, get) => ({
     }
   },
 
-  // A late event must not reopen a finished install.
+  // A late event must not reopen a finished install, and a cancelled one is an offer again.
   receiveInstall: (p) => {
     const current = get().install
     if (!p?.phase || current === null || current.phase === 'done' || current.phase === 'failed')
       return
-    set({ install: p })
+    set({ install: p.phase === 'cancelled' ? null : p })
   },
 }))
 

@@ -22,6 +22,7 @@ export namespace models {
 	    wikiPictures?: number;
 	    mapIn?: string;
 	    sidebarCompact?: boolean;
+	    seenVersion?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppSettings(source);
@@ -50,7 +51,90 @@ export namespace models {
 	        this.wikiPictures = source["wikiPictures"];
 	        this.mapIn = source["mapIn"];
 	        this.sidebarCompact = source["sidebarCompact"];
+	        this.seenVersion = source["seenVersion"];
 	    }
+	}
+	export class ReleaseNotesSection {
+	    title: string;
+	    items: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ReleaseNotesSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.title = source["title"];
+	        this.items = source["items"];
+	    }
+	}
+	export class ReleaseNotes {
+	    tag: string;
+	    date: string;
+	    sections: ReleaseNotesSection[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ReleaseNotes(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.tag = source["tag"];
+	        this.date = source["date"];
+	        this.sections = this.convertValues(source["sections"], ReleaseNotesSection);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Changelog {
+	    releases: ReleaseNotes[];
+	    reason: string;
+	    page: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Changelog(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.releases = this.convertValues(source["releases"], ReleaseNotes);
+	        this.reason = source["reason"];
+	        this.page = source["page"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class ChangelogEntry {
 	    version: string;
@@ -459,6 +543,7 @@ export namespace models {
 	    reason?: string;
 	    splash?: boolean;
 	    estimate?: Record<string, number>;
+	    preview?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new GameState(source);
@@ -474,6 +559,7 @@ export namespace models {
 	        this.reason = source["reason"];
 	        this.splash = source["splash"];
 	        this.estimate = source["estimate"];
+	        this.preview = source["preview"];
 	    }
 	}
 	
@@ -706,6 +792,7 @@ export namespace models {
 	    scope: string;
 	    card: boolean;
 	    playsInstall: boolean;
+	    popup?: boolean;
 	    page?: string;
 	
 	    static createFrom(source: any = {}) {
@@ -719,6 +806,7 @@ export namespace models {
 	        this.scope = source["scope"];
 	        this.card = source["card"];
 	        this.playsInstall = source["playsInstall"];
+	        this.popup = source["popup"];
 	        this.page = source["page"];
 	    }
 	}
@@ -792,6 +880,8 @@ export namespace models {
 		    return a;
 		}
 	}
+	
+	
 	export class RunLog {
 	    kind: string;
 	    name: string;
@@ -970,6 +1060,88 @@ export namespace models {
 	        this.reason = source["reason"];
 	    }
 	}
+	export class WhatsNewHighlight {
+	    title: string;
+	    text?: string;
+	    items?: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new WhatsNewHighlight(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.title = source["title"];
+	        this.text = source["text"];
+	        this.items = source["items"];
+	    }
+	}
+	export class WhatsNewRelease {
+	    version: string;
+	    highlights: WhatsNewHighlight[];
+	
+	    static createFrom(source: any = {}) {
+	        return new WhatsNewRelease(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.highlights = this.convertValues(source["highlights"], WhatsNewHighlight);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class WhatsNew {
+	    version: string;
+	    releases: WhatsNewRelease[];
+	
+	    static createFrom(source: any = {}) {
+	        return new WhatsNew(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.releases = this.convertValues(source["releases"], WhatsNewRelease);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	
 	export class WikiArtStats {
 	    avgBytes: number;

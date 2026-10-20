@@ -2,11 +2,11 @@ import { Suspense, lazy } from 'react'
 import type { Chapter } from '../../types'
 import { chapterArt, chapterTitleArt } from '../../lib/art'
 import { isPlaceholder, knownFacts } from '../../lib/manifest'
-import { LoaderCircle, MapIcon, Pencil, SquareTerminal } from '../../lib/icons'
+import { MapIcon, Pencil, SquareTerminal } from '../../lib/icons'
 import { panoramaStart, usePanoramaReady } from '../../lib/panorama'
 import { Drift } from '../ui/Drift'
-import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
+import { Spinner } from '../ui/Spinner'
 import { Pill } from '../ui/Pill'
 import { useLoadedImage } from '../../lib/useLoadedImage'
 
@@ -87,11 +87,7 @@ export function Hero({
               role="status"
               className="text-fg-muted text-2xs absolute right-7 bottom-4 flex items-center gap-2"
             >
-              <Icon
-                icon={LoaderCircle}
-                size="sm"
-                className="animate-spin motion-reduce:animate-none"
-              />
+              <Spinner />
               Loading panorama…
             </span>
           )}

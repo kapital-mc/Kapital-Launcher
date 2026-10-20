@@ -99,7 +99,29 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 94 the same day: the account tile shows the skin's face from Go's cache, so the player
 // store, which only the lazy account page read before, is in the entry with its new
 // binding and the tile's picture. Measured 93.86 KB.
-const BUDGET_KB = 94
+// 94.2 since Cancel in the downloads section and the popup previews (2026-10-19): the
+// engine store cancels Prism's download and holds a preview's request for the Get Prism
+// popup, which the action bar takes from the first paint, and the bindings gain the two
+// cancels. The section and the popups still load after the first paint. Measured 94.01 KB.
+// 95.1 the same day: every card and popup follows its content's height and fades in what is
+// added (ui/Smooth, lib/smoothResize), which the action bar's popups and the sidebar's
+// downloads section draw with, so it is in the entry; the column popups' rise and the
+// downloads section's spinner came with it. Measured 94.9 KB.
+// 95.2 the same day: a field that grew out of a button shrinks back into it (`morphTo`), and
+// a card follows only a morph's size animation, not a colour fading on the same element.
+// Measured 95.11 KB.
+// 95.4 the same day: a column's popup lifts the column itself out, carrying a copy of its
+// content (Dialog's `lifting`, the lift keyframes in the entry's CSS). Measured 95.27 KB.
+// 95.9 on 2026-10-19: the launch intro's cover and its animation are in the entry, since they
+// are the first paint; the traced wordmark's lines load in a chunk of their own behind the
+// cover. Measured 95.8 KB.
+// 96.0 on 2026-10-20: the busy mark is drawn by ui/Spinner, an arc run round by its dash
+// offset (and its keyframes in the entry's CSS) instead of a rotated icon, which wobbled in
+// WebKit; the downloads section and the hero both show it. Measured 95.96 KB.
+// 96.5 the same day: every Scrollable glides on the wheel (lib/smoothWheel), and the main
+// view is one, so it is in the entry. Loading it later split smoothResize into a chunk of its
+// own and saved nothing. Measured 96.43 KB.
+const BUDGET_KB = 96.5
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

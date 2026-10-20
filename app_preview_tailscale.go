@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 
 	"kapital/backend/models"
@@ -60,13 +61,13 @@ func (a *App) connectPreviewTailscale() {
 // playPreviewTailscaleInstall is the made-up Tailscale install: the steps of
 // services.PreviewTailscaleInstallProgress as tailscale:install events, a pause
 // apart, then the failure it ends in. The installer is never reached.
-func (a *App) playPreviewTailscaleInstall() error {
+func (a *App) playPreviewTailscaleInstall(ctx context.Context, emit func(models.TailscaleInstallProgress)) error {
 	steps := services.PreviewTailscaleInstallProgress()
 	for i, step := range steps {
-		if i > 0 && !a.previewPause() {
-			return a.context().Err()
+		if i > 0 && !a.previewPause(ctx) {
+			return ctx.Err()
 		}
-		a.emitTailscaleInstall(step)
+		emit(step)
 	}
 	return errors.New(steps[len(steps)-1].Error)
 }

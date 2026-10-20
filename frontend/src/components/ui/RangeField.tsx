@@ -1,4 +1,5 @@
 import { useId, useLayoutEffect, useRef } from 'react'
+import { Grow } from './Grow'
 import { Hint } from './Notes'
 import { SubHeading } from './Section'
 
@@ -26,6 +27,11 @@ interface Props {
   hint?: string
   /** Drawn under the track at its value, and sets it on a click; left out when it is off the track. */
   mark?: RangeMark | null
+  /**
+   * How good the value is, from 0 through 1 to 2: the value is then drawn in
+   * a colour that fades from success through warning to danger (`.value-tone`).
+   */
+  tone?: number
 }
 
 const share = (value: number, min: number, max: number) =>
@@ -50,10 +56,12 @@ export function RangeField({
   onChange,
   hint,
   mark,
+  tone,
 }: Props) {
   const id = useId()
   const input = useRef<HTMLInputElement>(null)
   const markRef = useRef<HTMLButtonElement>(null)
+  const readout = useRef<HTMLSpanElement>(null)
   const shown = mark && mark.value >= min && mark.value <= max ? mark : null
   useLayoutEffect(() => {
     input.current?.style.setProperty('--range-fill', `${share(value, min, max) * 100}%`)
@@ -62,12 +70,23 @@ export function RangeField({
     if (shown) markRef.current?.style.setProperty('--mark-at', String(share(shown.value, min, max)))
   }, [shown, min, max])
 
+  useLayoutEffect(() => {
+    if (tone === undefined) return
+    readout.current?.style.setProperty('--tone-warning', `${Math.min(1, tone) * 100}%`)
+    readout.current?.style.setProperty('--tone-danger', `${Math.max(0, tone - 1) * 100}%`)
+  }, [tone])
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-4">
         <SubHeading id={id}>{label}</SubHeading>
         <span className="flex items-baseline gap-2">
-          <span className="text-md font-mono">{valueLabel}</span>
+          <span
+            ref={readout}
+            className={`text-md font-mono ${tone === undefined ? '' : 'value-tone'}`}
+          >
+            {valueLabel}
+          </span>
           {valueNote && <span className="text-fg-muted text-xs">{valueNote}</span>}
         </span>
       </div>
@@ -101,7 +120,9 @@ export function RangeField({
           </button>
         </div>
       )}
-      {hint && <Hint>{hint}</Hint>}
+      <Grow className="-mt-3" inner="pt-3">
+        {hint && <Hint>{hint}</Hint>}
+      </Grow>
     </div>
   )
 }

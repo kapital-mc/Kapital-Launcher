@@ -4,6 +4,10 @@ import {models} from '../models';
 
 export function CancelDHSnapshot(arg1:string):Promise<boolean>;
 
+export function CancelPrismInstall():Promise<boolean>;
+
+export function CancelTailscaleInstall():Promise<boolean>;
+
 export function CheckChapterMap(arg1:string):Promise<models.MapStatus>;
 
 export function ChoosePrismExecutable():Promise<string>;
@@ -66,6 +70,10 @@ export function GetTailscaleRelease():Promise<models.TailscaleRelease>;
 
 export function GetUpdate():Promise<models.UpdateInfo>;
 
+export function GetWhatsNew():Promise<models.WhatsNew>;
+
+export function GetWhatsNewChangelog():Promise<models.Changelog>;
+
 export function GetWikiArtStats():Promise<models.WikiArtStats>;
 
 export function GetWikiPages():Promise<Array<models.WikiPage>>;
@@ -85,6 +93,8 @@ export function LaunchChapter(arg1:string):Promise<void>;
 export function LeaveSplash():Promise<void>;
 
 export function LogFrontendError(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function MarkWhatsNewSeen():Promise<boolean>;
 
 export function OpenChapterWiki(arg1:string):Promise<void>;
 

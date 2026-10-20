@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import type { Chapter, DHDownloadProgress, DHSnapshotInfo } from '../../types'
 import { errMsg } from '../../lib/ipc'
 import { Download, X } from '../../lib/icons'
@@ -9,6 +10,7 @@ import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { ProgressBar } from '../ui/ProgressBar'
+import { Grow } from '../ui/Grow'
 import { ErrorLine, Hint } from '../ui/Notes'
 import { SubHeading } from '../ui/Section'
 import { SettingsCard } from '../ui/SettingsLayout'
@@ -23,7 +25,8 @@ interface Props {
  * generated, which otherwise fills in slowly while the player plays. The card reads what is
  * published when it opens (its date, size and dimensions) and downloads only on Download. Terrain
  * the instance already holds for the server is replaced only after the player confirms. While it
- * runs, the bar follows dh:download (heard from App, so the sidebar's downloads follow it too) and Cancel keeps what was verified for the next try. Go
+ * runs, the bar follows dh:download (heard from App, so the sidebar's downloads follow it too) and
+ * Cancel keeps what was verified for the next try, which a line says until the settings close. Go
  * refuses while the game runs, and says why.
  */
 export function DistantHorizonsCard({ chapter }: Props) {
@@ -32,6 +35,7 @@ export function DistantHorizonsCard({ chapter }: Props) {
   const readError = useTerrainStore((s) => s.readError[chapter.id])
   const unavailable = useTerrainStore((s) => s.unavailable)
   const load = useTerrainStore((s) => s.load)
+  const forgetCancel = useTerrainStore((s) => s.forgetCancel)
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,6 +44,8 @@ export function DistantHorizonsCard({ chapter }: Props) {
   useEffect(() => {
     void load(chapter.id)
   }, [chapter.id, load, playing])
+  // A cancel is said until the settings close.
+  useEffect(() => () => forgetCancel(chapter.id), [chapter.id, forgetCancel])
   // The running guess goes stale when the game closes: read again when the window comes back.
   useEffect(() => {
     const onFocus = () => {
@@ -71,6 +77,7 @@ export function DistantHorizonsCard({ chapter }: Props) {
   }
 
   const ready = !unavailable && !!info?.available && !playing
+  const cancelled = !confirming && progress?.phase === 'cancelled'
   return (
     <div className="flex flex-col gap-3 pt-3">
       <SubHeading>World data</SubHeading>
@@ -86,7 +93,7 @@ export function DistantHorizonsCard({ chapter }: Props) {
                   </span>
                 )}
               </span>
-              {info && <Summary info={info} />}
+              {info && <Summary info={info} kept={!cancelled} />}
             </div>
             {downloading ? (
               <Button onClick={() => void cancel()}>
@@ -100,33 +107,38 @@ export function DistantHorizonsCard({ chapter }: Props) {
               </Button>
             )}
           </div>
-          {confirming && info && (
-            <Confirm
-              info={info}
-              onReplace={() => void start(true)}
-              onKeep={() => setConfirming(false)}
-            />
-          )}
-          {downloading && progress && <Progress progress={progress} />}
-          <Outcome
-            info={info}
-            progress={downloading ? undefined : progress}
-            error={error ?? readError}
-          />
+          <Grow className="-mt-3" inner="pt-3">
+            {confirming && info && (
+              <Confirm
+                info={info}
+                onReplace={() => void start(true)}
+                onCancel={() => setConfirming(false)}
+              />
+            )}
+          </Grow>
+          <Grow className="-mt-3" inner="pt-3">
+            {downloading && progress && <Progress progress={progress} />}
+          </Grow>
+          <Grow className="-mt-3" inner="pt-3">
+            {!confirming && outcome(info, downloading ? undefined : progress, error ?? readError)}
+          </Grow>
         </div>
       </SettingsCard>
     </div>
   )
 }
 
-/** What is published, and what of it the instance already has. */
-function Summary({ info }: { info: DHSnapshotInfo }) {
+/**
+ * What is published, and what of it the instance already has, unless the line under it
+ * says that (`kept` false, after a cancel).
+ */
+function Summary({ info, kept }: { info: DHSnapshotInfo; kept: boolean }) {
   if (!info.createdAt) return null
   const dims = info.dimensions === 1 ? '1 dimension' : `${info.dimensions} dimensions`
   return (
     <span className="text-fg-muted text-xs">
       {`Published ${publishedOn(info.createdAt)} · ${formatBytes(info.sizeBytes)} · ${dims}`}
-      {info.partialBytes > 0 && ` · ${formatBytes(info.partialBytes)} already downloaded`}
+      {kept && info.partialBytes > 0 && ` · ${formatBytes(info.partialBytes)} already downloaded`}
     </span>
   )
 }
@@ -134,11 +146,11 @@ function Summary({ info }: { info: DHSnapshotInfo }) {
 function Confirm({
   info,
   onReplace,
-  onKeep,
+  onCancel,
 }: {
   info: DHSnapshotInfo
   onReplace: () => void
-  onKeep: () => void
+  onCancel: () => void
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
@@ -147,7 +159,9 @@ function Confirm({
       </Hint>
       <div className="flex gap-2">
         <Button onClick={onReplace}>Replace</Button>
-        <Button onClick={onKeep}>Keep mine</Button>
+        <Button variant="quiet" onClick={onCancel}>
+          Cancel
+        </Button>
       </div>
     </div>
   )
@@ -164,32 +178,25 @@ function Progress({ progress }: { progress: DHDownloadProgress }) {
   return (
     <div className="flex flex-col gap-1.5">
       <ProgressBar value={value} label="Terrain download" />
-      <span className="text-fg-muted text-xs">{`${label} · ${percent}%`}</span>
+      <span className="text-fg-muted text-xs tabular-nums">{`${label} · ${percent}%`}</span>
     </div>
   )
 }
 
-/** Why Download is held, or how the last download ended. */
-function Outcome({
-  info,
-  progress,
-  error,
-}: {
-  info: DHSnapshotInfo | undefined
-  progress: DHDownloadProgress | undefined
-  error: string | null | undefined
-}) {
+/** Why Download is held, or how the last download ended; null when there is nothing to say. */
+function outcome(
+  info: DHSnapshotInfo | undefined,
+  progress: DHDownloadProgress | undefined,
+  error: string | null | undefined,
+): ReactNode {
   const failed = progress?.phase === 'failed' ? progress.error : undefined
   if (error || failed) return <ErrorLine>{error ?? failed}</ErrorLine>
   if (progress?.phase === 'done') {
     return <Hint>The terrain is in place. It shows the next time you join the server.</Hint>
   }
   if (progress?.phase === 'cancelled') {
-    return (
-      <Hint>
-        Cancelled. What was downloaded is kept, so the next download continues from there.
-      </Hint>
-    )
+    const kept = info?.partialBytes ?? 0
+    return <Hint>{kept > 0 ? `Cancelled. ${formatBytes(kept)} downloaded.` : 'Cancelled.'}</Hint>
   }
   if (info && !info.available && !info.downloading && info.reason) return <Hint>{info.reason}</Hint>
   return null

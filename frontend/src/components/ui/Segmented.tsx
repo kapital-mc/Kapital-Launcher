@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { moveRadioFocus } from '../../lib/radioKeys'
 import { ErrorLine, Hint } from './Notes'
+import { Grow } from './Grow'
 
 interface Option<T extends string> {
   value: T
@@ -90,7 +91,9 @@ export function Segmented<T extends string>({
           <span id={id} className={`text-sm font-medium ${disabled ? 'text-fg-faint' : 'text-fg'}`}>
             {label}
           </span>
-          {line}
+          <Grow className="-mt-1" inner="pt-1">
+            {line}
+          </Grow>
         </div>
         {group}
       </div>
@@ -102,7 +105,9 @@ export function Segmented<T extends string>({
         {label}
       </span>
       {group}
-      {line}
+      <Grow className="-mt-1.5" inner="pt-1.5">
+        {line}
+      </Grow>
     </div>
   )
 }

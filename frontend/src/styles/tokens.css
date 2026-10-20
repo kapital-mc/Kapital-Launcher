@@ -25,6 +25,7 @@
   --color-chapter-luxemburg: var(--chapter-luxemburg);
   --color-chapter-lichdenstein: var(--chapter-lichdenstein);
   --color-chapter-frangfurd: var(--chapter-frangfurd);
+  --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-logo-gradient-top: var(--logo-gradient-top);
@@ -93,6 +94,8 @@
   --transition-duration-breathe: 16000ms;
   --duration-tooltip: 2000ms;
   --transition-duration-tooltip: 2000ms;
+  --duration-spin: 1000ms;
+  --transition-duration-spin: 1000ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
@@ -112,6 +115,7 @@
   --layout-controls-mac: 80px;
   --layout-sidebar-compact: 95px;
   --layout-play-min: 240px;
+  --layout-icon-2xs: 10px;
   --layout-icon-xs: 14px;
   --layout-icon-sm: 16px;
   --layout-icon-md: 18px;
@@ -176,6 +180,7 @@
   --chapter-luxemburg: #e0aa4e;
   --chapter-lichdenstein: #5cbfa2;
   --chapter-frangfurd: #7cbfe0;
+  --success: #8fcf7a;
   --warning: #e0aa4e;
   --danger: #ef7a5e;
   --logo-gradient-top: #f9ae9f;
@@ -199,6 +204,7 @@
   --chapter-luxemburg: #8a6512;
   --chapter-lichdenstein: #1a6b55;
   --chapter-frangfurd: #1c6a8e;
+  --success: #3d7a2b;
   --warning: #8a6512;
   --danger: #b23e21;
 }
@@ -221,6 +227,7 @@
     --chapter-luxemburg: #8a6512;
     --chapter-lichdenstein: #1a6b55;
     --chapter-frangfurd: #1c6a8e;
+    --success: #3d7a2b;
     --warning: #8a6512;
     --danger: #b23e21;
   }

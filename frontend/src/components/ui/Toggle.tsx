@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import type { ReactNode } from 'react'
 import { ErrorLine, Hint } from './Notes'
+import { Grow } from './Grow'
 
 interface Props {
   label: string
@@ -42,11 +43,13 @@ export function Toggle({ label, checked, hint, error, disabled, onChange, badge,
           {label}
           {badge}
         </label>
-        {error ? (
-          <ErrorLine id={lineId}>{error}</ErrorLine>
-        ) : (
-          hint && <Hint id={lineId}>{hint}</Hint>
-        )}
+        <Grow className="-mt-1" inner="pt-1">
+          {error ? (
+            <ErrorLine id={lineId}>{error}</ErrorLine>
+          ) : (
+            hint && <Hint id={lineId}>{hint}</Hint>
+          )}
+        </Grow>
       </div>
       <button
         id={id}

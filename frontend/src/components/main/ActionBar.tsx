@@ -21,6 +21,7 @@ import { packHost, packSourceLine } from '../../lib/packSource'
 import { serverLine } from '../../lib/serverLine'
 import { gameLine } from '../../lib/gameLine'
 import { isActive } from '../../stores/useGameStore'
+import { useEngineStore } from '../../stores/useEngineStore'
 import { Download, Play, RefreshCw, Square } from '../../lib/icons'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
@@ -161,6 +162,7 @@ export function ActionBar({
   onCheckServer,
 }: Props) {
   const [offering, setOffering] = useState(false)
+  const offerPending = useEngineStore((s) => s.offerPending)
   const [confirming, setConfirming] = useState(false)
   const missing = engine !== null && !engine.found
   const working = install !== null && WORKING.includes(install.phase)
@@ -169,6 +171,12 @@ export function ActionBar({
   const published = isPublished(chapter) || devPack !== undefined
   const source = installed ? packSourceLine(instancePack, chapter.pack.packwiz) : null
   const playing = isActive(game?.phase)
+  // A developer preview's request for the popup, taken once.
+  useEffect(() => {
+    if (!offerPending) return
+    useEngineStore.setState({ offerPending: false })
+    setOffering(true)
+  }, [offerPending])
   // The timer is cleared with the component, and by the click that spends it.
   useEffect(() => {
     if (!confirming) return

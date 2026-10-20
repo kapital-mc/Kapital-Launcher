@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"kapital/backend/models"
 	"kapital/backend/services"
@@ -140,5 +142,34 @@ func TestTailscaleInstallPreviewFailsWithoutTheInstaller(t *testing.T) {
 	}
 	if err := app.ClearPreviews(); err != nil || app.previews.Launcher() != "" {
 		t.Fatalf("%v %q", err, app.previews.Launcher())
+	}
+}
+
+func TestCancelEndsAMadeUpTailscaleDownload(t *testing.T) {
+	app := newTestApp(t)
+	app.previewStep = time.Hour
+	steps := make(chan models.TailscaleInstallProgress, 16)
+	app.tailscale.emitInstall = func(p models.TailscaleInstallProgress) { steps <- p }
+	if _, err := app.StartPreview("", services.PreviewTailscaleInstall); err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan error, 1)
+	go func() { done <- app.InstallTailscale() }()
+	if first := <-steps; first.Phase != "downloading" {
+		t.Fatalf("%+v", first)
+	}
+	if ok, err := app.CancelTailscaleInstall(); err != nil || !ok {
+		t.Fatalf("%v %v", ok, err)
+	}
+	select {
+	case err := <-done:
+		if !errors.Is(err, errInstallCancelled) {
+			t.Fatalf("got %v", err)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("the install went on after Cancel")
+	}
+	if last := <-steps; last.Phase != "cancelled" {
+		t.Fatalf("%+v", last)
 	}
 }

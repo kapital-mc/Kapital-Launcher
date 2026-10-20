@@ -1,9 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
-import { hasWailsBridge } from '../../lib/ipc'
-import { guessPlatform } from '../../lib/platform'
 import { tailscaleStep } from '../../lib/tailscale'
 import { tailscaleWorking, useTailscaleStore } from '../../stores/useTailscaleStore'
 import { ErrorLine } from '../ui/Notes'
+import { Grow } from '../ui/Grow'
 import { TextLink } from '../ui/TextLink'
 import { Toggle } from '../ui/Toggle'
 
@@ -41,10 +40,17 @@ export function TailscaleRow({ chapterId, on, error, onChange }: Props) {
   const connect = useTailscaleStore((s) => s.connect)
   const open = useTailscaleStore((s) => s.open)
   const [offering, setOffering] = useState(false)
+  const offerPending = useTailscaleStore((s) => s.offerPending)
 
   useEffect(() => {
     void load()
   }, [load])
+  // A developer preview's request for the popup, taken once.
+  useEffect(() => {
+    if (!offerPending) return
+    useTailscaleStore.setState({ offerPending: false })
+    setOffering(true)
+  }, [offerPending])
   const step = tailscaleStep(info, chapterId)
   const canInstall = info?.canInstall === true
   useEffect(() => {
@@ -76,15 +82,17 @@ export function TailscaleRow({ chapterId, on, error, onChange }: Props) {
           )}
         </div>
       )}
-      {failure && step !== 'ready' && <ErrorLine>{failure}</ErrorLine>}
-      {storeError && step === 'ready' && <ErrorLine>{storeError}</ErrorLine>}
+      <Grow className="-mt-1" inner="pt-1">
+        {step === 'ready'
+          ? storeError && <ErrorLine>{storeError}</ErrorLine>
+          : failure && <ErrorLine>{failure}</ErrorLine>}
+      </Grow>
       {offering && release && (
         <Suspense fallback={null}>
           <GetTailscale
             release={release}
             install={install}
             info={info}
-            platform={guessPlatform(navigator.userAgent, hasWailsBridge())}
             onConfirm={() => void installTailscale()}
             onClose={() => setOffering(false)}
             onConnect={() => void connect(chapterId)}

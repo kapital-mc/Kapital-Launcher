@@ -6,6 +6,7 @@ import { useEngineStore } from './useEngineStore'
 import { useGameStore } from './useGameStore'
 import { useTailscaleStore } from './useTailscaleStore'
 import { useUpdateStore } from './useUpdateStore'
+import { useWhatsNewStore } from './useWhatsNewStore'
 
 /**
  * The developer previews (#124): screens a run only shows when something goes
@@ -34,8 +35,8 @@ const FINISHED = ['done', 'failed']
 
 /**
  * Reads again what a preview changes that no event carries: the engine, the
- * release, the instances with the pack state, the launcher's update and the
- * player's Tailscale. The release goes first, so a
+ * release, the instances with the pack state, the launcher's update and What's
+ * new, and the player's Tailscale. The release goes first, so a
  * made-up one never outlives its preview; it is read again where the launcher
  * would read it (App does the same on the engine).
  */
@@ -50,11 +51,16 @@ async function readViews() {
   // The launcher's own update notice, and the player's Tailscale, which its
   // previews make up; a made-up installer is dropped like Prism's release.
   await useUpdateStore.getState().load()
+  await useWhatsNewStore.getState().load()
   useTailscaleStore.setState((s) => ({
     release: null,
     install: s.install && FINISHED.includes(s.install.phase) ? null : s.install,
   }))
-  await useTailscaleStore.getState().load()
+  const ts = useTailscaleStore.getState()
+  await ts.load()
+  // The row reads the installer only when its step changes, which a preview need not do.
+  const info = useTailscaleStore.getState().info
+  if (info?.state === 'missing' && info.canInstall) await ts.loadRelease()
 }
 
 export const usePreviewStore = create<PreviewStore>((set) => ({
@@ -69,10 +75,16 @@ export const usePreviewStore = create<PreviewStore>((set) => ({
     if (!hasWailsBridge()) throw new Error('Previews need the desktop app.')
     await StartPreview(chapterId, situation.id)
     await readViews()
+    const tailscale = situation.scope === 'launcher'
+    // The popup opens on its offer, or over the install it then plays.
+    if (situation.popup) {
+      if (tailscale) useTailscaleStore.setState({ offerPending: true })
+      else useEngineStore.setState({ offerPending: true })
+    }
     // The made-up install is the situation: it plays on its own, over
     // prism:install or tailscale:install, and fails.
     if (!situation.playsInstall) return
-    if (situation.scope === 'launcher') void useTailscaleStore.getState().installTailscale()
+    if (tailscale) void useTailscaleStore.getState().installTailscale()
     else void useEngineStore.getState().installPrism()
   },
 

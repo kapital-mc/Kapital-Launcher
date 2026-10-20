@@ -273,6 +273,13 @@ and compared with `main.Version`. It sends nothing but the request, and not
 reaching the site is a reason in an `UpdateInfo`, never an error. The popup opens
 `services.DownloadPage` and nothing else; the launcher downloads nothing for it.
 
+What's new (`whatsnew.go`, `releasenotes.go`, `app_whatsnew.go`, ADR-9's
+2026-10-19 amendment) reads the highlights built into the app
+(`data/whatsnew.json`, `ParseWhatsNew` at startup) and the `seenVersion`
+setting, which only Go writes. Its full changelog is the update check's twin:
+one GET of the site's `changelog.json`, when the dropdown is opened, 256 KiB,
+each release held to the site's shape (S4.12).
+
 The wiki art (`wikiart.go`, `wikidraw.go`, `GetWikiShots` and `GetWikiArtStats`,
 #141 and issue 172) is the one place that downloads pictures. The wiki's lore
 export lists screenshots (`screenshots[]`) and each page's pictures

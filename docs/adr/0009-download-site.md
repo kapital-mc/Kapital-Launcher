@@ -213,3 +213,44 @@ The author asked for three changes to the page.
   signing policy moved from a `details` element into a popup of its own, and
   the two open from a pair of quiet buttons above the footer. SignPath's
   wording is unchanged.
+
+## Amendment, 2026-10-19: What's new after an update
+
+The author asked for a page on the first start after an update that shows a
+release's main changes by name rather than its list of pull requests, with
+small changes grouped ("Bug fixes", "UI improvements") and the full changelog
+under a dropdown.
+
+- **The highlights are written by hand and built in.** `data/whatsnew.json`
+  holds each release's highlights, newest first in the popup: a title with a
+  line, or with the small changes it groups, or both. It is written before the
+  release is cut, since the build embeds it; a release without an entry shows
+  nothing. `ParseWhatsNew` refuses the file whole at startup on a fault, so a
+  mistake fails CI rather than a player's start.
+- **Once per update.** Go records the version seen (`seenVersion`, written by
+  Go alone) when the popup is closed, and shows every release since it up to
+  this build. A fresh install has nothing new and records its version
+  silently. A launcher from before this change left no version: its player
+  sees this build's entry only. A dev build shows nothing.
+- **The full changelog comes from the site.** Its build writes
+  `changelog.json` beside `version.json`, the Changelog popup's releases as
+  plain text, served `no-cache`. The launcher reads it only when the dropdown
+  is opened, from the fixed address, under the update check's limits with
+  256 KiB in place of 4 KiB, and keeps the releases What's new covers. Not
+  reaching it says so and links to the site (SECURITY_CHECKLIST S4.12).
+- **Seen before a release carries it** through the developer preview "What's
+  new after an update", which shows the newest entry, makes the changelog up,
+  fetches nothing and records nothing.
+
+## Amendment, 2026-10-20: the update offer under its button
+
+The author asked for the update offer to open under the header's update
+button rather than over the window, with a Download button to the site and a
+smaller way out. The offer is now a panel that drops out of the button
+(`UpdateNotice`, which also draws the button): "Update available", both
+versions, one line, Download and Not now. It opens by itself once a start as
+before; Not now, Escape or a press anywhere else folds it back into the
+button until the button opens it again. What it does is unchanged: it opens
+`services.DownloadPage` and nothing else. Not now, Cancel and Close across
+the launcher's popups and prompts are the same small borderless button
+(`Button`'s `quiet`), so the action beside them leads. What's new keeps its X.

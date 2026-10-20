@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { Ellipsis, Pencil, Plus, Trash2, X } from '../../lib/icons'
 import { MAX_JAVA_ARGS, javaArgProblem } from '../../lib/javaArgs'
+import { fadeIn, morphFrom, morphTo } from '../../lib/smoothResize'
 import { Icon } from '../ui/Icon'
 
 interface Props {
@@ -26,6 +27,8 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
   const [editing, setEditing] = useState<Editing>(null)
   const [menuFor, setMenuFor] = useState<number | null>(null)
   const addRef = useRef<HTMLButtonElement>(null)
+  // Where Add argument stood when it was pressed: the new field grows out of it.
+  const [addFrom, setAddFrom] = useState<DOMRect | undefined>(undefined)
   const listId = useId()
   // After a commit, a removal or a cancel the field or the row is gone: focus goes to +.
   const [refocus, setRefocus] = useState(false)
@@ -35,6 +38,13 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
       setRefocus(false)
     }
   }, [refocus])
+
+  // Add argument comes back drawn, and its words fade in where the field shrank into it.
+  const wasEditing = useRef(false)
+  useLayoutEffect(() => {
+    if (editing === null && wasEditing.current) fadeIn(addRef.current)
+    wasEditing.current = editing !== null
+  }, [editing])
 
   const done = () => {
     setEditing(null)
@@ -66,8 +76,10 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
           </span>
         )}
       </div>
+      {/* The rows are as far apart as the list is from Add argument, and a row keeps its height
+          while its menu button is hidden, so a new field starts exactly where the button stood. */}
       {(args.length > 0 || editing === 'new') && (
-        <ul aria-labelledby={listId} className="m-0 flex list-none flex-col gap-1.5 p-0">
+        <ul aria-labelledby={listId} className="m-0 flex list-none flex-col gap-2 p-0">
           {args.map((arg, i) =>
             editing === i ? (
               <ArgEditor
@@ -96,6 +108,7 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
           {editing === 'new' && (
             <ArgEditor
               initial=""
+              from={addFrom}
               action="Add"
               check={(v) => javaArgProblem(v, args, null)}
               onCommit={(v) => commit(v, 'new')}
@@ -108,8 +121,12 @@ export function JavaArgsList({ args, onChange, disabled }: Props) {
         <button
           ref={addRef}
           type="button"
+          data-smooth="self"
           disabled={disabled || full}
-          onClick={() => setEditing('new')}
+          onClick={() => {
+            setAddFrom(addRef.current?.getBoundingClientRect())
+            setEditing('new')
+          }}
           className="text-fg-soft hover:text-fg border-line-strong hover:border-accent-edge duration-fast ease-standard flex h-8 w-fit items-center gap-1.5 rounded-md border border-dashed pr-3 pl-2 text-sm transition-colors disabled:opacity-50"
         >
           <Icon icon={Plus} size="sm" className="text-accent" />
@@ -181,7 +198,7 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
         aria-controls={open ? menuId : undefined}
         disabled={disabled}
         onClick={() => onOpen(!open)}
-        className="text-fg-muted hover:text-fg hover:bg-hover aria-expanded:bg-hover aria-expanded:text-fg duration-fast ease-standard flex size-7 shrink-0 items-center justify-center rounded-sm opacity-0 transition-[opacity,background-color] group-focus-within:opacity-100 group-hover:opacity-100 disabled:hidden aria-expanded:opacity-100"
+        className="text-fg-muted hover:text-fg hover:bg-hover aria-expanded:bg-hover aria-expanded:text-fg duration-fast ease-standard flex size-7 shrink-0 items-center justify-center rounded-sm opacity-0 transition-[opacity,background-color] group-focus-within:opacity-100 group-hover:opacity-100 disabled:invisible aria-expanded:opacity-100"
       >
         <Icon icon={Ellipsis} size="sm" />
       </button>
@@ -220,6 +237,8 @@ function ArgRow({ arg, disabled, open, onOpen, onEdit, onRemove }: RowProps) {
 
 interface EditorProps {
   initial: string
+  /** The rectangle of the button it replaces, which it grows out of and shrinks back into. */
+  from?: DOMRect
   /** The commit button's word: Add for a new argument, Save for an edit. */
   action: 'Add' | 'Save'
   check: (value: string) => string | null
@@ -228,19 +247,33 @@ interface EditorProps {
 }
 
 /** The field that adds or edits one argument, in the row's place. Enter commits, Escape cancels. */
-function ArgEditor({ initial, action, check, onCommit, onCancel }: EditorProps) {
+function ArgEditor({ initial, from, action, check, onCommit, onCancel }: EditorProps) {
   const [value, setValue] = useState(initial)
   const [problem, setProblem] = useState<string | null>(null)
   const input = useRef<HTMLInputElement>(null)
+  const row = useRef<HTMLLIElement>(null)
   const lineId = useId()
+  // Before the first paint, so the field is never seen at full size first.
+  useLayoutEffect(() => {
+    if (from && row.current) morphFrom(row.current, from)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only as it opens
+  }, [])
   useEffect(() => {
     input.current?.focus()
     input.current?.select()
   }, [])
+  // Grown out of a button, it shrinks back into it before it goes.
+  const closing = useRef(false)
+  const cancel = () => {
+    if (closing.current) return
+    if (!from || !row.current) return onCancel()
+    closing.current = true
+    morphTo(row.current, from, onCancel)
+  }
 
   const commit = () => {
     const v = value.trim()
-    if (v === '' || v === initial) return onCancel()
+    if (v === '' || v === initial) return cancel()
     const why = check(v)
     if (why) {
       setProblem(why)
@@ -255,12 +288,16 @@ function ArgEditor({ initial, action, check, onCommit, onCancel }: EditorProps) 
       commit()
     } else if (e.key === 'Escape') {
       e.stopPropagation()
-      onCancel()
+      cancel()
     }
   }
 
   return (
-    <li className="bg-sunken border-accent-edge flex flex-wrap items-center gap-1 rounded-md border p-1">
+    <li
+      ref={row}
+      data-smooth={from ? 'self' : undefined}
+      className="bg-sunken border-accent-edge flex flex-wrap items-center gap-1 rounded-md border p-1"
+    >
       <input
         ref={input}
         type="text"
@@ -288,7 +325,7 @@ function ArgEditor({ initial, action, check, onCommit, onCancel }: EditorProps) 
       <button
         type="button"
         aria-label="Cancel"
-        onClick={onCancel}
+        onClick={cancel}
         className="text-fg-muted hover:text-fg hover:bg-hover flex size-7 items-center justify-center rounded-sm"
       >
         <Icon icon={X} size="sm" />

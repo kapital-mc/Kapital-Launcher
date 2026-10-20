@@ -6,6 +6,14 @@ export function CancelDHSnapshot(arg1) {
   return window['go']['main']['App']['CancelDHSnapshot'](arg1);
 }
 
+export function CancelPrismInstall() {
+  return window['go']['main']['App']['CancelPrismInstall']();
+}
+
+export function CancelTailscaleInstall() {
+  return window['go']['main']['App']['CancelTailscaleInstall']();
+}
+
 export function CheckChapterMap(arg1) {
   return window['go']['main']['App']['CheckChapterMap'](arg1);
 }
@@ -130,6 +138,14 @@ export function GetUpdate() {
   return window['go']['main']['App']['GetUpdate']();
 }
 
+export function GetWhatsNew() {
+  return window['go']['main']['App']['GetWhatsNew']();
+}
+
+export function GetWhatsNewChangelog() {
+  return window['go']['main']['App']['GetWhatsNewChangelog']();
+}
+
 export function GetWikiArtStats() {
   return window['go']['main']['App']['GetWikiArtStats']();
 }
@@ -168,6 +184,10 @@ export function LeaveSplash() {
 
 export function LogFrontendError(arg1, arg2, arg3) {
   return window['go']['main']['App']['LogFrontendError'](arg1, arg2, arg3);
+}
+
+export function MarkWhatsNewSeen() {
+  return window['go']['main']['App']['MarkWhatsNewSeen']();
 }
 
 export function OpenChapterWiki(arg1) {

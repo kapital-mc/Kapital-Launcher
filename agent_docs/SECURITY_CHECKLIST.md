@@ -22,6 +22,8 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetChangelogs` | nothing | one bounded GET of each chapter's `changelog.json`, beside the `pack.toml` of the source `GetPackStates` uses (the instance's own pack URL, the loopback override or the manifest's), held to that source's URL rule, redirects included; the answer is parsed strictly and shown as plain text | S4.3, S4.7 |
 | `GetPrismRelease` | nothing | one bounded GET to Prism's fixed release URL | S4.5 |
 | `GetUpdate` | nothing | once a start, one GET (8 s, no redirect followed, 4 KiB) of the download site's fixed `version.json`, sending nothing but the request; only a tag of the release shape is read from it, and a dev build makes no request | S4.3, S4.9 |
+| `GetWhatsNew`, `MarkWhatsNewSeen` | nothing | the highlights built into the app (`data/whatsnew.json`, refused whole at startup on a fault); the one `seenVersion` setting, which a save from the frontend never changes | S4.12 |
+| `GetWhatsNewChangelog` | nothing | when the player opens it, one GET (8 s, no redirect followed, 256 KiB) of the download site's fixed `changelog.json`, sending nothing but the request; tags and dates held to their shapes, sections to the site's three, lines cut to 300 characters and rendered as text | S4.12 |
 | `InstallPrism` | nothing | download, verify and unpack Prism's official build | S4.5 |
 | `InstallChapter` | a chapter id | the manifest's instance and pack URL: one instance folder written into the Prism root | S3.3, S4.6 |
 | `ReinstallChapter` | a chapter id | for an installed chapter whose instance has no pack URL of the launcher's: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. Refused for the launcher's own instance, under a preview, while the game is active or running, or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
@@ -819,6 +821,28 @@ Verify: `TestTailscaleLatestPicksThisOSsInstaller`,
 Probe: an index naming `../x.pkg` or a file on another host; a `.sha256` that
 does not match; a login line naming `https://login.tailscale.com.evil.example/a/x`
 or `https://user@login.tailscale.com/a/x`.
+
+**S4.12 What's new reads the app's own highlights and one fixed changelog, and sends nothing.**
+Holds when: (a) the highlights are built into the app and `ParseWhatsNew`
+refuses the file whole on an unknown key, a tag that is not a release's, a
+version listed twice, no highlights or more than six, or copy that is empty,
+too long or has an em dash; (b) `GetWhatsNewChangelog` takes no argument and
+asks only `https://kapital-launcher.pages.dev/changelog.json`, a constant
+(`services.DownloadPage`), with no query and no header but the User-Agent, only
+when the player opens the list, and keeps a read that worked for the run; (c)
+the request is a GET of 8 s, follows no redirect, counts only a 200 and decodes
+at most 256 KiB, and a release with a bad tag or date is dropped alone, a
+section other than Features, Fixes and Other changes is dropped, and a line is
+cut to 300 characters; (d) every value is rendered by React as text, never as
+HTML; (e) `seenVersion` is written only by Go (`MarkWhatsNewSeen`, and
+`GetWhatsNew` when nothing is new), never from a dev build or a preview, and
+`SaveSettings` keeps the stored one.
+Verify: `TestParseWhatsNewRefusesTheFileWhole`, `TestFetchChangelogFailuresAreReasons`,
+`TestFetchChangelogKeepsTheReleasesSinceTheSeenOne`,
+`TestWhatsNewChangelogIsReadOnceFromTheSeenVersion`,
+`TestSaveSettingsKeepsTheSeenVersion`.
+Probe: the file answering a redirect, a 404, HTML, 1 MiB, or a line holding
+`<img src=x onerror=alert(1)>`.
 
 ## S5. WebView
 

@@ -10,6 +10,7 @@ import { OpenExternal } from '../../../wailsjs/go/main/App'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
+import { Grow } from '../ui/Grow'
 import { ErrorLine } from '../ui/Notes'
 import { Page } from '../ui/Page'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
@@ -41,7 +42,8 @@ interface Props {
  * name Mojang does not know, the tile keeps the initials and an unreachable Mojang says nothing.
  *
  * With no profile name Prism plays its default account, and the page shows the name the game
- * reported for it on the last run (`playerName`, which Go learns from the game log).
+ * reported for it on the last run (`playerName`, which Go learns from the game log), alone in
+ * the empty field (the author, 2026-10-19), or "Prism's default account" before there is one.
  *
  * Play offline (Prism's `--offline`) swaps the profile for a player name of the launcher's own,
  * and the play time section shows what Prism has counted per chapter.
@@ -228,42 +230,48 @@ function ProfileSection({ player }: { player: PlayerProfile | null }) {
           <TextField
             label="Profile name"
             value={profile}
-            placeholder={
-              playerName ? `Prism's default account, ${playerName}` : "Prism's default account"
-            }
+            placeholder={playerName || "Prism's default account"}
             hint={profileNameProblem(profile)}
             error={error}
             onCommit={(v) => void save(v)}
           />
-          {player?.status === 'found' && (
-            <p
-              role="status"
-              className="text-accent m-0 flex items-center gap-1.5 text-xs leading-normal"
-            >
-              <Icon icon={Check} size="sm" />
-              <span>Found on Mojang</span>
-            </p>
-          )}
-          {player?.status === 'not_found' && (
-            <ErrorLine>No Minecraft profile has this name</ErrorLine>
-          )}
+          <Grow className="-mt-2" inner="pt-2">
+            {player?.status === 'found' ? (
+              <p
+                role="status"
+                className="text-accent m-0 flex items-center gap-1.5 text-xs leading-normal"
+              >
+                <Icon icon={Check} size="sm" />
+                <span>Found on Mojang</span>
+              </p>
+            ) : (
+              player?.status === 'not_found' && (
+                <ErrorLine>No Minecraft profile has this name</ErrorLine>
+              )
+            )}
+          </Grow>
         </div>
-        <Toggle
-          label="Play offline"
-          checked={offlineShown}
-          hint={offlineShown ? 'Online servers refuse an offline player.' : undefined}
-          error={offlineError}
-          onChange={onOfflineSwitch}
-        />
-        {offlineShown && (
-          <TextField
-            label="Offline name"
-            value={offlineName}
-            placeholder={accountName(profile, playerName) || 'Your Minecraft name'}
-            hint={profileNameProblem(offlineName)}
-            onCommit={(v) => void saveOffline({ offlineName: v, offline: true })}
+        {/* The offline name opens under its switch, in the same row of the card. */}
+        <div className="flex flex-col">
+          <Toggle
+            label="Play offline"
+            checked={offlineShown}
+            hint={offlineShown ? 'Online servers refuse an offline player.' : undefined}
+            error={offlineError}
+            onChange={onOfflineSwitch}
           />
-        )}
+          <Grow inner="pt-4">
+            {offlineShown && (
+              <TextField
+                label="Offline name"
+                value={offlineName}
+                placeholder={accountName(profile, playerName) || 'Your Minecraft name'}
+                hint={profileNameProblem(offlineName)}
+                onCommit={(v) => void saveOffline({ offlineName: v, offline: true })}
+              />
+            )}
+          </Grow>
+        </div>
       </SettingsCard>
     </SettingsSection>
   )

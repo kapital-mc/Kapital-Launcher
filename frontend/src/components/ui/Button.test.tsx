@@ -38,7 +38,10 @@ describe('Button', () => {
     // The glow is one box-shadow, so the button's own transition carries it,
     // and reduced motion removes the transition and leaves the glow.
     // It eases over the reveal's duration, longer than a plain hover's, in and out.
-    expect(play).toHaveClass('duration-reveal', 'transition-[background-color,filter,box-shadow]')
+    expect(play).toHaveClass(
+      'duration-reveal',
+      'transition-[background-color,color,filter,box-shadow]',
+    )
     expect(play).not.toHaveClass('duration-fast')
     expect(play).toHaveClass('motion-reduce:transition-none')
   })

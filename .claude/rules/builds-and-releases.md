@@ -8,6 +8,10 @@ paths:
 
 # Builds and releases
 
+Before a release is cut, `data/whatsnew.json` gets its entry under the new
+tag: the main changes by name, small ones grouped (ADR-9, 2026-10-19
+amendment). The build embeds it, so a release without one shows no What's new.
+
 `version.go`'s `Version` is the single source of the app version, mirrored in
 `wails.json`'s `info.productVersion`. The `-dev` suffix marks a build that is
 not a release. A release stamps it with `-ldflags "-X main.Version=<tag>"`.

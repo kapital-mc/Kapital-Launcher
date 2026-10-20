@@ -30,7 +30,8 @@ percentages. A component's look is its utility classes.
 Colours: `bg-sunken bg-canvas bg-raised bg-raised-2 bg-hover`,
 `text-fg text-fg-soft text-fg-muted text-fg-faint`, `border-line
 border-line-strong`, `text-accent bg-accent bg-accent-wash border-accent-edge`,
-`text-warning text-danger`, and `bg-chapter-<id>` for the rare place a chapter's
+`text-success text-warning text-danger` (and `value-tone`, a readout whose colour fades
+through the three as its value gets worse: `RangeField`'s `tone`, the memory slider), and `bg-chapter-<id>` for the rare place a chapter's
 colour is needed outside its own scope. Type: `text-2xs` to `text-2xl` and
 `text-display`; `font-ui font-display font-mono`; `tracking-control
 tracking-label tracking-eyebrow`. Radius: `rounded-sm rounded-md
@@ -49,6 +50,27 @@ card: `main/PageLayer`), and `glow-accent` and `glow-danger` (a filled button's
 hover glow, never on a disabled one). Each has a reduced-motion fallback that
 only fades and still ends its animation, because a leaving page is unmounted
 by its `animationend`.
+
+Size changes animate in one place, not per component. `ui/Smooth` (with
+`lib/smoothResize`) is the box of every `SettingsCard`, `Dialog` and the
+sidebar's downloads section: its height follows its content over the reveal
+and whatever is added to it later fades in (`smooth-resizing`,
+`smooth-enter`). A new card or popup gets that by being drawn with one of
+them; draw a new kind of tile with `Smooth` rather than animating its parts.
+`ui/Grow` stays for a line or block that comes and goes (it also fades it
+out), and the box follows it. An element that takes a control's place grows
+out of it with `morphFrom`, shrinks back into it with `morphTo`, and carries
+`data-smooth="self"` (the Java argument field).
+A column's popup is the column lifting out: the surface starts as the column,
+carrying a copy of it that fades as it rises, while the column stays empty
+(`rise-in`, `rise-out`, `lift-ghost-out`, `lift-ghost-in`, `rise-content-in`,
+`wash-in`, `wash-out`; Dialog's `origin` and `lifting`). The launch intro
+(`shell/LaunchIntro`) runs its timeline with the Web Animations API from the
+same tokens (`ms`, `token` from `lib/smoothResize`), and a line too long for its place fades at its
+end (`fade-end`) rather than ending in an ellipsis where a control sits over it.
+
+Every `ui/Scrollable` glides on the wheel (`lib/smoothWheel`): WebKit moves a mouse wheel's
+steps at once.
 
 Spacing is Tailwind's default 4px scale, which is what the reference was drawn
 on; `p-14` is 56px. Do not add a spacing token for a value the scale already has.
@@ -74,6 +96,8 @@ variant. If you find yourself writing one, the token is wrong.
 `lib/icons.ts` as a component. A control's icon goes inside
 `components/ui/IconButton`, which owns the hit area, hover and accessible name;
 the icon itself stays `aria-hidden`. Adding an icon is one line in `icons.ts`.
+The busy mark is `ui/Spinner`, never a rotated icon: WebKit draws an SVG turned by
+CSS at a shifting fraction of a pixel, so it wobbles (WebKit bug 252385).
 
 ## Placeholders
 
@@ -86,6 +110,7 @@ The manifest writes an unsettled fact as `[PLACEHOLDER]` or `null`.
 One per domain (`useChapterStore`, `useEngineStore`, `useSettingsStore`,
 `useServerStore`, `useGameStore`, the account page's `usePlayerStore`, and the
 settings page's `useTerrainStore` and `useTailscaleStore`, which the sidebar's
-downloads section, loaded after the first paint, also listens through); a
+downloads section, loaded after the first paint, also listens through, and
+What's new's `useWhatsNewStore`, loaded with its popup); a
 component reads with a selector and never reaches into another store's data.
 `.claude/rules/ipc.md` has the rejection rules.

@@ -227,9 +227,14 @@
         "icon": {
           "type": "object",
           "description": "Icon box sizes, the px value lucide draws at, and the stroke weight in screen px that lucide's absoluteStrokeWidth holds constant across sizes.",
-          "required": ["xs", "sm", "md", "stroke"],
+          "required": ["2xs", "xs", "sm", "md", "stroke"],
           "additionalProperties": false,
           "properties": {
+            "2xs": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The busy mark beside small digits (ui/Spinner)."
+            },
             "xs": { "type": "integer", "minimum": 1 },
             "sm": { "type": "integer", "minimum": 1 },
             "md": { "type": "integer", "minimum": 1 },

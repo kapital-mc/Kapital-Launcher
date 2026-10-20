@@ -38,16 +38,15 @@ describe('HeaderTools', () => {
     expect(screen.getByRole('button', { name: 'Settings' })).toBeEnabled()
   })
 
-  it('shows the update only while one is out, and brings its popup back', () => {
+  it('shows the update only while one is out, and brings its panel back', async () => {
+    const out = { current: 'v1.0.0', latest: 'v1.1.0', available: true, page: '', reason: '' }
+    vi.mocked(Bindings.GetUpdate).mockResolvedValue(out as never)
     tools()
     expect(screen.queryByRole('button', { name: /^Update Launcher/ })).toBeNull()
-    act(() =>
-      useUpdateStore.setState({
-        update: { current: 'v1.0.0', latest: 'v1.1.0', available: true, page: '', reason: '' },
-        dismissed: true,
-      }),
-    )
-    fireEvent.click(screen.getByRole('button', { name: 'Update Launcher' }))
+    const button = await screen.findByRole('button', { name: 'Update Launcher' })
+    expect(screen.getByRole('dialog', { name: 'Update available' })).toBeInTheDocument()
+    act(() => useUpdateStore.getState().dismiss())
+    fireEvent.click(button)
     expect(useUpdateStore.getState().dismissed).toBe(false)
   })
 })

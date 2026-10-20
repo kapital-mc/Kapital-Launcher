@@ -128,16 +128,21 @@ describe('Panels', () => {
     }))
     panels({ changelog: { chapterId: chapter.id, checked: true, entries } })
     fireEvent.click(screen.getByRole('button', { name: 'Full changelog' }))
-    // The dialog opens on the click; its body loads in its own chunk and fades in.
+    // The dialog opens on the click; its body loads in its own chunk.
     const dialog = screen.getByRole('dialog', { name: 'Changelog' })
-    expect((await within(dialog).findByText('1.0.2')).closest('.reveal')).not.toBeNull()
+    expect(await within(dialog).findByText('1.0.2')).toBeInTheDocument()
     expect(within(dialog).getByText('Fixed Map 1.0.2')).toBeInTheDocument()
     expect(within(dialog).getAllByText('2026-10-03')).toHaveLength(4)
-    // Close shrinks it back into the column, and it goes when that animation ends.
+    // Close fades the content and lowers the surface back onto the column, and the popup
+    // goes when that animation ends.
     fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
-    expect(dialog).toHaveClass('grow-out')
+    expect(dialog).toHaveClass('fade-out')
+    const surface = document.querySelector('.rise-out')!
+    expect(surface).not.toBeNull()
     // jsdom has no AnimationEvent, so React listens for the prefixed name there.
     fireEvent(dialog, new Event('webkitAnimationEnd', { bubbles: true }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent(surface, new Event('webkitAnimationEnd', { bubbles: true }))
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
@@ -185,7 +190,21 @@ describe('Panels', () => {
       expect(screen.queryByRole('dialog')).toBeNull()
       fireEvent.click(screen.getByRole('button', { name: 'Pack details' }))
       const dialog = await screen.findByRole('dialog', { name: 'Pack' })
-      expect(dialog).toHaveClass('grow-in')
+      // A surface in the card's colour lifts from the column to the box, whose content
+      // comes in as it lands; the surface stays under it until the content is all there.
+      expect(dialog).toHaveClass('rise-content-in', 'bg-raised')
+      const surface = document.querySelector('.rise-in')
+      expect(surface).not.toBeNull()
+      // The column lifts out: the surface carries a copy of it, inert, and the column is
+      // left empty until the popup has gone.
+      const copy = surface!.querySelector('.lift-ghost-out')!
+      expect(copy).toHaveAttribute('inert')
+      expect(within(copy as HTMLElement).getByText('Loader')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Pack details' }).closest('.group')).toHaveClass(
+        '*:invisible',
+      )
+      fireEvent(dialog, new Event('webkitAnimationEnd', { bubbles: true }))
+      expect(surface).toHaveClass('invisible')
       expect(await within(dialog).findByText(chapter.blurb)).toBeInTheDocument()
       expect(await within(dialog).findByText('6.0 GB')).toBeInTheDocument()
       const off = await within(dialog).findByText('Distant Horizons')

@@ -5,9 +5,10 @@ interface Props {
   onClick: () => void
   /**
    * `play` is the one accent-filled control on the screen, and `stop` takes its place while a game
-   * runs, in the danger colour; `ghost` is everything else.
+   * runs, in the danger colour; `quiet` is the way out of a popup or a prompt (Not now, Cancel,
+   * Close), smaller and without a border so the action beside it leads; `ghost` is everything else.
    */
-  variant?: 'play' | 'stop' | 'ghost'
+  variant?: 'play' | 'stop' | 'ghost' | 'quiet'
   disabled?: boolean
   /** Announces a change of the button's own label, for one that says how it went. */
   live?: boolean
@@ -19,11 +20,14 @@ interface Props {
 // over the reveal's 200 ms rather than the 140 ms of a plain hover, so the glow eases in and
 // out instead of snapping.
 const FILLED =
-  'duration-reveal text-canvas h-13 min-w-(--layout-play-min) justify-center px-7.5 text-md tracking-control enabled:hover:brightness-(--effect-hover-brightness)'
+  'duration-reveal text-canvas h-13 min-w-(--layout-play-min) justify-center px-7.5 text-md tracking-control font-semibold enabled:hover:brightness-(--effect-hover-brightness)'
 const VARIANT = {
   play: `bg-accent glow-accent ${FILLED}`,
   stop: `bg-danger glow-danger ${FILLED}`,
-  ghost: 'duration-fast border-line-strong hover:bg-hover h-11 border px-4.5 text-base',
+  ghost:
+    'duration-fast border-line-strong hover:bg-hover h-11 border px-4.5 text-base font-semibold',
+  quiet:
+    'duration-fast text-fg-muted enabled:hover:text-fg hover:bg-hover h-9 px-3 text-sm font-medium',
 } as const
 
 export function Button({ children, onClick, variant = 'ghost', disabled, live, title }: Props) {
@@ -34,7 +38,7 @@ export function Button({ children, onClick, variant = 'ghost', disabled, live, t
       disabled={disabled}
       title={title}
       aria-live={live ? 'polite' : undefined}
-      className={`${VARIANT[variant]} ease-standard inline-flex items-center gap-2 rounded-md font-semibold transition-[background-color,filter,box-shadow] disabled:opacity-50 motion-reduce:transition-none`}
+      className={`${VARIANT[variant]} ease-standard inline-flex items-center gap-2 rounded-md transition-[background-color,color,filter,box-shadow] disabled:opacity-50 motion-reduce:transition-none`}
     >
       {children}
     </button>

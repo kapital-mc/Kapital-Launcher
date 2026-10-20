@@ -42,6 +42,8 @@ export interface GameState {
    * on every event of a run.
    */
   estimate?: Partial<Record<'mods' | 'window' | 'resources' | 'running', number>>
+  /** A developer preview's state (#124), made up rather than a run's. */
+  preview?: boolean
 }
 
 /** When a run reached one of starting, mods, window, resources and running. */

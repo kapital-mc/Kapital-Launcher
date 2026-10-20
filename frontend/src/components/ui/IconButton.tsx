@@ -11,9 +11,10 @@ interface Props {
   onClick: () => void
   /**
    * `md` is the 44px box the hero tools use; `sm` the 32px one in the account card; `xs`
-   * the 28px one in a column's corner, with the smaller glyph.
+   * the 28px one in a column's corner, with the smaller glyph; `2xs` the 20px one on a line of
+   * small text, such as a download's step, with that glyph too.
    */
-  size?: 'xs' | 'sm' | 'md'
+  size?: '2xs' | 'xs' | 'sm' | 'md'
   disabled?: boolean
   /**
    * One cell of a joined group of tools (the hero's): square, so its hover
@@ -31,6 +32,7 @@ interface Props {
 }
 
 const BOX = {
+  '2xs': 'size-5',
   xs: 'size-7',
   sm: 'size-8',
   md: 'size-11',
@@ -56,7 +58,7 @@ export function IconButton({
       disabled={disabled}
       className={`${BOX[size]} ${colour} hover:bg-hover duration-fast ease-standard ${tooltip ? 'group relative' : ''} inline-flex shrink-0 items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:opacity-50 disabled:hover:bg-transparent`}
     >
-      <Icon icon={icon} size={size} />
+      <Icon icon={icon} size={size === '2xs' ? 'xs' : size} />
       {tooltip && (
         <span
           aria-hidden

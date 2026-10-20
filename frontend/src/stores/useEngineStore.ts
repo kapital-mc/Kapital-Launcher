@@ -13,6 +13,7 @@ import type {
 } from '../types'
 import { errMsg, hasWailsBridge, readOr } from '../lib/ipc'
 import {
+  CancelPrismInstall,
   GetChangelogs,
   GetChapterSettings,
   GetEngine,
@@ -82,6 +83,13 @@ interface EngineStore {
   openPrism: () => Promise<void>
   loadRelease: () => Promise<void>
   installPrism: () => Promise<void>
+  /** Cancels Prism's install while it downloads; it goes back to being an offer. */
+  cancelInstall: () => Promise<void>
+  /**
+   * A developer preview asks for the Get Prism popup (#124): the action bar opens it on its next
+   * render and takes the request back.
+   */
+  offerPending: boolean
   listenInstall: () => () => void
   receiveInstall: (p: PrismInstallProgress) => void
   loadInstances: () => Promise<void>
@@ -127,6 +135,9 @@ async function writeInstance(
   }
 }
 
+/** Whether the player cancelled Prism's install that runs, which then fails as no failure. */
+let prismCancelled = false
+
 export const useEngineStore = create<EngineStore>((set, get) => ({
   engine: null,
   instances: null,
@@ -139,6 +150,7 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   error: null,
   release: null,
   install: null,
+  offerPending: false,
   chapterSettings: {},
   playTimes: {},
 
@@ -181,13 +193,29 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
     set({
       install: { phase: 'downloading', received: 0, total: get().release?.size ?? 0, error: '' },
     })
+    prismCancelled = false
     try {
       await InstallPrism()
       set({ install: { phase: 'done', received: 0, total: 0, error: '' } })
       await get().load()
       await get().loadRelease()
     } catch (e) {
-      set({ install: { phase: 'failed', received: 0, total: 0, error: errMsg(e) } })
+      set({
+        install: prismCancelled
+          ? null
+          : { phase: 'failed', received: 0, total: 0, error: errMsg(e) },
+      })
+    }
+  },
+
+  // Marked before Go is asked, as the install's own answer can come back first.
+  cancelInstall: async () => {
+    prismCancelled = true
+    try {
+      prismCancelled = await CancelPrismInstall()
+    } catch (e) {
+      prismCancelled = false
+      set({ error: errMsg(e) })
     }
   },
 
@@ -204,7 +232,7 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
     const current = get().install
     if (!p?.phase || current === null || current.phase === 'done' || current.phase === 'failed')
       return
-    set({ install: p })
+    set({ install: p.phase === 'cancelled' ? null : p })
   },
 
   load: async () => {

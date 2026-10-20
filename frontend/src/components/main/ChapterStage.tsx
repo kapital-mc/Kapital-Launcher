@@ -69,7 +69,7 @@ export function ChapterStage({
 
   return (
     // The chapter card's popups (Panels) centre on this frame, not on the window.
-    <div data-popup-frame className="card-stage relative m-5 flex min-h-0 grow flex-col">
+    <div data-popup-frame className="card-stage relative m-4 flex min-h-0 grow flex-col">
       <div
         key={chapter.id}
         inert={covered}

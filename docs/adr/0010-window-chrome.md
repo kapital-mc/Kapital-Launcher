@@ -84,18 +84,22 @@ sidebar's width, and elsewhere 16px in, the sidebar's own padding, so the
 buttons' hover boxes line up with the chapter tiles' left edge. Compacting moves only the sidebar's right edge (to
 `layout.sidebarCompact`, an icon row's width between the sidebar's padding),
 so the icons and the initials never move sideways; the text fades out first and
-back in once there is room. Compact, the Chapters heading folds away and the
-sidebar's padding matches the chapter card's, so the first chapter tile and the
-account tile line up with the card's top and bottom edges (the author asked,
-2026-10-19). The choice is saved as `sidebarCompact` in the
+back in once there is room. The sidebar's padding and the chapter card's gap
+are one 16px in both widths (the card's was 20px until the author found the
+account tile 4px below the card, 2026-10-19), so the Chapters heading, or
+compact the first chapter tile, starts level with the card's top and the
+account tile ends level with its bottom; compacting moves nothing up or down.
+Compact, the Chapters heading folds away. The choice is saved as `sidebarCompact` in the
 settings and taken without animation on launch. `[verify]` on the author's Mac:
 the button clear of the traffic lights, and the fold animating in WKWebView
 (it moves grid tracks between 1fr and 0fr; a WebView that cannot interpolate
 them snaps instead).
 
 The downloads section above the account tile (Tailscale, 2026-10-19) keeps each
-bar and its percentage when compact; its heading, the names and the steps fold
-away with the rest of the sidebar's text.
+bar and its percentage when compact, with a spinner beside the percentage (the
+author found the bare number odd, 2026-10-19); its heading, the names and the steps
+fold away with the rest of the sidebar's text. There is no paused state:
+every download runs at once, none waits behind another.
 
 The author then asked for the bar's left side to carry the launcher's tools
 after the sidebar's button: Settings (moved from the right, which now holds
@@ -146,3 +150,22 @@ in, rather than at 64px, so on macOS it no longer sits over the compact
 sidebar's icon column. `[verify]` on the author's Mac: the bar's height and the
 buttons centred on the lights, every header button clickable, the window
 dragged by the bar's empty space, and full screen entered and left.
+
+## Amendment, 2026-10-19: the launch intro
+
+The author asked for a short animation on start that builds the wordmark from
+its lines and fades into the launcher. The compact wordmark picture was traced
+into vector outlines (`assets/brand/kapital-launcher-wordmark.svg`: the whole
+mark's outline and each letter's face, in reading order), and `LaunchIntro`
+covers the window on every start while the launcher loads under it: the lines
+draw in letter by letter over the slow duration, the picture fills them from
+the outside inward, and the cover fades and grows slightly over the grace,
+about a second in all, from the motion tokens. The fill was a plain fade at
+first; the author asked for it to close in from the edges with some variety.
+So the mark's dark rim fills from its silhouette inward, then each letter's
+face from its own edge, each at a random moment and pace within the tokens:
+a mask per part whose stroke along the part's edge grows to twice the part's
+`data-reach`, clipped to the part. Only the cover and its timeline are in the
+first paint's bundle; the drawing (`IntroMark`) loads behind it. Reduced motion skips it. `[verify]` on the
+author's Mac: it plays once, ends on its own, and the window shows no flash
+between the native background and the cover.

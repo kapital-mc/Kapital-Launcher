@@ -84,13 +84,13 @@ describe('The Distant Horizons terrain card', () => {
     expect(screen.queryByRole('progressbar')).toBeNull()
   })
 
-  it('asks before replacing terrain the instance has, and keeps it on Keep mine', async () => {
+  it('asks before replacing terrain the instance has, and keeps it on Cancel', async () => {
     vi.mocked(App.GetDHSnapshot).mockResolvedValue({ ...published, existingBytes: 2048 } as never)
     vi.mocked(App.DownloadDHSnapshot).mockResolvedValue(published as never)
     render(<DistantHorizonsCard chapter={frangfurd} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Download' }))
     expect(screen.getByText(/already has 2\.0 KB of terrain/)).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Keep mine' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(App.DownloadDHSnapshot).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Download' }))
     fireEvent.click(screen.getByRole('button', { name: 'Replace' }))
@@ -109,10 +109,27 @@ describe('The Distant Horizons terrain card', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     await waitFor(() => expect(App.CancelDHSnapshot).toHaveBeenCalledWith('frangfurd'))
     await act(async () => refuse(new Error('the download was cancelled')))
-    expect(await screen.findByText(/Cancelled\. What was downloaded is kept/)).toBeInTheDocument()
+    expect(await screen.findByText('Cancelled. 1.0 KB downloaded.')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).toBeNull()
     expect(await screen.findByRole('button', { name: 'Continue' })).toBeEnabled()
-    expect(screen.getByText(/1\.0 KB already downloaded/)).toBeInTheDocument()
+    // The line says what is kept, so the summary does not say it again.
+    expect(screen.queryByText(/already downloaded/)).toBeNull()
+  })
+
+  it('forgets the cancel when the settings close, and says what is kept again', async () => {
+    vi.mocked(App.GetDHSnapshot).mockResolvedValue({ ...published, partialBytes: 1024 } as never)
+    useTerrainStore.setState({
+      progress: {
+        frangfurd: { chapterId: 'frangfurd', phase: 'cancelled', received: 0, total: 0 },
+      },
+    })
+    const { unmount } = render(<DistantHorizonsCard chapter={frangfurd} />)
+    expect(await screen.findByText('Cancelled. 1.0 KB downloaded.')).toBeInTheDocument()
+    unmount()
+    expect(useTerrainStore.getState().progress.frangfurd).toBeUndefined()
+    render(<DistantHorizonsCard chapter={frangfurd} />)
+    expect(await screen.findByText(/1\.0 KB already downloaded/)).toBeInTheDocument()
+    expect(screen.queryByText(/Cancelled/)).toBeNull()
   })
 
   it("shows Go's refusal", async () => {

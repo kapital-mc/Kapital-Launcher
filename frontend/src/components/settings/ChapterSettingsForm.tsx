@@ -3,6 +3,7 @@ import {
   MEMORY_STEP_MB,
   MIN_MEMORY_MB,
   memoryLabel,
+  memoryTone,
   presetLabel,
   presetNote,
   sliderMaxMb,
@@ -70,6 +71,7 @@ export function ChapterSettingsForm({
         step={MEMORY_STEP_MB}
         value={Math.min(max, draft.maxMemoryMb)}
         onChange={(maxMemoryMb) => onDraft({ ...draft, maxMemoryMb })}
+        tone={memoryTone(draft.maxMemoryMb, info.packMemoryMb, info.machineMemoryMb)}
         mark={
           info.packMemoryMb > 0
             ? {
