@@ -50,7 +50,9 @@ export function InstallPopup({
               <Icon icon={Download} size="sm" />
               <span>Download</span>
             </Button>
-            <Button onClick={onClose}>Not now</Button>
+            <Button variant="quiet" onClick={onClose}>
+              Not now
+            </Button>
           </div>
         </>
       )}
@@ -61,7 +63,9 @@ export function InstallPopup({
             <span className="text-fg-muted text-xs">{stage.line}</span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={onClose}>Hide</Button>
+            <Button variant="quiet" onClick={onClose}>
+              Hide
+            </Button>
           </div>
         </>
       )}
@@ -69,7 +73,9 @@ export function InstallPopup({
         <>
           <div className="text-fg-soft m-0 flex flex-col gap-2 leading-normal">{done}</div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={onClose}>Close</Button>
+            <Button variant="quiet" onClick={onClose}>
+              Close
+            </Button>
           </div>
         </>
       )}
@@ -78,7 +84,9 @@ export function InstallPopup({
           <ErrorLine>{stage.error || 'Something went wrong'}</ErrorLine>
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={onConfirm}>Try again</Button>
-            <Button onClick={onClose}>Close</Button>
+            <Button variant="quiet" onClick={onClose}>
+              Close
+            </Button>
           </div>
         </>
       )}

@@ -32,12 +32,8 @@ const AccountPanel = lazy(() =>
 const ChapterPage = lazy(() =>
   import('./components/main/ChapterPage').then((m) => ({ default: m.ChapterPage })),
 )
-// The check for a newer launcher, and its popup, load in a chunk of their own
-// after the first paint, which keeps them out of the bundle budget.
-const UpdateNotice = lazy(() =>
-  import('./components/shell/UpdateNotice').then((m) => ({ default: m.UpdateNotice })),
-)
-// So does What's new, shown once on the first start after an update.
+// What's new, shown once on the first start after an update, loads in a chunk of
+// its own after the first paint, which keeps it out of the bundle budget.
 const WhatsNew = lazy(() =>
   import('./components/shell/WhatsNew').then((m) => ({ default: m.WhatsNew })),
 )
@@ -262,7 +258,6 @@ export default function App() {
       </div>
       <Toasts onOpenReport={pages.openReport} />
       <Suspense fallback={null}>
-        <UpdateNotice />
         <WhatsNew />
         <ProfileNotice onOpenAccount={pages.openAccount} />
       </Suspense>

@@ -434,7 +434,7 @@ describe('App', () => {
       }),
     )
     render(<App />)
-    const dialog = await screen.findByRole('dialog', { name: 'A new version is out' })
+    const dialog = await screen.findByRole('dialog', { name: 'Update available' })
     expect(Bindings.GetUpdate).toHaveBeenCalledOnce()
     fireEvent.click(within(dialog).getByRole('button', { name: 'Not now' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -468,7 +468,8 @@ describe('App', () => {
     let finish!: () => void
     vi.mocked(Bindings.InstallPrism).mockReturnValue(new Promise<void>((r) => (finish = r)))
     fireEvent.click(screen.getByRole('button', { name: 'Play Luxemburg' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Download' }))
+    const offer = await screen.findByRole('dialog', { name: 'Get Prism Launcher' })
+    fireEvent.click(within(offer).getByRole('button', { name: 'Download' }))
     expect(Bindings.InstallPrism).toHaveBeenCalledOnce()
     expect(await screen.findByText('◐ Getting Prism · 0%')).toBeInTheDocument()
     // The popup stays with the install, and the sidebar shows it too.

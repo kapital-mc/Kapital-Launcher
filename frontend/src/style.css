@@ -225,6 +225,37 @@
     filter: none;
   }
 }
+/* A panel under the control that opens it (the header's update panel): it drops a
+   few px out of the control into place as it fades in, and folds back up into it
+   as it goes, unmounted by its animationend. With reduced motion it only fades. */
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--layout-reveal-rise)));
+    filter: blur(var(--effect-reveal-blur));
+  }
+}
+@keyframes drop-out {
+  to {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--layout-reveal-rise)));
+    filter: blur(var(--effect-reveal-blur));
+  }
+}
+@utility drop-in {
+  animation: drop-in var(--duration-reveal) var(--ease-out) both;
+}
+@utility drop-out {
+  animation: drop-out var(--duration-fast) var(--ease-standard) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .drop-in {
+    animation: card-fade-in var(--duration-fast) ease-in-out both;
+  }
+  .drop-out {
+    animation: card-fade-out var(--duration-fast) ease-in-out both;
+  }
+}
 /* A small picture scaled up stays blocks of pixels, as a skin's face should. */
 @utility pixelated {
   image-rendering: pixelated;

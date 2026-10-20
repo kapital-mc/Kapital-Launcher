@@ -241,3 +241,16 @@ under a dropdown.
 - **Seen before a release carries it** through the developer preview "What's
   new after an update", which shows the newest entry, makes the changelog up,
   fetches nothing and records nothing.
+
+## Amendment, 2026-10-20: the update offer under its button
+
+The author asked for the update offer to open under the header's update
+button rather than over the window, with a Download button to the site and a
+smaller way out. The offer is now a panel that drops out of the button
+(`UpdateNotice`, which also draws the button): "Update available", both
+versions, one line, Download and Not now. It opens by itself once a start as
+before; Not now, Escape or a press anywhere else folds it back into the
+button until the button opens it again. What it does is unchanged: it opens
+`services.DownloadPage` and nothing else. Not now, Cancel and Close across
+the launcher's popups and prompts are the same small borderless button
+(`Button`'s `quiet`), so the action beside them leads. What's new keeps its X.

@@ -159,7 +159,9 @@ function Confirm({
       </Hint>
       <div className="flex gap-2">
         <Button onClick={onReplace}>Replace</Button>
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button variant="quiet" onClick={onCancel}>
+          Cancel
+        </Button>
       </div>
     </div>
   )
