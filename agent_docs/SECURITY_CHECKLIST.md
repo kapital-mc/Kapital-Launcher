@@ -28,9 +28,9 @@ summed). A different count is new surface to classify: add the method to this ta
 | `InstallChapter` | a chapter id | the manifest's instance and pack URL: one instance folder written into the Prism root | S3.3, S4.6 |
 | `ReinstallChapter` | a chapter id | for an installed chapter whose instance has no pack URL of the launcher's: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. Refused for the launcher's own instance, under a preview, while the game is active or running, or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
 | `ShowStashedInstance` | a chapter id | Prism started with `[--dir <root>] --show <stash>`, where the stash is the folder name Go recorded at that chapter's last `ReinstallChapter` in this app run, never the caller's, and only while `<instances>/<stash>/instance.cfg` exists; the started Prism is not followed | S3.1, S3.2, S3.3 |
-| `LaunchChapter`, `OpenChapterWiki`, `GetServerStatus` | a chapter id | the manifest's instance, URL or address for it; before a launch, the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, only from the launcher's earlier template | S3.3, S3.7, S4.6, S6.1 |
+| `LaunchChapter`, `OpenChapterWiki`, `GetServerStatus` | a chapter id | the manifest's instance, URL or address for it; before a launch, the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, only from the launcher's earlier template; before a launch, a close request to an idle Prism of the engine's executable, never an end | S3.3, S3.7, S3.9, S4.6, S6.1 |
 | `SetPackSource` | a chapter id and `published` or `dev` | the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, between the manifest's pack URL and the loopback override from settings, only from the launcher's own template; refused while the game is active or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
-| `StopGame` | a chapter id | the pid of the Prism the launcher started, or of the game's Java found as its child, for a run the tracker follows: asked to close, then ended | S3.3, S3.9 |
+| `StopGame` | a chapter id | the pid of the Prism the launcher started, the game's Java found as its child, or what that Prism started since Play (the pack sync and its Java), for a run the tracker follows: asked to close, then ended | S3.3, S3.9 |
 | `OpenPrism` | nothing | Prism started with `[--dir <the engine's root>]` and nothing else, on its main window, where the player signs in; the started Prism is not followed and nothing of its accounts is read | S1.1, S3.1, S3.2 |
 | `ShowInstanceInPrism` | a chapter id | Prism started with `[--dir <root>] --show <the chapter's manifest instance id>` for an installed chapter whose game is not active, after a Prism left on that chapter's last console is closed as Play closes it; the started Prism is not followed | S3.1, S3.2, S3.3 |
 | `ShowPrismConsole` | a chapter id | the console window of the Prism the launcher started for that chapter, which the launcher's own hold hid: shown and given the foreground | S3.3, S3.7 |
@@ -415,7 +415,7 @@ Content-Security-Policy frontend/dist/splash.html` after a build is 1.
 Probe: a page request for `../..`, `%2e%2e`, a backslash path or a `.map` file;
 a posted message that names a path or another chapter.
 
-**S3.9 Stop ends only the two processes the launcher found itself, by pid, and never by name.**
+**S3.9 Stop ends only the processes the launcher found itself (its Prism, the game's Java and what that Prism started for the launch), by pid, and never by name.**
 Holds when: `GameTracker.Stop` (`gametracker_stop.go`) acts on a run the
 tracker follows and on nothing else: the Prism the launcher started
 (`TrackRequest.Prism`, taken from the `exec.Command` that ran it) and the game's
@@ -443,7 +443,7 @@ the same way (issue 211); it is still only the pid the launcher started. The sam
 on, `SIGKILL`. The five seconds are judged on the run's steps, not slept on.
 Nothing is started, read or written to do it, and the pid is logged, never a
 window title.
-Verify: `TestCloseOwnPrismClosesTheLaunchersPrismAndSaysWhetherItIsGone`,
+Verify: `TestCloseOwnPrismClosesTheLaunchersPrismAndSaysWhetherItIsGone`, `TestStopDuringTheDownloadEndsThePackSyncAndItsJava`, `TestLaunchDescendantsAreWhatPrismStartedSincePlay`, `TestCloseIdlePrismsAsksOnlyIdlePrismsToClose`,
 `TestAPrismTheLauncherDidNotStartIsNeverClosed`, `TestMatchPrismProcessesTellsThePrismOfTheExecutableFromEveryOtherProcess`,
 `TestStopAsksTheLaunchersPrismToCloseAndEndsWhenItExits`,
 `TestStopClosesThePrismLeftAfterTheGameAndEndsItIfItStays`,
@@ -455,6 +455,7 @@ Verify: `TestCloseOwnPrismClosesTheLaunchersPrismAndSaysWhetherItIsGone`,
 `TestStopNeverSignalsAPidItDoesNotOwn`,
 `TestStopRefusesAChapterWithNoRunInProgress`,
 `TestStopGameRefusesAnUnknownChapterAndOneWithNoRun`.
+Stop also ends what the launcher's Prism started for the launch (the pack sync and its Java): every process below that Prism's pid, found by parent pid in the same list, that started after Play, and none whose start cannot be read (`launchDescendants`, ADR-2 eighteenth amendment). Before Play, a Prism of the engine's executable that the launcher did not start is asked to close only when nothing runs under it and it is no followed run's Prism, by the same close request, and is never ended (`CloseIdlePrisms`).
 Probe: Stop on a chapter whose launch went to a Prism that was already open (no
 process of ours is alive, and none may be signalled); a Prism whose pid has been
 reused after it exited (its exit channel is closed, so it is not touched).
