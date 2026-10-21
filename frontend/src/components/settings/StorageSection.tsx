@@ -18,6 +18,7 @@ import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Button } from '../ui/Button'
+import { Fold } from '../ui/Fold'
 import { Grow } from '../ui/Grow'
 import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
@@ -34,7 +35,7 @@ interface Props {
  * Distant Horizons (each server's terrain, an unfinished download) and Xaero's maps (the world
  * map, the minimap) are headings over their own rows; screenshots, logs, mods and the rest are one
  * row each. Every row opens its folder, and terrain, the download, the world map, screenshots and
- * logs can be deleted: the Delete button turns into Confirm in place, and the row says what is
+ * logs can be deleted: the trash button grows into Confirm in place, and the row says what is
  * lost. Go measures, opens and deletes, and refuses a delete while the game runs (Distant Horizons
  * holds its database open) or a terrain download runs. Only the tracker's answer (`playing`)
  * disables the deletes; `running` is the log's guess, shown as a hint. The view is read again when
@@ -231,23 +232,22 @@ function Row({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {canDelete(item) &&
-          (confirming ? (
-            <>
+        {canDelete(item) && (
+          <>
+            <Fold open={confirming} axis="x">
               <Button variant="quiet" onClick={onCancel}>
                 Cancel
               </Button>
-              <Button onClick={onConfirm} disabled={busy}>
-                <Icon icon={Trash2} size="sm" />
-                <span>Confirm</span>
-              </Button>
-            </>
-          ) : (
-            <Button onClick={onDelete} disabled={busy} title={`Delete ${title}`}>
-              <Icon icon={Trash2} size="sm" />
-              <span>Delete</span>
-            </Button>
-          ))}
+            </Fold>
+            <DeleteButton
+              title={title}
+              confirming={confirming}
+              disabled={busy}
+              onDelete={onDelete}
+              onConfirm={onConfirm}
+            />
+          </>
+        )}
         <IconButton
           icon={FolderOpen}
           size="sm"
@@ -256,6 +256,40 @@ function Row({
         />
       </div>
     </div>
+  )
+}
+
+interface DeleteProps {
+  title: string
+  confirming: boolean
+  disabled: boolean
+  onDelete: () => void
+  onConfirm: () => void
+}
+
+/**
+ * An outlined trash button the size of the folder button beside it. Pressed, it grows to the right
+ * of its glyph into Confirm while Cancel folds in before it, and a second press deletes. The second
+ * click of a double click is not a confirmation.
+ */
+function DeleteButton({ title, confirming, disabled, onDelete, onConfirm }: DeleteProps) {
+  return (
+    <button
+      type="button"
+      aria-label={confirming ? 'Confirm' : 'Delete'}
+      title={confirming ? undefined : `Delete ${title}`}
+      disabled={disabled}
+      onClick={(e) => {
+        if (!confirming) onDelete()
+        else if (e.detail <= 1) onConfirm()
+      }}
+      className={`${confirming ? 'text-fg' : 'text-fg-muted'} border-line-strong hover:bg-hover enabled:hover:text-fg duration-fast ease-standard inline-flex h-8 items-center rounded-md border px-1.75 text-sm font-semibold transition-colors disabled:opacity-50 motion-reduce:transition-none`}
+    >
+      <Icon icon={Trash2} size="sm" />
+      <Fold open={confirming} axis="x">
+        <span className="pl-1.5 whitespace-nowrap">Confirm</span>
+      </Fold>
+    </button>
   )
 }
 

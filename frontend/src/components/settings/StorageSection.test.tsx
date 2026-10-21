@@ -89,13 +89,27 @@ describe('StorageSection', () => {
     expect(App.GetDHSnapshot).toHaveBeenCalledWith('frangfurd')
   })
 
+  it('does not take the second click of a double click as the confirmation', async () => {
+    render(<StorageSection chapter={frangfurd} />)
+    const trash = (await screen.findAllByRole('button', { name: 'Delete' }))[0]!
+    fireEvent.click(trash, { detail: 1 })
+    fireEvent.click(trash, { detail: 2 })
+    expect(trash).toHaveAccessibleName('Confirm')
+    expect(App.ClearChapterStorage).not.toHaveBeenCalled()
+  })
+
   it('cancels a confirmation without deleting', async () => {
     render(<StorageSection chapter={frangfurd} />)
     fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[1]!)
     expect(
       screen.getByText('Delete 40 pictures (215 MB)? They do not go to the bin.'),
     ).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    // Every deletable row holds a Cancel, folded away and inert until its row asks.
+    const cancel = screen
+      .getAllByRole('button', { name: 'Cancel' })
+      .filter((b) => !b.closest('[inert]'))
+    expect(cancel).toHaveLength(1)
+    fireEvent.click(cancel[0]!)
     expect(screen.queryByRole('button', { name: 'Confirm' })).toBeNull()
     expect(screen.getByText('215 MB · 40 pictures')).toBeInTheDocument()
     expect(App.ClearChapterStorage).not.toHaveBeenCalled()
