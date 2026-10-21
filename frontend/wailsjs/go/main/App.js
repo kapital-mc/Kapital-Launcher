@@ -14,6 +14,10 @@ export function CancelTailscaleInstall() {
   return window['go']['main']['App']['CancelTailscaleInstall']();
 }
 
+export function CancelUpdateDownload() {
+  return window['go']['main']['App']['CancelUpdateDownload']();
+}
+
 export function CheckChapterMap(arg1) {
   return window['go']['main']['App']['CheckChapterMap'](arg1);
 }
@@ -44,6 +48,10 @@ export function CopyRedactedLog() {
 
 export function DownloadDHSnapshot(arg1, arg2) {
   return window['go']['main']['App']['DownloadDHSnapshot'](arg1, arg2);
+}
+
+export function DownloadUpdate() {
+  return window['go']['main']['App']['DownloadUpdate']();
 }
 
 export function GetAppVersion() {
@@ -224,6 +232,10 @@ export function RefreshEngine() {
 
 export function ReinstallChapter(arg1) {
   return window['go']['main']['App']['ReinstallChapter'](arg1);
+}
+
+export function RestartToUpdate() {
+  return window['go']['main']['App']['RestartToUpdate']();
 }
 
 export function SaveChapterSettings(arg1, arg2) {

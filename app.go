@@ -82,8 +82,10 @@ type App struct {
 	// prismInstall is Cancel on the Prism install that is running.
 	prismInstall installCancel
 
-	// update is the one look at the download site a start gets (app_update.go).
+	// update is the one look at the download site a start gets, and self the
+	// launcher's own download and restart into a newer build (app_update.go).
 	update updateCheck
+	self   selfUpdate
 	// whatsNew is every release's highlights, newest first, and freshInstall
 	// whether this start found no settings file (app_whatsnew.go).
 	whatsNew     []models.WhatsNewRelease
@@ -168,6 +170,7 @@ func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 		tailscale:   newTailscaleState(dataDir),
 		engineReady: make(chan struct{}),
 		whatsNew:    whatsNew,
+		self:        selfUpdate{updater: services.NewLauncherUpdater()},
 	}
 	a.freshInstall = !a.settings.Exists()
 	a.syncCopy = services.NewSyncCopy(dataDir, Version)

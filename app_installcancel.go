@@ -65,3 +65,10 @@ func (c *installCancel) stop() bool {
 	c.cancel()
 	return true
 }
+
+// running is whether an install is being tracked, at any step.
+func (c *installCancel) running() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.cancel != nil
+}

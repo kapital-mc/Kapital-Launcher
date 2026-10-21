@@ -286,6 +286,25 @@ func PreviewUpdate(situation, current string) (models.UpdateInfo, bool) {
 	return models.UpdateInfo{Current: current, Latest: previewLauncherLatest, Available: true, Page: DownloadPage}, true
 }
 
+// previewLauncherSize is the size of the made-up launcher download.
+const previewLauncherSize = 24 << 20
+
+// PreviewLauncherUpdateProgress is the launcher:update steps the update
+// preview plays: a download that fills, the check of it, and ready, after
+// which Restart relaunches the launcher as it is.
+func PreviewLauncherUpdateProgress() []models.LauncherUpdateProgress {
+	const total = previewLauncherSize
+	v := previewLauncherLatest
+	return []models.LauncherUpdateProgress{
+		{Phase: "downloading", Received: 0, Total: total, Version: v},
+		{Phase: "downloading", Received: total * 30 / 100, Total: total, Version: v},
+		{Phase: "downloading", Received: total * 65 / 100, Total: total, Version: v},
+		{Phase: "downloading", Received: total, Total: total, Version: v},
+		{Phase: "verifying", Received: total, Total: total, Version: v},
+		{Phase: "ready", Version: v},
+	}
+}
+
 // previewInstallError is what the made-up install fails with.
 const previewInstallError = "The download failed (preview: nothing was downloaded)"
 
