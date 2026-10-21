@@ -113,6 +113,10 @@ type TrackRequest struct {
 	// macOS (SplashCard.GameHold, #258). It is started and released exactly as
 	// the hold is, and only with HoldWindow.
 	Hold func(pid int) (WindowHolder, error)
+	// Adopted is a game that was already running when the launcher started,
+	// found by Adopt (gametracker_adopt.go). Its Prism is left empty: this
+	// launcher did not start it, so nothing of it is held, recorded or ended.
+	Adopted bool
 }
 
 // GameTracker follows each launched chapter from Play to the game's end: the
@@ -247,22 +251,33 @@ func (t *GameTracker) Track(ctx context.Context, req TrackRequest) error {
 	if err != nil {
 		return err
 	}
+	t.start(r)
+	return nil
+}
+
+// start makes the run reachable by Stop and runs it on its own goroutine.
+func (t *GameTracker) start(r *gameRun) {
 	t.register(r)
 	t.runs.Add(1)
 	go func() {
 		defer t.runs.Done()
 		r.loop()
 	}()
-	return nil
 }
 
 // begin records the launch as starting and returns the run that follows it,
 // which the caller steps: Track on a goroutine, a test by hand.
 func (t *GameTracker) begin(ctx context.Context, req TrackRequest) (*gameRun, error) {
+	return t.beginAt(ctx, req, newLogFollower(req.InstanceDir, req.Before, req.StartedAt), models.GamePhaseStarting)
+}
+
+// beginAt is begin with the log follower and the phase the run starts from:
+// an adopted game's log has been read up to where the game is.
+func (t *GameTracker) beginAt(ctx context.Context, req TrackRequest, follower *logFollower, phase string) (*gameRun, error) {
 	started := req.StartedAt.UTC()
 	state := models.GameState{
 		ChapterID: req.ChapterID,
-		Phase:     models.GamePhaseStarting,
+		Phase:     phase,
 		Since:     started.Format(time.RFC3339),
 		StartedAt: started.Format(time.RFC3339),
 		// Taken before this run adds its own timings, so every event of the
@@ -284,7 +299,7 @@ func (t *GameTracker) begin(ctx context.Context, req TrackRequest) (*gameRun, er
 		ctx:      ctx,
 		req:      req,
 		state:    state,
-		follower: newLogFollower(req.InstanceDir, req.Before, req.StartedAt),
+		follower: follower,
 		prism:    newPrismLogFollower(req.PrismRoot, req.PrismLog, req.Profile),
 		reached:  map[string]time.Time{},
 		ignored:  map[int]bool{},
@@ -480,7 +495,9 @@ func (r *gameRun) advance(phase string, now time.Time) {
 		r.stopped = true
 	}
 	r.set(phase, now, nil)
-	if phase == models.GamePhaseRunning {
+	// An adopted game's start was timed by nothing: its launch began before
+	// this launcher did.
+	if phase == models.GamePhaseRunning && !r.req.Adopted {
 		r.t.recordTiming(r.req.ChapterID, r.timing())
 	}
 }
@@ -583,6 +600,11 @@ func (r *gameRun) timedOut(now time.Time) bool {
 // findGame looks for the game's Java among Prism's children and, finding it,
 // waits on it in the background.
 func (r *gameRun) findGame() {
+	// An adopted run's game was bound when it was found. Another Java of that
+	// Prism is not this chapter's to take.
+	if r.req.Adopted {
+		return
+	}
 	procs, err := r.t.os.list()
 	if err != nil {
 		slog.Info("game process lookup unavailable, following the log only", "chapter", r.req.ChapterID, "error", err)
@@ -620,12 +642,17 @@ func (r *gameRun) findGame() {
 	if best == 0 {
 		return
 	}
-	r.bound = best
-	r.holdWindow(best)
+	r.bind(best)
+}
+
+// bind makes pid the game's process and waits on it in the background.
+func (r *gameRun) bind(pid int) {
+	r.bound = pid
+	r.holdWindow(pid)
 	wctx, cancel := context.WithCancel(r.ctx)
 	r.cancelWait = cancel
 	go func() {
-		code, known, err := r.t.os.wait(wctx, best)
+		code, known, err := r.t.os.wait(wctx, pid)
 		r.exitCh <- procExit{code: code, known: known, err: err}
 	}()
 }

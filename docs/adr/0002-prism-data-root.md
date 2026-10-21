@@ -638,3 +638,31 @@ and plain, over reading `accounts.json` to check or fill in the name.
   and the launcher's log records only that a name was learned.
 - **What does not change.** Nothing of Prism's accounts is read. The game log
   was already read for this line to mask the name in reports (sixth amendment).
+
+## Nineteenth amendment, 2026-10-21
+
+A launcher that restarts into an update (ADR-6 amendment, 2026-10-21), or is
+closed and opened again while a game runs, showed the chapter stopped with Play
+offered: the tracker only knew runs this launcher run had started. The game now
+keeps its chapter when the launcher comes back.
+
+- **What is looked for.** Once at startup, after detection, the tracker lists
+  the processes as it does for a run (pid, parent pid, name), takes the Prisms
+  of the detected executable as `OtherPrismOpen` matches them (name and image
+  path, thirteenth amendment) and each Java whose parent is one of them, with
+  its start time. Nothing else of a process is read.
+- **Which chapter.** A Java is the game of the chapter whose game log was begun
+  no earlier than the Java (two seconds of slack) and has not said `Stopping!`,
+  read from the start with the follower a run uses. When more than one log
+  fits, the chapter whose `instance.cfg` `lastLaunchTime` (already read for
+  play time, eleventh amendment) falls between five seconds before and two
+  minutes after the Java's start decides: Prism writes it as it hands the
+  running Java its launch (`LauncherPartLaunch::proceed`, read on Prism's
+  `develop` branch). No match, or more than one, adopts nothing.
+- **The run.** It starts at the phase the log has reached, bound to that Java,
+  and ends as any run does. Its start is not timed. Prism's dialogs and console
+  are not held, the Prism gets no console record, and another Java of that
+  Prism is never taken for the game.
+- **Stop.** Stop ends the adopted Java as it ends a run's game (S3.9). The
+  Prism it runs under was not started by this launcher and is never asked to
+  close or ended, during the run or after it.

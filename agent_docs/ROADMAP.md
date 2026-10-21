@@ -132,6 +132,8 @@ What is left:
       against `checksums.txt` signed with the launcher's ed25519 key, and
       Restart swaps it in (the .app on macOS, the exe on Windows) and starts it
       (ADR-6 amendment, 2026-10-21)
+- [x] A game still running when the launcher starts keeps its chapter: shown
+      at its phase, Play held, Stop ends its Java (ADR-2 nineteenth amendment)
 - [x] What's new on the first start after an update: each release's
       highlights, written by hand in `data/whatsnew.json`, small changes
       grouped, and the full changelog from the site's `changelog.json` in a

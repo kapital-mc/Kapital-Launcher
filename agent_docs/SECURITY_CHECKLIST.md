@@ -32,7 +32,7 @@ summed). A different count is new surface to classify: add the method to this ta
 | `ShowStashedInstance` | a chapter id | Prism started with `[--dir <root>] --show <stash>`, where the stash is the folder name Go recorded at that chapter's last `ReinstallChapter` in this app run, never the caller's, and only while `<instances>/<stash>/instance.cfg` exists; the started Prism is not followed | S3.1, S3.2, S3.3 |
 | `LaunchChapter`, `OpenChapterWiki`, `GetServerStatus` | a chapter id | the manifest's instance, URL or address for it; before a launch, the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, only from the launcher's earlier template | S3.3, S3.7, S4.6, S6.1 |
 | `SetPackSource` | a chapter id and `published` or `dev` | the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, between the manifest's pack URL and the loopback override from settings, only from the launcher's own template; refused while the game is active or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
-| `StopGame` | a chapter id | the pid of the Prism the launcher started, or of the game's Java found as its child, for a run the tracker follows: asked to close, then ended | S3.3, S3.9 |
+| `StopGame` | a chapter id | the pid of the Prism the launcher started, or of the game's Java found as its child, for a run the tracker follows: asked to close, then ended. For a game adopted at startup, only its Java | S3.3, S3.9 |
 | `OpenPrism` | nothing | Prism started with `[--dir <the engine's root>]` and nothing else, on its main window, where the player signs in; the started Prism is not followed and nothing of its accounts is read | S1.1, S3.1, S3.2 |
 | `ShowInstanceInPrism` | a chapter id | Prism started with `[--dir <root>] --show <the chapter's manifest instance id>` for an installed chapter whose game is not active, after a Prism left on that chapter's last console is closed as Play closes it; the started Prism is not followed | S3.1, S3.2, S3.3 |
 | `ShowPrismConsole` | a chapter id | the console window of the Prism the launcher started for that chapter, which the launcher's own hold hid: shown and given the foreground | S3.3, S3.7 |
@@ -460,6 +460,14 @@ Verify: `TestCloseOwnPrismClosesTheLaunchersPrismAndSaysWhetherItIsGone`,
 Probe: Stop on a chapter whose launch went to a Prism that was already open (no
 process of ours is alive, and none may be signalled); a Prism whose pid has been
 reused after it exited (its exit channel is closed, so it is not touched).
+One exception: a game already running when the launcher starts (ADR-2,
+nineteenth amendment) is adopted when its Java is a child of a Prism matched as
+`OtherPrismOpen` matches one and its chapter's log began after that Java. Stop
+ends that Java by pid as above; its Prism was not started by this launcher and
+is never asked to close or ended, and gets no console record that a later Play
+or the launcher's quit would close.
+Verify: `TestAdoptFollowsARunningGameAndStopEndsOnlyItsJava`,
+`TestAdoptLeavesWhatIsNotARunningGame`, `TestAdoptPicksTheChapterPrismLaunched`.
 
 **S3.10 The logs page reads only files its own listing produces, inside the instance's game folder, and only a bounded chunk of one.**
 Holds when: `GetRunLogs` and `ReadRunLog` (issue 155, ADR-2 eighth amendment)

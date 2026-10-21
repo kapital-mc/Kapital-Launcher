@@ -28,6 +28,9 @@ func (a *App) startup(ctx context.Context) {
 	// The old copy a restart into an update swapped out, and any download
 	// that was never applied.
 	go a.cleanUpUpdate(runCtx)
+	// A game still running from before this launcher started, so a restart
+	// into an update does not lose it.
+	go a.adoptRunningGames(runCtx)
 	go a.status.Run(runCtx, a.manifest.Chapters, a.serverAddress, func(s models.ServerStatus) {
 		wailsrt.EventsEmit(a.ctx, services.EventServerStatus, s)
 	})
