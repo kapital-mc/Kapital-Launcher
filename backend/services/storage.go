@@ -17,12 +17,15 @@ import (
 // The storage section of a chapter's settings: what the instance holds on disk
 // by kind, and the few kinds the player may delete. Measuring reads directory
 // entries only: no file is opened, links are not followed, and the walk stops
-// at maxSizeWalkEntries. Deleting removes one of four fixed folders, or one
-// server's terrain folder, through an os.Root on the instance folder, and only
-// a real directory: a link or a file in its place is refused untouched.
+// at maxSizeWalkEntries. Every kind has fixed folders (storageTargets), built
+// here from the kind and, for terrain, a plain folder name. Deleting removes
+// those of the five deletable kinds through an os.Root on the instance folder,
+// and only a real directory: a link or a file in its place is refused untouched.
+// Opening shows the first of them that is a real directory.
 
 const (
 	xaeroWorldMap  = "world-map"
+	xaeroMinimap   = "minimap"
 	xaeroFolder    = "xaero"
 	screenshotsDir = "screenshots"
 	logsDir        = "logs"
@@ -34,6 +37,7 @@ const (
 var storageOrder = []string{
 	models.StorageTerrainDownload,
 	models.StorageWorldMap,
+	models.StorageMinimap,
 	models.StorageScreenshots,
 	models.StorageLogs,
 	models.StorageMods,
@@ -43,10 +47,7 @@ var storageOrder = []string{
 // MeasureStorage walks an instance folder and sums its files by kind. The
 // free space is the instance disk's, -1 when it cannot be read.
 func MeasureStorage(instanceDir string) (models.ChapterStorage, error) {
-	game := ""
-	if dir := gameFolder(instanceDir); dir != "" {
-		game = filepath.Base(dir)
-	}
+	game := gameFolderName(instanceDir)
 	sums := map[string]*models.StorageItem{}
 	report := models.ChapterStorage{FreeBytes: -1}
 	entries := 0
@@ -120,6 +121,9 @@ func storageKind(game string, parts []string) (kind, name string) {
 		if len(parts) > 3 && parts[2] == xaeroWorldMap {
 			return models.StorageWorldMap, ""
 		}
+		if len(parts) > 3 && parts[2] == xaeroMinimap {
+			return models.StorageMinimap, ""
+		}
 	case screenshotsDir:
 		return models.StorageScreenshots, ""
 	case logsDir, crashDir:
@@ -170,33 +174,72 @@ func validTerrainFolder(name string) bool {
 		!strings.ContainsAny(name, "/\\:\x00")
 }
 
-// ClearStorage deletes one kind of an instance's storage: one server's terrain
-// (name is its folder), the unfinished terrain download, the Xaero world map, or
-// the logs and crash reports. The caller has made sure the game is closed and
-// no terrain download runs. A folder that is not there is nothing to delete.
-func ClearStorage(instanceDir, kind, name string) error {
-	game := ""
-	if dir := gameFolder(instanceDir); dir != "" {
-		game = filepath.Base(dir)
+// deletable are the kinds ClearStorage removes. The minimap (waypoints), the
+// mods (put back by the next sync) and everything else (saves, options,
+// config, Essential's folder) are only measured and opened.
+var deletable = map[string]bool{
+	models.StorageTerrain:         true,
+	models.StorageTerrainDownload: true,
+	models.StorageWorldMap:        true,
+	models.StorageScreenshots:     true,
+	models.StorageLogs:            true,
+}
+
+// storageTargets are a kind's folders, relative to the instance folder; game is
+// the game folder's name. Everything else (".") is the game folder itself, or
+// the instance folder when there is none yet.
+func storageTargets(game, kind, name string) ([]string, error) {
+	if kind == models.StorageTerrainDownload {
+		return []string{dhStaging}, nil
 	}
-	var targets []string
+	if kind == models.StorageOther && game == "" {
+		return []string{"."}, nil
+	}
+	if game == "" {
+		return nil, errors.New("the instance has no game folder yet")
+	}
 	switch kind {
-	case models.StorageTerrainDownload:
-		targets = []string{dhStaging}
 	case models.StorageTerrain:
 		if !validTerrainFolder(name) {
-			return fmt.Errorf("%q is not a terrain folder", name)
+			return nil, fmt.Errorf("%q is not a terrain folder", name)
 		}
-		targets = []string{filepath.Join(game, dhServerData, name)}
+		return []string{filepath.Join(game, dhServerData, name)}, nil
 	case models.StorageWorldMap:
-		targets = []string{filepath.Join(game, xaeroFolder, xaeroWorldMap)}
+		return []string{filepath.Join(game, xaeroFolder, xaeroWorldMap)}, nil
+	case models.StorageMinimap:
+		return []string{filepath.Join(game, xaeroFolder, xaeroMinimap)}, nil
+	case models.StorageScreenshots:
+		return []string{filepath.Join(game, screenshotsDir)}, nil
 	case models.StorageLogs:
-		targets = []string{filepath.Join(game, logsDir), filepath.Join(game, crashDir)}
-	default:
+		return []string{filepath.Join(game, logsDir), filepath.Join(game, crashDir)}, nil
+	case models.StorageMods:
+		return []string{filepath.Join(game, modsDir)}, nil
+	case models.StorageOther:
+		return []string{game}, nil
+	}
+	return nil, fmt.Errorf("%q is not a kind of storage", kind)
+}
+
+// gameFolderName is the instance's game folder's name, "" when it has none.
+func gameFolderName(instanceDir string) string {
+	if dir := gameFolder(instanceDir); dir != "" {
+		return filepath.Base(dir)
+	}
+	return ""
+}
+
+// ClearStorage deletes one kind of an instance's storage: one server's terrain
+// (name is its folder), the unfinished terrain download, the Xaero world map,
+// the screenshots, or the logs and crash reports. The caller has made sure the
+// game is closed and no terrain download runs. A folder that is not there is
+// nothing to delete.
+func ClearStorage(instanceDir, kind, name string) error {
+	if !deletable[kind] {
 		return fmt.Errorf("%q cannot be deleted", kind)
 	}
-	if game == "" && kind != models.StorageTerrainDownload {
-		return errors.New("the instance has no game folder yet")
+	targets, err := storageTargets(gameFolderName(instanceDir), kind, name)
+	if err != nil {
+		return err
 	}
 	root, err := os.OpenRoot(instanceDir)
 	if err != nil {
@@ -221,16 +264,23 @@ func ClearStorage(instanceDir, kind, name string) error {
 	return nil
 }
 
-// ScreenshotsFolder is the instance's screenshots folder, or "" when there is
-// none yet.
-func ScreenshotsFolder(instanceDir string) string {
-	game := gameFolder(instanceDir)
-	if game == "" {
-		return ""
+// StorageFolder is the folder a kind of an instance's storage is in, to show in
+// the file manager: the first of its targets that is a real directory inside
+// the instance folder. A kind with none yet is an error.
+func StorageFolder(instanceDir, kind, name string) (string, error) {
+	targets, err := storageTargets(gameFolderName(instanceDir), kind, name)
+	if err != nil {
+		return "", err
 	}
-	dir := filepath.Join(game, screenshotsDir)
-	if info, err := os.Lstat(dir); err != nil || !info.IsDir() {
-		return ""
+	root, err := os.OpenRoot(instanceDir)
+	if err != nil {
+		return "", err
 	}
-	return dir
+	defer root.Close() //nolint:errcheck // a read-only handle
+	for _, target := range targets {
+		if info, err := root.Lstat(target); err == nil && info.IsDir() {
+			return filepath.Join(instanceDir, target), nil
+		}
+	}
+	return "", errors.New("that folder is not there yet")
 }

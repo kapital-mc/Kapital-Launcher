@@ -108,7 +108,7 @@ export function OpenInstanceFolder(arg1:string):Promise<void>;
 
 export function OpenPrism():Promise<void>;
 
-export function OpenScreenshotsFolder(arg1:string):Promise<void>;
+export function OpenStorageFolder(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function OpenTailscale():Promise<void>;
 

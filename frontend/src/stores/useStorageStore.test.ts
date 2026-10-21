@@ -57,13 +57,13 @@ describe('useStorageStore', () => {
     expect(useStorageStore.getState().byChapter.frangfurd).toEqual(view(0))
   })
 
-  it('opens the screenshots through Go, and does nothing without a bridge', async () => {
-    await useStorageStore.getState().openScreenshots('frangfurd')
-    expect(Bindings.OpenScreenshotsFolder).toHaveBeenCalledWith('frangfurd')
+  it('opens a folder through Go, and does nothing without a bridge', async () => {
+    await useStorageStore.getState().openFolder('frangfurd', 'terrain', '1_frangfurd')
+    expect(Bindings.OpenStorageFolder).toHaveBeenCalledWith('frangfurd', 'terrain', '1_frangfurd')
     Reflect.deleteProperty(window, 'go')
-    await useStorageStore.getState().openScreenshots('frangfurd')
+    await useStorageStore.getState().openFolder('frangfurd', 'mods', '')
     await useStorageStore.getState().clear('frangfurd', 'logs', '')
-    expect(Bindings.OpenScreenshotsFolder).toHaveBeenCalledTimes(1)
+    expect(Bindings.OpenStorageFolder).toHaveBeenCalledTimes(1)
     expect(Bindings.ClearChapterStorage).not.toHaveBeenCalled()
   })
 })

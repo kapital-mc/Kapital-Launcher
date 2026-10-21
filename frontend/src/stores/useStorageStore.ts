@@ -4,7 +4,7 @@ import { errMsg, hasWailsBridge } from '../lib/ipc'
 import {
   ClearChapterStorage,
   GetChapterStorage,
-  OpenScreenshotsFolder,
+  OpenStorageFolder,
 } from '../../wailsjs/go/main/App'
 
 /**
@@ -28,8 +28,8 @@ interface StorageStore {
   load: (chapterId: string) => Promise<void>
   /** Deletes one kind of the chapter's storage; rejects with Go's reason. */
   clear: (chapterId: string, kind: string, name: string) => Promise<void>
-  /** Shows the chapter's screenshots folder; rejects with Go's reason. */
-  openScreenshots: (chapterId: string) => Promise<void>
+  /** Shows the folder one kind of the chapter's storage is in; rejects with Go's reason. */
+  openFolder: (chapterId: string, kind: string, name: string) => Promise<void>
 }
 
 export const useStorageStore = create<StorageStore>((set) => ({
@@ -67,8 +67,8 @@ export const useStorageStore = create<StorageStore>((set) => ({
     }
   },
 
-  openScreenshots: async (chapterId) => {
+  openFolder: async (chapterId, kind, name) => {
     if (!hasWailsBridge()) return
-    await OpenScreenshotsFolder(chapterId)
+    await OpenStorageFolder(chapterId, kind, name)
   },
 }))

@@ -3,8 +3,10 @@ import type { StorageItem } from '../types'
 import {
   canDelete,
   confirmText,
+  hasRows,
   serverName,
   storageDetail,
+  storageGroups,
   storageKey,
   storageTitle,
 } from './storage'
@@ -33,24 +35,55 @@ describe('storage rows', () => {
     })
     expect(serverName(current)).toBe('frangfurd')
     expect(serverName(old)).toBe('Frangfurd (Germany)')
-    expect(storageTitle(old)).toBe('Distant Horizons terrain: Frangfurd (Germany)')
+    expect(storageTitle(old)).toBe('Frangfurd (Germany)')
     expect(serverName(item({ kind: 'terrain', name: 'raw' }))).toBe('raw')
     expect(storageKey(old)).toBe('terrain/Frangfurd+%28Germany%29')
   })
 
   it('offers a delete only for what Go deletes', () => {
-    const kinds = ['terrain', 'terrainDownload', 'worldMap', 'screenshots', 'logs', 'mods', 'other']
+    const kinds = [
+      'terrain',
+      'terrainDownload',
+      'worldMap',
+      'minimap',
+      'screenshots',
+      'logs',
+      'mods',
+      'other',
+    ]
     expect(kinds.filter((kind) => canDelete(item({ kind })))).toEqual([
       'terrain',
       'terrainDownload',
       'worldMap',
+      'screenshots',
       'logs',
     ])
+  })
+
+  it('gathers a mod’s rows into one group, in a fixed order, and leaves out empty groups', () => {
+    const groups = storageGroups([
+      item({ kind: 'terrain', name: 'a', bytes: 5 }),
+      item({ kind: 'terrain', name: 'b', bytes: 3 }),
+      item({ kind: 'terrainDownload', bytes: 2 }),
+      item({ kind: 'minimap', bytes: 1 }),
+      item({ kind: 'mods', bytes: 7 }),
+      item({ kind: 'saves', bytes: 4 }),
+    ])
+    expect(groups.map((g) => [g.id, g.bytes, g.items.length])).toEqual([
+      ['terrain', 10, 3],
+      ['map', 1, 1],
+      ['mods', 7, 1],
+      ['other', 4, 1],
+    ])
+    expect(groups.map(hasRows)).toEqual([true, true, false, false])
+    expect(groups[0]!.title).toBe('Distant Horizons')
+    expect(groups[1]!.title).toBe("Xaero's maps")
   })
 
   it('says each row’s size and what to know about it', () => {
     expect(storageDetail(item({ kind: 'screenshots', files: 1 }))).toBe('3.0 MB · 1 picture')
     expect(storageDetail(item({ kind: 'logs' }))).toBe('3.0 MB · 2 files')
+    expect(storageDetail(item({ kind: 'minimap' }))).toBe('3.0 MB · your waypoints')
     expect(storageDetail(item({ kind: 'mods' }))).toBe(
       "3.0 MB · the pack's mods, put back on every Play",
     )
@@ -60,20 +93,22 @@ describe('storage rows', () => {
     expect(storageDetail(item({ kind: 'terrain' }))).toBe('3.0 MB')
     expect(storageDetail(item({ kind: 'saves' }))).toBe('3.0 MB')
     expect(storageTitle(item({ kind: 'saves' }))).toBe('saves')
+    expect(storageTitle(item({ kind: 'minimap' }))).toBe('Minimap and waypoints')
   })
 
   it('asks before a delete in words that say what is lost', () => {
     expect(confirmText(item({ kind: 'terrain', name: '1_frangfurd' }))).toBe(
-      'Delete 3.0 MB of terrain for frangfurd? It comes back from the server as you play.',
+      'Delete 3.0 MB of terrain? It comes back from the server as you play.',
     )
     expect(confirmText(item({ kind: 'worldMap' }))).toBe(
-      'Delete the world map (3.0 MB)? What you explored is lost.',
+      'Delete 3.0 MB? What you explored is lost.',
     )
-    expect(confirmText(item({ kind: 'logs' }))).toBe(
-      'Delete the logs and crash reports (2 files, 3.0 MB)?',
+    expect(confirmText(item({ kind: 'screenshots', files: 40 }))).toBe(
+      'Delete 40 pictures (3.0 MB)? They do not go to the bin.',
     )
+    expect(confirmText(item({ kind: 'logs' }))).toBe('Delete 2 files (3.0 MB)?')
     expect(confirmText(item({ kind: 'terrainDownload' }))).toBe(
-      'Delete the unfinished download (3.0 MB)? The next one starts over.',
+      'Delete 3.0 MB? The next download starts over.',
     )
   })
 })

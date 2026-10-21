@@ -1,11 +1,12 @@
 // What the storage section's bound methods carry (app_storage.go).
 
 /**
- * A kind of storage in an instance. Terrain, the unfinished terrain download, the world map and
- * the logs can be deleted; screenshots can be opened; mods and the rest are only shown.
+ * A kind of storage in an instance. Terrain, the unfinished terrain download, the world map, the
+ * screenshots and the logs can be deleted; the minimap, mods and the rest are only shown. Every
+ * kind's folder can be opened.
  */
 export type StorageKind =
-  'terrain' | 'terrainDownload' | 'worldMap' | 'screenshots' | 'logs' | 'mods' | 'other'
+  'terrain' | 'terrainDownload' | 'worldMap' | 'minimap' | 'screenshots' | 'logs' | 'mods' | 'other'
 
 /** One kind of storage in an instance; for terrain, one server's Distant Horizons folder. */
 export interface StorageItem {

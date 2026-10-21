@@ -53,55 +53,59 @@ describe('StorageSection', () => {
     Reflect.deleteProperty(window, 'go')
   })
 
-  it('lists the instance by kind with the total and the disk’s free space', async () => {
+  it('splits the instance into coloured groups, with the total and the disk’s free space', async () => {
     render(<StorageSection chapter={frangfurd} />)
-    expect(await screen.findByText('Distant Horizons terrain: frangfurd')).toBeInTheDocument()
+    expect(await screen.findByText('Distant Horizons')).toBeInTheDocument()
+    expect(screen.getByText('frangfurd')).toBeInTheDocument()
     expect(screen.getByText('14 GB')).toBeInTheDocument()
     expect(screen.getByText('215 MB · 40 pictures')).toBeInTheDocument()
     expect(screen.getByText('50 GB free on this disk.')).toBeInTheDocument()
-    // One delete (the terrain) and one way to the screenshots; mods have neither.
-    expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
-    expect(screen.getByRole('button', { name: 'Open folder' })).toBeInTheDocument()
+    expect(screen.getByRole('img')).toHaveAccessibleName(
+      'Distant Horizons 13 GB, Screenshots 215 MB, Mods 400 MB',
+    )
+    // The terrain and the screenshots can go; the mods cannot. Every row has its folder.
+    expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: /^Open the .* folder$/ })).toHaveLength(3)
   })
 
-  it('deletes only after the player confirms, and shows Go’s new measure', async () => {
+  it('turns Delete into Confirm in place, and shows Go’s new measure', async () => {
     vi.mocked(App.ClearChapterStorage).mockResolvedValue(view([shots, mods]) as never)
     render(<StorageSection chapter={frangfurd} />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }))
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[0]!)
     expect(App.ClearChapterStorage).not.toHaveBeenCalled()
     expect(
-      screen.getByText(
-        'Delete 13 GB of terrain for frangfurd? It comes back from the server as you play.',
-      ),
+      screen.getByText('Delete 13 GB of terrain? It comes back from the server as you play.'),
     ).toBeInTheDocument()
-    const buttons = screen.getAllByRole('button', { name: 'Delete' })
-    await act(async () => fireEvent.click(buttons[buttons.length - 1]!))
+    // Only the screenshots' Delete is left; the terrain's is Confirm now.
+    expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Confirm' })))
     expect(App.ClearChapterStorage).toHaveBeenCalledWith(
       'frangfurd',
       'terrain',
       '1790374988_frangfurd',
     )
-    await waitFor(() =>
-      expect(screen.queryByText('Distant Horizons terrain: frangfurd')).not.toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.queryByText('Distant Horizons')).not.toBeInTheDocument())
     // The World data card is read again.
     expect(App.GetDHSnapshot).toHaveBeenCalledWith('frangfurd')
   })
 
   it('cancels a confirmation without deleting', async () => {
     render(<StorageSection chapter={frangfurd} />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }))
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[1]!)
+    expect(
+      screen.getByText('Delete 40 pictures (215 MB)? They do not go to the bin.'),
+    ).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull())
+    expect(screen.queryByRole('button', { name: 'Confirm' })).toBeNull()
+    expect(screen.getByText('215 MB · 40 pictures')).toBeInTheDocument()
     expect(App.ClearChapterStorage).not.toHaveBeenCalled()
   })
 
   it('shows Go’s refusal', async () => {
     vi.mocked(App.ClearChapterStorage).mockRejectedValue('Frangfurd is starting or running')
     render(<StorageSection chapter={frangfurd} />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }))
-    const buttons = screen.getAllByRole('button', { name: 'Delete' })
-    await act(async () => fireEvent.click(buttons[buttons.length - 1]!))
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[0]!)
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Confirm' })))
     expect(await screen.findByRole('alert')).toHaveTextContent('Frangfurd is starting or running')
   })
 
@@ -117,7 +121,9 @@ describe('StorageSection', () => {
       },
     })
     render(<StorageSection chapter={frangfurd} />)
-    expect(await screen.findByRole('button', { name: 'Delete' })).toBeDisabled()
+    for (const b of await screen.findAllByRole('button', { name: 'Delete' }))
+      expect(b).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Open the frangfurd folder' })).toBeEnabled()
     expect(screen.getByText('Close the game to delete anything.')).toBeInTheDocument()
     cleanup()
     useGameStore.setState({ states: {} })
@@ -127,13 +133,20 @@ describe('StorageSection', () => {
     expect(screen.getByRole('button', { name: 'Delete' })).toBeEnabled()
   })
 
-  it('opens the screenshots folder through Go, and shows a refusal', async () => {
+  it('opens a row’s folder through Go, and shows a refusal', async () => {
     render(<StorageSection chapter={frangfurd} />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Open folder' }))
-    expect(App.OpenScreenshotsFolder).toHaveBeenCalledWith('frangfurd')
-    vi.mocked(App.OpenScreenshotsFolder).mockRejectedValue('Frangfurd has no screenshots yet')
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Open folder' })))
-    expect(await screen.findByRole('alert')).toHaveTextContent('Frangfurd has no screenshots yet')
+    fireEvent.click(await screen.findByRole('button', { name: 'Open the frangfurd folder' }))
+    expect(App.OpenStorageFolder).toHaveBeenCalledWith(
+      'frangfurd',
+      'terrain',
+      '1790374988_frangfurd',
+    )
+    vi.mocked(App.OpenStorageFolder).mockRejectedValue('Frangfurd: that folder is not there yet')
+    await act(async () =>
+      fireEvent.click(screen.getByRole('button', { name: 'Open the Screenshots folder' })),
+    )
+    expect(App.OpenStorageFolder).toHaveBeenLastCalledWith('frangfurd', 'screenshots', '')
+    expect(await screen.findByRole('alert')).toHaveTextContent('that folder is not there yet')
   })
 
   it('shows a read refusal, and nothing without a bridge', async () => {

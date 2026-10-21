@@ -12,7 +12,7 @@ import (
 
 // The storage section of a chapter's settings: what the instance holds on disk
 // by kind, a delete for the kinds that come back or are the player's to drop,
-// and a way to the screenshots. The caller names a chapter and, for terrain, a
+// and a way to each kind's folder. The caller names a chapter and, for terrain, a
 // server folder the listing gave; every path is built in Go from the instance
 // chapterInstance resolves.
 
@@ -42,10 +42,10 @@ func (a *App) chapterStorage(chapter models.Chapter, instanceDir string) (models
 
 // ClearChapterStorage deletes one kind of a chapter's storage and returns the
 // instance measured again. kind is terrain (name is a server folder under
-// Distant_Horizons_server_data), terrainDownload, worldMap or logs; anything
-// else is refused. It is refused under a developer preview, while the game runs
-// (Distant Horizons and the game hold these files open) and, for terrain, while
-// a terrain download of the chapter runs.
+// Distant_Horizons_server_data), terrainDownload, worldMap, screenshots or
+// logs; anything else is refused. It is refused under a developer preview,
+// while the game runs (Distant Horizons and the game hold these files open)
+// and, for terrain, while a terrain download of the chapter runs.
 func (a *App) ClearChapterStorage(chapterID, kind, name string) (models.ChapterStorage, error) {
 	chapter, ok := a.chapter(chapterID)
 	if !ok {
@@ -73,21 +73,22 @@ func (a *App) ClearChapterStorage(chapterID, kind, name string) (models.ChapterS
 	return a.chapterStorage(chapter, instanceDir)
 }
 
-// OpenScreenshotsFolder shows a chapter's screenshots folder in the file
-// manager. Like OpenInstanceFolder, the caller names a chapter and never a
-// path; an instance with no screenshots folder yet is refused.
-func (a *App) OpenScreenshotsFolder(chapterID string) error {
+// OpenStorageFolder shows the folder one kind of a chapter's storage is in, in
+// the file manager: for terrain, that server's folder (name is from the
+// listing). Like OpenInstanceFolder, the caller names a chapter and a kind and
+// never a path; a folder that is not there yet is refused.
+func (a *App) OpenStorageFolder(chapterID, kind, name string) error {
 	chapter, cfg, err := a.chapterInstance(chapterID)
 	if err != nil {
 		return err
 	}
-	dir := services.ScreenshotsFolder(filepath.Dir(cfg))
-	if dir == "" {
-		return fmt.Errorf("%s has no screenshots yet", chapter.Name)
+	dir, err := services.StorageFolder(filepath.Dir(cfg), kind, name)
+	if err != nil {
+		return a.storageError(chapter, err)
 	}
 	if err := a.openFolder(dir); err != nil {
-		slog.Error("open screenshots folder", "chapter", chapter.ID, "error", err)
-		return fmt.Errorf("could not open the %s screenshots folder", chapter.Name)
+		slog.Error("open storage folder", "chapter", chapter.ID, "kind", kind, "error", err)
+		return fmt.Errorf("could not open the %s folder", chapter.Name)
 	}
 	return nil
 }

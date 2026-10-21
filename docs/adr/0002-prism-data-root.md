@@ -652,19 +652,24 @@ measured by kind, and a delete the player asks for.
   (directory entries only, no link followed, stopped at the size walk's entry
   cap and then marked partial) and sums it by kind: each server folder under
   `<game folder>/Distant_Horizons_server_data/`, the terrain staging folder
-  (sixteenth amendment), `<game folder>/xaero/world-map`, `screenshots`,
-  `logs` with `crash-reports`, `mods`, and the rest. The disk's free space comes
-  with it. Nothing is opened or written.
-- **What can be deleted.** Four kinds, each one fixed folder built in Go: one
+  (sixteenth amendment), `<game folder>/xaero/world-map` and `xaero/minimap`,
+  `screenshots`, `logs` with `crash-reports`, `mods`, and the rest. The disk's
+  free space comes with it. Nothing is opened or written. The section shows it
+  as a bar split by group (Distant Horizons, Xaero's maps, screenshots, logs,
+  mods, the rest) and the same groups as rows.
+- **What can be deleted.** Five kinds, each one fixed folder built in Go: one
   server's terrain folder (a name the listing gave, held to a plain folder name),
-  the terrain staging folder, the Xaero world map and the logs with crash
-  reports. Each goes through an `os.Root` on the game folder (the staging folder,
-  on the instance), and a target that is a link or a file is left as it is.
-  Screenshots only open in the file manager, through the same check as the
-  instance folder; mods come back with the next sync, so neither has a delete.
-- **When.** Only after the player confirms the row. Refused under a developer
-  preview, while the game is active or the log says it may be running (Distant
-  Horizons and Xaero hold their files open), and for terrain while a terrain
-  download of the chapter runs.
-- **What is never touched.** Saves, options, `config`, the Xaero minimap
-  (waypoints), and Essential's folder, which may hold account data (S1.1).
+  the terrain staging folder, the Xaero world map, the screenshots, and the logs
+  with crash reports. Each goes through an `os.Root` on the instance folder, and
+  a target that is a link or a file is left as it is. Screenshots are the
+  player's own and do not go to the bin, so their confirmation says so.
+- **What can be opened.** Every kind's folder, through `OpenStorageFolder`: the
+  same fixed folders, the first that is a real directory, opened like the
+  instance folder (S3.6). The rest opens the game folder.
+- **When.** A delete only after the player confirms the row, in place of its
+  Delete button. Refused under a developer preview, while the game is active or
+  the log says it may be running (Distant Horizons and Xaero hold their files
+  open), and for terrain while a terrain download of the chapter runs.
+- **What is never deleted.** Saves, options, `config`, the mods (the next sync
+  puts them back), the Xaero minimap (waypoints), and Essential's folder, which
+  may hold account data (S1.1).

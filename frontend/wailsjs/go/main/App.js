@@ -214,8 +214,8 @@ export function OpenPrism() {
   return window['go']['main']['App']['OpenPrism']();
 }
 
-export function OpenScreenshotsFolder(arg1) {
-  return window['go']['main']['App']['OpenScreenshotsFolder'](arg1);
+export function OpenStorageFolder(arg1, arg2, arg3) {
+  return window['go']['main']['App']['OpenStorageFolder'](arg1, arg2, arg3);
 }
 
 export function OpenTailscale() {

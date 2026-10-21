@@ -2,12 +2,13 @@ package models
 
 // The kinds of storage a chapter's instance is measured by, for the storage
 // section of its settings. Terrain, the unfinished terrain download, the world
-// map and the logs can be deleted; screenshots can be opened; the mods and the
-// rest are shown only.
+// map, the screenshots and the logs can be deleted; the minimap (waypoints), the
+// mods and the rest are only shown. Every kind's folder can be opened.
 const (
 	StorageTerrain         = "terrain"
 	StorageTerrainDownload = "terrainDownload"
 	StorageWorldMap        = "worldMap"
+	StorageMinimap         = "minimap"
 	StorageScreenshots     = "screenshots"
 	StorageLogs            = "logs"
 	StorageMods            = "mods"

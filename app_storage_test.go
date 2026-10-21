@@ -76,7 +76,7 @@ func TestStorageMethodsRefuseAChapterThatIsNotThereOrNotInstalled(t *testing.T) 
 	if _, err := app.ClearChapterStorage("frangfurd", models.StorageLogs, ""); err == nil || !strings.Contains(err.Error(), "not installed") {
 		t.Fatalf("got %v", err)
 	}
-	if err := app.OpenScreenshotsFolder("frangfurd"); err == nil || !strings.Contains(err.Error(), "not installed") {
+	if err := app.OpenStorageFolder("frangfurd", models.StorageMods, ""); err == nil || !strings.Contains(err.Error(), "not installed") {
 		t.Fatalf("got %v", err)
 	}
 }
@@ -93,10 +93,10 @@ func TestClearChapterStorageDeletesAndMeasuresAgain(t *testing.T) {
 	if kinds := strings.Join(storageKinds(got), " "); kinds != "worldMap: screenshots: mods: other:" {
 		t.Fatalf("measured again: %q", kinds)
 	}
-	if _, err := app.ClearChapterStorage("frangfurd", models.StorageScreenshots, ""); err == nil {
-		t.Fatal("screenshots were deleted")
+	if _, err := app.ClearChapterStorage("frangfurd", models.StorageMods, ""); err == nil {
+		t.Fatal("the mods were deleted")
 	}
-	if _, err := os.Stat(filepath.Join(game, "screenshots")); err != nil {
+	if _, err := os.Stat(filepath.Join(game, "mods")); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -159,24 +159,30 @@ func TestClearChapterStorageUnderAPreviewIsRefusedAndEndsIt(t *testing.T) {
 	}
 }
 
-func TestOpenScreenshotsFolderOpensOnlyThatFolder(t *testing.T) {
+func TestOpenStorageFolderOpensOnlyThatFolder(t *testing.T) {
 	app, _, game := storageApp(t)
 	var opened []string
 	app.openFolder = func(dir string) error { opened = append(opened, dir); return nil }
-	if err := app.OpenScreenshotsFolder("frangfurd"); err != nil {
+	if err := app.OpenStorageFolder("frangfurd", models.StorageScreenshots, ""); err != nil {
 		t.Fatal(err)
 	}
 	if len(opened) != 1 || opened[0] != filepath.Join(game, "screenshots") {
 		t.Fatalf("opened %v", opened)
 	}
 	app.openFolder = func(string) error { return errors.New("no file manager") }
-	if err := app.OpenScreenshotsFolder("frangfurd"); err == nil || !strings.Contains(err.Error(), "Frangfurd") {
+	if err := app.OpenStorageFolder("frangfurd", models.StorageScreenshots, ""); err == nil || !strings.Contains(err.Error(), "Frangfurd") {
 		t.Fatalf("the failure names the chapter: %v", err)
 	}
 	if err := os.RemoveAll(filepath.Join(game, "screenshots")); err != nil {
 		t.Fatal(err)
 	}
-	if err := app.OpenScreenshotsFolder("frangfurd"); err == nil || !strings.Contains(err.Error(), "no screenshots") {
+	if err := app.OpenStorageFolder("frangfurd", models.StorageScreenshots, ""); err == nil || !strings.Contains(err.Error(), "not there") {
 		t.Fatalf("got %v", err)
+	}
+	if err := app.OpenStorageFolder("frangfurd", models.StorageTerrain, "../../.."); err == nil {
+		t.Fatal("a path left the instance")
+	}
+	if err := app.OpenStorageFolder("nowhere", models.StorageMods, ""); err == nil {
+		t.Fatal("an unknown chapter was opened")
 	}
 }

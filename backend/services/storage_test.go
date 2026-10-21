@@ -74,11 +74,12 @@ func TestMeasureStorageSortsAnInstanceByKind(t *testing.T) {
 		{models.StorageTerrain, "Frangfurd+%28Germany%29", "Frangfurd (Germany)", sumLen(stOldServer), 1},
 		{models.StorageTerrainDownload, "", "", sumLen(stStaged), 1},
 		{models.StorageWorldMap, "", "", sumLen(stMap), 1},
+		// The minimap's stWaypoints are not the world map: they are the player's own.
+		{models.StorageMinimap, "", "", sumLen(stWaypoints), 1},
 		{models.StorageScreenshots, "", "", sumLen(stShot), 1},
 		{models.StorageLogs, "", "", sumLen(stLatestLog, stCrash), 2},
 		{models.StorageMods, "", "", sumLen(stModJar), 1},
-		// The minimap's stWaypoints are not the world map: they are the player's own.
-		{models.StorageOther, "", "", sumLen(stWaypoints, stOptions, stCfg), 3},
+		{models.StorageOther, "", "", sumLen(stOptions, stCfg), 2},
 	}
 	if !reflect.DeepEqual(rows, want) {
 		t.Fatalf("got  %+v\nwant %+v", rows, want)
@@ -132,6 +133,7 @@ func TestClearStorageDeletesOnlyItsOwnFolder(t *testing.T) {
 		{models.StorageTerrain, "1790374988_frangfurd", []string{stOverworld, stNether}},
 		{models.StorageTerrainDownload, "", []string{stStaged}},
 		{models.StorageWorldMap, "", []string{stMap}},
+		{models.StorageScreenshots, "", []string{stShot}},
 		{models.StorageLogs, "", []string{stLatestLog, stCrash}},
 	}
 	for _, c := range cases {
@@ -161,7 +163,7 @@ func TestClearStorageDeletesOnlyItsOwnFolder(t *testing.T) {
 func TestClearStorageRefusesAnythingElse(t *testing.T) {
 	dir := storageInstance(t, stOverworld, stShot, stModJar, stOptions, stCfg)
 	for _, c := range []struct{ kind, name string }{
-		{models.StorageScreenshots, ""},
+		{models.StorageMinimap, ""},
 		{models.StorageMods, ""},
 		{models.StorageOther, ""},
 		{"saves", ""},
@@ -212,13 +214,41 @@ func TestClearStorageWithoutAGameFolder(t *testing.T) {
 	}
 }
 
-func TestScreenshotsFolder(t *testing.T) {
-	dir := storageInstance(t, stCfg, stOptions)
-	if got := ScreenshotsFolder(dir); got != "" {
-		t.Fatalf("no screenshots yet: %q", got)
+func TestStorageFolderIsTheKindsOwnFolder(t *testing.T) {
+	dir := storageInstance(t, stOverworld, stMap, stWaypoints, stShot, stCrash, stModJar, stOptions, stStaged, stCfg)
+	game := filepath.Join(dir, "minecraft")
+	for _, c := range []struct{ kind, name, want string }{
+		{models.StorageTerrain, "1790374988_frangfurd", filepath.Join(game, "Distant_Horizons_server_data", "1790374988_frangfurd")},
+		{models.StorageTerrainDownload, "", filepath.Join(dir, "kapital-dh-download")},
+		{models.StorageWorldMap, "", filepath.Join(game, "xaero", "world-map")},
+		{models.StorageMinimap, "", filepath.Join(game, "xaero", "minimap")},
+		{models.StorageScreenshots, "", filepath.Join(game, "screenshots")},
+		// No logs folder yet: the crash reports are where the rest is.
+		{models.StorageLogs, "", filepath.Join(game, "crash-reports")},
+		{models.StorageMods, "", filepath.Join(game, "mods")},
+		{models.StorageOther, "", game},
+	} {
+		got, err := StorageFolder(dir, c.kind, c.name)
+		if err != nil || got != c.want {
+			t.Errorf("%s %q: %q, %v; want %q", c.kind, c.name, got, err, c.want)
+		}
 	}
-	dir = storageInstance(t, stCfg, stShot)
-	if got := ScreenshotsFolder(dir); got != filepath.Join(dir, "minecraft", "screenshots") {
-		t.Fatalf("got %q", got)
+	for _, c := range []struct{ kind, name string }{
+		{models.StorageTerrain, "Frangfurd+%28Germany%29"},
+		{models.StorageTerrain, ".."},
+		{models.StorageTerrain, "../mods"},
+		{"saves", ""},
+	} {
+		if got, err := StorageFolder(dir, c.kind, c.name); err == nil {
+			t.Errorf("%s %q: opened %q", c.kind, c.name, got)
+		}
+	}
+	// Before the first start there is no game folder; everything else is the instance.
+	bare := storageInstance(t, stCfg)
+	if got, err := StorageFolder(bare, models.StorageOther, ""); err != nil || got != bare {
+		t.Errorf("got %q, %v", got, err)
+	}
+	if _, err := StorageFolder(bare, models.StorageScreenshots, ""); err == nil {
+		t.Error("screenshots opened without a game folder")
 	}
 }

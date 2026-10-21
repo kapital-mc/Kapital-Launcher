@@ -336,15 +336,17 @@ download at a time (`terrainDownloads`), progress as `dh:download` events, and
 the launcher never writes to the bucket.
 
 The storage section (`storage.go`, `app_storage.go`, `GetChapterStorage`,
-`ClearChapterStorage` and `OpenScreenshotsFolder`, ADR-2 eighteenth amendment,
+`ClearChapterStorage` and `OpenStorageFolder`, ADR-2 eighteenth amendment,
 SECURITY_CHECKLIST S3.13) measures an instance by kind in one walk with the
-size walk's cap, following no link. A delete names a kind and, for terrain, a
-server folder from the listing; `ClearStorage` builds the one folder from that
-and removes it through an `os.Root`, leaving a link or a file in place. The
-kinds are terrain, the terrain staging folder, the Xaero world map, and logs
-with crash reports; anything else is refused. It is refused under a preview,
-while the game runs and, for terrain, while a terrain download runs, and returns
-the instance measured again.
+size walk's cap, following no link. Every kind has fixed folders
+(`storageTargets`), built from the kind and, for terrain, a server folder from
+the listing. `ClearStorage` removes those of the five deletable kinds (terrain,
+the terrain staging folder, the Xaero world map, screenshots, logs with crash
+reports) through an `os.Root`, leaving a link or a file in place; anything else
+is refused. `StorageFolder` returns the first that is a real directory, for
+`OpenStorageFolder`. A delete is refused under a preview, while the game runs
+and, for terrain, while a terrain download runs, and returns the instance
+measured again.
 
 Tailscale (`tailscale*.go`, `serverlist.go`, `nbt.go`, `app_tailscale.go`,
 ADR-14, SECURITY_CHECKLIST S3.12 and S4.11) is found, never bundled: its CLI

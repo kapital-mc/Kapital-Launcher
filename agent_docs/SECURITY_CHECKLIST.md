@@ -59,8 +59,8 @@ summed). A different count is new surface to classify: add the method to this ta
 | `DownloadDHSnapshot` | a chapter id and whether to replace | the same reads, then that snapshot's parts (each checked against its hash) into `<instance>/kapital-dh-download/` and, once every level matched its hash, one rename per level into `<game folder>/Distant_Horizons_server_data/<server>/<level>/`; refused under a preview, while the game is active or running (asked again before placing), while another download runs, for a newer Distant Horizons, and over existing terrain unless replace is true | S3.3, S4.10 |
 | `CancelDHSnapshot` | a chapter id | the running download's context, cancelled; nothing else | S4.10 |
 | `GetChapterStorage` | a chapter id | the directory entries of that chapter's instance folder, walked once without following a link and capped like the size walk, summed by kind, and the disk's free space; nothing opened or written | S3.3, S3.13 |
-| `ClearChapterStorage` | a chapter id, a kind and, for `terrain`, a server folder name | one fixed folder removed: that server's folder under `<game folder>/Distant_Horizons_server_data/`, `<instance>/kapital-dh-download/`, `<game folder>/xaero/world-map`, or `<game folder>/logs` and `crash-reports`, through an `os.Root`; refused for any other kind or a name that is not a plain folder name, under a preview, while the game runs, and for terrain while a terrain download runs | S3.3, S3.13 |
-| `OpenScreenshotsFolder` | a chapter id | that chapter's `<game folder>/screenshots`, opened in the file manager like the instance folder, when it is a folder | S3.3, S3.6 |
+| `ClearChapterStorage` | a chapter id, a kind and, for `terrain`, a server folder name | one fixed folder removed: that server's folder under `<game folder>/Distant_Horizons_server_data/`, `<instance>/kapital-dh-download/`, `<game folder>/xaero/world-map`, `<game folder>/screenshots`, or `<game folder>/logs` and `crash-reports`, through an `os.Root`; refused for any other kind or a name that is not a plain folder name, under a preview, while the game runs, and for terrain while a terrain download runs | S3.3, S3.13 |
+| `OpenStorageFolder` | a chapter id, a kind and, for `terrain`, a server folder name | the first of that kind's fixed folders (the same `ClearChapterStorage` removes, plus `xaero/minimap`, `mods` and the game folder) that is a real directory inside the instance, opened in the file manager like the instance folder; nothing written | S3.3, S3.6, S3.13 |
 | `GetPreviewSituations` | nothing | the fixed list of developer previews, in memory | none |
 | `StartPreview`, `ClearPreviews` | a chapter id and a situation name, which must be one of the fixed list (`services.PreviewSituations`) | state and copy only: a synthetic `game:state`, the real loading card with a made-up report, synthetic pack, instance, engine and release answers, and a made-up Prism install that never reaches the installer. No file, process, URL or network request; a real launch, game event or write to the chapter ends the preview | S3.3, S3.8, S4.5 |
 
@@ -305,10 +305,11 @@ instance that exists); `services.OpenFolder` then refuses anything that is not
 an absolute path to an existing directory. Windows opens it with `ShellExecute`
 (an API call, the path is one argument), macOS with `/usr/bin/open` and that
 path as its only argument, other platforms refuse.
-`OpenScreenshotsFolder` opens that instance's `screenshots` folder the same
-way, built in Go and refused when it is not a folder.
+`OpenStorageFolder` opens one of that instance's storage folders the same
+way: built in Go from a kind (S3.13), reached through an `os.Root` on the
+instance and `Lstat`ed, so a link or a file is not opened.
 Verify: `TestOpenInstanceFolderOpensOnlyAnInstalledChaptersFolder`,
-`TestOpenScreenshotsFolderOpensOnlyThatFolder`, `TestScreenshotsFolder`,
+`TestOpenStorageFolderOpensOnlyThatFolder`, `TestStorageFolderIsTheKindsOwnFolder`,
 `TestOpenFolderChecksTheDirectoryBeforeTheOSSeesIt`.
 Probe: a chapter id that is a path; an instance folder that is a file or gone.
 
@@ -589,21 +590,23 @@ Verify: `TestNBTRoundTripsTheGamesOwnFile`, `TestNBTRefusesBrokenFiles`,
 Probe: a `servers.dat` nested 100 lists deep, or a list claiming 2^31 items
 (refused, the file untouched).
 
-**S3.13 The storage section deletes one of four fixed folders of an instance, and only when the game is closed.**
-Holds when: `GetChapterStorage` and `ClearChapterStorage` (ADR-2 eighteenth
+**S3.13 The storage section deletes one of five fixed folders of an instance, and only when the game is closed.**
+Holds when: `GetChapterStorage`, `ClearChapterStorage` and `OpenStorageFolder` (ADR-2 eighteenth
 amendment) take a chapter id, resolved through the manifest and the disk's own
 instance report (S3.3), never a path. The measure walks with `filepath.WalkDir`,
 counts regular files only, follows no link and stops at the size walk's cap.
 `services.ClearStorage` takes a kind and refuses all but `terrain`,
-`terrainDownload`, `worldMap` and `logs`; for `terrain` the name must be a plain
+`terrainDownload`, `worldMap`, `screenshots` and `logs`; for `terrain` the name must be a plain
 folder name (`validTerrainFolder`: not empty, at most 255 bytes, not `.` or
 `..`, no `/`, `\`, `:` or NUL). Each target is reached through an `os.Root` on
-the game folder (the staging folder, on the instance) and `Lstat`ed first: a
+the instance folder, so a path that leaves it is refused, and `Lstat`ed first: a
 missing target is skipped, a link or a file is an error and left in place,
 and a folder is removed with `Root.RemoveAll`. Refused under a preview, while
 the tracker or the log says the game runs, and for terrain or the staging
 folder while that chapter's terrain download runs. Saves, options, `config`,
-mods, screenshots, the Xaero minimap and Essential's folder have no delete.
+mods, the Xaero minimap and Essential's folder have no delete. `StorageFolder`
+builds the same targets for opening and returns only a real directory inside
+the instance.
 Errors pass the redactor before they reach the page.
 Verify: `TestClearStorageRefusesAnythingElse`,
 `TestClearStorageDeletesOnlyItsOwnFolder`,
@@ -612,9 +615,10 @@ Verify: `TestClearStorageRefusesAnythingElse`,
 cannot make links), `TestClearStorageWithoutAGameFolder`,
 `TestClearChapterStorageIsRefusedWhileTheGameRuns`,
 `TestClearChapterStorageWaitsForATerrainDownload`,
-`TestClearChapterStorageUnderAPreviewIsRefusedAndEndsIt`.
+`TestClearChapterStorageUnderAPreviewIsRefusedAndEndsIt`,
+`TestStorageFolderIsTheKindsOwnFolder`.
 Probe: a terrain name of `..`, `../mods`, `..\mods` or `C:`; a kind of
-`screenshots` or `mods`; `xaero/world-map` as a link to the home folder; a
+`minimap` or `mods`; `xaero/world-map` as a link to the home folder; a
 delete while Distant Horizons holds its database open.
 
 ## S4. Downloads (milestone 4)

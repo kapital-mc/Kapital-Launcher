@@ -28,6 +28,12 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-storage-terrain: var(--storage-terrain);
+  --color-storage-map: var(--storage-map);
+  --color-storage-screenshots: var(--storage-screenshots);
+  --color-storage-logs: var(--storage-logs);
+  --color-storage-mods: var(--storage-mods);
+  --color-storage-other: var(--storage-other);
   --color-logo-gradient-top: var(--logo-gradient-top);
   --color-logo-gradient-bottom: var(--logo-gradient-bottom);
   /* The active chapter's accent. Set by [data-chapter] below. */
@@ -183,6 +189,12 @@
   --success: #8fcf7a;
   --warning: #e0aa4e;
   --danger: #ef7a5e;
+  --storage-terrain: #6fa8dc;
+  --storage-map: #5cbfa2;
+  --storage-screenshots: #e0aa4e;
+  --storage-logs: #b48ad6;
+  --storage-mods: #e0849a;
+  --storage-other: #6c6c78;
   --logo-gradient-top: #f9ae9f;
   --logo-gradient-bottom: #6d3939;
 }
@@ -207,6 +219,12 @@
   --success: #3d7a2b;
   --warning: #8a6512;
   --danger: #b23e21;
+  --storage-terrain: #2c5f8a;
+  --storage-map: #1a6b55;
+  --storage-screenshots: #8a6512;
+  --storage-logs: #6b3f8c;
+  --storage-mods: #9a3a4f;
+  --storage-other: #a8a8b2;
 }
 
 @media (prefers-color-scheme: light) {
@@ -230,6 +248,12 @@
     --success: #3d7a2b;
     --warning: #8a6512;
     --danger: #b23e21;
+    --storage-terrain: #2c5f8a;
+    --storage-map: #1a6b55;
+    --storage-screenshots: #8a6512;
+    --storage-logs: #6b3f8c;
+    --storage-mods: #9a3a4f;
+    --storage-other: #a8a8b2;
   }
 }
 
