@@ -33,6 +33,9 @@ const (
 	stOldServer = "minecraft/Distant_Horizons_server_data/Frangfurd+%28Germany%29/ff@minecraft@@overworld/DistantHorizons.sqlite"
 	stMap       = "minecraft/xaero/world-map/Multiplayer_frangfurd/null/0_0.zip"
 	stWaypoints = "minecraft/xaero/minimap/Multiplayer_frangfurd/waypoints.txt"
+	stWorld     = "minecraft/saves/Convert/region/r.0.0.mca"
+	stWorldDat  = "minecraft/saves/Convert/level.dat"
+	stTestWorld = "minecraft/saves/Test/level.dat"
 	stShot      = "minecraft/screenshots/2026-10-20_21.38.11.png"
 	stLatestLog = "minecraft/logs/latest.log"
 	stCrash     = "minecraft/crash-reports/crash-2026-10-12_16.19.00-client.txt"
@@ -51,8 +54,8 @@ func sumLen(names ...string) int64 {
 }
 
 func TestMeasureStorageSortsAnInstanceByKind(t *testing.T) {
-	dir := storageInstance(t, stOverworld, stNether, stOldServer, stMap, stWaypoints, stShot,
-		stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg)
+	dir := storageInstance(t, stOverworld, stNether, stOldServer, stMap, stWaypoints, stTestWorld,
+		stWorld, stWorldDat, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg)
 	got, err := MeasureStorage(dir)
 	if err != nil {
 		t.Fatal(err)
@@ -76,6 +79,9 @@ func TestMeasureStorageSortsAnInstanceByKind(t *testing.T) {
 		{models.StorageWorldMap, "", "", sumLen(stMap), 1},
 		// The minimap's stWaypoints are not the world map: they are the player's own.
 		{models.StorageMinimap, "", "", sumLen(stWaypoints), 1},
+		// One row per world, largest first.
+		{models.StorageSaves, "Convert", "", sumLen(stWorld, stWorldDat), 2},
+		{models.StorageSaves, "Test", "", sumLen(stTestWorld), 1},
 		{models.StorageScreenshots, "", "", sumLen(stShot), 1},
 		{models.StorageLogs, "", "", sumLen(stLatestLog, stCrash), 2},
 		{models.StorageMods, "", "", sumLen(stModJar), 1},
@@ -84,7 +90,7 @@ func TestMeasureStorageSortsAnInstanceByKind(t *testing.T) {
 	if !reflect.DeepEqual(rows, want) {
 		t.Fatalf("got  %+v\nwant %+v", rows, want)
 	}
-	if got.TotalBytes != sumLen(stOverworld, stNether, stOldServer, stMap, stWaypoints, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg) {
+	if got.TotalBytes != sumLen(stOverworld, stNether, stOldServer, stMap, stWaypoints, stTestWorld, stWorld, stWorldDat, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg) {
 		t.Errorf("total %d", got.TotalBytes)
 	}
 	if got.FreeBytes <= 0 || got.Partial {
@@ -161,12 +167,13 @@ func TestClearStorageDeletesOnlyItsOwnFolder(t *testing.T) {
 }
 
 func TestClearStorageRefusesAnythingElse(t *testing.T) {
-	dir := storageInstance(t, stOverworld, stShot, stModJar, stOptions, stCfg)
+	dir := storageInstance(t, stOverworld, stWorld, stShot, stModJar, stOptions, stCfg)
 	for _, c := range []struct{ kind, name string }{
 		{models.StorageMinimap, ""},
 		{models.StorageMods, ""},
 		{models.StorageOther, ""},
-		{"saves", ""},
+		{models.StorageSaves, "Convert"},
+		{models.StorageSaves, ""},
 		{models.StorageTerrain, ""},
 		{models.StorageTerrain, ".."},
 		{models.StorageTerrain, "../mods"},
@@ -177,7 +184,7 @@ func TestClearStorageRefusesAnythingElse(t *testing.T) {
 			t.Errorf("%q %q: deleted", c.kind, c.name)
 		}
 	}
-	for _, f := range []string{stOverworld, stShot, stModJar, stOptions, stCfg} {
+	for _, f := range []string{stOverworld, stWorld, stShot, stModJar, stOptions, stCfg} {
 		if _, err := os.Stat(filepath.Join(dir, filepath.FromSlash(f))); err != nil {
 			t.Errorf("%s: %v", f, err)
 		}
@@ -215,13 +222,14 @@ func TestClearStorageWithoutAGameFolder(t *testing.T) {
 }
 
 func TestStorageFolderIsTheKindsOwnFolder(t *testing.T) {
-	dir := storageInstance(t, stOverworld, stMap, stWaypoints, stShot, stCrash, stModJar, stOptions, stStaged, stCfg)
+	dir := storageInstance(t, stOverworld, stMap, stWaypoints, stWorld, stShot, stCrash, stModJar, stOptions, stStaged, stCfg)
 	game := filepath.Join(dir, "minecraft")
 	for _, c := range []struct{ kind, name, want string }{
 		{models.StorageTerrain, "1790374988_frangfurd", filepath.Join(game, "Distant_Horizons_server_data", "1790374988_frangfurd")},
 		{models.StorageTerrainDownload, "", filepath.Join(dir, "kapital-dh-download")},
 		{models.StorageWorldMap, "", filepath.Join(game, "xaero", "world-map")},
 		{models.StorageMinimap, "", filepath.Join(game, "xaero", "minimap")},
+		{models.StorageSaves, "Convert", filepath.Join(game, "saves", "Convert")},
 		{models.StorageScreenshots, "", filepath.Join(game, "screenshots")},
 		// No logs folder yet: the crash reports are where the rest is.
 		{models.StorageLogs, "", filepath.Join(game, "crash-reports")},
@@ -237,7 +245,9 @@ func TestStorageFolderIsTheKindsOwnFolder(t *testing.T) {
 		{models.StorageTerrain, "Frangfurd+%28Germany%29"},
 		{models.StorageTerrain, ".."},
 		{models.StorageTerrain, "../mods"},
-		{"saves", ""},
+		{models.StorageSaves, ""},
+		{models.StorageSaves, "../mods"},
+		{models.StorageSaves, "Test"},
 	} {
 		if got, err := StorageFolder(dir, c.kind, c.name); err == nil {
 			t.Errorf("%s %q: opened %q", c.kind, c.name, got)

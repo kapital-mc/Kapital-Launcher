@@ -18,7 +18,7 @@ import (
 // by kind, and the few kinds the player may delete. Measuring reads directory
 // entries only: no file is opened, links are not followed, and the walk stops
 // at maxSizeWalkEntries. Every kind has fixed folders (storageTargets), built
-// here from the kind and, for terrain, a plain folder name. Deleting removes
+// here from the kind and, for terrain and saves, a plain folder name. Deleting removes
 // those of the five deletable kinds through an os.Root on the instance folder,
 // and only a real directory: a link or a file in its place is refused untouched.
 // Opening shows the first of them that is a real directory.
@@ -31,13 +31,16 @@ const (
 	logsDir        = "logs"
 	crashDir       = "crash-reports"
 	modsDir        = "mods"
+	savesDir       = "saves"
 )
 
-// storageOrder is the order the kinds after terrain are listed in.
+// storageOrder is the order the kinds after terrain are listed in. Saves, one
+// item per world, are listed largest first in their place.
 var storageOrder = []string{
 	models.StorageTerrainDownload,
 	models.StorageWorldMap,
 	models.StorageMinimap,
+	models.StorageSaves,
 	models.StorageScreenshots,
 	models.StorageLogs,
 	models.StorageMods,
@@ -103,7 +106,7 @@ func MeasureStorage(instanceDir string) (models.ChapterStorage, error) {
 }
 
 // storageKind files a path inside the instance, split into its segments, under
-// a kind and, for terrain, the server's folder. game is the game folder's name,
+// a kind and, for terrain, the server's folder, for saves, the world's. game is the game folder's name,
 // "" when the instance has none yet.
 func storageKind(game string, parts []string) (kind, name string) {
 	if len(parts) > 1 && parts[0] == dhStaging {
@@ -124,6 +127,10 @@ func storageKind(game string, parts []string) (kind, name string) {
 		if len(parts) > 3 && parts[2] == xaeroMinimap {
 			return models.StorageMinimap, ""
 		}
+	case savesDir:
+		if len(parts) > 3 {
+			return models.StorageSaves, parts[2]
+		}
 	case screenshotsDir:
 		return models.StorageScreenshots, ""
 	case logsDir, crashDir:
@@ -135,11 +142,24 @@ func storageKind(game string, parts []string) (kind, name string) {
 }
 
 // sortStorage lists terrain largest first, then the other kinds in
-// storageOrder.
+// storageOrder, with saves largest first in their place.
 func sortStorage(sums map[string]*models.StorageItem) []models.StorageItem {
+	items := byKind(sums, models.StorageTerrain)
+	for _, kind := range storageOrder {
+		if kind == models.StorageSaves {
+			items = append(items, byKind(sums, kind)...)
+		} else if it := sums[kind+"/"]; it != nil {
+			items = append(items, *it)
+		}
+	}
+	return items
+}
+
+// byKind is every item of one kind, largest first, then by name.
+func byKind(sums map[string]*models.StorageItem, kind string) []models.StorageItem {
 	items := []models.StorageItem{}
 	for _, it := range sums {
-		if it.Kind == models.StorageTerrain {
+		if it.Kind == kind {
 			items = append(items, *it)
 		}
 	}
@@ -149,11 +169,6 @@ func sortStorage(sums map[string]*models.StorageItem) []models.StorageItem {
 		}
 		return items[i].Name < items[j].Name
 	})
-	for _, kind := range storageOrder {
-		if it := sums[kind+"/"]; it != nil {
-			items = append(items, *it)
-		}
-	}
 	return items
 }
 
@@ -167,16 +182,16 @@ func terrainLabel(folder string) string {
 	return folder
 }
 
-// validTerrainFolder is the shape of a server folder name ClearStorage takes:
-// one plain path segment.
-func validTerrainFolder(name string) bool {
+// validFolderName is the shape of a server or world folder name ClearStorage
+// and StorageFolder take: one plain path segment.
+func validFolderName(name string) bool {
 	return name != "" && len(name) <= 255 && name != "." && name != ".." &&
 		!strings.ContainsAny(name, "/\\:\x00")
 }
 
-// deletable are the kinds ClearStorage removes. The minimap (waypoints), the
-// mods (put back by the next sync) and everything else (saves, options,
-// config, Essential's folder) are only measured and opened.
+// deletable are the kinds ClearStorage removes. The saves, the minimap
+// (waypoints), the mods (put back by the next sync) and everything else
+// (options, config, Essential's folder) are only measured and opened.
 var deletable = map[string]bool{
 	models.StorageTerrain:         true,
 	models.StorageTerrainDownload: true,
@@ -200,10 +215,15 @@ func storageTargets(game, kind, name string) ([]string, error) {
 	}
 	switch kind {
 	case models.StorageTerrain:
-		if !validTerrainFolder(name) {
+		if !validFolderName(name) {
 			return nil, fmt.Errorf("%q is not a terrain folder", name)
 		}
 		return []string{filepath.Join(game, dhServerData, name)}, nil
+	case models.StorageSaves:
+		if !validFolderName(name) {
+			return nil, fmt.Errorf("%q is not a world folder", name)
+		}
+		return []string{filepath.Join(game, savesDir, name)}, nil
 	case models.StorageWorldMap:
 		return []string{filepath.Join(game, xaeroFolder, xaeroWorldMap)}, nil
 	case models.StorageMinimap:

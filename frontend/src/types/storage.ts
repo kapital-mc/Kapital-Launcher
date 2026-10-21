@@ -2,16 +2,30 @@
 
 /**
  * A kind of storage in an instance. Terrain, the unfinished terrain download, the world map, the
- * screenshots and the logs can be deleted; the minimap, mods and the rest are only shown. Every
- * kind's folder can be opened.
+ * screenshots and the logs can be deleted; the saves, the minimap, mods and the rest are only
+ * shown. Every kind's folder can be opened.
  */
 export type StorageKind =
-  'terrain' | 'terrainDownload' | 'worldMap' | 'minimap' | 'screenshots' | 'logs' | 'mods' | 'other'
+  | 'terrain'
+  | 'terrainDownload'
+  | 'worldMap'
+  | 'minimap'
+  | 'saves'
+  | 'screenshots'
+  | 'logs'
+  | 'mods'
+  | 'other'
 
-/** One kind of storage in an instance; for terrain, one server's Distant Horizons folder. */
+/**
+ * One kind of storage in an instance; for terrain, one server's Distant Horizons folder, and for
+ * saves, one world.
+ */
 export interface StorageItem {
   kind: StorageKind | string
-  /** The server's folder for terrain, what ClearChapterStorage takes back; '' otherwise. */
+  /**
+   * The server's folder for terrain, what ClearChapterStorage takes back, the world's folder for a
+   * save; '' otherwise.
+   */
   name: string
   /** The server's name as Distant Horizons wrote it, decoded, for terrain; '' otherwise. */
   label: string
@@ -27,7 +41,10 @@ export interface ChapterStorage {
   totalBytes: number
   /** Free space on the instance's disk, -1 when unknown. */
   freeBytes: number
-  /** Terrain largest first, then the other kinds in a fixed order; empty kinds left out. */
+  /**
+   * Terrain largest first, then the other kinds in a fixed order, saves largest first in theirs;
+   * empty kinds left out.
+   */
   items: StorageItem[]
   /** The walk stopped at its ceiling, so the sizes are low. */
   partial: boolean

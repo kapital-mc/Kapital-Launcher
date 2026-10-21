@@ -1,11 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import type { Chapter, ChapterStorage, StorageItem } from '../../types'
 import { errMsg } from '../../lib/ipc'
 import { formatBytes } from '../../lib/bytes'
-import { FolderOpen, HardDrive, Trash2 } from '../../lib/icons'
+import { ChevronDown, FolderOpen, HardDrive, Trash2 } from '../../lib/icons'
 import {
   canDelete,
-  confirmText,
   GROUP_COLOUR,
   hasRows,
   storageDetail,
@@ -13,7 +13,7 @@ import {
   storageKey,
   storageTitle,
 } from '../../lib/storage'
-import type { StorageGroup } from '../../lib/storage'
+import type { StorageGroup, StorageGroupId } from '../../lib/storage'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
@@ -32,11 +32,11 @@ interface Props {
 
 /**
  * What the chapter's instance holds on disk: a bar split by colour, then the same groups as rows.
- * Distant Horizons (each server's terrain, an unfinished download) and Xaero's maps (the world
- * map, the minimap) are headings over their own rows; screenshots, logs, mods and the rest are one
- * row each. Every row opens its folder, and terrain, the download, the world map, screenshots and
- * logs can be deleted: the trash button grows into Confirm in place, and the row says what is
- * lost. Go measures, opens and deletes, and refuses a delete while the game runs (Distant Horizons
+ * Distant Horizons (each server's terrain, an unfinished download), Xaero's maps (the world map,
+ * the minimap) and the saves (one row per world) are headings over their own rows, folded until
+ * the player opens one; screenshots, logs, mods and the rest are one row each. Every row opens its
+ * folder, and terrain, the download, the world map, screenshots and logs can be deleted (a save
+ * never is): the trash button grows into Confirm in place. Go measures, opens and deletes, and refuses a delete while the game runs (Distant Horizons
  * holds its database open) or a terrain download runs. Only the tracker's answer (`playing`)
  * disables the deletes; `running` is the log's guess, shown as a hint. The view is read again when
  * the game ends and when the window regains focus, and the World data card is read again after
@@ -51,6 +51,7 @@ export function StorageSection({ chapter }: Props) {
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const wasPlaying = useRef(playing)
   const [confirming, setConfirming] = useState<string | null>(null)
+  const [unfolded, setUnfolded] = useState<ReadonlySet<StorageGroupId>>(new Set())
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -100,6 +101,14 @@ export function StorageSection({ chapter }: Props) {
   }
 
   const groups = storageGroups(view.items)
+  const toggle = (id: StorageGroupId) => {
+    setConfirming(null)
+    setUnfolded((was) => {
+      const next = new Set(was)
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
+  }
   const row = (item: StorageItem, group: StorageGroup, title: string) => {
     const key = storageKey(item)
     return (
@@ -123,12 +132,14 @@ export function StorageSection({ chapter }: Props) {
       <SettingsCard>
         {groups.map((group) =>
           hasRows(group) ? (
-            <div key={group.id} className="flex flex-col gap-3">
-              <Heading group={group} />
-              <div className="flex flex-col gap-3 pl-5">
-                {group.items.map((item) => row(item, group, storageTitle(item)))}
-              </div>
-            </div>
+            <Group
+              key={group.id}
+              group={group}
+              open={unfolded.has(group.id)}
+              onToggle={() => toggle(group.id)}
+            >
+              {group.items.map((item) => row(item, group, storageTitle(item)))}
+            </Group>
           ) : (
             row(group.items[0]!, group, group.title)
           ),
@@ -181,13 +192,44 @@ function Swatch({ colour }: { colour: string }) {
   return <span aria-hidden className={`${colour} rounded-pill size-2.5 shrink-0`} />
 }
 
-/** A group's line over its rows: its colour, name and size. */
-function Heading({ group }: { group: StorageGroup }) {
+interface GroupProps {
+  group: StorageGroup
+  open: boolean
+  onToggle: () => void
+  children: ReactNode
+}
+
+/**
+ * A group's line over its rows: its colour, name and size, and a chevron where the rows' folder
+ * buttons are. Pressed, the rows grow open under it; folded, they are not drawn.
+ */
+function Group({ group, open, onToggle, children }: GroupProps) {
+  const rowsId = useId()
   return (
-    <div className="flex items-center gap-2.5">
-      <Swatch colour={GROUP_COLOUR[group.id]} />
-      <span className="text-fg text-sm font-medium">{group.title}</span>
-      <span className="text-fg-muted text-xs tabular-nums">{formatBytes(group.bytes)}</span>
+    <div className="flex flex-col">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={rowsId}
+        onClick={onToggle}
+        className="group flex items-center gap-2.5 text-left"
+      >
+        <Swatch colour={GROUP_COLOUR[group.id]} />
+        <span className="text-fg text-sm font-medium">{group.title}</span>
+        <span className="text-fg-muted text-xs tabular-nums">{formatBytes(group.bytes)}</span>
+        <span className="text-fg-muted group-hover:text-fg duration-fast ease-standard ml-auto flex size-8 items-center justify-center transition-colors">
+          <Icon
+            icon={ChevronDown}
+            size="sm"
+            className={`duration-fast ease-standard transition-transform motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}
+          />
+        </span>
+      </button>
+      <div id={rowsId}>
+        <Grow inner="pt-3">
+          {open && <div className="flex flex-col gap-3 pl-5">{children}</div>}
+        </Grow>
+      </div>
     </div>
   )
 }
@@ -223,12 +265,7 @@ function Row({
         {colour && <Swatch colour={colour} />}
         <div className="flex min-w-0 flex-col gap-1">
           <span className="text-fg text-sm font-medium break-words">{title}</span>
-          <span
-            className={`${confirming ? 'text-warning' : 'text-fg-muted'} text-xs tabular-nums`}
-            aria-live="polite"
-          >
-            {confirming ? confirmText(item) : storageDetail(item)}
-          </span>
+          <span className="text-fg-muted text-xs tabular-nums">{storageDetail(item)}</span>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -295,8 +332,9 @@ function DeleteButton({ title, confirming, disabled, onDelete, onConfirm }: Dele
 
 /** The disk's free space, and a word when the walk stopped early. */
 function Footer({ view }: { view: ChapterStorage }) {
-  const free = view.freeBytes >= 0 ? `${formatBytes(view.freeBytes)} free on this disk.` : ''
-  const partial = view.partial ? ' Some files were not counted.' : ''
-  if (!free && !partial) return null
-  return <Hint>{`${free}${partial}`.trim()}</Hint>
+  const parts = [
+    view.freeBytes >= 0 && `${formatBytes(view.freeBytes)} free on disk`,
+    view.partial && 'Some files not counted',
+  ].filter(Boolean)
+  return parts.length > 0 ? <Hint>{parts.join(' · ')}</Hint> : null
 }

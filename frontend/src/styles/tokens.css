@@ -30,6 +30,7 @@
   --color-danger: var(--danger);
   --color-storage-terrain: var(--storage-terrain);
   --color-storage-map: var(--storage-map);
+  --color-storage-saves: var(--storage-saves);
   --color-storage-screenshots: var(--storage-screenshots);
   --color-storage-logs: var(--storage-logs);
   --color-storage-mods: var(--storage-mods);
@@ -191,6 +192,7 @@
   --danger: #ef7a5e;
   --storage-terrain: #6fa8dc;
   --storage-map: #5cbfa2;
+  --storage-saves: #9cc46a;
   --storage-screenshots: #e0aa4e;
   --storage-logs: #b48ad6;
   --storage-mods: #e0849a;
@@ -221,6 +223,7 @@
   --danger: #b23e21;
   --storage-terrain: #2c5f8a;
   --storage-map: #1a6b55;
+  --storage-saves: #4b6e1d;
   --storage-screenshots: #8a6512;
   --storage-logs: #6b3f8c;
   --storage-mods: #9a3a4f;
@@ -250,6 +253,7 @@
     --danger: #b23e21;
     --storage-terrain: #2c5f8a;
     --storage-map: #1a6b55;
+    --storage-saves: #4b6e1d;
     --storage-screenshots: #8a6512;
     --storage-logs: #6b3f8c;
     --storage-mods: #9a3a4f;

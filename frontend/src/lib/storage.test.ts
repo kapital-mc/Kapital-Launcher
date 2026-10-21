@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { StorageItem } from '../types'
 import {
   canDelete,
-  confirmText,
   hasRows,
   serverName,
   storageDetail,
@@ -46,6 +45,7 @@ describe('storage rows', () => {
       'terrainDownload',
       'worldMap',
       'minimap',
+      'saves',
       'screenshots',
       'logs',
       'mods',
@@ -67,15 +67,19 @@ describe('storage rows', () => {
       item({ kind: 'terrainDownload', bytes: 2 }),
       item({ kind: 'minimap', bytes: 1 }),
       item({ kind: 'mods', bytes: 7 }),
-      item({ kind: 'saves', bytes: 4 }),
+      item({ kind: 'saves', name: 'Convert', bytes: 4 }),
+      item({ kind: 'saves', name: 'Test', bytes: 1 }),
+      item({ kind: 'other', bytes: 6 }),
     ])
     expect(groups.map((g) => [g.id, g.bytes, g.items.length])).toEqual([
       ['terrain', 10, 3],
       ['map', 1, 1],
+      ['saves', 5, 2],
       ['mods', 7, 1],
-      ['other', 4, 1],
+      ['other', 6, 1],
     ])
-    expect(groups.map(hasRows)).toEqual([true, true, false, false])
+    expect(groups.map(hasRows)).toEqual([true, true, true, false, false])
+    expect(groups[2]!.title).toBe('Saves')
     expect(groups[0]!.title).toBe('Distant Horizons')
     expect(groups[1]!.title).toBe("Xaero's maps")
   })
@@ -83,32 +87,20 @@ describe('storage rows', () => {
   it('says each row’s size and what to know about it', () => {
     expect(storageDetail(item({ kind: 'screenshots', files: 1 }))).toBe('3.0 MB · 1 picture')
     expect(storageDetail(item({ kind: 'logs' }))).toBe('3.0 MB · 2 files')
-    expect(storageDetail(item({ kind: 'minimap' }))).toBe('3.0 MB · your waypoints')
-    expect(storageDetail(item({ kind: 'mods' }))).toBe(
-      "3.0 MB · the pack's mods, put back on every Play",
-    )
+    expect(storageDetail(item({ kind: 'mods' }))).toBe('3.0 MB')
+    for (const kind of ['worldMap', 'minimap', 'terrainDownload'])
+      expect(storageDetail(item({ kind, lastModified: '2026-10-20T19:40:00Z' }), 'en-GB')).toBe(
+        '3.0 MB · last written 20 Oct 2026',
+      )
     expect(
       storageDetail(item({ kind: 'terrain', lastModified: '2026-10-20T19:40:00Z' }), 'en-GB'),
     ).toBe('3.0 MB · last written 20 Oct 2026')
     expect(storageDetail(item({ kind: 'terrain' }))).toBe('3.0 MB')
-    expect(storageDetail(item({ kind: 'saves' }))).toBe('3.0 MB')
-    expect(storageTitle(item({ kind: 'saves' }))).toBe('saves')
+    expect(
+      storageDetail(item({ kind: 'saves', lastModified: '2026-10-12T16:19:00Z' }), 'en-GB'),
+    ).toBe('3.0 MB · last played 12 Oct 2026')
+    expect(storageTitle(item({ kind: 'saves', name: 'Convert' }))).toBe('Convert')
+    expect(storageDetail(item({ kind: 'other' }))).toBe('3.0 MB')
     expect(storageTitle(item({ kind: 'minimap' }))).toBe('Minimap and waypoints')
-  })
-
-  it('asks before a delete in words that say what is lost', () => {
-    expect(confirmText(item({ kind: 'terrain', name: '1_frangfurd' }))).toBe(
-      'Delete 3.0 MB of terrain? It comes back from the server as you play.',
-    )
-    expect(confirmText(item({ kind: 'worldMap' }))).toBe(
-      'Delete 3.0 MB? What you explored is lost.',
-    )
-    expect(confirmText(item({ kind: 'screenshots', files: 40 }))).toBe(
-      'Delete 40 pictures (3.0 MB)? They do not go to the bin.',
-    )
-    expect(confirmText(item({ kind: 'logs' }))).toBe('Delete 2 files (3.0 MB)?')
-    expect(confirmText(item({ kind: 'terrainDownload' }))).toBe(
-      'Delete 3.0 MB? The next download starts over.',
-    )
   })
 })

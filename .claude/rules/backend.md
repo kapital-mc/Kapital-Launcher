@@ -339,8 +339,8 @@ The storage section (`storage.go`, `app_storage.go`, `GetChapterStorage`,
 `ClearChapterStorage` and `OpenStorageFolder`, ADR-2 twentieth amendment,
 SECURITY_CHECKLIST S3.13) measures an instance by kind in one walk with the
 size walk's cap, following no link. Every kind has fixed folders
-(`storageTargets`), built from the kind and, for terrain, a server folder from
-the listing. `ClearStorage` removes those of the five deletable kinds (terrain,
+(`storageTargets`), built from the kind and, for terrain or a save, a server
+or world folder from the listing. `ClearStorage` removes those of the five deletable kinds (terrain,
 the terrain staging folder, the Xaero world map, screenshots, logs with crash
 reports) through an `os.Root`, leaving a link or a file in place; anything else
 is refused. `StorageFolder` returns the first that is a real directory, for

@@ -2,13 +2,15 @@ package models
 
 // The kinds of storage a chapter's instance is measured by, for the storage
 // section of its settings. Terrain, the unfinished terrain download, the world
-// map, the screenshots and the logs can be deleted; the minimap (waypoints), the
-// mods and the rest are only shown. Every kind's folder can be opened.
+// map, the screenshots and the logs can be deleted; the saves, the minimap
+// (waypoints), the mods and the rest are only shown. Every kind's folder can be
+// opened.
 const (
 	StorageTerrain         = "terrain"
 	StorageTerrainDownload = "terrainDownload"
 	StorageWorldMap        = "worldMap"
 	StorageMinimap         = "minimap"
+	StorageSaves           = "saves"
 	StorageScreenshots     = "screenshots"
 	StorageLogs            = "logs"
 	StorageMods            = "mods"
@@ -25,7 +27,8 @@ type ChapterStorage struct {
 	// be read.
 	FreeBytes int64 `json:"freeBytes"`
 	// Items are the instance's storage by kind, largest terrain first, then the
-	// other kinds in a fixed order. A kind with nothing in it is left out.
+	// other kinds in a fixed order, saves largest first in theirs. A kind with
+	// nothing in it is left out.
 	Items []StorageItem `json:"items"`
 	// Partial is true when the walk stopped at its ceiling of entries, so the
 	// sizes are lower than the disk's.
@@ -36,12 +39,13 @@ type ChapterStorage struct {
 }
 
 // StorageItem is one kind of storage in an instance: for terrain, one server's
-// Distant Horizons folder.
+// Distant Horizons folder, and for saves, one world.
 type StorageItem struct {
 	// Kind is one of the Storage constants.
 	Kind string `json:"kind"`
 	// Name is the server's folder under Distant_Horizons_server_data for
-	// terrain, what ClearChapterStorage takes back, and "" for every other kind.
+	// terrain, what ClearChapterStorage takes back, the world's folder under
+	// saves for a save, and "" for every other kind.
 	Name string `json:"name"`
 	// Label is the server's name as Distant Horizons wrote it in the folder
 	// name, decoded, for terrain; "" for every other kind.

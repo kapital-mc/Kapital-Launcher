@@ -77,7 +77,7 @@
         "status": { "$ref": "#/$defs/colorGroup" },
         "storage": {
           "allOf": [{ "$ref": "#/$defs/colorGroup" }],
-          "description": "One colour per group of the storage section's split bar (Distant Horizons, Xaero's maps, screenshots, logs, mods, everything else), told apart from each other rather than meaning a status."
+          "description": "One colour per group of the storage section's split bar (Distant Horizons, Xaero's maps, saves, screenshots, logs, mods, everything else), told apart from each other rather than meaning a status."
         },
         "brand": {
           "allOf": [{ "$ref": "#/$defs/colorGroup" }],

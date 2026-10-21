@@ -62,7 +62,7 @@ summed). A different count is new surface to classify: add the method to this ta
 | `CancelDHSnapshot` | a chapter id | the running download's context, cancelled; nothing else | S4.10 |
 | `GetChapterStorage` | a chapter id | the directory entries of that chapter's instance folder, walked once without following a link and capped like the size walk, summed by kind, and the disk's free space; nothing opened or written | S3.3, S3.13 |
 | `ClearChapterStorage` | a chapter id, a kind and, for `terrain`, a server folder name | one fixed folder removed: that server's folder under `<game folder>/Distant_Horizons_server_data/`, `<instance>/kapital-dh-download/`, `<game folder>/xaero/world-map`, `<game folder>/screenshots`, or `<game folder>/logs` and `crash-reports`, through an `os.Root`; refused for any other kind or a name that is not a plain folder name, under a preview, while the game runs, and for terrain while a terrain download runs | S3.3, S3.13 |
-| `OpenStorageFolder` | a chapter id, a kind and, for `terrain`, a server folder name | the first of that kind's fixed folders (the same `ClearChapterStorage` removes, plus `xaero/minimap`, `mods` and the game folder) that is a real directory inside the instance, opened in the file manager like the instance folder; nothing written | S3.3, S3.6, S3.13 |
+| `OpenStorageFolder` | a chapter id, a kind and, for `terrain`, a server folder name, for `saves`, a world folder name | the first of that kind's fixed folders (the same `ClearChapterStorage` removes, plus `xaero/minimap`, one world under `saves`, `mods` and the game folder) that is a real directory inside the instance, opened in the file manager like the instance folder; nothing written | S3.3, S3.6, S3.13 |
 | `GetPreviewSituations` | nothing | the fixed list of developer previews, in memory | none |
 | `StartPreview`, `ClearPreviews` | a chapter id and a situation name, which must be one of the fixed list (`services.PreviewSituations`) | state and copy only: a synthetic `game:state`, the real loading card with a made-up report, synthetic pack, instance, engine and release answers, and a made-up Prism install that never reaches the installer. No file, process, URL or network request; a real launch, game event or write to the chapter ends the preview | S3.3, S3.8, S4.5 |
 
@@ -608,7 +608,7 @@ instance report (S3.3), never a path. The measure walks with `filepath.WalkDir`,
 counts regular files only, follows no link and stops at the size walk's cap.
 `services.ClearStorage` takes a kind and refuses all but `terrain`,
 `terrainDownload`, `worldMap`, `screenshots` and `logs`; for `terrain` the name must be a plain
-folder name (`validTerrainFolder`: not empty, at most 255 bytes, not `.` or
+folder name (`validFolderName`: not empty, at most 255 bytes, not `.` or
 `..`, no `/`, `\`, `:` or NUL). Each target is reached through an `os.Root` on
 the instance folder, so a path that leaves it is refused, and `Lstat`ed first: a
 missing target is skipped, a link or a file is an error and left in place,
@@ -616,7 +616,8 @@ and a folder is removed with `Root.RemoveAll`. Refused under a preview, while
 the tracker or the log says the game runs, and for terrain or the staging
 folder while that chapter's terrain download runs. Saves, options, `config`,
 mods, the Xaero minimap and Essential's folder have no delete. `StorageFolder`
-builds the same targets for opening and returns only a real directory inside
+builds the same targets for opening, a world under `saves` among them (its name
+held to the same plain folder name), and returns only a real directory inside
 the instance.
 Errors pass the redactor before they reach the page.
 Verify: `TestClearStorageRefusesAnythingElse`,

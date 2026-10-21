@@ -714,19 +714,22 @@ measured by kind, and a delete the player asks for.
   cap and then marked partial) and sums it by kind: each server folder under
   `<game folder>/Distant_Horizons_server_data/`, the terrain staging folder
   (sixteenth amendment), `<game folder>/xaero/world-map` and `xaero/minimap`,
-  `screenshots`, `logs` with `crash-reports`, `mods`, and the rest. The disk's
-  free space comes with it. Nothing is opened or written. The section shows it
-  as a bar split by group (Distant Horizons, Xaero's maps, screenshots, logs,
-  mods, the rest) and the same groups as rows.
+  each world under `saves`, `screenshots`, `logs` with `crash-reports`, `mods`,
+  and the rest. The disk's free space comes with it. Nothing is opened or
+  written. The section shows it as a bar split by group (Distant Horizons,
+  Xaero's maps, saves, screenshots, logs, mods, the rest) and the same groups as
+  rows; the three groups with rows of their own start folded.
 - **What can be deleted.** Five kinds, each one fixed folder built in Go: one
   server's terrain folder (a name the listing gave, held to a plain folder name),
   the terrain staging folder, the Xaero world map, the screenshots, and the logs
   with crash reports. Each goes through an `os.Root` on the instance folder, and
   a target that is a link or a file is left as it is. Screenshots are the
-  player's own and do not go to the bin, so their confirmation says so.
+  player's own and do not go to the bin.
 - **What can be opened.** Every kind's folder, through `OpenStorageFolder`: the
   same fixed folders, the first that is a real directory, opened like the
-  instance folder (S3.6). The rest opens the game folder.
+  instance folder (S3.6). A save opens its own world's folder, a name the
+  listing gave held to a plain folder name as a terrain folder is. The rest
+  opens the game folder.
 - **When.** A delete only after the player confirms the row, in place of its
   Delete button. Refused under a developer preview, while the game is active or
   the log says it may be running (Distant Horizons and Xaero hold their files

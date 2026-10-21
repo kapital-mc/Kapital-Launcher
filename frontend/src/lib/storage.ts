@@ -13,11 +13,11 @@ const DELETABLE: readonly string[] = [
 
 export const canDelete = (item: StorageItem): boolean => DELETABLE.includes(item.kind)
 
-/** A row's key: its kind, and the server folder for terrain. */
+/** A row's key: its kind, and the server folder for terrain or the world folder for a save. */
 export const storageKey = (item: StorageItem): string => `${item.kind}/${item.name}`
 
-/** The groups the section shows, in order: a mod's files together, then one kind each. */
-export type StorageGroupId = 'terrain' | 'map' | 'screenshots' | 'logs' | 'mods' | 'other'
+/** The groups the section shows, in order: a mod's files together, the worlds, then one kind each. */
+export type StorageGroupId = 'terrain' | 'map' | 'saves' | 'screenshots' | 'logs' | 'mods' | 'other'
 
 export interface StorageGroup {
   id: StorageGroupId
@@ -31,6 +31,7 @@ const GROUP_OF: Record<string, StorageGroupId> = {
   terrainDownload: 'terrain',
   worldMap: 'map',
   minimap: 'map',
+  saves: 'saves',
   screenshots: 'screenshots',
   logs: 'logs',
   mods: 'mods',
@@ -39,6 +40,7 @@ const GROUP_OF: Record<string, StorageGroupId> = {
 const GROUPS: readonly { id: StorageGroupId; title: string }[] = [
   { id: 'terrain', title: 'Distant Horizons' },
   { id: 'map', title: "Xaero's maps" },
+  { id: 'saves', title: 'Saves' },
   { id: 'screenshots', title: 'Screenshots' },
   { id: 'logs', title: 'Logs and crash reports' },
   { id: 'mods', title: 'Mods' },
@@ -52,6 +54,7 @@ const GROUPS: readonly { id: StorageGroupId; title: string }[] = [
 export const GROUP_COLOUR: Record<StorageGroupId, string> = {
   terrain: 'bg-storage-terrain',
   map: 'bg-storage-map',
+  saves: 'bg-storage-saves',
   screenshots: 'bg-storage-screenshots',
   logs: 'bg-storage-logs',
   mods: 'bg-storage-mods',
@@ -66,9 +69,12 @@ export function storageGroups(items: readonly StorageItem[]): StorageGroup[] {
   }).filter((group) => group.items.length > 0)
 }
 
-/** Whether a group is drawn as a heading over its own rows: Distant Horizons and Xaero's maps. */
+/**
+ * Whether a group is drawn as a heading over its own rows, folded at first: Distant Horizons,
+ * Xaero's maps and the saves.
+ */
 export const hasRows = (group: StorageGroup): boolean =>
-  group.id === 'terrain' || group.id === 'map'
+  group.id === 'terrain' || group.id === 'map' || group.id === 'saves'
 
 /**
  * The server a terrain folder is for. Distant Horizons names it `<server id>_<key>` when the server
@@ -88,51 +94,31 @@ const TITLES: Record<string, string> = {
 /** A row's title under its group's heading. */
 export function storageTitle(item: StorageItem): string {
   if (item.kind === 'terrain') return serverName(item)
+  if (item.kind === 'saves') return item.name
   return TITLES[item.kind] ?? item.kind
 }
 
 const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
 
-/** The small line under a row's title: its size and what to know about it. */
+/** The small line under a row's title: its size, and a count or the last write where it helps. */
 export function storageDetail(item: StorageItem, locale?: string): string {
   const size = formatBytes(item.bytes)
   switch (item.kind) {
     case 'terrain':
+    case 'terrainDownload':
+    case 'worldMap':
+    case 'minimap':
       return item.lastModified
         ? `${size} · last written ${publishedOn(item.lastModified, locale)}`
         : size
-    case 'terrainDownload':
-      return `${size} · kept so the download can continue`
-    case 'worldMap':
-      return `${size} · the map you explored`
-    case 'minimap':
-      return `${size} · your waypoints`
+    case 'saves':
+      return item.lastModified
+        ? `${size} · last played ${publishedOn(item.lastModified, locale)}`
+        : size
     case 'screenshots':
       return `${size} · ${count(item.files, 'picture', 'pictures')}`
     case 'logs':
       return `${size} · ${count(item.files, 'file', 'files')}`
-    case 'mods':
-      return `${size} · the pack's mods, put back on every Play`
-    case 'other':
-      return `${size} · settings, caches and saves`
   }
   return size
-}
-
-/** What a row says in place of its detail while the player confirms a delete. */
-export function confirmText(item: StorageItem): string {
-  const size = formatBytes(item.bytes)
-  switch (item.kind) {
-    case 'terrain':
-      return `Delete ${size} of terrain? It comes back from the server as you play.`
-    case 'terrainDownload':
-      return `Delete ${size}? The next download starts over.`
-    case 'worldMap':
-      return `Delete ${size}? What you explored is lost.`
-    case 'screenshots':
-      return `Delete ${count(item.files, 'picture', 'pictures')} (${size})? They do not go to the bin.`
-    case 'logs':
-      return `Delete ${count(item.files, 'file', 'files')} (${size})?`
-  }
-  return `Delete ${size}?`
 }

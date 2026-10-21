@@ -30,6 +30,11 @@ const shots: StorageItem = {
   lastModified: '',
 }
 const mods: StorageItem = { ...shots, kind: 'mods', bytes: 400 * MB, files: 300 }
+const world: StorageItem = { ...terrain, kind: 'saves', name: 'Convert', label: '', bytes: 90 * MB }
+
+/** Opens a folded group by its heading. */
+const unfold = async (title: string) =>
+  fireEvent.click(await screen.findByRole('button', { name: new RegExp(`^${title}`) }))
 
 const view = (items: StorageItem[], running = false): ChapterStorage => ({
   chapterId: 'frangfurd',
@@ -56,10 +61,11 @@ describe('StorageSection', () => {
   it('splits the instance into coloured groups, with the total and the disk’s free space', async () => {
     render(<StorageSection chapter={frangfurd} />)
     expect(await screen.findByText('Distant Horizons')).toBeInTheDocument()
+    await unfold('Distant Horizons')
     expect(screen.getByText('frangfurd')).toBeInTheDocument()
     expect(screen.getByText('14 GB')).toBeInTheDocument()
     expect(screen.getByText('215 MB · 40 pictures')).toBeInTheDocument()
-    expect(screen.getByText('50 GB free on this disk.')).toBeInTheDocument()
+    expect(screen.getByText('50 GB free on disk')).toBeInTheDocument()
     expect(screen.getByRole('img')).toHaveAccessibleName(
       'Distant Horizons 13 GB, Screenshots 215 MB, Mods 400 MB',
     )
@@ -71,11 +77,9 @@ describe('StorageSection', () => {
   it('turns Delete into Confirm in place, and shows Go’s new measure', async () => {
     vi.mocked(App.ClearChapterStorage).mockResolvedValue(view([shots, mods]) as never)
     render(<StorageSection chapter={frangfurd} />)
+    await unfold('Distant Horizons')
     fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[0]!)
     expect(App.ClearChapterStorage).not.toHaveBeenCalled()
-    expect(
-      screen.getByText('Delete 13 GB of terrain? It comes back from the server as you play.'),
-    ).toBeInTheDocument()
     // Only the screenshots' Delete is left; the terrain's is Confirm now.
     expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Confirm' })))
@@ -91,6 +95,7 @@ describe('StorageSection', () => {
 
   it('does not take the second click of a double click as the confirmation', async () => {
     render(<StorageSection chapter={frangfurd} />)
+    await unfold('Distant Horizons')
     const trash = (await screen.findAllByRole('button', { name: 'Delete' }))[0]!
     fireEvent.click(trash, { detail: 1 })
     fireEvent.click(trash, { detail: 2 })
@@ -100,10 +105,8 @@ describe('StorageSection', () => {
 
   it('cancels a confirmation without deleting', async () => {
     render(<StorageSection chapter={frangfurd} />)
+    await unfold('Distant Horizons')
     fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[1]!)
-    expect(
-      screen.getByText('Delete 40 pictures (215 MB)? They do not go to the bin.'),
-    ).toBeInTheDocument()
     // Every deletable row holds a Cancel, folded away and inert until its row asks.
     const cancel = screen
       .getAllByRole('button', { name: 'Cancel' })
@@ -118,6 +121,7 @@ describe('StorageSection', () => {
   it('shows Go’s refusal', async () => {
     vi.mocked(App.ClearChapterStorage).mockRejectedValue('Frangfurd is starting or running')
     render(<StorageSection chapter={frangfurd} />)
+    await unfold('Distant Horizons')
     fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[0]!)
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Confirm' })))
     expect(await screen.findByRole('alert')).toHaveTextContent('Frangfurd is starting or running')
@@ -135,6 +139,7 @@ describe('StorageSection', () => {
       },
     })
     render(<StorageSection chapter={frangfurd} />)
+    await unfold('Distant Horizons')
     for (const b of await screen.findAllByRole('button', { name: 'Delete' }))
       expect(b).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Open the frangfurd folder' })).toBeEnabled()
@@ -143,12 +148,14 @@ describe('StorageSection', () => {
     useGameStore.setState({ states: {} })
     vi.mocked(App.GetChapterStorage).mockResolvedValue(view([terrain], true) as never)
     render(<StorageSection chapter={frangfurd} />)
+    await unfold('Distant Horizons')
     expect(await screen.findByText(/may be running/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Delete' })).toBeEnabled()
   })
 
   it('opens a row’s folder through Go, and shows a refusal', async () => {
     render(<StorageSection chapter={frangfurd} />)
+    await unfold('Distant Horizons')
     fireEvent.click(await screen.findByRole('button', { name: 'Open the frangfurd folder' }))
     expect(App.OpenStorageFolder).toHaveBeenCalledWith(
       'frangfurd',
@@ -161,6 +168,22 @@ describe('StorageSection', () => {
     )
     expect(App.OpenStorageFolder).toHaveBeenLastCalledWith('frangfurd', 'screenshots', '')
     expect(await screen.findByRole('alert')).toHaveTextContent('that folder is not there yet')
+  })
+
+  it('folds the groups at first, and lists each save with its folder and no delete', async () => {
+    vi.mocked(App.GetChapterStorage).mockResolvedValue(view([terrain, world, shots]) as never)
+    render(<StorageSection chapter={frangfurd} />)
+    const saves = await screen.findByRole('button', { name: /^Saves/ })
+    expect(saves).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('frangfurd')).toBeNull()
+    expect(screen.queryByText('Convert')).toBeNull()
+    fireEvent.click(saves)
+    expect(saves).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Convert')).toBeInTheDocument()
+    // Only the screenshots' Delete: the terrain's group is still folded, and a save has none.
+    expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Open the Convert folder' }))
+    expect(App.OpenStorageFolder).toHaveBeenCalledWith('frangfurd', 'saves', 'Convert')
   })
 
   it('shows a read refusal, and nothing without a bridge', async () => {
