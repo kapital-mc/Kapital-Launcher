@@ -639,6 +639,39 @@ and plain, over reading `accounts.json` to check or fill in the name.
 - **What does not change.** Nothing of Prism's accounts is read. The game log
   was already read for this line to mask the name in reports (sixth amendment).
 
+## Eighteenth amendment, 2026-10-21
+
+Stop did not stop the game, reported on Windows. Prism's window was open when
+Play was pressed. Prism hands a launch to a Prism running on the same root and
+exits (`Application::messageReceived`, read on Prism's `develop` branch), so the
+game started in a Prism the launcher did not start, which Stop may not end
+(S3.9). Stop ended the run with nothing signalled, and that Prism went on to
+download the pack and start the game. A second Play went to the same Prism,
+which shows the console of an instance that is already running
+(`Application::launch`). Separately, a Stop during the pack download ended the
+launcher's Prism but not the download: the pack sync is Prism's pre-launch
+command and runs packwiz in a Java of its own, and neither ends with its parent.
+The author's rule: Stop stops, Play starts.
+
+- **Play closes an idle open Prism.** After closing the chapter's own leftover
+  Prism, `LaunchChapter` closes the launcher's leftover Prisms of every other
+  chapter (`CloseOwnPrism`), since any of them would take the launch. Then every
+  other Prism of the engine's executable (the thirteenth amendment's look) that
+  is idle, with no process under it and not the Prism of a run the launcher
+  follows, is asked to close as its close button does (`CloseIdlePrisms`), and
+  waited for up to five seconds. It is never ended. A busy one, or one that does
+  not close, is left alone and takes the launch as before. Another chapter whose
+  game is starting or running refuses Play with "<chapter> is running; close it,
+  then press Play". The thirteenth amendment's "the launch itself goes ahead"
+  holds.
+- **Stop ends the download.** Stop, before it asks the launcher's Prism to close
+  and again before it ends it, ends every process below that Prism, at any
+  depth, that started after Play (`launchDescendants`): the pack sync, its Java,
+  a Java download. They are found by parent pid in the process list the game's
+  Java is found in, never by name, and a process whose start cannot be read is
+  left out with everything below it.
+- **What does not change.** A Prism the launcher did not start is never ended.
+
 ## Nineteenth amendment, 2026-10-21
 
 A launcher that restarts into an update (ADR-6 amendment, 2026-10-21), or is

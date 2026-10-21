@@ -64,6 +64,9 @@ type App struct {
 	// a test swaps them.
 	closeOwnPrism      func(chapterID string) bool
 	prismOpenElsewhere func(chapterID, exe string) (bool, error)
+	// closeIdle asks the idle Prisms of an executable to close before Play
+	// (makeRoomForPlay); nil uses the tracker's, and a test swaps it.
+	closeIdle func(exe string) bool
 	// emit, when set, takes the game:state events in place of the window; a
 	// test sets it. emitInstall does the same for prism:install.
 	emit        func(models.GameState)
@@ -299,6 +302,9 @@ func (a *App) LaunchChapter(chapterID string) error {
 		return err
 	}
 	engine := a.realEngine()
+	if err := a.makeRoomForPlay(chapter, engine.Executable); err != nil {
+		return err
+	}
 	req := models.LaunchRequest{
 		InstanceID: chapter.Instance.ID,
 		Profile:    settings.ProfileName,
