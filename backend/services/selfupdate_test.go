@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -55,6 +56,12 @@ func newUpdaterFixture(t *testing.T) *updaterFixture {
 	dir := t.TempDir()
 	target := filepath.Join(dir, "launcher.exe")
 	if err := os.WriteFile(target, []byte("old build"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// Target resolves links, as the temp folder is one on macOS (/var is
+	// /private/var) and a short name on Windows (RUNNER~1).
+	target, err = filepath.EvalSymlinks(target)
+	if err != nil {
 		t.Fatal(err)
 	}
 	f := &updaterFixture{release: &fakeRelease{files: map[string][]byte{}}, target: target, key: private}
@@ -224,8 +231,8 @@ func TestUpdateApplyWithNothingStaged(t *testing.T) {
 }
 
 func TestUpdateTargetNeedsAWritableFolder(t *testing.T) {
-	if os.Geteuid() == 0 {
-		t.Skip("root writes anywhere")
+	if os.Geteuid() == 0 || runtime.GOOS == "windows" {
+		t.Skip("root writes anywhere, and Windows ignores a folder's read-only mode")
 	}
 	f := newUpdaterFixture(t)
 	dir := filepath.Dir(f.target)
