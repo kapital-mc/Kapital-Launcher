@@ -296,6 +296,9 @@ func (a *App) LaunchChapter(chapterID string) error {
 		return err
 	}
 	engine := a.realEngine()
+	if err := a.refusePlayWhilePrismOpen(chapter, engine.Executable); err != nil {
+		return err
+	}
 	req := models.LaunchRequest{
 		InstanceID: chapter.Instance.ID,
 		Profile:    settings.ProfileName,

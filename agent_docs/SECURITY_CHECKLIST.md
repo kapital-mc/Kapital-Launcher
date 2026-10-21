@@ -443,7 +443,7 @@ the same way (issue 211); it is still only the pid the launcher started. The sam
 on, `SIGKILL`. The five seconds are judged on the run's steps, not slept on.
 Nothing is started, read or written to do it, and the pid is logged, never a
 window title.
-Verify: `TestCloseOwnPrismClosesTheLaunchersPrismAndSaysWhetherItIsGone`,
+Verify: `TestCloseOwnPrismClosesTheLaunchersPrismAndSaysWhetherItIsGone`, `TestPlayIsRefusedWhilePrismIsOpen`,
 `TestAPrismTheLauncherDidNotStartIsNeverClosed`, `TestMatchPrismProcessesTellsThePrismOfTheExecutableFromEveryOtherProcess`,
 `TestStopAsksTheLaunchersPrismToCloseAndEndsWhenItExits`,
 `TestStopClosesThePrismLeftAfterTheGameAndEndsItIfItStays`,
@@ -455,6 +455,7 @@ Verify: `TestCloseOwnPrismClosesTheLaunchersPrismAndSaysWhetherItIsGone`,
 `TestStopNeverSignalsAPidItDoesNotOwn`,
 `TestStopRefusesAChapterWithNoRunInProgress`,
 `TestStopGameRefusesAnUnknownChapterAndOneWithNoRun`.
+Play refuses while another Prism of the engine's executable is open (`refusePlayWhilePrismOpen`, ADR-2 eighteenth amendment), so a launch reaches a Prism the launcher did not start only in the moment between that look and the launch.
 Probe: Stop on a chapter whose launch went to a Prism that was already open (no
 process of ours is alive, and none may be signalled); a Prism whose pid has been
 reused after it exited (its exit channel is closed, so it is not touched).

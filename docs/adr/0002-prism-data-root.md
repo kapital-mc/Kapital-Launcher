@@ -638,3 +638,30 @@ and plain, over reading `accounts.json` to check or fill in the name.
   and the launcher's log records only that a name was learned.
 - **What does not change.** Nothing of Prism's accounts is read. The game log
   was already read for this line to mask the name in reports (sixth amendment).
+
+## Eighteenth amendment, 2026-10-21
+
+Stop did not stop a game whose launch went to a Prism that was already open.
+Prism hands a launch to a Prism running on the same root and exits
+(`Application::messageReceived`, read on Prism's `develop` branch), so the game
+starts in a Prism the launcher did not start. Stop may not end that one (S3.9),
+so it ended the run with nothing signalled: the launcher showed the chapter
+stopped while that Prism downloaded the pack and started the game. A second
+Play went to the same Prism, which shows the console of an instance that is
+already running (`Application::launch`). Reported on a real install. The same path
+also skipped holding Prism's dialogs and failed the start after thirty seconds.
+The thirteenth amendment's "the launch itself goes ahead" is withdrawn.
+
+- **Play refuses while Prism is open.** After closing the chapter's own leftover
+  Prism, `LaunchChapter` closes the launcher's leftover Prisms of every other
+  chapter with the same routine (`CloseOwnPrism`), since any of them would take
+  the launch. Another chapter whose game is starting or running refuses with
+  "<chapter> is running; close it, then press Play". Then any other Prism of the
+  engine's executable (`OtherPrismOpen`, the thirteenth amendment's look)
+  refuses with "Prism is open; close it, then press Play", before the loading
+  card opens and before Prism is run.
+- **Where it cannot be told,** Play goes ahead as before. A Prism opened between
+  the look and the launch still takes it; the tracker's handover path stays for
+  that.
+- **What does not change.** Nothing the launcher did not start is ended. The
+  pre-launch rewrite keeps its own look.

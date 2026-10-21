@@ -191,6 +191,42 @@ func (a *App) refuseIfPrismOpen(chapter models.Chapter, exe string) error {
 	return nil
 }
 
+// refusePlayWhilePrismOpen is Play's guard against a Prism that is already open
+// (ADR-2, eighteenth amendment). Prism hands a launch to a Prism running on the
+// same root and exits, so the game would start in a Prism the launcher did not
+// start: Stop may not end it (S3.9), and the run would show stopped while that
+// Prism goes on to start the game. The launcher's own Prisms left after their
+// runs are closed first, every chapter's, since any of them would take the
+// launch (the chapter's own was closed by LaunchChapter). Another chapter whose
+// game is starting or running refuses in its own words, and any other Prism of
+// the engine's executable refuses with the plain sentence. Where the processes
+// cannot be listed Play goes ahead, as before.
+func (a *App) refusePlayWhilePrismOpen(chapter models.Chapter, exe string) error {
+	for _, other := range a.manifest.Chapters {
+		if other.ID == chapter.ID {
+			continue
+		}
+		if a.games.Active(other.ID) {
+			return fmt.Errorf("%s is running; close it, then press Play", other.Name)
+		}
+		// One that will not close is still open, and the look below says so.
+		a.ownPrismGone(other.ID)
+	}
+	open, err := a.otherPrismOpen(chapter.ID, exe)
+	if err != nil {
+		slog.Info("could not tell whether Prism is open", "chapter", chapter.ID, "error", err)
+		return nil
+	}
+	if open {
+		slog.Info("play refused", "chapter", chapter.ID, "reason", "Prism is open")
+		return errPrismOpenAtPlay
+	}
+	return nil
+}
+
+// errPrismOpenAtPlay is what Play refused for an open Prism says.
+var errPrismOpenAtPlay = errors.New("Prism is open; close it, then press Play")
+
 // errPrismOpen is what a write refused for an open Prism says.
 var errPrismOpen = errors.New("Prism is open; close it first, or the change is lost when Prism saves")
 
