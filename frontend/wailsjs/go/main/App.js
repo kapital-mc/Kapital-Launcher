@@ -30,6 +30,10 @@ export function ChoosePrismRoot() {
   return window['go']['main']['App']['ChoosePrismRoot']();
 }
 
+export function ClearChapterStorage(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ClearChapterStorage'](arg1, arg2, arg3);
+}
+
 export function ClearPreviews() {
   return window['go']['main']['App']['ClearPreviews']();
 }
@@ -72,6 +76,10 @@ export function GetChapterMods(arg1) {
 
 export function GetChapterSettings(arg1) {
   return window['go']['main']['App']['GetChapterSettings'](arg1);
+}
+
+export function GetChapterStorage(arg1) {
+  return window['go']['main']['App']['GetChapterStorage'](arg1);
 }
 
 export function GetDHSnapshot(arg1) {
@@ -212,6 +220,10 @@ export function OpenInstanceFolder(arg1) {
 
 export function OpenPrism() {
   return window['go']['main']['App']['OpenPrism']();
+}
+
+export function OpenStorageFolder(arg1, arg2, arg3) {
+  return window['go']['main']['App']['OpenStorageFolder'](arg1, arg2, arg3);
 }
 
 export function OpenTailscale() {

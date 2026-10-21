@@ -699,3 +699,41 @@ keeps its chapter when the launcher comes back.
 - **Stop.** Stop ends the adopted Java as it ends a run's game (S3.9). The
   Prism it runs under was not started by this launcher and is never asked to
   close or ended, during the run or after it.
+
+## Twentieth amendment, 2026-10-21
+
+An instance grows without a bound, mostly through Distant Horizons: its terrain
+database for a server keeps every chunk the player has seen, and the author's
+Frangfurd instance reached 15 GB. Distant Horizons has no size limit of its own,
+so a limit the launcher enforced would mean deleting under a running game. The
+author chose a storage section in the chapter's settings instead: the instance
+measured by kind, and a delete the player asks for.
+
+- **What is measured.** `GetChapterStorage` walks the instance folder once
+  (directory entries only, no link followed, stopped at the size walk's entry
+  cap and then marked partial) and sums it by kind: each server folder under
+  `<game folder>/Distant_Horizons_server_data/`, the terrain staging folder
+  (sixteenth amendment), `<game folder>/xaero/world-map` and `xaero/minimap`,
+  each world under `saves`, `screenshots`, `logs` with `crash-reports`, `mods`,
+  and the rest. The disk's free space comes with it. Nothing is opened or
+  written. The section shows it as a bar split by group (Distant Horizons,
+  Xaero's maps, saves, screenshots, logs, mods, the rest) and the same groups as
+  rows; the three groups with rows of their own start folded.
+- **What can be deleted.** Five kinds, each one fixed folder built in Go: one
+  server's terrain folder (a name the listing gave, held to a plain folder name),
+  the terrain staging folder, the Xaero world map, the screenshots, and the logs
+  with crash reports. Each goes through an `os.Root` on the instance folder, and
+  a target that is a link or a file is left as it is. Screenshots are the
+  player's own and do not go to the bin.
+- **What can be opened.** Every kind's folder, through `OpenStorageFolder`: the
+  same fixed folders, the first that is a real directory, opened like the
+  instance folder (S3.6). A save opens its own world's folder, a name the
+  listing gave held to a plain folder name as a terrain folder is. The rest
+  opens the game folder.
+- **When.** A delete only after the player confirms the row, in place of its
+  Delete button. Refused under a developer preview, while the game is active or
+  the log says it may be running (Distant Horizons and Xaero hold their files
+  open), and for terrain while a terrain download of the chapter runs.
+- **What is never deleted.** Saves, options, `config`, the mods (the next sync
+  puts them back), the Xaero minimap (waypoints), and Essential's folder, which
+  may hold account data (S1.1).

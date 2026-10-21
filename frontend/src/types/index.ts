@@ -6,9 +6,10 @@
  * structs: `pnpm typecheck` fails where a bound call disagrees.
  */
 
-// A launched game, its run and its logs live in a file of their own; every type is still
-// imported from here.
+// A launched game, its run and its logs, and an instance's storage, live in files of their own;
+// every type is still imported from here.
 export * from './game'
+export * from './storage'
 
 export type ChapterState = 'released' | 'development' | 'planned'
 export type Theme = 'dark' | 'light' | 'system'

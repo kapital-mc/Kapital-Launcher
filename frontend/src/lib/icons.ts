@@ -27,6 +27,7 @@ export {
   ExternalLink,
   Folder,
   FolderOpen,
+  HardDrive,
   Info,
   KeyRound,
   LifeBuoy,

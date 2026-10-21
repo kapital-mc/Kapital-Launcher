@@ -16,6 +16,11 @@ import { ChapterSettingsForm } from './ChapterSettingsForm'
 // the panel asks for it, so its store and its list stay out of the launcher's bundle.
 const ModsSection = lazy(() => import('./ModsSection').then((m) => ({ default: m.ModsSection })))
 
+// Storage measures the instance folder when it mounts, so it loads with the mods section.
+const StorageSection = lazy(() =>
+  import('./StorageSection').then((m) => ({ default: m.StorageSection })),
+)
+
 // Only a chapter with a local pack has anything to switch, so the section loads
 // when the panel asks for it and stays out of the launcher's bundle budget
 // (scripts/check-bundle-size.mjs), as the run report does.
@@ -46,8 +51,9 @@ const sameSettings = (a: ChapterSettings, b: ChapterSettings) =>
  * A chapter with a server gets the Server section next (issue 163), installed or not: its address
  * and the switch for joining it on Play, both saved in the launcher's settings.
  * Mods (issue 156) come after: the chapter's quick switches and an advanced list of every mod,
- * saved by Go in the launcher's settings and applied by the pre-launch sync. A chapter with a
- * local pack also gets the pack source section, which switches its instance between the
+ * saved by Go in the launcher's settings and applied by the pre-launch sync. Storage follows:
+ * the instance on disk by kind, with a delete for terrain, the world map, screenshots and logs. A chapter
+ * with a local pack also gets the pack source section, which switches its instance between the
  * published pack and that one.
  */
 export function ChapterSettingsPanel({ chapter, onClose }: Props) {
@@ -210,6 +216,7 @@ export function ChapterSettingsPanel({ chapter, onClose }: Props) {
       {installed === true && (
         <Suspense fallback={null}>
           <ModsSection chapter={chapter} />
+          <StorageSection chapter={chapter} />
           <PackSourceSection chapter={chapter} />
         </Suspense>
       )}

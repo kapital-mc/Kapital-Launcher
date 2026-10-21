@@ -16,6 +16,8 @@ export function ChoosePrismExecutable():Promise<string>;
 
 export function ChoosePrismRoot():Promise<string>;
 
+export function ClearChapterStorage(arg1:string,arg2:string,arg3:string):Promise<models.ChapterStorage>;
+
 export function ClearPreviews():Promise<void>;
 
 export function ConnectTailscale(arg1:string):Promise<void>;
@@ -37,6 +39,8 @@ export function GetChangelogs():Promise<Array<models.PackChangelog>>;
 export function GetChapterMods(arg1:string):Promise<models.ChapterMods>;
 
 export function GetChapterSettings(arg1:string):Promise<models.ChapterSettingsInfo>;
+
+export function GetChapterStorage(arg1:string):Promise<models.ChapterStorage>;
 
 export function GetDHSnapshot(arg1:string):Promise<models.DHSnapshotInfo>;
 
@@ -107,6 +111,8 @@ export function OpenExternal(arg1:string):Promise<void>;
 export function OpenInstanceFolder(arg1:string):Promise<void>;
 
 export function OpenPrism():Promise<void>;
+
+export function OpenStorageFolder(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function OpenTailscale():Promise<void>;
 
