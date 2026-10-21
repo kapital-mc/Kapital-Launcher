@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -13,7 +12,7 @@ import (
 )
 
 // playApp is an app whose Play gets as far as starting Prism, from an
-// executable that does not exist: a launch that is not refused fails with
+// executable that does not exist: a launch that goes ahead fails with
 // "start prism", which no refusal says.
 func playApp(t *testing.T) *App {
 	t.Helper()
@@ -27,42 +26,31 @@ func playApp(t *testing.T) *App {
 }
 
 // A Prism already open would take the launch, and Stop could not end the game
-// it starts there: Play is refused before Prism is run. The launcher's own
-// Prisms left by the other chapters' runs are closed first, then the look is
-// made, for the engine's executable.
-func TestPlayIsRefusedWhilePrismIsOpen(t *testing.T) {
-	app := playApp(t)
-	probe := &prismProbe{ownGone: true, other: true}
-	probe.install(app)
+// it starts there. Play closes the launcher's own leftover Prisms of the other
+// chapters, then the idle ones of the engine's executable, and goes ahead,
+// whether or not one stayed open.
+func TestPlayClosesTheOpenPrismsAndGoesAhead(t *testing.T) {
+	for _, stillOpen := range []bool{false, true} {
+		app := playApp(t)
+		probe := &prismProbe{ownGone: true}
+		probe.install(app)
+		var exes []string
+		app.closeIdle = func(exe string) bool {
+			probe.calls = append(probe.calls, "close idle")
+			exes = append(exes, exe)
+			return stillOpen
+		}
 
-	err := app.LaunchChapter("lichdenstein")
-	if err == nil || err.Error() != "Prism is open; close it, then press Play" {
-		t.Fatalf("got %v", err)
-	}
-	if got := strings.Join(probe.calls, ","); got != "close own luxemburg,close own frangfurd,look lichdenstein" {
-		t.Fatalf("the other chapters' leftover Prisms are closed before the look: %s", got)
-	}
-	if probe.exes[0] != app.engine.Executable {
-		t.Fatalf("looked for %q, the engine's executable is %q", probe.exes[0], app.engine.Executable)
-	}
-	if app.games.Active("lichdenstein") {
-		t.Fatal("no run is followed")
-	}
-
-	// Prism closed: Play goes on to start Prism.
-	probe.other = false
-	if err := app.LaunchChapter("lichdenstein"); err == nil || !strings.Contains(err.Error(), "start prism") {
-		t.Fatalf("Prism is started: %v", err)
-	}
-}
-
-// Where the processes cannot be listed Play goes ahead, as it did before.
-func TestPlayGoesAheadWhenAnOpenPrismCannotBeTold(t *testing.T) {
-	app := playApp(t)
-	probe := &prismProbe{ownGone: true, err: errors.New("no snapshot")}
-	probe.install(app)
-	if err := app.LaunchChapter("lichdenstein"); err == nil || !strings.Contains(err.Error(), "start prism") {
-		t.Fatalf("Prism is started: %v", err)
+		err := app.LaunchChapter("lichdenstein")
+		if err == nil || !strings.Contains(err.Error(), "start prism") {
+			t.Fatalf("still open %v: Prism is started: %v", stillOpen, err)
+		}
+		if got := strings.Join(probe.calls, ","); !strings.HasPrefix(got, "close own luxemburg,close own frangfurd,close idle") {
+			t.Fatalf("the leftovers first, then the idle Prisms, before Prism starts: %s", got)
+		}
+		if len(exes) != 1 || exes[0] != app.engine.Executable {
+			t.Fatalf("closed for %v, the engine's executable is %q", exes, app.engine.Executable)
+		}
 	}
 }
 
@@ -73,6 +61,10 @@ func TestPlayIsRefusedWhileAnotherChapterIsRunning(t *testing.T) {
 	app := playApp(t)
 	probe := &prismProbe{ownGone: true}
 	probe.install(app)
+	app.closeIdle = func(string) bool {
+		probe.calls = append(probe.calls, "close idle")
+		return false
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
 	// No process has pid -1, so the tracker has nothing to find and stays starting.
@@ -89,8 +81,8 @@ func TestPlayIsRefusedWhileAnotherChapterIsRunning(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	for _, call := range probe.calls {
-		if call == "close own frangfurd" {
-			t.Fatalf("a running chapter's Prism is not closed: %v", probe.calls)
+		if call == "close own frangfurd" || call == "close idle" {
+			t.Fatalf("nothing is closed: %v", probe.calls)
 		}
 	}
 }
