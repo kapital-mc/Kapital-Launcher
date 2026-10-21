@@ -262,6 +262,14 @@ func TestChecksumFor(t *testing.T) {
 	}
 }
 
+// Every key the launcher ships with is well formed: a malformed one would leave
+// the launcher offering the site only.
+func TestTheShippedUpdateKeysParse(t *testing.T) {
+	if len(UpdatePublicKeys) == 0 || len(updateKeys()) != len(UpdatePublicKeys) {
+		t.Fatalf("%d keys listed, %d parse", len(UpdatePublicKeys), len(updateKeys()))
+	}
+}
+
 func TestUpdateKeysParse(t *testing.T) {
 	saved := UpdatePublicKeys
 	t.Cleanup(func() { UpdatePublicKeys = saved })

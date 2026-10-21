@@ -13,7 +13,10 @@ import (
 // makes a pair. A second key may be listed so a lost one can be retired
 // without players reinstalling by hand. With none, the launcher offers the
 // download site only.
-var UpdatePublicKeys = []string{}
+var UpdatePublicKeys = []string{
+	// Made 2026-10-21; the private half is the release environment's secret.
+	"d6ZQ4S6RsRQwDFXjt5GhLj3x6H+7SLvLueqU++Qz5zI=",
+}
 
 // updateKeys parses UpdatePublicKeys, leaving out any that is malformed.
 func updateKeys() []ed25519.PublicKey {
