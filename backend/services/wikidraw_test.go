@@ -73,6 +73,34 @@ func TestParseWikiPicturesKeepsOnlyPlainVaultImagesOfListablePages(t *testing.T)
 	}
 }
 
+func TestParseWikiPicturesKeepsAPictureToTheEraTheExportGivesIt(t *testing.T) {
+	export := `{"pages": [
+	  {"id": "locations/P.md", "name": "P", "url": "/wiki/p", "type": "location", "era": ["Lichdenstein", "Frangfurd"], "status": "draft", "excerpt": "P.",
+	   "images": ["/vault/images/p.webp", "/vault/images/p-lichdenstein.webp", "/vault/images/p-odd.webp", "/vault/images/p-new.webp"],
+	   "imageEras": {"/vault/images/p.webp": "Frangfurd", "/vault/images/p-lichdenstein.webp": "Lichdenstein", "/vault/images/p-odd.webp": "Luxemburg"}},
+	  {"id": "locations/R.md", "name": "R", "url": "/wiki/r", "type": "location", "era": ["Luxemburg", "Frangfurd"], "status": "canon", "excerpt": "R.",
+	   "images": ["/vault/images/r.webp"], "imageEras": "not a map"}
+	]}`
+	var lines []string
+	for _, s := range parseWikiPictures([]byte(export)) {
+		lines = append(lines, s.era+" "+s.file)
+	}
+	// An era the page lacks, no entry and a malformed field leave the picture under every era.
+	want := []string{
+		"Lichdenstein p-lichdenstein.webp",
+		"Lichdenstein p-odd.webp",
+		"Lichdenstein p-new.webp",
+		"Frangfurd p.webp",
+		"Frangfurd p-odd.webp",
+		"Frangfurd p-new.webp",
+		"Luxemburg r.webp",
+		"Frangfurd r.webp",
+	}
+	if !reflect.DeepEqual(lines, want) {
+		t.Fatalf("got\n%s\nwant\n%s", strings.Join(lines, "\n"), strings.Join(want, "\n"))
+	}
+}
+
 func TestParseWikiPicturesWithoutTheFieldOrTheExportYieldsNone(t *testing.T) {
 	if got := parseWikiPictures([]byte(artExport)); len(got) != 0 {
 		t.Fatalf("an export without images has no page pictures: %+v", got)

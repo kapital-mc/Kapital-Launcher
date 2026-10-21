@@ -14,9 +14,10 @@ import (
 // a game that has died with Prism still up, would otherwise hold Play until
 // the tracker gave up. Stop is a request to the run's own goroutine, so every
 // process call stays where the others are, and it ends only what the tracker
-// found itself: the Prism the launcher started (asked to close, then ended)
-// and the game's Java found as that Prism's child (ended), by pid and never by
-// name (S3.9).
+// found itself: the Prism the launcher started (asked to close, then ended),
+// the game's Java found as that Prism's child (ended), and what that Prism
+// started for the launch, such as the pack sync (ended, gametracker_tree.go),
+// by pid and never by name (S3.9).
 
 // ErrNoGameToStop is Stop on a chapter with no run in progress.
 var ErrNoGameToStop = errors.New("there is no game to stop")
@@ -162,6 +163,9 @@ func (r *gameRun) stopPrism(now time.Time) {
 	pid := r.req.Prism.PID
 	r.markStopped()
 	r.stop.forceAt = now.Add(r.t.stopForce)
+	// The pack sync and its Java outlive Prism: they are ended first, or the
+	// download goes on after the stop.
+	r.endLaunchChildren()
 	// The console's windows are hidden, which the OS routine leaves alone.
 	if err := r.t.askPrismClose(r.req.ChapterID, pid); err != nil {
 		slog.Info("stop: prism took no close request, ending it", "chapter", r.req.ChapterID, "pid", pid, "error", err)
@@ -189,6 +193,8 @@ func (r *gameRun) escalateStop(now time.Time) {
 	pid, target := r.bound, "game"
 	if pid == 0 && r.prismAlive() {
 		pid, target = r.req.Prism.PID, "prism"
+		// Anything Prism started since the stop goes with it.
+		r.endLaunchChildren()
 	}
 	if !endable(pid) {
 		return

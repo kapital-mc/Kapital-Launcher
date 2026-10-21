@@ -64,6 +64,9 @@ type App struct {
 	// a test swaps them.
 	closeOwnPrism      func(chapterID string) bool
 	prismOpenElsewhere func(chapterID, exe string) (bool, error)
+	// closeIdle asks the idle Prisms of an executable to close before Play
+	// (makeRoomForPlay); nil uses the tracker's, and a test swaps it.
+	closeIdle func(exe string) bool
 	// emit, when set, takes the game:state events in place of the window; a
 	// test sets it. emitInstall does the same for prism:install.
 	emit        func(models.GameState)
@@ -79,8 +82,10 @@ type App struct {
 	// prismInstall is Cancel on the Prism install that is running.
 	prismInstall installCancel
 
-	// update is the one look at the download site a start gets (app_update.go).
+	// update is the one look at the download site a start gets, and self the
+	// launcher's own download and restart into a newer build (app_update.go).
 	update updateCheck
+	self   selfUpdate
 	// whatsNew is every release's highlights, newest first, and freshInstall
 	// whether this start found no settings file (app_whatsnew.go).
 	whatsNew     []models.WhatsNewRelease
@@ -165,6 +170,7 @@ func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 		tailscale:   newTailscaleState(dataDir),
 		engineReady: make(chan struct{}),
 		whatsNew:    whatsNew,
+		self:        selfUpdate{updater: services.NewLauncherUpdater()},
 	}
 	a.freshInstall = !a.settings.Exists()
 	a.syncCopy = services.NewSyncCopy(dataDir, Version)
@@ -296,6 +302,9 @@ func (a *App) LaunchChapter(chapterID string) error {
 		return err
 	}
 	engine := a.realEngine()
+	if err := a.makeRoomForPlay(chapter, engine.Executable); err != nil {
+		return err
+	}
 	req := models.LaunchRequest{
 		InstanceID: chapter.Instance.ID,
 		Profile:    settings.ProfileName,

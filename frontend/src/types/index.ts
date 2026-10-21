@@ -212,6 +212,10 @@ export interface UpdateInfo {
   page: string
   /** Why nothing was compared: "dev build", "no answer", "timed out" or "not a version". */
   reason: string
+  /** Whether this copy can download the update and restart into it (ADR-6 amendment). */
+  installable: boolean
+  /** Why it cannot, in a sentence for the player; the popup then offers the site only. */
+  blocked: string
 }
 
 /**

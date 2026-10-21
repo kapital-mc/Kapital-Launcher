@@ -5,9 +5,10 @@ const name = (id: string) => (id === 'frangfurd' ? 'Frangfurd' : id)
 
 describe('downloadRows', () => {
   it('is empty when nothing downloads', () => {
-    expect(downloadRows(null, false, null, {}, name)).toEqual([])
+    expect(downloadRows(null, null, false, null, {}, name)).toEqual([])
     expect(
       downloadRows(
+        null,
         { phase: 'done', received: 0, total: 0, error: '' },
         false,
         { phase: 'failed', received: 0, total: 0, error: 'x' },
@@ -19,6 +20,7 @@ describe('downloadRows', () => {
 
   it('lists Prism, Tailscale and terrain, each with its share and step', () => {
     const rows = downloadRows(
+      null,
       { phase: 'downloading', received: 25, total: 100, error: '' },
       true,
       { phase: 'installing', received: 10, total: 10, error: '' },
@@ -40,8 +42,42 @@ describe('downloadRows', () => {
     ])
   })
 
+  it("lists the launcher's own update first, cancellable while it downloads", () => {
+    const rows = downloadRows(
+      { phase: 'downloading', received: 1, total: 4, version: 'v1.1.0', error: '' },
+      null,
+      false,
+      null,
+      {},
+      name,
+    )
+    expect(rows).toEqual([
+      {
+        key: 'launcher',
+        title: 'Kapital Launcher update',
+        value: 0.25,
+        line: 'Downloading 1 B of 4 B',
+        cancel: { kind: 'launcher' },
+      },
+    ])
+    const [checking] = downloadRows(
+      { phase: 'verifying', received: 4, total: 4, version: 'v1.1.0', error: '' },
+      null,
+      false,
+      null,
+      {},
+      name,
+    )
+    expect(checking).toMatchObject({ value: 1, cancel: null })
+    for (const phase of ['ready', 'failed']) {
+      const p = { phase, received: 0, total: 0, version: 'v1.1.0', error: '' }
+      expect(downloadRows(p, null, false, null, {}, name)).toEqual([])
+    }
+  })
+
   it('counts the steps after a download as full', () => {
     const [row] = downloadRows(
+      null,
       { phase: 'unpacking', received: 0, total: 0, error: '' },
       false,
       null,

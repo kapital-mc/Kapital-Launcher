@@ -16,6 +16,26 @@ type UpdateInfo struct {
 	// Reason is a short plain-text cause when nothing was compared: "dev
 	// build", "no answer", "timed out" or "not a version". Empty when it was.
 	Reason string `json:"reason"`
+	// Installable is whether this copy can update itself in place (ADR-6
+	// amendment, 2026-10-21): a release build on Windows or macOS, in a folder
+	// the player can write, with an update key built in.
+	Installable bool `json:"installable"`
+	// Blocked is why it cannot, in a sentence for the player, when an update is
+	// available and Installable is false. The popup then offers the site only.
+	Blocked string `json:"blocked"`
+}
+
+// LauncherUpdateProgress is one step of the launcher's own update, sent as a
+// launcher:update event while the new build downloads in the background.
+type LauncherUpdateProgress struct {
+	// Phase is "downloading", "verifying", "ready" (staged, waiting for
+	// Restart), "failed" or "cancelled".
+	Phase    string `json:"phase"`
+	Received int64  `json:"received"`
+	Total    int64  `json:"total"`
+	// Version is the release being downloaded.
+	Version string `json:"version"`
+	Error   string `json:"error"`
 }
 
 // WhatsNewHighlight is one change a release puts in front of the player,

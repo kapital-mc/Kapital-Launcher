@@ -336,7 +336,7 @@ download at a time (`terrainDownloads`), progress as `dh:download` events, and
 the launcher never writes to the bucket.
 
 The storage section (`storage.go`, `app_storage.go`, `GetChapterStorage`,
-`ClearChapterStorage` and `OpenStorageFolder`, ADR-2 eighteenth amendment,
+`ClearChapterStorage` and `OpenStorageFolder`, ADR-2 twentieth amendment,
 SECURITY_CHECKLIST S3.13) measures an instance by kind in one walk with the
 size walk's cap, following no link. Every kind has fixed folders
 (`storageTargets`), built from the kind and, for terrain, a server folder from

@@ -7,6 +7,7 @@ import { useChapterStore } from '../../stores/useChapterStore'
 import { useEngineStore } from '../../stores/useEngineStore'
 import { useTailscaleStore } from '../../stores/useTailscaleStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
+import { useUpdateStore } from '../../stores/useUpdateStore'
 import { Fold } from '../ui/Fold'
 import { Grow } from '../ui/Grow'
 import { IconButton } from '../ui/IconButton'
@@ -15,8 +16,8 @@ import { ProgressBar } from '../ui/ProgressBar'
 import { Smooth } from '../ui/Smooth'
 
 /**
- * What the launcher is downloading, above the account tile: Prism, Tailscale's
- * installer and a chapter's terrain, each with its bar and step. It shows only
+ * What the launcher is downloading, above the account tile: its own update,
+ * Prism, Tailscale's installer and a chapter's terrain, each with its bar and step. It shows only
  * while something downloads, so a popup or a settings card can be closed and
  * the download still be followed. The sidebar is always on screen, so it also
  * holds the terrain and Tailscale listeners for the app's lifetime (Prism's is
@@ -30,6 +31,7 @@ import { Smooth } from '../ui/Smooth'
  * after it.
  */
 export function Downloads({ compact = false }: { compact?: boolean }) {
+  const launcher = useUpdateStore((s) => s.progress)
   const prism = useEngineStore((s) => s.install)
   const prismUpdate = useEngineStore((s) => s.engine?.found === true)
   const tailscale = useTailscaleStore((s) => s.install)
@@ -41,7 +43,7 @@ export function Downloads({ compact = false }: { compact?: boolean }) {
   useEffect(() => listenTailscale(), [listenTailscale])
 
   const name = (id: string) => chapters.find((c) => c.id === id)?.name ?? id
-  const rows = downloadRows(prism, prismUpdate, tailscale, terrain, name)
+  const rows = downloadRows(launcher, prism, prismUpdate, tailscale, terrain, name)
   // The section opens and closes as the first download starts and the last ends, with its gap
   // to the account tile under it: the tile's own 16px to the sidebar's sides.
   return (
@@ -75,7 +77,8 @@ function Row({ row, compact, first }: { row: DownloadRow; compact: boolean; firs
     if (!cancel) return
     setError(null)
     try {
-      if (cancel.kind === 'prism') await useEngineStore.getState().cancelInstall()
+      if (cancel.kind === 'launcher') await useUpdateStore.getState().cancelDownload()
+      else if (cancel.kind === 'prism') await useEngineStore.getState().cancelInstall()
       else if (cancel.kind === 'tailscale') await useTailscaleStore.getState().cancelInstall()
       else await useTerrainStore.getState().cancel(cancel.chapterId)
     } catch (e) {

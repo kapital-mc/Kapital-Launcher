@@ -8,6 +8,8 @@ export function CancelPrismInstall():Promise<boolean>;
 
 export function CancelTailscaleInstall():Promise<boolean>;
 
+export function CancelUpdateDownload():Promise<boolean>;
+
 export function CheckChapterMap(arg1:string):Promise<models.MapStatus>;
 
 export function ChoosePrismExecutable():Promise<string>;
@@ -25,6 +27,8 @@ export function CopyPlayerUUID():Promise<void>;
 export function CopyRedactedLog():Promise<number>;
 
 export function DownloadDHSnapshot(arg1:string,arg2:boolean):Promise<models.DHSnapshotInfo>;
+
+export function DownloadUpdate():Promise<void>;
 
 export function GetAppVersion():Promise<string>;
 
@@ -119,6 +123,8 @@ export function ReadRunLog(arg1:string,arg2:string,arg3:string,arg4:number):Prom
 export function RefreshEngine():Promise<models.EngineInfo>;
 
 export function ReinstallChapter(arg1:string):Promise<models.ReinstallResult>;
+
+export function RestartToUpdate():Promise<void>;
 
 export function SaveChapterSettings(arg1:string,arg2:models.ChapterSettings):Promise<models.ChapterSettingsInfo>;
 

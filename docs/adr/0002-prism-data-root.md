@@ -641,6 +641,67 @@ and plain, over reading `accounts.json` to check or fill in the name.
 
 ## Eighteenth amendment, 2026-10-21
 
+Stop did not stop the game, reported on Windows. Prism's window was open when
+Play was pressed. Prism hands a launch to a Prism running on the same root and
+exits (`Application::messageReceived`, read on Prism's `develop` branch), so the
+game started in a Prism the launcher did not start, which Stop may not end
+(S3.9). Stop ended the run with nothing signalled, and that Prism went on to
+download the pack and start the game. A second Play went to the same Prism,
+which shows the console of an instance that is already running
+(`Application::launch`). Separately, a Stop during the pack download ended the
+launcher's Prism but not the download: the pack sync is Prism's pre-launch
+command and runs packwiz in a Java of its own, and neither ends with its parent.
+The author's rule: Stop stops, Play starts.
+
+- **Play closes an idle open Prism.** After closing the chapter's own leftover
+  Prism, `LaunchChapter` closes the launcher's leftover Prisms of every other
+  chapter (`CloseOwnPrism`), since any of them would take the launch. Then every
+  other Prism of the engine's executable (the thirteenth amendment's look) that
+  is idle, with no process under it and not the Prism of a run the launcher
+  follows, is asked to close as its close button does (`CloseIdlePrisms`), and
+  waited for up to five seconds. It is never ended. A busy one, or one that does
+  not close, is left alone and takes the launch as before. Another chapter whose
+  game is starting or running refuses Play with "<chapter> is running; close it,
+  then press Play". The thirteenth amendment's "the launch itself goes ahead"
+  holds.
+- **Stop ends the download.** Stop, before it asks the launcher's Prism to close
+  and again before it ends it, ends every process below that Prism, at any
+  depth, that started after Play (`launchDescendants`): the pack sync, its Java,
+  a Java download. They are found by parent pid in the process list the game's
+  Java is found in, never by name, and a process whose start cannot be read is
+  left out with everything below it.
+- **What does not change.** A Prism the launcher did not start is never ended.
+
+## Nineteenth amendment, 2026-10-21
+
+A launcher that restarts into an update (ADR-6 amendment, 2026-10-21), or is
+closed and opened again while a game runs, showed the chapter stopped with Play
+offered: the tracker only knew runs this launcher run had started. The game now
+keeps its chapter when the launcher comes back.
+
+- **What is looked for.** Once at startup, after detection, the tracker lists
+  the processes as it does for a run (pid, parent pid, name), takes the Prisms
+  of the detected executable as `OtherPrismOpen` matches them (name and image
+  path, thirteenth amendment) and each Java whose parent is one of them, with
+  its start time. Nothing else of a process is read.
+- **Which chapter.** A Java is the game of the chapter whose game log was begun
+  no earlier than the Java (two seconds of slack) and has not said `Stopping!`,
+  read from the start with the follower a run uses. When more than one log
+  fits, the chapter whose `instance.cfg` `lastLaunchTime` (already read for
+  play time, eleventh amendment) falls between five seconds before and two
+  minutes after the Java's start decides: Prism writes it as it hands the
+  running Java its launch (`LauncherPartLaunch::proceed`, read on Prism's
+  `develop` branch). No match, or more than one, adopts nothing.
+- **The run.** It starts at the phase the log has reached, bound to that Java,
+  and ends as any run does. Its start is not timed. Prism's dialogs and console
+  are not held, the Prism gets no console record, and another Java of that
+  Prism is never taken for the game.
+- **Stop.** Stop ends the adopted Java as it ends a run's game (S3.9). The
+  Prism it runs under was not started by this launcher and is never asked to
+  close or ended, during the run or after it.
+
+## Twentieth amendment, 2026-10-21
+
 An instance grows without a bound, mostly through Distant Horizons: its terrain
 database for a server keeps every chunk the player has seen, and the author's
 Frangfurd instance reached 15 GB. Distant Horizons has no size limit of its own,
