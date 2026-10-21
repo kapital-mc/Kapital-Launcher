@@ -201,7 +201,9 @@ interface GroupProps {
 
 /**
  * A group's line over its rows: its colour, name and size, and a chevron where the rows' folder
- * buttons are. Pressed, the rows grow open under it; folded, they are not drawn.
+ * buttons are. Pressed, the rows grow open under it; folded, they are not drawn. The button reaches
+ * over the card's padding round its line (SettingsCard's px-4 py-3.5), so the whole tile opens the
+ * group.
  */
 function Group({ group, open, onToggle, children }: GroupProps) {
   const rowsId = useId()
@@ -212,7 +214,7 @@ function Group({ group, open, onToggle, children }: GroupProps) {
         aria-expanded={open}
         aria-controls={rowsId}
         onClick={onToggle}
-        className="group flex items-center gap-2.5 text-left"
+        className="group -mx-4 -my-3.5 flex items-center gap-2.5 px-4 py-3.5 text-left"
       >
         <Swatch colour={GROUP_COLOUR[group.id]} />
         <span className="text-fg text-sm font-medium">{group.title}</span>
