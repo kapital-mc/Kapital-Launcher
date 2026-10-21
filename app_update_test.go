@@ -65,7 +65,11 @@ func TestGetUpdateUnderThePreviewAsksNothing(t *testing.T) {
 
 // A build with no update key offers the site only, and says why.
 func TestGetUpdateWithoutAKeyIsNotInstallable(t *testing.T) {
+	saved := services.UpdatePublicKeys
+	t.Cleanup(func() { services.UpdatePublicKeys = saved })
+	services.UpdatePublicKeys = nil
 	app := newTestApp(t)
+	app.self.updater = services.NewLauncherUpdater()
 	stubCheckUpdate(t, models.UpdateInfo{Latest: "v9.0.0", Available: true, Page: services.DownloadPage})
 	got, err := app.GetUpdate()
 	if err != nil || got.Installable || got.Blocked == "" {
