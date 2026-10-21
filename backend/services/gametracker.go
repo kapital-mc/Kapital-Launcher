@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"path/filepath"
 	"slices"
 	"sort"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -655,22 +653,4 @@ func (r *gameRun) bind(pid int) {
 		code, known, err := r.t.os.wait(wctx, pid)
 		r.exitCh <- procExit{code: code, known: known, err: err}
 	}()
-}
-
-// isJavaName is whether a process name is a Java runtime: javaw.exe or
-// java.exe on Windows, java on macOS. All three are accepted everywhere, as no
-// one OS has more than one of them.
-func isJavaName(name string) bool {
-	switch strings.ToLower(name) {
-	case "javaw.exe", "java.exe", "java":
-		return true
-	}
-	return false
-}
-
-// sameExe compares a process name with the Prism executable's base name,
-// ignoring case and a ".exe" either side lacks.
-func sameExe(name, exe string) bool {
-	trim := func(s string) string { return strings.TrimSuffix(strings.ToLower(s), ".exe") }
-	return exe != "" && trim(name) == trim(filepath.Base(exe))
 }
