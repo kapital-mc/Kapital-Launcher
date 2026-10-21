@@ -20,6 +20,8 @@ import (
 // pages' pictures, and the launcher downloads only a set number of them: it
 // draws up to the player's number (5, 10, 20, or all) once a day, never more
 // than one picture of a page before every page with pictures left has had one.
+// A page of several eras says which era each picture was taken in
+// (pages[].imageEras), so one world's pictures stay out of another's chapter.
 
 const (
 	// maxWikiPictures bounds how many page pictures the export may list, one
@@ -43,10 +45,13 @@ var wikiPictureFile = regexp.MustCompile(`^[a-z0-9][A-Za-z0-9._-]*\.(?:webp|png|
 var wikiPicturePath = regexp.MustCompile(`^` + regexp.QuoteMeta(wikiPicturesSite) + `([a-z0-9][A-Za-z0-9._-]*\.(?:webp|png|jpe?g))$`)
 
 // parseWikiPictures keeps the pictures the export's listable pages embed, one
-// per era of the page, in the export's order. A page the panel does not pick
-// from (an index, the timeline, a stub), one without an era and a path that
-// fails the shape are dropped on their own; so is an images field that is not
-// a list of strings. The page's id is the picture's subject.
+// per era of the page, in the export's order. A picture imageEras gives one of
+// the page's eras is that era's alone; one it does not name (an older export,
+// an era the page lacks) stays under every era of the page. A page the panel
+// does not pick from (an index, the timeline, a stub), one without an era and
+// a path that fails the shape are dropped on their own; so is an images field
+// that is not a list of strings, and an imageEras that is not a map of strings.
+// The page's id is the picture's subject.
 func parseWikiPictures(raw []byte) []wikiShot {
 	var doc struct {
 		Pages []struct {
@@ -55,6 +60,8 @@ func parseWikiPictures(raw []byte) []wikiShot {
 			Era    []string        `json:"era"`
 			Status string          `json:"status"`
 			Images json.RawMessage `json:"images"`
+			// ImageEras is raw so that a malformed one drops alone.
+			ImageEras json.RawMessage `json:"imageEras"`
 		} `json:"pages"`
 	}
 	if err := json.Unmarshal(raw, &doc); err != nil {
@@ -79,6 +86,10 @@ func parseWikiPictures(raw []byte) []wikiShot {
 				eras = append(eras, e)
 			}
 		}
+		var picEras map[string]string
+		if len(p.ImageEras) > 0 && json.Unmarshal(p.ImageEras, &picEras) != nil {
+			picEras = nil
+		}
 		var files []string
 		for _, item := range items {
 			var img string
@@ -92,6 +103,9 @@ func parseWikiPictures(raw []byte) []wikiShot {
 		}
 		for _, era := range eras {
 			for _, f := range files {
+				if own := picEras[wikiPicturesSite+f]; own != era && slices.Contains(eras, own) {
+					continue
+				}
 				if len(out) == maxWikiPictures {
 					return out
 				}
