@@ -7,6 +7,7 @@ import { useChapterStore } from '../../stores/useChapterStore'
 import { HeaderTools } from './HeaderTools'
 
 vi.mock('../../../wailsjs/go/main/App')
+vi.mock('../../../wailsjs/runtime/runtime')
 
 describe('HeaderTools', () => {
   beforeEach(() => {
@@ -39,7 +40,15 @@ describe('HeaderTools', () => {
   })
 
   it('shows the update only while one is out, and brings its panel back', async () => {
-    const out = { current: 'v1.0.0', latest: 'v1.1.0', available: true, page: '', reason: '' }
+    const out = {
+      current: 'v1.0.0',
+      latest: 'v1.1.0',
+      available: true,
+      page: '',
+      reason: '',
+      installable: false,
+      blocked: '',
+    }
     vi.mocked(Bindings.GetUpdate).mockResolvedValue(out as never)
     tools()
     expect(screen.queryByRole('button', { name: /^Update Launcher/ })).toBeNull()

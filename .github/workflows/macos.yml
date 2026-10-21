@@ -4,7 +4,8 @@ name: macOS
 # and an Intel runner: the managed Prism installed from its latest release and
 # verified by codesign, its version read through detection, the roots Prism
 # itself creates, Prism quitting on SIGTERM, the launcher's sync copy run from
-# outside its bundle, and the header sized to the title bar macOS drew, its
+# outside its bundle, the launcher's own update swapping a bundle in
+# /Applications, and the header sized to the title bar macOS drew, its
 # first button still taking a real click (a picture of it is kept as an
 # artefact). ci.yml's backend-macos job compiles and unit-tests the Go on
 # Apple Silicon; this one also runs the unit tests on Intel, the only
@@ -20,6 +21,7 @@ on:
       - 'backend/services/prism.go'
       - 'backend/services/instances.go'
       - 'backend/services/synccopy.go'
+      - 'backend/services/selfupdate*'
       - 'backend/services/prelaunchcommand.go'
       - 'backend/services/modsync*'
       - 'backend/services/gameproc*'
@@ -43,6 +45,7 @@ on:
       - 'backend/services/prism.go'
       - 'backend/services/instances.go'
       - 'backend/services/synccopy.go'
+      - 'backend/services/selfupdate*'
       - 'backend/services/prelaunchcommand.go'
       - 'backend/services/modsync*'
       - 'backend/services/gameproc*'

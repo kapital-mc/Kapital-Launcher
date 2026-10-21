@@ -103,4 +103,7 @@ func main() {
 	if err != nil {
 		slog.Error("wails run", "error", err)
 	}
+	// Restart into an update: the window has closed and shutdown has run, so
+	// the new copy starts with this one already gone from the screen.
+	app.relaunchAfterQuit()
 }

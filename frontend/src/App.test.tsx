@@ -431,6 +431,8 @@ describe('App', () => {
         available: true,
         page: 'https://kapital-launcher.pages.dev/',
         reason: '',
+        installable: false,
+        blocked: '',
       }),
     )
     render(<App />)

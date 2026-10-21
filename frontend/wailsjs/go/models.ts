@@ -1046,6 +1046,8 @@ export namespace models {
 	    available: boolean;
 	    page: string;
 	    reason: string;
+	    installable: boolean;
+	    blocked: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new UpdateInfo(source);
@@ -1058,6 +1060,8 @@ export namespace models {
 	        this.available = source["available"];
 	        this.page = source["page"];
 	        this.reason = source["reason"];
+	        this.installable = source["installable"];
+	        this.blocked = source["blocked"];
 	    }
 	}
 	export class WhatsNewHighlight {

@@ -22,6 +22,8 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetChangelogs` | nothing | one bounded GET of each chapter's `changelog.json`, beside the `pack.toml` of the source `GetPackStates` uses (the instance's own pack URL, the loopback override or the manifest's), held to that source's URL rule, redirects included; the answer is parsed strictly and shown as plain text | S4.3, S4.7 |
 | `GetPrismRelease` | nothing | one bounded GET to Prism's fixed release URL | S4.5 |
 | `GetUpdate` | nothing | once a start, one GET (8 s, no redirect followed, 4 KiB) of the download site's fixed `version.json`, sending nothing but the request; only a tag of the release shape is read from it, and a dev build makes no request | S4.3, S4.9 |
+| `DownloadUpdate`, `CancelUpdateDownload` | nothing | for the tag `GetUpdate` read, when this copy can update itself: three bounded GETs on this repository's fixed release URL (GitHub and its asset hosts only), the build checked against `checksums.txt`, whose ed25519 signature must verify against a key built in; staged in a hidden folder beside the running copy; on macOS unpacked by `/usr/bin/ditto` and checked by `/usr/bin/codesign`, both with argument arrays. Cancel ends the download only | S4.13 |
+| `RestartToUpdate` | nothing | the staged build swapped in by two renames beside the running copy, rolled back on a failure, and, after the window has closed, the new copy started (`/usr/bin/open -n` on macOS, the exe itself on Windows, argument arrays). Refused while a game loads or closes and while a download runs | S4.13 |
 | `GetWhatsNew`, `MarkWhatsNewSeen` | nothing | the highlights built into the app (`data/whatsnew.json`, refused whole at startup on a fault); the one `seenVersion` setting, which a save from the frontend never changes | S4.12 |
 | `GetWhatsNewChangelog` | nothing | when the player opens it, one GET (8 s, no redirect followed, 256 KiB) of the download site's fixed `changelog.json`, sending nothing but the request; tags and dates held to their shapes, sections to the site's three, lines cut to 300 characters and rendered as text | S4.12 |
 | `InstallPrism` | nothing | download, verify and unpack Prism's official build | S4.5 |
@@ -754,8 +756,8 @@ counts only a 200 and decodes at most 4 KiB; (c) the one value used is a string
 that must match the release tag pattern (`releaseTag`, the site's own `TAG`),
 or nothing is shown; (d) it is made at most once a start (`updateCheck`'s
 `sync.Once`) and never by a dev build; (e) the popup opens only
-`services.DownloadPage`, through `OpenExternal`'s checks, and the launcher
-downloads and runs nothing itself (ADR-9 amendment).
+`services.DownloadPage`, through `OpenExternal`'s checks (ADR-9 amendment);
+the launcher's own update is S4.13's.
 Verify: `TestCheckUpdateComparesTheSitesTagWithTheBuild`,
 `TestCheckUpdateShowsNothingForAnAnswerThatIsNotAVersion`,
 `TestCheckUpdateAsksNothingForADevBuild`, `TestGetUpdateAsksTheSiteOncePerStart`.
@@ -843,6 +845,33 @@ Verify: `TestParseWhatsNewRefusesTheFileWhole`, `TestFetchChangelogFailuresAreRe
 `TestSaveSettingsKeepsTheSeenVersion`.
 Probe: the file answering a redirect, a 404, HTML, 1 MiB, or a line holding
 `<img src=x onerror=alert(1)>`.
+
+**S4.13 The launcher installs only a build its own key signed, from its own releases, and swaps it in whole or not at all.**
+Holds when: (a) the tag is the one `GetUpdate` read from the site, held to the
+release pattern with its `v`, and the files come only from
+`https://github.com/sandrogekeler/Kapital-Launcher/releases/download/<tag>/`, a
+constant, with redirects only to `prismDownloadHosts`; (b) `checksums.txt.sig`
+verifies against a key in `UpdatePublicKeys`, whose private half is the
+`release` environment's `UPDATE_SIGNING_KEY` alone, and a build with no key
+offers the site only; (c) the asset's SHA-256 equals its signed line, the
+download is held to 200 MiB, ends on a 60 s stall, and anything that fails a
+check is removed with its staging folder; (d) on macOS the unpacked bundle
+passes `codesign --verify --deep --strict` for the launcher's identifier, and
+a translocated copy or a folder the player cannot write offers the site
+instead; (e) the swap is two renames in the target's own folder, the old copy
+put back when the second fails, and nothing of the running copy changes before
+Restart; (f) the new copy is started after the window has closed, with an
+argument array and no arguments, and removes the old one at its start; (g) a
+build the launcher wrote carries no quarantine flag or Mark of the Web, so the
+signature is the only gate: never skip it. A Windows Authenticode pin waits on
+SignPath (issue 179).
+Verify: `TestUpdateDownloadsStagesAndSwapsIn`, `TestUpdateRefusesWhatTheKeyDidNotSign`,
+`TestUpdateWithoutAKeyOffersTheSiteOnly`, `TestUpdateRefusesATagThatIsNotARelease`,
+`TestUpdateRefusesAnotherHost`, `TestUpdateApplyRollsBackWhenThePlacementFails`,
+`TestUpdateSwapsARunningExe` (Windows), `TestMacSelfUpdateSwapsTheBundle` (macOS
+workflow), `TestRestartToUpdateWaitsForDownloads`.
+Probe: a release whose build changed after signing; a signature by another
+key; a redirect to another host; an asset of 1 GiB; a tag of `v1.0.0/../x`.
 
 ## S5. WebView
 
@@ -1007,6 +1036,10 @@ score. Both upload to code scanning, so results sit under Security. The default
 setup stays off so the two do not clash. `scorecard.yml` declares `read-all`
 at the top, which S8.1 reads as read-only, and widens on its one job.
 Verify: Security, Code scanning on the repository lists both tools.
+**S8.7 The update signing key is read by the release job alone.**
+`UPDATE_SIGNING_KEY` is a secret of the `release` environment, which only
+`build.yml`'s release job names, and `scripts/update-sign` fails the release
+when it is missing or its public half is not built into the launcher.
 
 ## Open backlog
 

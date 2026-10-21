@@ -128,6 +128,10 @@ What is left:
 - [x] Update notice: once a start the launcher reads the download site's
       `version.json`, and a newer release opens a popup to the site; Not now
       waits for the next start (ADR-9 amendment, 2026-10-14)
+- [x] In-app update: Update downloads the release in the background, checked
+      against `checksums.txt` signed with the launcher's ed25519 key, and
+      Restart swaps it in (the .app on macOS, the exe on Windows) and starts it
+      (ADR-6 amendment, 2026-10-21)
 - [x] What's new on the first start after an update: each release's
       highlights, written by hand in `data/whatsnew.json`, small changes
       grouped, and the full changelog from the site's `changelog.json` in a

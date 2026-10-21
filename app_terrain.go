@@ -60,6 +60,13 @@ func (t *terrainDownloads) busy(chapterID string) bool {
 	return t.cancel != nil && t.chapter == chapterID
 }
 
+// running is whether any chapter's terrain is downloading.
+func (t *terrainDownloads) running() bool {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return t.cancel != nil
+}
+
 // stop cancels the chapter's download, reporting whether one was running.
 func (t *terrainDownloads) stop(chapterID string) bool {
 	t.mu.Lock()

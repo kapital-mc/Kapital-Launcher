@@ -1,13 +1,17 @@
 import type { DHDownloadProgress, PrismInstallProgress } from '../types'
+import type { LauncherUpdateProgress } from '../types/update'
 import type { TailscaleInstallProgress } from '../types/tailscale'
 import { formatBytes } from './bytes'
 import { fillOf, isSettled, stepLabel } from './terrain'
 import { tailscaleStepLine } from './tailscale'
 import { installLine } from './prismInstall'
 
-/** What a row's Cancel ends: Prism's or Tailscale's install, or a chapter's terrain. */
+/** What a row's Cancel ends: the launcher's update, Prism's or Tailscale's install, or a chapter's terrain. */
 export type DownloadCancel =
-  { kind: 'prism' } | { kind: 'tailscale' } | { kind: 'terrain'; chapterId: string }
+  | { kind: 'launcher' }
+  | { kind: 'prism' }
+  | { kind: 'tailscale' }
+  | { kind: 'terrain'; chapterId: string }
 
 /** One running download in the sidebar's section. */
 export interface DownloadRow {
@@ -23,6 +27,7 @@ export interface DownloadRow {
   cancel: DownloadCancel | null
 }
 
+const LAUNCHER_WORKING = ['downloading', 'verifying']
 const PRISM_WORKING = ['downloading', 'unpacking', 'verifying']
 const TAILSCALE_WORKING = ['downloading', 'verifying', 'installing']
 
@@ -31,10 +36,11 @@ const share = (received: number, total: number) =>
 
 /**
  * Everything the launcher is downloading now, from the stores that follow
- * each download's events: Prism, Tailscale's installer and each chapter's
- * terrain. A download that has ended is not a row.
+ * each download's events: its own update, Prism, Tailscale's installer and
+ * each chapter's terrain. A download that has ended is not a row.
  */
 export function downloadRows(
+  launcher: LauncherUpdateProgress | null,
   prism: PrismInstallProgress | null,
   prismUpdate: boolean,
   tailscale: TailscaleInstallProgress | null,
@@ -42,6 +48,21 @@ export function downloadRows(
   chapterName: (id: string) => string,
 ): DownloadRow[] {
   const rows: DownloadRow[] = []
+  if (launcher && LAUNCHER_WORKING.includes(launcher.phase)) {
+    const downloading = launcher.phase === 'downloading'
+    rows.push({
+      key: 'launcher',
+      title: 'Kapital Launcher update',
+      value: downloading ? share(launcher.received, launcher.total) : 1,
+      line:
+        downloading && launcher.total > 0
+          ? `Downloading ${formatBytes(launcher.received)} of ${formatBytes(launcher.total)}`
+          : downloading
+            ? 'Downloading'
+            : 'Checking the signature',
+      cancel: downloading ? { kind: 'launcher' } : null,
+    })
+  }
   if (prism && PRISM_WORKING.includes(prism.phase)) {
     rows.push({
       key: 'prism',

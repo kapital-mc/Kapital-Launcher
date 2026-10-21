@@ -25,6 +25,9 @@ func (a *App) startup(ctx context.Context) {
 	runCtx, cancel := context.WithCancel(ctx)
 	a.stop = cancel
 	a.runCtx = runCtx
+	// The old copy a restart into an update swapped out, and any download
+	// that was never applied.
+	go a.cleanUpUpdate(runCtx)
 	go a.status.Run(runCtx, a.manifest.Chapters, a.serverAddress, func(s models.ServerStatus) {
 		wailsrt.EventsEmit(a.ctx, services.EventServerStatus, s)
 	})
