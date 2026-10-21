@@ -638,3 +638,33 @@ and plain, over reading `accounts.json` to check or fill in the name.
   and the launcher's log records only that a name was learned.
 - **What does not change.** Nothing of Prism's accounts is read. The game log
   was already read for this line to mask the name in reports (sixth amendment).
+
+## Eighteenth amendment, 2026-10-21
+
+An instance grows without a bound, mostly through Distant Horizons: its terrain
+database for a server keeps every chunk the player has seen, and the author's
+Frangfurd instance reached 15 GB. Distant Horizons has no size limit of its own,
+so a limit the launcher enforced would mean deleting under a running game. The
+author chose a storage section in the chapter's settings instead: the instance
+measured by kind, and a delete the player asks for.
+
+- **What is measured.** `GetChapterStorage` walks the instance folder once
+  (directory entries only, no link followed, stopped at the size walk's entry
+  cap and then marked partial) and sums it by kind: each server folder under
+  `<game folder>/Distant_Horizons_server_data/`, the terrain staging folder
+  (sixteenth amendment), `<game folder>/xaero/world-map`, `screenshots`,
+  `logs` with `crash-reports`, `mods`, and the rest. The disk's free space comes
+  with it. Nothing is opened or written.
+- **What can be deleted.** Four kinds, each one fixed folder built in Go: one
+  server's terrain folder (a name the listing gave, held to a plain folder name),
+  the terrain staging folder, the Xaero world map and the logs with crash
+  reports. Each goes through an `os.Root` on the game folder (the staging folder,
+  on the instance), and a target that is a link or a file is left as it is.
+  Screenshots only open in the file manager, through the same check as the
+  instance folder; mods come back with the next sync, so neither has a delete.
+- **When.** Only after the player confirms the row. Refused under a developer
+  preview, while the game is active or the log says it may be running (Distant
+  Horizons and Xaero hold their files open), and for terrain while a terrain
+  download of the chapter runs.
+- **What is never touched.** Saves, options, `config`, the Xaero minimap
+  (waypoints), and Essential's folder, which may hold account data (S1.1).

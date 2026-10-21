@@ -134,6 +134,10 @@ What is left:
       dropdown (ADR-9 amendment, 2026-10-19)
 - [x] Launch intro: the traced wordmark draws in and fades into the launcher,
       about a second, skipped with reduced motion (ADR-10 amendment, 2026-10-19)
+- [x] Storage section in a chapter's settings: the instance measured by kind,
+      with a delete for Distant Horizons terrain per server, an unfinished
+      terrain download, the world map and the logs; no size limit, since
+      Distant Horizons has none (ADR-2 eighteenth amendment, 2026-10-21)
 - [x] Release workflow with attested artefacts for Windows and macOS; code
       signing decision (ADR-6): `.github/workflows/build.yml` (#107) builds both
       and cuts an attested release, only from the Actions tab since issue 177;
