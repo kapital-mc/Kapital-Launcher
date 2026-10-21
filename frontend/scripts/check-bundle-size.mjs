@@ -121,7 +121,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 96.5 the same day: every Scrollable glides on the wheel (lib/smoothWheel), and the main
 // view is one, so it is in the entry. Loading it later split smoothResize into a chunk of its
 // own and saved nothing. Measured 96.43 KB.
-const BUDGET_KB = 96.5
+// 96.6 on 2026-10-21: the storage section's three bound methods (GetChapterStorage,
+// ClearChapterStorage, OpenStorageFolder) are in the generated App.js, one module in the shared
+// chunk, though the section itself loads on demand. Measured 96.52 KB, from 96.48 KB on main.
+const BUDGET_KB = 96.6
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)
