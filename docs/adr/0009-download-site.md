@@ -281,8 +281,9 @@ download easy and looks good, at most two screens tall. What changed:
   CSP allows no `style` attribute; each paints only its own slice of the
   picture, so the page never paints a full-size copy per square (an early
   mockup that did so glitched the whole viewport). The picture is lightly
-  blurred and tinted toward the accent: `effect.showcase` joined the tokens,
-  with the dim of a closed panel.
+  tinted toward the accent: `effect.showcase` joined the tokens, with the dim
+  of a closed panel. It is not blurred: a blur reads across the squares'
+  edges, which showed seams mid-swap and softened the dark squares.
 - **A pixel face.** Buttons, labels and the popups' headings are in
   Silkscreen (OFL), the face of the first mockup the author liked, served
   from the site like the others; it is `type.family.pixel` in the tokens. The
