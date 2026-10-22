@@ -299,9 +299,13 @@ function Row({
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
       <div className="flex min-w-0 items-center gap-2.5">
         {colour && <Swatch colour={colour} />}
-        {item.icon && (
-          <img src={item.icon} alt="" className="pixelated size-8 shrink-0 rounded-sm" />
-        )}
+        {/* A world without an icon keeps an empty square, so the names line up. */}
+        {item.kind === 'saves' &&
+          (item.icon ? (
+            <img src={item.icon} alt="" className="pixelated size-8 shrink-0 rounded-sm" />
+          ) : (
+            <span aria-hidden className="bg-sunken border-line size-8 shrink-0 rounded-sm border" />
+          ))}
         <div className="flex min-w-0 flex-col gap-1">
           <span className="text-fg text-sm font-medium break-words">{title}</span>
           <span className="text-fg-muted text-xs tabular-nums">{storageDetail(item)}</span>
