@@ -731,7 +731,9 @@ measured by kind, and a delete the player asks for.
   listing gave held to a plain folder name as a terrain folder is. The rest
   opens the game folder.
 - **When.** A delete only after the player confirms the row, in place of its
-  Delete button. Refused under a developer preview, while the game is active or
+  Delete button. Screenshots then ask once more in a popup ("Are you sure?"),
+  which its "Don't ask me again" turns off (`skipDeleteConfirm` in the
+  launcher's settings). Refused under a developer preview, while the game is active or
   the log says it may be running (Distant Horizons and Xaero hold their files
   open), and for terrain while a terrain download of the chapter runs.
 - **What is never deleted.** Saves, options, `config`, the mods (the next sync

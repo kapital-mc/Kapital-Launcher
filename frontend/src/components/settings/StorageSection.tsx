@@ -5,6 +5,7 @@ import { errMsg } from '../../lib/ipc'
 import { formatBytes } from '../../lib/bytes'
 import { ChevronDown, FolderOpen, HardDrive, Trash2 } from '../../lib/icons'
 import {
+  asksTwice,
   canDelete,
   GROUP_COLOUR,
   hasRows,
@@ -15,6 +16,7 @@ import {
 } from '../../lib/storage'
 import type { StorageGroup, StorageGroupId } from '../../lib/storage'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
+import { useSettingsStore } from '../../stores/useSettingsStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Button } from '../ui/Button'
@@ -24,6 +26,7 @@ import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
 import { ErrorLine, Hint, WarningLine } from '../ui/Notes'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
+import { DeleteConfirm } from './DeleteConfirm'
 import { RunningHint } from './RunningHint'
 
 interface Props {
@@ -51,6 +54,8 @@ export function StorageSection({ chapter }: Props) {
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const wasPlaying = useRef(playing)
   const [confirming, setConfirming] = useState<string | null>(null)
+  const [asking, setAsking] = useState<{ item: StorageItem; title: string } | null>(null)
+  const skipAsk = useSettingsStore((s) => s.settings.skipDeleteConfirm === true)
   const [unfolded, setUnfolded] = useState<ReadonlySet<StorageGroupId>>(new Set())
   const [error, setError] = useState<string | null>(null)
 
@@ -91,6 +96,25 @@ export function StorageSection({ chapter }: Props) {
       setError(errMsg(e))
     }
   }
+  // Screenshots ask once more in a popup, unless the player ticked "Don't ask me again" there.
+  const confirm = (item: StorageItem, title: string) => {
+    if (!asksTwice(item) || skipAsk) {
+      void remove(item)
+      return
+    }
+    setConfirming(null)
+    setAsking({ item, title })
+  }
+  const confirmAsked = (item: StorageItem, dontAsk: boolean) => {
+    setAsking(null)
+    void remove(item)
+    if (dontAsk) {
+      useSettingsStore
+        .getState()
+        .update({ skipDeleteConfirm: true })
+        .catch((e: unknown) => setError(errMsg(e)))
+    }
+  }
   const open = async (item: StorageItem) => {
     setError(null)
     try {
@@ -120,7 +144,7 @@ export function StorageSection({ chapter }: Props) {
         busy={playing || clearing !== null}
         confirming={confirming === key}
         onDelete={() => setConfirming(key)}
-        onConfirm={() => void remove(item)}
+        onConfirm={() => confirm(item, title)}
         onCancel={() => setConfirming(null)}
         onOpen={() => void open(item)}
       />
@@ -155,6 +179,13 @@ export function StorageSection({ chapter }: Props) {
         {error && <ErrorLine>{error}</ErrorLine>}
       </Grow>
       <Footer view={view} />
+      {asking && (
+        <DeleteConfirm
+          facts={`${asking.title} · ${storageDetail(asking.item)}`}
+          onConfirm={(dontAsk) => confirmAsked(asking.item, dontAsk)}
+          onCancel={() => setAsking(null)}
+        />
+      )}
     </SettingsSection>
   )
 }

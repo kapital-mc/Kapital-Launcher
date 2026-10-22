@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import * as App from '../../../wailsjs/go/main/App'
 import { useGameStore } from '../../stores/useGameStore'
+import { DEFAULT_SETTINGS, useSettingsStore } from '../../stores/useSettingsStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
 import type { ChapterStorage, StorageItem } from '../../types'
@@ -51,6 +52,7 @@ describe('StorageSection', () => {
     Object.assign(window, { go: {} })
     useStorageStore.setState({ byChapter: {}, unavailable: false, readError: {}, clearing: null })
     useGameStore.setState({ states: {} })
+    useSettingsStore.setState({ settings: DEFAULT_SETTINGS })
     vi.mocked(App.GetChapterStorage).mockResolvedValue(view([terrain, shots, mods]) as never)
   })
   afterEach(() => {
@@ -116,6 +118,39 @@ describe('StorageSection', () => {
     expect(screen.queryByRole('button', { name: 'Confirm' })).toBeNull()
     expect(screen.getByText('215 MB · 40 pictures')).toBeInTheDocument()
     expect(App.ClearChapterStorage).not.toHaveBeenCalled()
+  })
+
+  it('asks once more before deleting screenshots, and can stop asking', async () => {
+    render(<StorageSection chapter={frangfurd} />)
+    const shotsTrash = () => screen.getByRole('button', { name: 'Delete' })
+    await screen.findByText('Screenshots')
+    fireEvent.click(shotsTrash())
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Are you sure?' })
+    expect(dialog).toHaveTextContent('This will permanently delete your files.')
+    expect(App.ClearChapterStorage).not.toHaveBeenCalled()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+    expect(App.ClearChapterStorage).not.toHaveBeenCalled()
+
+    fireEvent.click(shotsTrash())
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+    const again = await screen.findByRole('dialog', { name: 'Are you sure?' })
+    fireEvent.click(within(again).getByRole('checkbox', { name: "Don't ask me again" }))
+    await act(async () => fireEvent.click(within(again).getByRole('button', { name: 'Confirm' })))
+    expect(App.ClearChapterStorage).toHaveBeenCalledWith('frangfurd', 'screenshots', '')
+    expect(App.SaveSettings).toHaveBeenCalledWith(
+      expect.objectContaining({ skipDeleteConfirm: true }),
+    )
+  })
+
+  it('deletes screenshots at once when the player stopped the popup', async () => {
+    useSettingsStore.setState({ settings: { ...DEFAULT_SETTINGS, skipDeleteConfirm: true } })
+    render(<StorageSection chapter={frangfurd} />)
+    await screen.findByText('Screenshots')
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Confirm' })))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(App.ClearChapterStorage).toHaveBeenCalledWith('frangfurd', 'screenshots', '')
   })
 
   it('shows Go’s refusal', async () => {

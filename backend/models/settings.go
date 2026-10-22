@@ -96,6 +96,10 @@ type AppSettings struct {
 	// SidebarCompact narrows the sidebar to the chapter icons and a square
 	// account tile, from the button at the header's left. Off by default.
 	SidebarCompact bool `json:"sidebarCompact,omitempty"`
+	// SkipDeleteConfirm leaves out the "Are you sure?" popup after a delete of
+	// screenshots is confirmed in the storage section, from the popup's "Don't
+	// ask me again". Off by default.
+	SkipDeleteConfirm bool `json:"skipDeleteConfirm,omitempty"`
 	// SeenVersion is the launcher version whose What's new the player last
 	// closed, or that was running when nothing was new. Set by the app, not
 	// the player: a save from the frontend keeps the stored one.

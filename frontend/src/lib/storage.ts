@@ -13,6 +13,9 @@ const DELETABLE: readonly string[] = [
 
 export const canDelete = (item: StorageItem): boolean => DELETABLE.includes(item.kind)
 
+/** Whether a confirmed delete asks once more in a popup: the player's own pictures, gone for good. */
+export const asksTwice = (item: StorageItem): boolean => item.kind === 'screenshots'
+
 /** A row's key: its kind, and the server folder for terrain or the world folder for a save. */
 export const storageKey = (item: StorageItem): string => `${item.kind}/${item.name}`
 
