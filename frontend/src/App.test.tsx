@@ -604,7 +604,7 @@ describe('App', () => {
     render(<App />)
     await screen.findByRole('heading', { level: 1 })
     // Luxemburg has no page in the export: the manifest's teaser stands.
-    expect(screen.getByText('Bellum Castle')).toBeInTheDocument()
+    expect(screen.getByText('An industrialised nation-state, unified in 1701.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Read the history →' }))
     expect(Bindings.OpenChapterWiki).toHaveBeenCalledWith('luxemburg')
 
