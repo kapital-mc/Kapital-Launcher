@@ -87,10 +87,12 @@ gap you cannot close under `HEALTH_CHECKLIST.md`'s Open backlog.
 ## Task tracking
 
 GitHub Issues. `ROADMAP.md` holds direction and milestones; work items are
-issues. `CONTRIBUTING.md` holds the rules CI enforces: one `type:` and one
-`area:` label on every pull request (`pr-labelled`), a title in sentence case
-with no em dash (`pr-copy`), the `type:` ladder that files each merged pull
-request into the release notes. Branch from `origin/main`.
+issues. `CONTRIBUTING.md` holds the rules CI enforces: an `area:` label and
+either a `## Changelog` section or a `type:` label on every pull request
+(`pr-labelled`), a title in sentence case with no em dash (`pr-copy`), the type
+ladder that files each change into the release notes. One pull request per
+piece of work with a Changelog line per change, never one per tweak. Branch
+from `origin/main`.
 
 `docs/HANDOVER.md` is the state a session cannot derive: branches, open
 questions, the issues still to file. Update it when handing over.

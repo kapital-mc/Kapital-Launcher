@@ -13,6 +13,7 @@ backend/design
 .claude/suite-memory.py
 .github/scripts/release-notes.py
 .github/scripts/release-notes_test.py
+.github/scripts/changelog-section.py
 
 # Build outputs and dependencies.
 frontend/dist
