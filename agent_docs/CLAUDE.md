@@ -53,6 +53,8 @@ Same shape as Konnekt, deliberately (docs/adr/0001-app-framework.md).
   `lucide-react`, rendered through `components/ui/Icon`.
 - **No em dashes** in anything a user reads: UI copy, the manifest, README,
   commits, pull requests. A comma, a colon, a middle dot or two sentences.
+- **UI copy states facts, never explanations**: a size, a count, a date, not
+  why or what happens next. The examples are in `.claude/rules/frontend-style.md`.
 - Go: `gofmt`, errors always handled (`//nolint:errcheck // reason` for a
   deliberate discard), `log/slog` for diagnostics, never `fmt.Println`.
 
