@@ -388,12 +388,12 @@ func (u *LauncherUpdater) Apply() (string, error) {
 	}
 	u.staged = nil
 	previous := filepath.Join(s.dir, "previous"+filepath.Ext(s.target))
-	if err := os.Rename(s.target, previous); err != nil {
+	if err := renameWhenFree(s.target, previous); err != nil {
 		removeQuietly(s.dir)
 		return "", fmt.Errorf("move the running launcher aside: %w", err)
 	}
-	if err := os.Rename(s.replacement, s.target); err != nil {
-		if rerr := os.Rename(previous, s.target); rerr != nil {
+	if err := renameWhenFree(s.replacement, s.target); err != nil {
+		if rerr := renameWhenFree(previous, s.target); rerr != nil {
 			slog.Error("launcher update: roll back", "target", s.target, "error", rerr)
 			return "", fmt.Errorf("place the update: %w; putting the old launcher back also failed: %w", err, rerr)
 		}
@@ -405,6 +405,18 @@ func (u *LauncherUpdater) Apply() (string, error) {
 	}
 	slog.Info("launcher updated in place", "version", s.tag, "target", s.target)
 	return s.target, nil
+}
+
+// renameWhenFree renames, waiting up to two seconds while another process
+// holds the file open: on Windows a virus scanner reading an exe blocks its
+// rename for that long (fileBusy).
+func renameWhenFree(from, to string) error {
+	err := os.Rename(from, to)
+	for try := 0; err != nil && fileBusy(err) && try < 10; try++ {
+		time.Sleep(200 * time.Millisecond)
+		err = os.Rename(from, to)
+	}
+	return err
 }
 
 // Relaunch starts the copy at target without waiting for it.
