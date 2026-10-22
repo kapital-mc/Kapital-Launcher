@@ -32,9 +32,9 @@
         "software": "[PLACEHOLDER]"
       },
       "wiki": {
-        "title": "Bellum Castle",
-        "line": "A trade empire grown out of a mountain pass.",
-        "path": "/wiki/locations/bellum-castle"
+        "title": "Luxemburg",
+        "line": "An industrialised nation-state, unified in 1701.",
+        "path": "/wiki/locations/luxemburg"
       },
       "changelog": []
     },
@@ -71,7 +71,7 @@
       "wiki": {
         "title": "Lichdenstein",
         "line": "Small, cautious settlements on scarred land.",
-        "path": "/worlds/lichdenstein"
+        "path": "/wiki/locations/lichdenstein"
       },
       "changelog": []
     },
