@@ -5,6 +5,8 @@ import { errMsg } from '../../lib/ipc'
 import { formatBytes } from '../../lib/bytes'
 import { ChevronDown, FolderOpen, HardDrive, Trash2 } from '../../lib/icons'
 import {
+  alwaysAsks,
+  asksTwice,
   canDelete,
   GROUP_COLOUR,
   hasRows,
@@ -15,6 +17,7 @@ import {
 } from '../../lib/storage'
 import type { StorageGroup, StorageGroupId } from '../../lib/storage'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
+import { useSettingsStore } from '../../stores/useSettingsStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Button } from '../ui/Button'
@@ -24,6 +27,7 @@ import { Icon } from '../ui/Icon'
 import { IconButton } from '../ui/IconButton'
 import { ErrorLine, Hint, WarningLine } from '../ui/Notes'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
+import { DeleteConfirm } from './DeleteConfirm'
 import { RunningHint } from './RunningHint'
 
 interface Props {
@@ -51,6 +55,8 @@ export function StorageSection({ chapter }: Props) {
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const wasPlaying = useRef(playing)
   const [confirming, setConfirming] = useState<string | null>(null)
+  const [asking, setAsking] = useState<{ item: StorageItem; title: string } | null>(null)
+  const skipAsk = useSettingsStore((s) => s.settings.skipDeleteConfirm === true)
   const [unfolded, setUnfolded] = useState<ReadonlySet<StorageGroupId>>(new Set())
   const [error, setError] = useState<string | null>(null)
 
@@ -91,6 +97,26 @@ export function StorageSection({ chapter }: Props) {
       setError(errMsg(e))
     }
   }
+  // Worlds, terrain, maps and screenshots ask once more in a popup. "Don't ask me again" there
+  // stops it for all but the worlds.
+  const confirm = (item: StorageItem, title: string) => {
+    if (!asksTwice(item) || (skipAsk && !alwaysAsks(item))) {
+      void remove(item)
+      return
+    }
+    setConfirming(null)
+    setAsking({ item, title })
+  }
+  const confirmAsked = (item: StorageItem, dontAsk: boolean) => {
+    setAsking(null)
+    void remove(item)
+    if (dontAsk) {
+      useSettingsStore
+        .getState()
+        .update({ skipDeleteConfirm: true })
+        .catch((e: unknown) => setError(errMsg(e)))
+    }
+  }
   const open = async (item: StorageItem) => {
     setError(null)
     try {
@@ -120,7 +146,7 @@ export function StorageSection({ chapter }: Props) {
         busy={playing || clearing !== null}
         confirming={confirming === key}
         onDelete={() => setConfirming(key)}
-        onConfirm={() => void remove(item)}
+        onConfirm={() => confirm(item, title)}
         onCancel={() => setConfirming(null)}
         onOpen={() => void open(item)}
       />
@@ -155,6 +181,14 @@ export function StorageSection({ chapter }: Props) {
         {error && <ErrorLine>{error}</ErrorLine>}
       </Grow>
       <Footer view={view} />
+      {asking && (
+        <DeleteConfirm
+          facts={`${asking.title} · ${storageDetail(asking.item)}`}
+          onConfirm={(dontAsk) => confirmAsked(asking.item, dontAsk)}
+          onCancel={() => setAsking(null)}
+          skippable={!alwaysAsks(asking.item)}
+        />
+      )}
     </SettingsSection>
   )
 }
@@ -265,6 +299,13 @@ function Row({
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
       <div className="flex min-w-0 items-center gap-2.5">
         {colour && <Swatch colour={colour} />}
+        {/* A world without an icon keeps an empty square, so the names line up. */}
+        {item.kind === 'saves' &&
+          (item.icon ? (
+            <img src={item.icon} alt="" className="pixelated size-8 shrink-0 rounded-sm" />
+          ) : (
+            <span aria-hidden className="bg-sunken border-line size-8 shrink-0 rounded-sm border" />
+          ))}
         <div className="flex min-w-0 flex-col gap-1">
           <span className="text-fg text-sm font-medium break-words">{title}</span>
           <span className="text-fg-muted text-xs tabular-nums">{storageDetail(item)}</span>

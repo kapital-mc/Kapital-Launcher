@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { StorageItem } from '../types'
 import {
+  alwaysAsks,
+  asksTwice,
   canDelete,
   hasRows,
   serverName,
@@ -51,10 +53,19 @@ describe('storage rows', () => {
       'mods',
       'other',
     ]
+    expect(kinds.filter((kind) => asksTwice(item({ kind })))).toEqual([
+      'terrain',
+      'terrainDownload',
+      'worldMap',
+      'saves',
+      'screenshots',
+    ])
+    expect(kinds.filter((kind) => alwaysAsks(item({ kind })))).toEqual(['saves'])
     expect(kinds.filter((kind) => canDelete(item({ kind })))).toEqual([
       'terrain',
       'terrainDownload',
       'worldMap',
+      'saves',
       'screenshots',
       'logs',
     ])

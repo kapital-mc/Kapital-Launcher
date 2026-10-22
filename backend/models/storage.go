@@ -2,7 +2,7 @@ package models
 
 // The kinds of storage a chapter's instance is measured by, for the storage
 // section of its settings. Terrain, the unfinished terrain download, the world
-// map, the screenshots and the logs can be deleted; the saves, the minimap
+// map, the saves, the screenshots and the logs can be deleted; the minimap
 // (waypoints), the mods and the rest are only shown. Every kind's folder can be
 // opened.
 const (
@@ -54,4 +54,7 @@ type StorageItem struct {
 	Files int    `json:"files"`
 	// LastModified is the newest file's time, RFC 3339 in UTC, or "".
 	LastModified string `json:"lastModified"`
+	// Icon is a save's icon.png as a data URL, "" for a world without one and
+	// every other kind.
+	Icon string `json:"icon,omitempty"`
 }

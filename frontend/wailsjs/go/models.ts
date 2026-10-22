@@ -22,6 +22,7 @@ export namespace models {
 	    wikiPictures?: number;
 	    mapIn?: string;
 	    sidebarCompact?: boolean;
+	    skipDeleteConfirm?: boolean;
 	    seenVersion?: string;
 	
 	    static createFrom(source: any = {}) {
@@ -51,6 +52,7 @@ export namespace models {
 	        this.wikiPictures = source["wikiPictures"];
 	        this.mapIn = source["mapIn"];
 	        this.sidebarCompact = source["sidebarCompact"];
+	        this.skipDeleteConfirm = source["skipDeleteConfirm"];
 	        this.seenVersion = source["seenVersion"];
 	    }
 	}
@@ -487,6 +489,7 @@ export namespace models {
 	    bytes: number;
 	    files: number;
 	    lastModified: string;
+	    icon?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new StorageItem(source);
@@ -500,6 +503,7 @@ export namespace models {
 	        this.bytes = source["bytes"];
 	        this.files = source["files"];
 	        this.lastModified = source["lastModified"];
+	        this.icon = source["icon"];
 	    }
 	}
 	export class ChapterStorage {
