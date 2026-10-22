@@ -64,6 +64,7 @@
   --font-display: 'Fraunces', 'Iowan Old Style', 'Georgia', serif;
   --font-display--font-variation-settings: 'SOFT' 0, 'WONK' 0;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+  --font-pixel: 'Silkscreen', ui-monospace, monospace;
 
   /* Letter-spacing by role, read as tracking-<role>. */
   --tracking-control: 0.01em;
@@ -159,6 +160,9 @@
   --cover-art: 40%;
   --cover-spot: 36%;
   --cover-blur: 36px;
+  --effect-showcase-blur: 2px;
+  --effect-showcase-tint: 22%;
+  --effect-showcase-dim: 28%;
   --layout-reveal-rise: 4px;
   --effect-reveal-blur: 2px;
   --effect-glow-blur: 18px;

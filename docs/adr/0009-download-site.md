@@ -261,3 +261,42 @@ button until the button opens it again. What it does is unchanged: it opens
 `services.DownloadPage` and nothing else. Not now, Cancel and Close across
 the launcher's popups and prompts are the same small borderless button
 (`Button`'s `quiet`), so the action beside them leads. What's new keeps its X.
+
+## Amendment, 2026-10-22: the pixel window
+
+The author redesigned the page with Claude over a set of mockups, after
+essential.gg and other Minecraft sites: no sales line, a page that makes the
+download easy and looks good, at most two screens tall. What changed:
+
+- **The window is a strip of chapters, not the app's layout.** The header bar
+  is still the app's (`HeaderBar`, tools on the left, Windows' buttons on the
+  right), but under it the three chapters are panels side by side; the open
+  one is wide with its picture at full strength, the others dimmed. The cycle
+  is gone. The panels are the labels of a radio group, so choosing a chapter
+  needs no script, and `src/showcase.js` is removed: the page runs two
+  scripts, `detect.js` and `popup.js`.
+- **A backdrop of squares.** Behind the window the open chapter's picture
+  shows through a grid of dark squares and changes square by square on a
+  switch. The squares are spans `mosaic.js` writes at build time, since the
+  CSP allows no `style` attribute; each paints only its own slice of the
+  picture, so the page never paints a full-size copy per square (an early
+  mockup that did so glitched the whole viewport). The picture is lightly
+  blurred and tinted toward the accent: `effect.showcase` joined the tokens,
+  with the dim of a closed panel.
+- **A pixel face.** Buttons, labels and the popups' headings are in
+  Silkscreen (OFL), the face of the first mockup the author liked, served
+  from the site like the others; it is `type.family.pixel` in the tokens. The
+  Download buttons are the logo's rose with square corners.
+- **One Download button for the visitor's system**, with the version and the
+  other system under it; both open the download popup with that system
+  picked. The popup has a banner of the open chapter's picture. Changelog,
+  GitHub and the code signing policy moved to the footer, and the logo is the
+  only thing above the button.
+- **Cards from the manifest, not live data.** Beside the window are the open
+  chapter's pack (version, mods, loader) and its state. A live player count
+  was in the mockups, but the page does not touch the network, so it shows
+  whether the chapter is released instead.
+- **No operating system logos.** Apple's trademark guidelines do not allow
+  the Apple logo on a website without a licence, and Microsoft's logos only
+  under its brand guidelines, so the systems are named in words.
+

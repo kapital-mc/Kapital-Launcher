@@ -111,6 +111,13 @@
   }
 }
 
+/* The Download button and the link under it, one per system: data-os on the
+   root is the visitor's system (src/detect.js), Windows without it. */
+:root[data-os='macos'] [data-when-os='windows'],
+:root:not([data-os='macos']) [data-when-os='macos'] {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [popover],
   [popover]:popover-open,

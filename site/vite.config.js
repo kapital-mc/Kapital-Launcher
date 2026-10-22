@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import { parseChangelog, renderChangelog } from './changelog.js'
+import { backdropSquares, bannerSquares, renderBackdropArt, renderBackdropPixels, renderBanner } from './mosaic.js'
 
 // The page's links, filled in at build time so the built HTML carries no inline
 // script. GitHub and `release` come from links.json and stay null until there
@@ -237,6 +238,35 @@ async function links() {
   }
 }
 
+// The squares of the chapter backdrop and the download popup's banner
+// (mosaic.js), written in where index.html marks them. Each marker is
+// expected exactly once.
+const MOSAIC = {
+  '<!--mosaic:art-->': () => renderBackdropArt(backdropSquares()),
+  '<!--mosaic:pixels-->': () => renderBackdropPixels(backdropSquares()),
+  '<!--mosaic:banner-->': () => renderBanner(bannerSquares()),
+}
+
+function mosaic() {
+  return {
+    name: 'kapital:mosaic',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        let out = html
+        for (const [marker, render] of Object.entries(MOSAIC)) {
+          const count = out.split(marker).length - 1
+          // The banner is in the download popup, which a build with no release leaves out.
+          if (count === 0 && marker === '<!--mosaic:banner-->') continue
+          if (count !== 1) throw new Error(`site: index.html has ${count} ${marker}, expected one`)
+          out = out.replace(marker, render)
+        }
+        return out
+      },
+    },
+  }
+}
+
 // Vite writes the page's script as a module before the stylesheet. A module
 // never stops the parser, so the whole body is parsed while the stylesheet is
 // still loading. Chromium holds the first paint for a stylesheet in the head
@@ -283,7 +313,7 @@ function stylesheetFirst() {
 }
 
 export default defineConfig(async () => ({
-  plugins: [tailwindcss(), await links(), stylesheetFirst()],
+  plugins: [tailwindcss(), await links(), mosaic(), stylesheetFirst()],
   build: {
     // The script runs as a classic script (stylesheetFirst above), and the page
     // has no module to preload, so the module preload polyfill has no work.

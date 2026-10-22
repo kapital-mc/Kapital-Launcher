@@ -1,76 +1,77 @@
 # Download site
 
-One static page: the launcher's name, the version it offers, the Download and
-GitHub buttons, and under them the launcher window itself, cycling
-through its three chapters, whose rows a visitor can click. Above the footer,
-Changelog and Code signing policy each open a popup. It is separate from the
-Kapitel Kapital wiki and runs three small scripts, bundled into one file: one
-picks the operating system in the download popup, one makes the window's rows
-clickable, and one closes the popups with motion. None touches the network or
-storage.
+One static page: the launcher's name, the Download button for the visitor's
+system with the version and the other system under it, and the launcher window
+with the three chapters as a strip of panels in front of a backdrop of the
+open chapter's picture. The footer holds Changelog, GitHub and Code signing
+policy. It is separate from the Kapitel Kapital wiki and runs two small
+scripts, bundled into one file: one picks the operating system, one closes
+the popups with motion. Neither touches the network or storage.
 The decision record is `docs/adr/0009-download-site.md`.
 
 ## Where the look comes from
 
-Nothing visual is defined here. `src/style.css` imports the app's generated
-`frontend/src/styles/tokens.css` and its shared `frontend/src/styles/base.css`
-(fonts, base rules, scrims), and `index.html` uses the
-Kapital Launcher logo (the author's one-line artwork, the file the app's header bar draws, 560px wide)
-and a screenshot from `frontend/src/assets/`. The logo is the page's `h1`,
-its alt text the heading. The buttons carry the
-classes of the app's `Button` variants: `play` for Download, `ghost` for the
-others. A value the page needs and the tokens do not have is a token to add in
-`design/tokens.json`, the same rule as the app.
+`src/style.css` imports the app's generated `frontend/src/styles/tokens.css`
+and its shared `frontend/src/styles/base.css` (fonts, base rules, scrims),
+then the site's own: `src/fonts.css` (Silkscreen, the page's pixel face,
+`type.family.pixel` in the tokens, served from `src/fonts/` with its licence),
+`src/showcase.css` (the chapter strip and the backdrop) and `src/popup.css`
+(the popups' motion). `index.html` uses the Kapital Launcher logo (the
+author's one-line artwork, 560px wide) as its `h1`, and the chapters'
+pictures, titles and icons from `frontend/src/assets/`. Buttons and labels are
+in Silkscreen, with bold only on the popups' headings; the Download buttons are
+the logo's rose (`logo-gradient-top`) with square corners. A value the page
+needs and the tokens do not have is a token to add in `design/tokens.json`,
+the same rule as the app.
 
 The page is dark whatever the visitor's system preference (`data-theme="dark"`
 on the root): the artwork and the window are drawn for the dark palette.
 
 ## The window
 
-Below the buttons is the launcher window at its real size
-(`layout.window` in the tokens), drawn with the classes of the app's own
-components (`frontend/src/components`): the header bar, the chapter nav with
-its gliding highlight, the account card, and the chapter card with its hero,
-action bar and panels, filled from `data/launcher.json`. The icons are
-lucide's paths inlined as SVG, the same glyphs the app renders. Apart from
-the nav's chapter rows, which are buttons (below), the window is a picture:
-nothing else in it is a control, the rest is hidden from assistive
-technology, and a sentence before it names the three chapters.
+Under the Download button is the launcher window: the app's header bar
+(`shell/HeaderBar.tsx` and `HeaderTools.tsx`, as Windows draws them: the
+compact tools on the left, minimise, maximise and close on the right), a
+picture with nothing in it to press, and under it the three chapters as a
+strip of panels. The open chapter's panel is wide, its picture at full
+strength and its title large; the others are dimmed
+(`effect.showcase.dim`). Width, picture and title ease between the two on
+the slow duration.
 
-It cycles through the chapters on CSS animations alone, in `src/showcase.css`,
-with the app's own motion: the card slides the way the content moves and
-blurs at the middle of its travel (`frontend/src/style.css`), the nav
-highlight glides to the next row in the same duration and easing, the row's
-art fades in behind it, and the glow behind the window, the Download
-button and the popup's download buttons take the open chapter's colour, all
-from one animation on the page's root, so the popup never restarts the cycle. A chapter dwells for
-`motion.duration.dwell`, then the next slides in over `motion.duration.slow`;
-the keyframe stops in `showcase.css` are fractions of that cycle and say how
-to recompute them if either duration changes. With reduced motion the cards
-cross-fade on the same clock and the highlight steps instead of gliding.
+The panels are the labels of a radio group (`name="chapter"`), so choosing a
+chapter needs no script. Everything that follows the open chapter reads that
+radio with `:has()` on the root, in `src/showcase.css`: the accent, the
+backdrop, the download popup's banner, and the two cards beside the window,
+the open chapter's pack (version, mods, loader) on the left and its state
+(released or in development) on the right, both from `data/launcher.json`.
+Frangfurd is open when the page loads.
 
-### Clicking a chapter
+### The backdrop
 
-`src/showcase.js` turns the rows into a switch. Once it runs it sets
-`data-showcase="live"` on the root, which stops the CSS cycle, and runs the
-same cycle itself: every step (dwell plus slow, read from the tokens) the next
-chapter slides in. A click on a row shows that chapter with the same slide,
-highlight glide and colour change, in the direction the app uses (down the
-list from below, up the list from above), and restarts the clock, so the
-chosen chapter stays a full dwell before the cycle moves on. The script only
-sets attributes: which chapter is open (`data-showcase-open`, `aria-current`,
-`data-open`) and which card enters or leaves which way (`data-motion`). The
-motion itself is the `[data-showcase="live"]` rules in `src/showcase.css`, on
-the same tokens. Without the script the rows are inert and the CSS cycle runs
-as before.
+Behind the window, from its top edge down and as wide as the page, is the
+open chapter's picture cut into a grid of 24 by 12 squares, under a second
+grid of dark squares of the same size. `mosaic.js` writes both grids into
+`index.html` when the site is built (`<!--mosaic:art-->` and
+`<!--mosaic:pixels-->`), as empty spans with two data attributes: a delay
+bucket (`data-d`) and the chapters each dark square belongs to (`data-m`).
+The pattern is seeded, so every build writes the same page, and it is dark
+along the top, open in the middle and ragged towards the bottom and the sides.
+On a switch each square changes picture and darkness at its own delay, so the
+new chapter replaces the old one square by square over the slow duration.
 
-Narrower than the app's minimum window (1024px) the panels and the window's
-disclaimer are left out and the window takes the height of its content;
-narrower than 768px the sidebar and the hero's tools go too, and the card
-alone is shown.
+Each square paints only its own slice of the picture, sized as
+`object-fit: cover` over the whole backdrop through container units, so the
+slices join and nothing larger than a square is painted. The picture is
+blurred and tinted toward the accent (`effect.showcase.blur` and `.tint`), as
+the app does behind a nav tile, but lightly. The pictures' aspect ratios are in
+`src/showcase.css` beside their URLs. Reduced motion swaps every square at
+once.
 
-A change to one of the components the window copies, or to the manifest's
-chapter facts, is a change to this page in the same pull request.
+Narrower than 1024px the two cards are left out; narrower than 768px the
+panels stack.
+
+A change to the header bar the window copies, or to the manifest's chapter
+facts, is a change to this page in the same pull request.
 
 ## The links
 
@@ -116,29 +117,37 @@ pnpm build` or `SITE_RELEASE=null pnpm build`.
 
 ## The download popup
 
-With a release set, Download is a button that opens a native popover
-(`popovertarget`), no script needed: a heading, a Windows or macOS switch, the
-one download for the chosen system, the Prism instance zips folded into a
-dropdown that slides open (a checkbox and a grid row easing from `0fr` to
-`1fr`, so the popup grows with it and no script is needed), a one-line note that the build is not code-signed yet with
-a link to the release notes, and a close button. The switch is a fieldset of two radios and CSS `:has()`, so it works
-without script. Windows is checked by default.
+With a release set, each Download button opens a native popover
+(`popovertarget`), no script needed: a banner of the open chapter's picture
+through a fixed pattern of dark squares (`<!--mosaic:banner-->`) with the
+version and a close button, a heading, a Windows or macOS switch, the one
+download for the chosen system, a link to the release notes for how to open
+it, and the Prism instance zips folded into a dropdown that slides open (a
+checkbox and a grid row easing from `0fr` to `1fr`, so the popup grows with it
+and no script is needed). The switch is a fieldset of two radios and CSS
+`:has()`, so it works without script. Windows is checked by default.
 
-`src/detect.js` is bundled with `src/showcase.js` into the page's one script
+There are two Download buttons and two links under them, one per system, and
+`data-os` on the root shows one of each: the button for the visitor's system,
+the link for the other. Without the script Windows is shown.
+
+`src/detect.js` is bundled with `src/popup.js` into the page's one script
 file, emitted by Vite under `assets/`. The build turns its tag into a classic script placed after the
 stylesheet (`stylesheetFirst` in `vite.config.js`), which stops the parser
 until the stylesheet has loaded. Without that, the body was parsed while the
 stylesheet was still on its way, and Safari and Firefox could paint it
 unstyled for a frame on every load. The script waits for `DOMContentLoaded`
 before it looks for the radio, and the build refuses a script that imports,
-exports or reads `import.meta`, since a classic script cannot. It checks the radio for the visitor's system
+exports or reads `import.meta`, since a classic script cannot. It reads the visitor's system
 (`navigator.userAgentData?.platform`, then `navigator.platform`, then the user
-agent) and does nothing else: no network, no storage. iPhone, iPad, Android and
-Linux are neither, and keep Windows checked. With `release` set to `null`, the
+agent), sets `data-os` on the root and checks that radio, and checks the radio
+a button names (`data-os-pick`) when it is pressed. It does nothing else: no
+network, no storage. iPhone, iPad, Android and Linux are neither, and keep
+Windows. With `release` set to `null`, the
 build leaves the popup out of the page.
 
-Its heading is in the display face, like the wiki's; the tag sits above it,
-filled in at build time. It opens with the app's reveal (a short rise out of
+Its heading is in the pixel face; the tag sits in the banner, filled in at
+build time. It opens with the app's reveal (a short rise out of
 a slight blur) while the page dims and softens behind it, and closes the same
 way in reverse over the slow duration on the glide curve, so the fade is seen.
 The other system's panel fades in when the switch moves: `src/popup.css`, on
@@ -159,7 +168,7 @@ more, so an inline script would be blocked.
 
 ## The changelog
 
-"Changelog", above the footer, opens a popup with each release's changes,
+"Changelog", in the footer, opens a popup with each release's changes,
 newest first. `changelog.js` makes it from the repository's releases feed,
 the same `releases.atom` the build reads to pick the newest release: for each
 release, what follows its notes' "What's changed" heading, sorted into
@@ -198,7 +207,7 @@ together.
 pnpm install
 pnpm build      # dist/
 pnpm preview    # build, then serve dist/ locally
-pnpm test       # the changelog parser, against test/fixtures/
+pnpm test       # the changelog parser, against test/fixtures/, and mosaic.js
 ```
 
 There is no `vite` dev server script on purpose: the page's fonts and images

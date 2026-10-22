@@ -271,7 +271,7 @@
     "effect": {
       "type": "object",
       "description": "Values a utility cannot name on its own: the hover lift on the filled button, the focus outline, the stops of the scrim over artwork, and the grid shown where a chapter has no artwork yet.",
-      "required": ["hoverBrightness", "focusRing", "scrim", "accent", "artPending", "motionBlur", "revealBlur", "glow", "tileBlur", "tileTint", "panorama", "cover"],
+      "required": ["hoverBrightness", "focusRing", "scrim", "accent", "artPending", "motionBlur", "revealBlur", "glow", "tileBlur", "tileTint", "panorama", "cover", "showcase"],
       "additionalProperties": false,
       "properties": {
         "hoverBrightness": { "type": "number", "exclusiveMinimum": 1, "maximum": 2 },
@@ -344,6 +344,18 @@
             "art": { "type": "number", "minimum": 0, "maximum": 100 },
             "spot": { "type": "number", "minimum": 0, "maximum": 100 },
             "blur": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "showcase": {
+          "type": "object",
+          "description": "The download page's chapter backdrop and strip (site/src/showcase.css): blur in px on the backdrop picture, tint as the percent of the open chapter's accent over it, dim as the opacity in percent of a chapter panel that is not open.",
+          "required": ["unit", "blur", "tint", "dim"],
+          "additionalProperties": false,
+          "properties": {
+            "unit": { "const": "%" },
+            "blur": { "type": "number", "minimum": 0 },
+            "tint": { "type": "number", "minimum": 0, "maximum": 100 },
+            "dim": { "type": "number", "minimum": 0, "maximum": 100 }
           }
         },
         "tileTint": {

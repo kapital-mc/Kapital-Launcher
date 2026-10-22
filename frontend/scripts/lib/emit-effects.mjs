@@ -39,6 +39,7 @@ export function emitEffects(src, push) {
     tileTint,
     panorama,
     cover,
+    showcase,
   } = src.effect
   push(`/* Effects: values a utility cannot name on its own. Read by the shared`)
   push(`   styles/base.css and by brightness-(--effect-hover-brightness). */`)
@@ -67,6 +68,9 @@ export function emitEffects(src, push) {
   push(`  --cover-art: ${cover.art}${cover.unit};`)
   push(`  --cover-spot: ${cover.spot}${cover.unit};`)
   push(`  --cover-blur: ${cover.blur}px;`)
+  push(`  --effect-showcase-blur: ${showcase.blur}px;`)
+  push(`  --effect-showcase-tint: ${showcase.tint}${showcase.unit};`)
+  push(`  --effect-showcase-dim: ${showcase.dim}${showcase.unit};`)
   emitRevealValues(src, push)
   push(`}`)
 }
