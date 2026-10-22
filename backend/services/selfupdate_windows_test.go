@@ -8,6 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
+
+	"golang.org/x/sys/windows"
 )
 
 // Windows will not overwrite or delete a running exe, but renames it: the
@@ -47,5 +50,38 @@ func TestUpdateSwapsARunningExe(t *testing.T) {
 	f.u.CleanUp(context.Background())
 	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(f.target), stagingPrefix+"*")); len(left) != 0 {
 		t.Fatalf("leftovers after CleanUp: %v", left)
+	}
+}
+
+// A virus scanner opens a new exe without sharing delete, which blocks a
+// rename until it closes the file. Apply waits that out.
+func TestUpdateWaitsForAFileHeldOpen(t *testing.T) {
+	f := newUpdaterFixture(t)
+	if _, err := f.download(t); err != nil {
+		t.Fatal(err)
+	}
+	name, err := windows.UTF16PtrFromString(f.target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := windows.CreateFile(name, windows.GENERIC_READ, windows.FILE_SHARE_READ, nil, windows.OPEN_EXISTING, 0, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(f.target, f.target+".moved"); !fileBusy(err) {
+		t.Fatalf("rename of a held file: %v, want a sharing violation", err)
+	}
+	released := time.AfterFunc(500*time.Millisecond, func() { _ = windows.CloseHandle(h) }) //nolint:errcheck // a read handle
+	t.Cleanup(func() {
+		if released.Stop() {
+			_ = windows.CloseHandle(h) //nolint:errcheck // a read handle
+		}
+	})
+
+	if _, err := f.u.Apply(); err != nil {
+		t.Fatal(err)
+	}
+	if got := readFile(t, f.target); got != "new build" {
+		t.Fatalf("after Apply the launcher holds %q", got)
 	}
 }
