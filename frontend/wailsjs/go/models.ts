@@ -489,6 +489,7 @@ export namespace models {
 	    bytes: number;
 	    files: number;
 	    lastModified: string;
+	    icon?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new StorageItem(source);
@@ -502,6 +503,7 @@ export namespace models {
 	        this.bytes = source["bytes"];
 	        this.files = source["files"];
 	        this.lastModified = source["lastModified"];
+	        this.icon = source["icon"];
 	    }
 	}
 	export class ChapterStorage {

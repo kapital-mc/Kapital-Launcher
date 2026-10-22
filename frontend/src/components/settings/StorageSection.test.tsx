@@ -84,7 +84,11 @@ describe('StorageSection', () => {
     expect(App.ClearChapterStorage).not.toHaveBeenCalled()
     // Only the screenshots' Delete is left; the terrain's is Confirm now.
     expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Confirm' })))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+    // Terrain asks once more, as screenshots do.
+    const dialog = await screen.findByRole('dialog', { name: 'Are you sure?' })
+    expect(App.ClearChapterStorage).not.toHaveBeenCalled()
+    await act(async () => fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' })))
     expect(App.ClearChapterStorage).toHaveBeenCalledWith(
       'frangfurd',
       'terrain',
@@ -143,7 +147,7 @@ describe('StorageSection', () => {
     )
   })
 
-  it('deletes screenshots at once when the player stopped the popup', async () => {
+  it('deletes at once when the player stopped the popup', async () => {
     useSettingsStore.setState({ settings: { ...DEFAULT_SETTINGS, skipDeleteConfirm: true } })
     render(<StorageSection chapter={frangfurd} />)
     await screen.findByText('Screenshots')
@@ -155,6 +159,7 @@ describe('StorageSection', () => {
 
   it('shows Go’s refusal', async () => {
     vi.mocked(App.ClearChapterStorage).mockRejectedValue('Frangfurd is starting or running')
+    useSettingsStore.setState({ settings: { ...DEFAULT_SETTINGS, skipDeleteConfirm: true } })
     render(<StorageSection chapter={frangfurd} />)
     await unfold('Distant Horizons')
     fireEvent.click((await screen.findAllByRole('button', { name: 'Delete' }))[0]!)
@@ -205,9 +210,12 @@ describe('StorageSection', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('that folder is not there yet')
   })
 
-  it('folds the groups at first, and lists each save with its folder and no delete', async () => {
-    vi.mocked(App.GetChapterStorage).mockResolvedValue(view([terrain, world, shots]) as never)
-    render(<StorageSection chapter={frangfurd} />)
+  it('folds the groups at first, and lists each save with its icon, folder and delete', async () => {
+    const icon = 'data:image/png;base64,iVBORw0KGgo='
+    vi.mocked(App.GetChapterStorage).mockResolvedValue(
+      view([terrain, { ...world, icon }, shots]) as never,
+    )
+    const { container } = render(<StorageSection chapter={frangfurd} />)
     const saves = await screen.findByRole('button', { name: /^Saves/ })
     expect(saves).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryByText('frangfurd')).toBeNull()
@@ -215,10 +223,25 @@ describe('StorageSection', () => {
     fireEvent.click(saves)
     expect(saves).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByText('Convert')).toBeInTheDocument()
-    // Only the screenshots' Delete: the terrain's group is still folded, and a save has none.
-    expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
+    expect(container.querySelector('img')).toHaveAttribute('src', icon)
+    // The save's and the screenshots' Delete: the terrain's group is still folded.
+    expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(2)
     fireEvent.click(screen.getByRole('button', { name: 'Open the Convert folder' }))
     expect(App.OpenStorageFolder).toHaveBeenCalledWith('frangfurd', 'saves', 'Convert')
+  })
+
+  it('always asks before deleting a world, without "Don\'t ask me again"', async () => {
+    useSettingsStore.setState({ settings: { ...DEFAULT_SETTINGS, skipDeleteConfirm: true } })
+    vi.mocked(App.GetChapterStorage).mockResolvedValue(view([world, shots]) as never)
+    render(<StorageSection chapter={frangfurd} />)
+    await unfold('Saves')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0]!)
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Are you sure?' })
+    expect(within(dialog).queryByRole('checkbox')).toBeNull()
+    expect(App.ClearChapterStorage).not.toHaveBeenCalled()
+    await act(async () => fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' })))
+    expect(App.ClearChapterStorage).toHaveBeenCalledWith('frangfurd', 'saves', 'Convert')
   })
 
   it('shows a read refusal, and nothing without a bridge', async () => {

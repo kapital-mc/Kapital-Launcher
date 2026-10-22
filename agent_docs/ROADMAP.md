@@ -145,6 +145,9 @@ What is left:
       at first), each with its folder, and a delete for Distant Horizons
       terrain per server, an unfinished terrain download, the world map,
       screenshots and logs; no size limit, since Distant Horizons has none (ADR-2 twentieth amendment, 2026-10-21)
+- [x] Storage deletes ask once more in a popup, with an "Ask before deleting"
+      switch in the settings; worlds deletable and shown with their icons
+      (ADR-2 twenty-first amendment, 2026-10-22)
 - [x] Release workflow with attested artefacts for Windows and macOS; code
       signing decision (ADR-6): `.github/workflows/build.yml` (#107) builds both
       and cuts an attested release, only from the Actions tab since issue 177;

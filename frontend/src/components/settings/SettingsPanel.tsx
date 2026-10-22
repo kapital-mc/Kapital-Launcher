@@ -228,6 +228,12 @@ function AppearanceSection({ settings, errors, save }: SectionProps) {
           error={errors.mapIn}
           onChange={(mapIn) => void save('mapIn', { mapIn })}
         />
+        <Toggle
+          label="Ask before deleting"
+          checked={settings.skipDeleteConfirm !== true}
+          error={errors.skipDeleteConfirm}
+          onChange={(ask) => void save('skipDeleteConfirm', { skipDeleteConfirm: !ask })}
+        />
         {/* Go says where the splash can run at all (#43); elsewhere there is
             nothing to choose. The effective value is derived, so the save
             carries it along for the switch to follow at once. */}

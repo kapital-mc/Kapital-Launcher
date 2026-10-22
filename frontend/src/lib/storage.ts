@@ -7,14 +7,26 @@ const DELETABLE: readonly string[] = [
   'terrain',
   'terrainDownload',
   'worldMap',
+  'saves',
   'screenshots',
   'logs',
 ]
 
 export const canDelete = (item: StorageItem): boolean => DELETABLE.includes(item.kind)
 
-/** Whether a confirmed delete asks once more in a popup: the player's own pictures, gone for good. */
-export const asksTwice = (item: StorageItem): boolean => item.kind === 'screenshots'
+/** The kinds whose confirmed delete asks once more in a popup: worlds, terrain, maps and pictures. */
+const ASKS_TWICE: readonly string[] = [
+  'terrain',
+  'terrainDownload',
+  'worldMap',
+  'saves',
+  'screenshots',
+]
+
+export const asksTwice = (item: StorageItem): boolean => ASKS_TWICE.includes(item.kind)
+
+/** A world asks every time: "Don't ask me again" does not cover it. */
+export const alwaysAsks = (item: StorageItem): boolean => item.kind === 'saves'
 
 /** A row's key: its kind, and the server folder for terrain or the world folder for a save. */
 export const storageKey = (item: StorageItem): string => `${item.kind}/${item.name}`

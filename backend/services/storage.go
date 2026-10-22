@@ -1,9 +1,11 @@
 package services
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io/fs"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -16,10 +18,10 @@ import (
 
 // The storage section of a chapter's settings: what the instance holds on disk
 // by kind, and the few kinds the player may delete. Measuring reads directory
-// entries only: no file is opened, links are not followed, and the walk stops
-// at maxSizeWalkEntries. Every kind has fixed folders (storageTargets), built
+// entries, and of the files only each world's icon.png: links are not followed,
+// and the walk stops at maxSizeWalkEntries. Every kind has fixed folders (storageTargets), built
 // here from the kind and, for terrain and saves, a plain folder name. Deleting removes
-// those of the five deletable kinds through an os.Root on the instance folder,
+// those of the six deletable kinds through an os.Root on the instance folder,
 // and only a real directory: a link or a file in its place is refused untouched.
 // Opening shows the first of them that is a real directory.
 
@@ -32,6 +34,9 @@ const (
 	crashDir       = "crash-reports"
 	modsDir        = "mods"
 	savesDir       = "saves"
+	worldIcon      = "icon.png"
+	// maxWorldIcon bounds the icon read. The game writes a 64x64 PNG, a few KiB.
+	maxWorldIcon = 64 << 10
 )
 
 // storageOrder is the order the kinds after terrain are listed in. Saves, one
@@ -99,6 +104,7 @@ func MeasureStorage(instanceDir string) (models.ChapterStorage, error) {
 		return models.ChapterStorage{}, err
 	}
 	report.Items = sortStorage(sums)
+	addWorldIcons(instanceDir, game, report.Items)
 	if free, err := diskFree(instanceDir); err == nil {
 		report.FreeBytes = free
 	}
@@ -172,6 +178,37 @@ func byKind(sums map[string]*models.StorageItem, kind string) []models.StorageIt
 	return items
 }
 
+// addWorldIcons sets each save's Icon to its icon.png as a data URL, read
+// through an os.Root on the instance folder. A world without one, or with a
+// link, an oversized file or anything but a PNG in its place, keeps "".
+func addWorldIcons(instanceDir, game string, items []models.StorageItem) {
+	if game == "" {
+		return
+	}
+	root, err := os.OpenRoot(instanceDir)
+	if err != nil {
+		return
+	}
+	defer root.Close() //nolint:errcheck // a read-only handle
+	for i := range items {
+		if items[i].Kind == models.StorageSaves {
+			items[i].Icon = readWorldIcon(root, filepath.Join(game, savesDir, items[i].Name, worldIcon))
+		}
+	}
+}
+
+func readWorldIcon(root *os.Root, path string) string {
+	info, err := root.Lstat(path)
+	if err != nil || !info.Mode().IsRegular() || info.Size() > maxWorldIcon {
+		return ""
+	}
+	body, err := root.ReadFile(path)
+	if err != nil || len(body) > maxWorldIcon || http.DetectContentType(body) != "image/png" {
+		return ""
+	}
+	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(body)
+}
+
 // terrainLabel is a server folder's name as Distant Horizons wrote it: the
 // server's name, form-encoded ("Frangfurd+%28Germany%29"). A name that does not
 // decode is shown as it is.
@@ -189,13 +226,14 @@ func validFolderName(name string) bool {
 		!strings.ContainsAny(name, "/\\:\x00")
 }
 
-// deletable are the kinds ClearStorage removes. The saves, the minimap
-// (waypoints), the mods (put back by the next sync) and everything else
-// (options, config, Essential's folder) are only measured and opened.
+// deletable are the kinds ClearStorage removes. The minimap (waypoints), the
+// mods (put back by the next sync) and everything else (options, config,
+// Essential's folder) are only measured and opened.
 var deletable = map[string]bool{
 	models.StorageTerrain:         true,
 	models.StorageTerrainDownload: true,
 	models.StorageWorldMap:        true,
+	models.StorageSaves:           true,
 	models.StorageScreenshots:     true,
 	models.StorageLogs:            true,
 }
@@ -250,7 +288,8 @@ func gameFolderName(instanceDir string) string {
 
 // ClearStorage deletes one kind of an instance's storage: one server's terrain
 // (name is its folder), the unfinished terrain download, the Xaero world map,
-// the screenshots, or the logs and crash reports. The caller has made sure the
+// one world (name is its folder under saves), the screenshots, or the logs and
+// crash reports. The caller has made sure the
 // game is closed and no terrain download runs. A folder that is not there is
 // nothing to delete.
 func ClearStorage(instanceDir, kind, name string) error {

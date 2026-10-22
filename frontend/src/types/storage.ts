@@ -2,7 +2,7 @@
 
 /**
  * A kind of storage in an instance. Terrain, the unfinished terrain download, the world map, the
- * screenshots and the logs can be deleted; the saves, the minimap, mods and the rest are only
+ * saves, the screenshots and the logs can be deleted; the minimap, mods and the rest are only
  * shown. Every kind's folder can be opened.
  */
 export type StorageKind =
@@ -33,6 +33,8 @@ export interface StorageItem {
   files: number
   /** The newest file's time, RFC 3339, or ''. */
   lastModified: string
+  /** A save's icon.png as a data URL; absent for a world without one and every other kind. */
+  icon?: string
 }
 
 /** What a chapter's instance holds on disk, by kind, from GetChapterStorage. */

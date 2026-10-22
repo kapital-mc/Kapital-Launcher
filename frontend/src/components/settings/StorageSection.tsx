@@ -5,6 +5,7 @@ import { errMsg } from '../../lib/ipc'
 import { formatBytes } from '../../lib/bytes'
 import { ChevronDown, FolderOpen, HardDrive, Trash2 } from '../../lib/icons'
 import {
+  alwaysAsks,
   asksTwice,
   canDelete,
   GROUP_COLOUR,
@@ -96,9 +97,10 @@ export function StorageSection({ chapter }: Props) {
       setError(errMsg(e))
     }
   }
-  // Screenshots ask once more in a popup, unless the player ticked "Don't ask me again" there.
+  // Worlds, terrain, maps and screenshots ask once more in a popup. "Don't ask me again" there
+  // stops it for all but the worlds.
   const confirm = (item: StorageItem, title: string) => {
-    if (!asksTwice(item) || skipAsk) {
+    if (!asksTwice(item) || (skipAsk && !alwaysAsks(item))) {
       void remove(item)
       return
     }
@@ -184,6 +186,7 @@ export function StorageSection({ chapter }: Props) {
           facts={`${asking.title} · ${storageDetail(asking.item)}`}
           onConfirm={(dontAsk) => confirmAsked(asking.item, dontAsk)}
           onCancel={() => setAsking(null)}
+          skippable={!alwaysAsks(asking.item)}
         />
       )}
     </SettingsSection>
@@ -296,6 +299,9 @@ function Row({
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
       <div className="flex min-w-0 items-center gap-2.5">
         {colour && <Swatch colour={colour} />}
+        {item.icon && (
+          <img src={item.icon} alt="" className="pixelated size-8 shrink-0 rounded-sm" />
+        )}
         <div className="flex min-w-0 flex-col gap-1">
           <span className="text-fg text-sm font-medium break-words">{title}</span>
           <span className="text-fg-muted text-xs tabular-nums">{storageDetail(item)}</span>

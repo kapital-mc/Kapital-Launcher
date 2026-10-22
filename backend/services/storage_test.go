@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/base64"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -130,7 +131,7 @@ func TestMeasureStorageDoesNotFollowLinks(t *testing.T) {
 }
 
 func TestClearStorageDeletesOnlyItsOwnFolder(t *testing.T) {
-	all := []string{stOverworld, stNether, stOldServer, stMap, stWaypoints, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg}
+	all := []string{stOverworld, stNether, stOldServer, stMap, stWaypoints, stWorld, stWorldDat, stTestWorld, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg}
 	cases := []struct {
 		kind, name string
 		gone       []string
@@ -139,6 +140,7 @@ func TestClearStorageDeletesOnlyItsOwnFolder(t *testing.T) {
 		{models.StorageTerrain, "1790374988_frangfurd", []string{stOverworld, stNether}},
 		{models.StorageTerrainDownload, "", []string{stStaged}},
 		{models.StorageWorldMap, "", []string{stMap}},
+		{models.StorageSaves, "Convert", []string{stWorld, stWorldDat}},
 		{models.StorageScreenshots, "", []string{stShot}},
 		{models.StorageLogs, "", []string{stLatestLog, stCrash}},
 	}
@@ -172,8 +174,9 @@ func TestClearStorageRefusesAnythingElse(t *testing.T) {
 		{models.StorageMinimap, ""},
 		{models.StorageMods, ""},
 		{models.StorageOther, ""},
-		{models.StorageSaves, "Convert"},
 		{models.StorageSaves, ""},
+		{models.StorageSaves, ".."},
+		{models.StorageSaves, "../mods"},
 		{models.StorageTerrain, ""},
 		{models.StorageTerrain, ".."},
 		{models.StorageTerrain, "../mods"},
@@ -187,6 +190,60 @@ func TestClearStorageRefusesAnythingElse(t *testing.T) {
 	for _, f := range []string{stOverworld, stWorld, stShot, stModJar, stOptions, stCfg} {
 		if _, err := os.Stat(filepath.Join(dir, filepath.FromSlash(f))); err != nil {
 			t.Errorf("%s: %v", f, err)
+		}
+	}
+}
+
+func TestMeasureStorageReadsEachWorldsIcon(t *testing.T) {
+	dir := storageInstance(t, stCfg, stWorldDat, stTestWorld, "minecraft/saves/Text/level.dat")
+	png := []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR")
+	write := func(world string, body []byte) {
+		if err := os.WriteFile(filepath.Join(dir, "minecraft", "saves", world, "icon.png"), body, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("Convert", png)
+	write("Text", []byte("not a picture"))
+	// Test has a PNG over the bound.
+	write("Test", append(png, make([]byte, maxWorldIcon)...))
+	got, err := MeasureStorage(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	icons := map[string]string{}
+	for _, it := range got.Items {
+		if it.Kind == models.StorageSaves {
+			icons[it.Name] = it.Icon
+		} else if it.Icon != "" {
+			t.Errorf("%s has an icon", it.Kind)
+		}
+	}
+	want := map[string]string{
+		"Convert": "data:image/png;base64," + base64.StdEncoding.EncodeToString(png),
+		"Test":    "",
+		"Text":    "",
+	}
+	if !reflect.DeepEqual(icons, want) {
+		t.Fatalf("icons %v, want %v", icons, want)
+	}
+}
+
+func TestMeasureStorageDoesNotReadALinkedIcon(t *testing.T) {
+	outside := t.TempDir()
+	if err := os.WriteFile(filepath.Join(outside, "icon.png"), []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	dir := storageInstance(t, stCfg, stWorldDat)
+	if err := os.Symlink(filepath.Join(outside, "icon.png"), filepath.Join(dir, "minecraft", "saves", "Convert", "icon.png")); err != nil {
+		t.Skip("no symlinks here:", err)
+	}
+	got, err := MeasureStorage(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, it := range got.Items {
+		if it.Icon != "" {
+			t.Fatalf("read through a link: %+v", it)
 		}
 	}
 }

@@ -228,6 +228,24 @@ describe('SettingsPanel', () => {
     expect(onClose).toHaveBeenCalledTimes(2)
   })
 
+  it('turns the popup back on after "Don\'t ask me again"', async () => {
+    useSettingsStore.setState({
+      settings: { ...DEFAULT_SETTINGS, skipDeleteConfirm: true },
+      loaded: true,
+      error: null,
+    })
+    render(<SettingsPanel onClose={() => undefined} onShowChapter={() => undefined} />)
+    const box = screen.getByRole('switch', { name: 'Ask before deleting' })
+    expect(box).not.toBeChecked()
+    fireEvent.click(box)
+    await waitFor(() =>
+      expect(App.SaveSettings).toHaveBeenLastCalledWith(
+        expect.objectContaining({ skipDeleteConfirm: false }),
+      ),
+    )
+    expect(box).toBeChecked()
+  })
+
   describe('loading splash toggle', () => {
     it('is hidden where Go says the splash is not available', () => {
       render(<SettingsPanel onClose={() => undefined} onShowChapter={() => undefined} />)

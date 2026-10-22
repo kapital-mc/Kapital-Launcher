@@ -18,8 +18,9 @@ import (
 
 // GetChapterStorage measures a chapter's instance folder by kind: each
 // server's Distant Horizons terrain, the unfinished terrain download, the world
-// map, screenshots, logs, mods and the rest, with the disk's free space. It
-// reads directory entries only and writes nothing.
+// map, the saves with their icons, screenshots, logs, mods and the rest, with
+// the disk's free space. It reads directory entries and the worlds' icons, and
+// writes nothing.
 func (a *App) GetChapterStorage(chapterID string) (models.ChapterStorage, error) {
 	chapter, cfg, err := a.chapterInstance(chapterID)
 	if err != nil {
@@ -42,8 +43,8 @@ func (a *App) chapterStorage(chapter models.Chapter, instanceDir string) (models
 
 // ClearChapterStorage deletes one kind of a chapter's storage and returns the
 // instance measured again. kind is terrain (name is a server folder under
-// Distant_Horizons_server_data), terrainDownload, worldMap, screenshots or
-// logs; anything else is refused. It is refused under a developer preview,
+// Distant_Horizons_server_data), terrainDownload, worldMap, saves (name is a
+// world folder), screenshots or logs; anything else is refused. It is refused under a developer preview,
 // while the game runs (Distant Horizons and the game hold these files open)
 // and, for terrain, while a terrain download of the chapter runs.
 func (a *App) ClearChapterStorage(chapterID, kind, name string) (models.ChapterStorage, error) {

@@ -731,11 +731,29 @@ measured by kind, and a delete the player asks for.
   listing gave held to a plain folder name as a terrain folder is. The rest
   opens the game folder.
 - **When.** A delete only after the player confirms the row, in place of its
-  Delete button. Screenshots then ask once more in a popup ("Are you sure?"),
-  which its "Don't ask me again" turns off (`skipDeleteConfirm` in the
-  launcher's settings). Refused under a developer preview, while the game is active or
+  Delete button. Refused under a developer preview, while the game is active or
   the log says it may be running (Distant Horizons and Xaero hold their files
   open), and for terrain while a terrain download of the chapter runs.
 - **What is never deleted.** Saves, options, `config`, the mods (the next sync
   puts them back), the Xaero minimap (waypoints), and Essential's folder, which
   may hold account data (S1.1).
+
+## Twenty-first amendment, 2026-10-22
+
+The author asked for a second question before the deletes that lose the most,
+and for worlds to be deletable after all.
+
+- **Saves can be deleted.** One world at a time, its folder under `saves`, the
+  name from the listing held to a plain folder name as for opening. This
+  reverses "never deleted" above for saves only; options, `config`, the mods,
+  the minimap and Essential's folder still have no delete.
+- **A popup asks once more.** After the row's Confirm, a world, terrain, the
+  unfinished terrain download, the world map and the screenshots open "Are you
+  sure?" with Confirm and Cancel. Its "Don't ask me again" sets
+  `skipDeleteConfirm` in the launcher's settings, which the settings screen's
+  "Ask before deleting" switch turns back. A world always asks and offers no
+  such box. The logs do not ask.
+- **Each world shows its icon.** The measure reads `saves/<world>/icon.png`
+  through the same `os.Root`, only a regular file of at most 64 KiB that sniffs
+  as a PNG, and hands it to the page as a data URL (`img-src` already allows
+  `data:`). Nothing else is opened.
