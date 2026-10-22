@@ -42,23 +42,33 @@ That is the same list CI runs.
 
 ### Pull requests
 
-Merged pull request titles become the release notes, so a title is copy, not
-a note to a reviewer.
+Merged pull requests become the release notes: each line of a pull request's
+Changelog section, or the title of one without, so both are copy, not a note
+to a reviewer.
 
 - **Title:** imperative mood, sentence case, no trailing period, one line.
   Say what changed, not which files moved.
 - **No em dashes** anywhere in the title or body. Use a comma, a colon, or
   two sentences. CI checks this (`pr-copy`).
-- **Label it twice:** one `type:` (`feature`, `bug`, `chore`, `docs`) and one
-  `area:`. CI's `pr-labelled` job fails without both.
-- **One pull request, one concern.** The notes list a merged pull request
-  once, under one heading, by its title.
+- **List the changes** in the body's `## Changelog` section, one
+  `- type: text` line each (`feature`, `fix`, `chore`, `docs` or `skip`). Each
+  line is release-notes copy with the same rules as the title, and each lands
+  on its own line under the section its type names. Which type is below.
+- **Or label it** with one `type:` (`feature`, `bug`, `chore`, `docs`) when it
+  is one change and has no section: the label files it, by its title.
+- **Label it with an `area:`** either way. CI's `pr-labelled` status needs the
+  area and one of the two above, and warns when it falls back to the title.
+- **One pull request per piece of work.** A session's small fixes and tweaks
+  are one pull request with a Changelog line each. Split only when a part is
+  risky on its own, has to be revertable on its own, or ships at a different
+  time.
 - **Body:** why the change exists and how you verified it.
 
-### Which `type:` label
+### Which type
 
-The label is the only input to the release notes. Ask these in order and stop
-at the first yes:
+The type, on a Changelog line or as the `type:` label, is the only input to
+where a change lands in the release notes. Ask these in order and stop at the
+first yes:
 
 1. **Can a user of the launcher tell the difference?** If nothing they can
    see, run or click changed, it is `type:chore`, or `type:docs` when it is
@@ -73,8 +83,8 @@ The size of the diff is not the test, and the title's verb is not the test.
 Imagine the change reverted: something goes back to being broken is a bug,
 they lose something they never had is a feature, they cannot tell is a chore.
 
-`changelog:skip` leaves a pull request out of the notes entirely. It does not
-replace the `type:` label.
+`changelog:skip` leaves a pull request out of the notes entirely. It silences a
+Changelog section too, and does not replace one or a `type:` label.
 
 ### Commit messages
 
