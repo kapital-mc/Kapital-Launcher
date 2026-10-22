@@ -4,6 +4,10 @@
 #
 # The language matrix is rendered from this repo's `languages` answer in
 # .copier-answers.yml. GitHub Actions workflows are always scanned.
+#
+# Rendered only when the `public` answer is true: on a private repository code
+# scanning needs GitHub Advanced Security, so the analysis would run and its
+# upload be refused. Making the repo public is `copier update --data public=true`.
 name: CodeQL
 
 on:

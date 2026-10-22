@@ -3,6 +3,8 @@
 #
 # OpenSSF Scorecard: scores the repo's supply-chain hygiene (pinned actions,
 # token permissions, branch protection) and uploads the result to code scanning.
+# Rendered only for a public repository: the action supports a private one only
+# with GitHub Advanced Security (scorecard-action's README).
 name: Scorecard
 
 on:
