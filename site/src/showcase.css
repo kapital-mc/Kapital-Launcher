@@ -64,8 +64,9 @@
 /* The backdrop: the open chapter's picture cut into a grid of squares under a
    second grid of dark ones (mosaic.js writes both). A switch replaces the
    picture and the dark squares square by square, each at its own delay. The
-   picture is tinted toward the accent, lightly, and not blurred: a blur reads
-   across the squares' edges, which then show seams mid-swap. Each square paints its own slice of one picture,
+   picture is darkened toward the page ground and tinted toward the accent,
+   lightly, and not blurred: a blur reads across the squares' edges, which
+   then show seams mid-swap. Each square paints its own slice of one picture,
    sized as object-fit: cover over the whole backdrop through container units,
    so the slices join and nothing larger than a square is ever painted. The
    grid's 24 by 12 is mosaic.js's COLS and ROWS. */
@@ -79,6 +80,14 @@
   display: grid;
   grid-template-columns: repeat(24, minmax(0, 1fr));
   grid-template-rows: repeat(12, minmax(0, 1fr));
+}
+/* The shade is out of the grid's flow, over every square at once. */
+.showcase-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-sunken);
+  opacity: var(--effect-showcase-shade);
 }
 .showcase-art > span {
   --showcase-width: max(100cqw, 100cqh * var(--showcase-ratio));

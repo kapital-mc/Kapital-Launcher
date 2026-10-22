@@ -348,12 +348,13 @@
         },
         "showcase": {
           "type": "object",
-          "description": "The download page's chapter backdrop and strip (site/src/showcase.css): tint as the percent of the open chapter's accent over it, dim as the opacity in percent of a chapter panel that is not open.",
-          "required": ["unit", "tint", "dim"],
+          "description": "The download page's chapter backdrop and strip (site/src/showcase.css): tint as the percent of the open chapter's accent over it, shade as the opacity in percent of the page ground over the picture, dim as the opacity in percent of a chapter panel that is not open.",
+          "required": ["unit", "tint", "shade", "dim"],
           "additionalProperties": false,
           "properties": {
             "unit": { "const": "%" },
             "tint": { "type": "number", "minimum": 0, "maximum": 100 },
+            "shade": { "type": "number", "minimum": 0, "maximum": 100 },
             "dim": { "type": "number", "minimum": 0, "maximum": 100 }
           }
         },

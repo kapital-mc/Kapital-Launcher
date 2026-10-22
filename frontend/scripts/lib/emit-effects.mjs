@@ -69,6 +69,7 @@ export function emitEffects(src, push) {
   push(`  --cover-spot: ${cover.spot}${cover.unit};`)
   push(`  --cover-blur: ${cover.blur}px;`)
   push(`  --effect-showcase-tint: ${showcase.tint}${showcase.unit};`)
+  push(`  --effect-showcase-shade: ${showcase.shade}${showcase.unit};`)
   push(`  --effect-showcase-dim: ${showcase.dim}${showcase.unit};`)
   emitRevealValues(src, push)
   push(`}`)

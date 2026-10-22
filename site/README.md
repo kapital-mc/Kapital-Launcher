@@ -62,7 +62,8 @@ new chapter replaces the old one square by square over the slow duration.
 Each square paints only its own slice of the picture, sized as
 `object-fit: cover` over the whole backdrop through container units, so the
 slices join and nothing larger than a square is painted. The picture is
-tinted toward the accent (`effect.showcase.tint`), lightly. It is not blurred:
+darkened toward the page ground (`effect.showcase.shade`) and tinted toward
+the accent (`.tint`), lightly. It is not blurred:
 a blur reads across the squares' edges, which then show seams mid-swap. The pictures' aspect ratios are in
 `src/showcase.css` beside their URLs. Reduced motion swaps every square at
 once.
