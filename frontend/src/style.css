@@ -13,18 +13,25 @@
   #root {
     height: 100%;
   }
+  /* Nor a web page's cursors: the arrow everywhere, links and buttons
+     included, as in a native app (the author asked, 2026-10-19). The text
+     cursor shows only where text can be selected or typed. It is set on html
+     and inherited, never set below it: the frameless window's edges show
+     their resize cursor by an inline style Wails puts on html, which a cursor
+     on body, a link or a button would cover. */
+  html {
+    cursor: default;
+  }
   body {
     overflow: hidden;
     /* The window is not a web page: no text selection on chrome, no rubber
        banding. Content that should be selectable opts back in. */
     user-select: none;
-    /* Nor a web page's cursors: the arrow everywhere, links and buttons
-       included, as in a native app (the author asked, 2026-10-19). The text
-       cursor shows only where text can be selected or typed. */
-    cursor: default;
   }
-  a:any-link {
-    cursor: default;
+  a:any-link,
+  button,
+  select {
+    cursor: inherit;
   }
   .select-text,
   textarea,
