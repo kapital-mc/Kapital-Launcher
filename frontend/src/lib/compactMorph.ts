@@ -182,8 +182,9 @@ function planPictures(m: MorphMeasure, c: Curves): Step[] {
       t: [0, A],
       ease: c.travel,
     },
-    { key: 'scrim', kf: [{ opacity: 1 }, { opacity: 0 }], t: [0, 0.3], ease: 'linear' },
-    { key: 'shade', kf: [{ opacity: 0 }, { opacity: 1 }], t: [0.1, A], ease: 'linear' },
+    // One wash comes in before the other goes, so the picture is never lighter than at either end.
+    { key: 'shade', kf: [{ opacity: 0 }, { opacity: 1 }], t: [0, 0.4], ease: 'linear' },
+    { key: 'scrim', kf: [{ opacity: 1 }, { opacity: 0 }], t: [0.25, A], ease: 'linear' },
   ]
   // The other chapters come in from the side they sit on: their far edge starts at the window's edge.
   m.panels.forEach((r, i) => {

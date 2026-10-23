@@ -1,6 +1,7 @@
 import type { ReactNode, Ref } from 'react'
 import type { Chapter } from '../../types'
 import { CompactPanel } from './CompactPanel'
+import { usePanelLean } from '../../lib/usePanelLean'
 
 interface Props {
   chapters: readonly Chapter[]
@@ -40,6 +41,7 @@ export function CompactStage({
   children,
   ref,
 }: Props) {
+  const { leaning, enter, leave } = usePanelLean(selectedId)
   return (
     <div
       ref={ref}
@@ -51,6 +53,7 @@ export function CompactStage({
       <div
         inert={covered}
         aria-hidden={covered || undefined}
+        data-leaning={leaning !== null || undefined}
         className="compact-row flex size-full gap-(--layout-compact-gap) p-(--layout-compact-gap)"
       >
         {chapters.map((c) => (
@@ -58,6 +61,9 @@ export function CompactStage({
             key={c.id}
             chapter={c}
             active={c.id === selectedId}
+            leaning={c.id === leaning}
+            onPointerEnter={() => enter(c.id)}
+            onPointerLeave={() => leave(c.id)}
             onSelect={() => onSelect(c.id)}
             onOpenSettings={onOpenSettings}
             onOpenLogs={onOpenLogs}

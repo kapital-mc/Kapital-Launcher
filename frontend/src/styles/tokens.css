@@ -143,6 +143,7 @@
   --layout-compact-title: 400px;
   --layout-compact-title-idle: 160px;
   --layout-compact-title-short: 190px;
+  --layout-compact-rise: 12px;
 }
 
 /* Effects: values a utility cannot name on its own. Read by the shared

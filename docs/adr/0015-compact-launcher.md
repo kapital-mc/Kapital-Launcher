@@ -63,7 +63,9 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   over `duration.switch` (600 ms) on `ease-travel`. A pointer resting on
   another chapter's panel for `duration.lean` (700 ms) leans it toward the
   open one by `effect.panel.lean`, taking the room from the open panel alone;
-  a pointer passing over starts nothing. The other chapters' pictures are
+  a pointer passing over starts nothing. One state for the row
+  (`lib/usePanelLean`) moves both panels together, so moving from one panel to
+  the next never shifts the third. The other chapters' pictures are
   dimmed and blurred by `effect.panel.blur`.
 
 ## Consequences

@@ -97,6 +97,10 @@ describe('planMorph', () => {
     // The washes themselves only fade, inside it.
     expect(step('scrim').box).toBeUndefined()
     expect(step('shade').box).toBeUndefined()
+    // The panel's wash is in before the hero's starts to go: the picture never shows lighter.
+    expect(step('shade').t[1]).toBeGreaterThan(step('scrim').t[0])
+    expect(step('shade').t[0]).toBe(0)
+    expect(step('scrim').t[1]).toBe(TRAVEL_END)
   })
 
   it('takes the title to the panel foot with the picture, then lets it rise as Play fades in', () => {

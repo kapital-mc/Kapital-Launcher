@@ -5,6 +5,7 @@ import { chapterArt, chapterTitleArt } from '../../lib/art'
 import { heroArtOf } from '../../lib/heroArt'
 import { useLoadedImage } from '../../lib/useLoadedImage'
 import { useOpenMap } from '../../lib/useOpenMap'
+import { Drift } from '../ui/Drift'
 import { ChapterActions } from '../main/ChapterActions'
 import { HeroTools } from '../main/HeroTools'
 
@@ -12,6 +13,10 @@ interface Props {
   chapter: Chapter
   /** Whether this is the open chapter: the wide panel, with its tools and Play. */
   active: boolean
+  /** Whether it leans toward the open panel, the pointer having rested on it (lib/usePanelLean). */
+  leaning: boolean
+  onPointerEnter: () => void
+  onPointerLeave: () => void
   onSelect: () => void
   onOpenSettings: (chapterId: string) => void
   onOpenLogs: (chapterId: string) => void
@@ -27,6 +32,9 @@ interface Props {
 export function CompactPanel({
   chapter,
   active,
+  leaning,
+  onPointerEnter,
+  onPointerLeave,
   onSelect,
   onOpenSettings,
   onOpenLogs,
@@ -45,17 +53,23 @@ export function CompactPanel({
       aria-label={chapter.name}
       data-morph="panel"
       data-active={active || undefined}
+      data-lean={leaning || undefined}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       data-chapter={chapter.id}
       className="compact-panel bg-sunken relative min-w-0 overflow-hidden rounded-md"
     >
       {art ? (
-        <img
-          data-morph="panel-art"
-          src={art}
-          alt=""
-          draggable={false}
-          className="compact-art absolute inset-0 size-full object-cover object-[center_40%]"
-        />
+        // A new slide drifts in as it does in the hero (issue 142).
+        <Drift id={art} className="absolute inset-0" layer="absolute inset-0">
+          <img
+            data-morph="panel-art"
+            src={art}
+            alt=""
+            draggable={false}
+            className="compact-art size-full object-cover object-[center_40%]"
+          />
+        </Drift>
       ) : (
         <div data-morph="panel-art" aria-hidden className="art-pending absolute inset-0" />
       )}
@@ -102,9 +116,10 @@ export function CompactPanel({
             </span>
           )}
         </h2>
-        {/* Play's row: open under the open chapter's title, closed under the others. */}
+        {/* Play's row: open under the open chapter's title, closed under the others.
+            It is not clipped while it opens: Play fades in once there is room. */}
         <div inert={!active} className="compact-foot -mt-3.5">
-          <div className="min-h-0 overflow-hidden">
+          <div className="min-h-0">
             <div className="pt-3.5">
               <ChapterActions chapter={chapter} layout="panel" />
             </div>

@@ -847,16 +847,14 @@
 .compact-panel[data-active] {
   flex-grow: var(--panel-grow);
 }
-/* A pointer resting on another chapter's panel leans it toward the open one: it
-   takes its extra width from the open panel alone, so its far edge stays put.
-   Only a pointer that stays: one passing over starts nothing. */
-.compact-panel:not([data-active]):hover {
+/* A pointer resting on another chapter's panel leans it toward the open one
+   (lib/usePanelLean): it takes its extra width from the open panel alone, so
+   its far edge stays put. */
+.compact-panel[data-lean] {
   flex-grow: calc(1 + var(--panel-lean));
-  transition-delay: var(--duration-lean);
 }
-.compact-row:has(> .compact-panel:not([data-active]):hover) > .compact-panel[data-active] {
+.compact-row[data-leaning] > .compact-panel[data-active] {
   flex-grow: calc(var(--panel-grow) - var(--panel-lean));
-  transition-delay: var(--duration-lean);
 }
 .compact-art {
   opacity: var(--panel-dim);
@@ -886,16 +884,21 @@
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
+  transform: translateY(var(--layout-compact-rise));
   transition:
     grid-template-rows var(--duration-switch) var(--ease-travel),
-    opacity var(--duration-reveal) linear;
+    opacity var(--duration-fast) linear,
+    transform var(--duration-fast) linear;
 }
+/* The row opens first; Play fades and lifts in when it nearly has its room. */
 .compact-panel[data-active] .compact-foot {
   grid-template-rows: 1fr;
   opacity: 1;
+  transform: none;
   transition:
     grid-template-rows var(--duration-switch) var(--ease-travel),
-    opacity var(--duration-slow) linear var(--duration-reveal);
+    opacity var(--duration-slow) var(--ease-out) var(--duration-slow),
+    transform var(--duration-slow) var(--ease-out) var(--duration-slow);
 }
 .compact-tools {
   transition: opacity var(--duration-slow) linear var(--duration-reveal);
