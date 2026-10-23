@@ -148,6 +148,15 @@
             "propertyNames": { "pattern": "^[A-Za-z]{4}$" },
             "additionalProperties": { "type": "number" }
           }
+        },
+        "features": {
+          "type": "object",
+          "description": "font-feature-settings per family, as feature tag to value: 0 turns a feature off.",
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": { "pattern": "^[a-z0-9]{4}$" },
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          }
         }
       }
     },
