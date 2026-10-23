@@ -148,9 +148,13 @@ const inset = (r: Box, m: MorphMeasure, radius: string) =>
   `inset(${px(r.y)} ${px(m.W - r.x - r.w)} ${px(m.H - r.y - r.h)} ${px(r.x)} round ${radius})`
 const fromTo = (a: Box, b: Box, scale: boolean) =>
   `translate(${px(a.x - b.x)}, ${px(a.y - b.y)}) scale(${scale ? a.w / b.w : 1})`
-/** Laid out at `b`, drawn over `a`: each side scales on its own, for a wash that fills its frame. */
-const stretch = (a: Box, b: Box) =>
-  `translate(${px(a.x - b.x)}, ${px(a.y - b.y)}) scale(${a.w / b.w}, ${a.h / b.h})`
+/** A box as layout, not a transform: animated on the same thread as the clip-path. */
+const rect = (r: Box): Keyframe => ({
+  left: px(r.x),
+  top: px(r.y),
+  width: px(r.w),
+  height: px(r.h),
+})
 
 /** The picture, its frame, the scrims and the other chapters' panels. */
 function planPictures(m: MorphMeasure, c: Curves): Step[] {
@@ -174,11 +178,14 @@ function planPictures(m: MorphMeasure, c: Curves): Step[] {
       t: [0, A],
       ease: c.travel,
     },
-    // The washes over the picture fill its frame all the way, the hero's turning into the panel's.
+    // The washes over the picture fill its frame all the way, the hero's turning into the
+    // panel's. They move as layout, as the clip does: a transform runs on the compositor
+    // (WebKit's Core Animation), the clip-path does not, and the two drift apart by a few
+    // pixels, leaving the picture bare along an edge.
     {
       key: 'wash',
       box: m.panel,
-      kf: [{ transform: stretch(m.hero, m.panel) }, { transform: 'none' }],
+      kf: [rect(m.hero), rect(m.panel)],
       t: [0, A],
       ease: c.travel,
     },
@@ -219,12 +226,13 @@ function planWords(m: MorphMeasure, c: Curves): Step[] {
   const fadeUp = (key: 'play' | 'status', box: Box, from: number): Step => ({
     key,
     box,
+    // A soft fade with a small lift, on an even curve: an ease-out would pop it in.
     kf: [
-      { opacity: 0, transform: 'translateY(14px)' },
+      { opacity: 0, transform: 'translateY(8px)' },
       { opacity: 1, transform: 'none' },
     ],
     t: [from, 1],
-    ease: c.out,
+    ease: c.settle,
   })
   const leave = (key: 'actions' | 'blurb', drop: number, until: number, box?: Box): Step => ({
     key,
@@ -247,8 +255,8 @@ function planWords(m: MorphMeasure, c: Curves): Step[] {
       t: [0, A],
       ease: c.travel,
     },
-    fadeUp('play', m.play, 0.7),
-    fadeUp('status', m.status, 0.74),
+    fadeUp('play', m.play, 0.64),
+    fadeUp('status', m.status, 0.7),
     // The card's own Play row and the blurb leave before the picture covers them.
     leave('actions', 8, 0.14),
     leave('blurb', 6, 0.16, m.blurb),

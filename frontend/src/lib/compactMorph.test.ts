@@ -88,11 +88,11 @@ describe('planMorph', () => {
     }
   })
 
-  it('carries the washes over the picture with its frame, stretched from the hero to the panel', () => {
+  it('carries the washes over the picture with its frame, as layout like the clip', () => {
     const wash = step('wash')
     expect(wash.box).toEqual(measure().panel)
-    expect(wash.kf[0]!.transform).toBe(`translate(-2px, 12px) scale(${984 / 712}, ${398 / 752})`)
-    expect(wash.kf[1]!.transform).toBe('none')
+    expect(wash.kf[0]).toEqual({ left: '280px', top: '16px', width: '984px', height: '398px' })
+    expect(wash.kf[1]).toEqual({ left: '282px', top: '4px', width: '712px', height: '752px' })
     expect(wash.t).toEqual([0, TRAVEL_END])
     // The washes themselves only fade, inside it.
     expect(step('scrim').box).toBeUndefined()
@@ -130,14 +130,14 @@ describe('timing', () => {
 
   it('places a step in its window of the whole', () => {
     const t = timing(s, true, 1000)
-    expect(t).toMatchObject({ delay: 700, easing: curves.out, fill: 'both' })
-    expect(t.duration).toBeCloseTo(300)
+    expect(t).toMatchObject({ delay: 640, easing: curves.settle, fill: 'both' })
+    expect(t.duration).toBeCloseTo(360)
   })
 
   it('going out, mirrors the window and the curve', () => {
     const t = timing(s, false, 1000)
     expect(t.delay).toBe(0)
-    expect(t.duration).toBeCloseTo(300)
-    expect(t.easing).toBe(mirror(curves.out))
+    expect(t.duration).toBeCloseTo(360)
+    expect(t.easing).toBe(mirror(curves.settle))
   })
 })

@@ -911,11 +911,19 @@
   transform: none;
   transition:
     grid-template-rows var(--duration-switch) var(--ease-travel),
-    opacity var(--duration-slow) var(--ease-out) var(--duration-slow),
-    transform var(--duration-slow) var(--ease-out) var(--duration-slow);
+    opacity var(--duration-switch) linear var(--duration-reveal),
+    transform var(--duration-switch) var(--ease-settle) var(--duration-reveal);
 }
 .compact-foot-row {
   width: calc(var(--panel-open-w) - 12 * var(--spacing));
+  /* A tiny panel keeps Play and lets its status line go. */
+  @variant panel-tiny {
+    width: calc(var(--panel-open-w) - 6 * var(--spacing));
+    & [data-morph='panel-status'] {
+      visibility: hidden;
+      position: absolute;
+    }
+  }
 }
 .compact-tools {
   transition: opacity var(--duration-slow) linear var(--duration-reveal);

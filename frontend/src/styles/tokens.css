@@ -143,7 +143,7 @@
   --layout-compact-title: 400px;
   --layout-compact-title-idle: 160px;
   --layout-compact-title-short: 190px;
-  --layout-compact-rise: 12px;
+  --layout-compact-rise: 6px;
 }
 
 /* Effects: values a utility cannot name on its own. Read by the shared
@@ -300,7 +300,9 @@
   --accent: var(--chapter-frangfurd);
 }
 
-/* A compact panel too short for its whole foot (the window's own minimum is
-   lower than the full foot needs). A container query cannot read a custom
-   property, so the height is written here, from the token. */
+/* A compact panel too short for its whole foot, and one with room for only its
+   title and Play (the window's own minimum is lower than the full foot needs).
+   A container query cannot read a custom property, so the heights are written
+   here, from the tokens. */
 @custom-variant panel-short (@container panel (height < 340px));
+@custom-variant panel-tiny (@container panel (height < 240px));

@@ -189,10 +189,12 @@ function emitCss(src) {
 }
 
 function emitVariants(src, push) {
-  push(`/* A compact panel too short for its whole foot (the window's own minimum is`)
-  push(`   lower than the full foot needs). A container query cannot read a custom`)
-  push(`   property, so the height is written here, from the token. */`)
+  push(`/* A compact panel too short for its whole foot, and one with room for only its`)
+  push(`   title and Play (the window's own minimum is lower than the full foot needs).`)
+  push(`   A container query cannot read a custom property, so the heights are written`)
+  push(`   here, from the tokens. */`)
   push(`@custom-variant panel-short (@container panel (height < ${src.layout.compact.short}px));`)
+  push(`@custom-variant panel-tiny (@container panel (height < ${src.layout.compact.tiny}px));`)
 }
 
 function emitThemeMapping(src, push) {

@@ -27,7 +27,7 @@ export const CHAPTER_ACCENTS: Record<ThemeMode, Record<ChapterId, string>> = {
 }
 
 /** Window geometry, in px. main.go reads the same numbers from backend/design/design_gen.go. */
-export const WINDOW = { width: 1280, height: 800, minWidth: 720, minHeight: 240 } as const
+export const WINDOW = { width: 1280, height: 800, minWidth: 480, minHeight: 180 } as const
 
 export const LAYOUT = {
   sidebar: 264,

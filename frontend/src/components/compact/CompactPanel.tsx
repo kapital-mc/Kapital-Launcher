@@ -88,11 +88,14 @@ export function CompactPanel({
           onOpenSettings={() => onOpenSettings(chapter.id)}
           onOpenLogs={() => onOpenLogs(chapter.id)}
           onOpenMap={openMap}
-          className="compact-tools absolute top-6 right-6"
+          className="compact-tools panel-tiny:invisible absolute top-6 right-6"
           morph="panel-tools"
         />
       </div>
-      <div data-morph="panel-body" className="absolute inset-x-6 bottom-6 flex flex-col gap-3.5">
+      <div
+        data-morph="panel-body"
+        className="panel-tiny:inset-x-3 panel-tiny:bottom-3 absolute inset-x-6 bottom-6 flex flex-col gap-3.5"
+      >
         <div
           data-morph="panel-label"
           className="text-fg-muted panel-short:invisible panel-short:absolute flex items-baseline gap-2.5 overflow-hidden text-sm whitespace-nowrap"

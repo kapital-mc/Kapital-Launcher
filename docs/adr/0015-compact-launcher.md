@@ -33,9 +33,10 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   (40 px) past both sides. Shrinking takes compact at once, mid-drag, so the
   full layout is never seen cut; growing waits for the drag to pause.
 - **The window keeps its size.** Choosing compact changes the layout, never
-  the window. The window minimum drops to 720 × 240. A panel shorter than
-  `layout.compact.short` drops its number and kind and takes a smaller title,
-  so Play and the title still fit.
+  the window. The window minimum drops to 480 × 180 (the author, 2026-10-23).
+  A panel shorter than `layout.compact.short` drops its number and kind and
+  takes a smaller title; one shorter than `layout.compact.tiny` keeps only its
+  title and Play, so both still fit.
 - **A left-click in compact goes back to full.** The sidebar button's usual
   click (narrowing the sidebar) has nothing to act on there.
 - **Both layouts are laid out; actors carry one into the other.** The full
