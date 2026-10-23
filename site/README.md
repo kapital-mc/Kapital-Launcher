@@ -148,8 +148,10 @@ under reduced motion.
 
 The two floating cards hold every chapter's version in one cell. On a switch
 `src/cards.js` shows the new version at once and runs each letter that
-differs through block characters (█▓▒░▀▄▌▐, the backdrop's squares as
-text) until it lands, each at its own moment within
+differs through blocks (full, top half, bottom half: ▀ ▄ █) until it lands.
+The blocks are boxes one letter wide and one capital tall
+(`.scramble-block`), not characters, since no face the page loads has them
+and a fallback face draws them a full line tall. Each lands at its own moment within
 the slow duration, as the backdrop's squares do. Their colours (the accent,
 the server's square) come from the root and fade there. Without the script, or
 under reduced motion, the versions cross-fade.

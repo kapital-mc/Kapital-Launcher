@@ -1,8 +1,11 @@
 // The two floating cards beside the window, and the download popup's button
 // word. On a chapter switch (or a system switch, for the word) their text
 // changes the way the backdrop changes its squares: each letter that differs
-// runs through block characters and lands on the new one at its own moment
-// within --duration-slow. Every version sits in one cell (src/showcase.css,
+// runs through blocks (full, top half, bottom half) and lands on the new one
+// at its own moment within --duration-slow. The blocks are drawn as boxes one
+// letter wide and one capital tall (.scramble-block, src/showcase.css), not as
+// characters: no face the page loads has them, and a fallback face's blocks
+// are a full line tall. Every version sits in one cell (src/showcase.css,
 // src/popup.css), so the script only shows the new one at once and scrambles
 // its text from what the old one was showing. Without the script, or under
 // reduced motion, the versions cross-fade instead.
@@ -30,9 +33,7 @@ document.addEventListener(
 
     // A letter is redrawn this many times on its way to the new one, at most.
     const STEPS = 10
-    // Shades and halves of a square, after the backdrop's: all in code page
-    // 437, so every system's fallback font has them.
-    const BLOCKS = '█▓▒░▀▄▌▐'
+    const BLOCKS = ['full', 'top', 'bottom']
     const block = () => BLOCKS[Math.floor(Math.random() * BLOCKS.length)]
 
     // Every text node's own text, to land on and to put back, in page order.
@@ -46,16 +47,56 @@ document.addEventListener(
     const textOf = (element) => [...finals.keys()].filter((node) => element.contains(node))
     const frames = new Map()
 
+    // A scrambling text node is emptied and drawn in a span before it: its
+    // letters as text, its blocks as boxes. `shown` is what each node shows.
+    const overlays = new Map()
+    const shown = new Map()
+    const textShown = (node) => shown.get(node) ?? node.data
+    const draw = (node, letters) => {
+      if (letters.every((letter) => typeof letter === 'string')) {
+        overlays.get(node)?.remove()
+        overlays.delete(node)
+        node.data = letters.join('')
+        shown.delete(node)
+        return
+      }
+      let overlay = overlays.get(node)
+      if (!overlay) {
+        overlay = document.createElement('span')
+        node.parentNode.insertBefore(overlay, node)
+        overlays.set(node, overlay)
+      }
+      node.data = ''
+      const parts = []
+      let run = ''
+      for (const letter of letters) {
+        if (typeof letter === 'string') {
+          run += letter
+          continue
+        }
+        if (run) parts.push(run)
+        run = ''
+        const box = document.createElement('span')
+        box.className = 'scramble-block'
+        box.dataset.block = letter.block
+        parts.push(box)
+      }
+      if (run) parts.push(run)
+      overlay.replaceChildren(...parts)
+      // Something in place of every block, for what swap() reads back.
+      shown.set(node, letters.map((letter) => (typeof letter === 'string' ? letter : '\u2588')).join(''))
+    }
+
     const scramble = (node, from, to) => {
       cancelAnimationFrame(frames.get(node))
       if (!motion) {
-        node.data = to
+        draw(node, [to])
         return
       }
       const length = Math.max(from.length, to.length)
       const lands = Array.from({ length }, () => Math.random() * span)
       const steady = Array.from({ length }, (_, i) => from[i] === to[i])
-      const shown = Array.from({ length }, (_, i) => from[i] ?? '')
+      const letters = Array.from({ length }, (_, i) => from[i] ?? '')
       const begin = performance.now()
       let step = -1
       const frame = (now) => {
@@ -64,16 +105,16 @@ document.addEventListener(
         if (next !== step) {
           step = next
           for (let i = 0; i < length; i++) {
-            if (steady[i]) shown[i] = to[i]
-            else if (t >= lands[i]) shown[i] = to[i] ?? ''
-            else if (to[i] === ' ' || from[i] === ' ') shown[i] = ' '
-            else shown[i] = block()
+            if (steady[i]) letters[i] = to[i]
+            else if (t >= lands[i]) letters[i] = to[i] ?? ''
+            else if (to[i] === ' ' || from[i] === ' ') letters[i] = ' '
+            else letters[i] = { block: block() }
           }
-          node.data = shown.join('')
+          draw(node, letters)
         }
         if (t < span) frames.set(node, requestAnimationFrame(frame))
         else {
-          node.data = to
+          draw(node, [to])
           frames.delete(node)
         }
       }
@@ -103,10 +144,10 @@ document.addEventListener(
           ? `Server online${counts ? ` · ${status.players}/${status.max}` : ''}`
           : 'Server offline'
         document.documentElement.dataset.server = status.online ? 'online' : 'offline'
-        const was = liveNode.data
+        const was = textShown(liveNode)
         finals.set(liveNode, text)
         if (open === liveChapter) scramble(liveNode, was, text)
-        else liveNode.data = text
+        else draw(liveNode, [text])
       } catch {
         // No answer, or not one this script reads: the card stays as it is.
       }
@@ -115,13 +156,13 @@ document.addEventListener(
     // Shows `after` in place of `before`, scrambling from what `before` showed.
     const swap = (before, after) => {
       if (!before || !after) return
-      const shown = textOf(before).map((node) => {
-        const text = node.data
+      const was = textOf(before).map((node) => {
+        const text = textShown(node)
         cancelAnimationFrame(frames.get(node))
-        node.data = finals.get(node)
+        draw(node, [finals.get(node)])
         return text
       })
-      textOf(after).forEach((node, i) => scramble(node, shown[i] ?? '', finals.get(node)))
+      textOf(after).forEach((node, i) => scramble(node, was[i] ?? '', finals.get(node)))
     }
 
     if (motion) for (const group of word ? [...cards, word] : cards) group.setAttribute('data-scramble', '')

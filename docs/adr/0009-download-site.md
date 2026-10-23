@@ -277,7 +277,7 @@ download easy and looks good, at most two screens tall. What changed:
   chapter every 5 s (`duration.cycle`), starting the wait again after a
   switch by hand, holding while the pointer or focus is on the strip or a
   popup is open, and never under reduced motion (WCAG 2.2.2). On a switch
-  `cards.js` runs the floating cards' letters through block characters
+  `cards.js` runs the floating cards' letters through letter-sized blocks
   into the new chapter's text, as the backdrop changes its squares, and the
   download popup's button word the same way on a system switch.
 - **A backdrop of squares.** Behind the window the open chapter's picture

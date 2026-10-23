@@ -53,6 +53,25 @@
 .showcase-card[data-scramble] > .showcase-fade {
   transition: none;
 }
+/* A block in scrambling text (src/cards.js): one letter wide with a letter's
+   gap, one capital tall, on the baseline, so it is the size of the letters
+   around it. */
+.scramble-block {
+  display: inline-block;
+  width: 1ch;
+  height: 1cap;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 75% 100%;
+}
+.scramble-block[data-block='top'] {
+  background-size: 75% 50%;
+}
+.scramble-block[data-block='bottom'] {
+  background-position: bottom;
+  background-size: 75% 50%;
+}
 .showcase-state {
   background-color: var(--showcase-state);
   transition: background-color var(--duration-slow) var(--ease-standard);
