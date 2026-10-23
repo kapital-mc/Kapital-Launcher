@@ -122,8 +122,8 @@ const CONFIRM_MS = 5000
  * to, the same whether the installed pack is in step or behind its source.
  *
  * While the chapter's game is starting, running or closing (#44) its own line
- * sits beside Play, right after the hand-over to Prism, and Play and Install
- * wait. Play becomes Stop, so a start that stalls or a game that has died
+ * sits beside Play, right after the hand-over to Prism (on a compact panel,
+ * in the status line's place), and Play and Install wait. Play becomes Stop, so a start that stalls or a game that has died
  * can be ended at once: one click while the start is only getting ready, and
  * once the game has a window the first click asks "Confirm" for five
  * seconds. Stop and Confirm are red, the danger colour, where Play is the
@@ -263,7 +263,13 @@ export function ActionBar({
   }
 
   const panel = layout === 'panel'
-  // Play and the line beside it; on a compact panel one group, which the morph moves.
+  // A compact panel's foot has no room beside Play, so the game's rows take
+  // the status line's place there and the foot keeps its two rows.
+  if (panel && beside) {
+    ;[state, meta, tone] = beside
+    serverShown = false
+  }
+  // Play, and on the card the game's line beside it; on a compact panel one group, which the morph moves.
   const play = (
     <>
       {playing || launching ? (
@@ -290,7 +296,7 @@ export function ActionBar({
           <span>{playLabel(chapter, joinServer)}</span>
         </Button>
       )}
-      {beside && (
+      {beside && !panel && (
         <div className="flex max-w-sm min-w-0 flex-col gap-0.5">
           <span className={`font-ui text-xs font-medium ${beside[2]}`}>{beside[0]}</span>
           {/* Truncated to keep the bar one row; the title carries the full detail. */}
