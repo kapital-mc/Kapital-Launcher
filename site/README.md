@@ -119,14 +119,23 @@ pnpm build` or `SITE_RELEASE=null pnpm build`.
 ## The download popup
 
 With a release set, each Download button opens a native popover
-(`popovertarget`), no script needed: a banner of the open chapter's picture
-through a fixed pattern of dark squares (`<!--mosaic:banner-->`) with the
-version and a close button, a heading, a Windows or macOS switch, the one
+(`popovertarget`), no script needed: a banner of the open chapter's picture,
+tinted in the wordmark's two colours (`--logo-gradient-top` and `-bottom`),
+through a pattern of dark squares (`<!--mosaic:banner-art-->` and
+`<!--mosaic:banner-->`) with the version and a close button, a heading, a Windows or macOS switch, the one
 download for the chosen system, a link to the release notes for how to open
 it, and the Prism instance zips folded into a dropdown that slides open (a
 checkbox and a grid row easing from `0fr` to `1fr`, so the popup grows with it
 and no script is needed). The switch is a fieldset of two radios and CSS
 `:has()`, so it works without script. Windows is checked by default.
+
+While the popup is open, `src/cycle.js` moves the banner on to the next
+chapter every `--duration-banner`, by `data-banner` on its frame, and the new
+picture and its dark squares come in from the right over `--duration-wave`.
+Each chapter has its own pattern, clear over what its picture is of
+(`SUBJECTS` in `mosaic.js`) and always dark under the tag and the close
+button. Without the script, or under reduced motion, the banner stays on the
+open chapter.
 
 There are two Download buttons and two links under them, one per system, and
 `data-os` on the root shows one of each: the button for the visitor's system,

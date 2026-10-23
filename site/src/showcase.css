@@ -197,16 +197,104 @@
 [data-d='6'] { --showcase-delay: calc(var(--duration-slow) * 6 / 7); }
 [data-d='7'] { --showcase-delay: var(--duration-slow); }
 
-/* The download popup's banner: the open chapter's picture under a fixed
-   pattern of dark squares, 13 by 4 (mosaic.js's BANNER_COLS and BANNER_ROWS). */
+/* The download popup's banner: a chapter's picture cut into 13 by 4 squares
+   (mosaic.js's BANNER_COLS and BANNER_ROWS) under that chapter's own pattern
+   of dark squares, which leaves its subject clear. The chapter is the open
+   one, or, while the popup is open, the one src/cycle.js has put in
+   data-banner, every --duration-banner. A change sweeps from right to left
+   over --duration-wave: each square changes picture and darkness at its own
+   delay. */
+.showcase-banner-frame {
+  container-type: size;
+  --banner-art: var(--showcase-art);
+  --banner-ratio: var(--showcase-ratio);
+}
+.showcase-banner-frame[data-banner='luxemburg'] {
+  --banner-art: url('../../frontend/src/assets/screenshots/luxemburg.webp');
+  --banner-ratio: 1.8692;
+}
+.showcase-banner-frame[data-banner='lichdenstein'] {
+  --banner-art: url('../../frontend/src/assets/screenshots/lichdenstein.webp');
+  --banner-ratio: 1.7758;
+}
+.showcase-banner-frame[data-banner='frangfurd'] {
+  --banner-art: url('../../frontend/src/assets/screenshots/frangfurd.webp');
+  --banner-ratio: 1.7758;
+}
+.showcase-banner-art,
 .showcase-banner {
   display: grid;
   grid-template-columns: repeat(13, minmax(0, 1fr));
   grid-template-rows: repeat(4, minmax(0, 1fr));
 }
-.showcase-banner > [data-dark] {
+.showcase-banner-art > span {
+  --showcase-width: max(100cqw, 100cqh * var(--banner-ratio));
+  --showcase-height: max(100cqw / var(--banner-ratio), 100cqh);
+  background-image: var(--banner-art);
+  background-repeat: no-repeat;
+  background-size: var(--showcase-width) var(--showcase-height);
+  background-position:
+    calc((100cqw - var(--showcase-width)) / 2 - var(--showcase-x) * 100cqw / 13)
+    calc((100cqh - var(--showcase-height)) / 2 - var(--showcase-y) * 100cqh / 4);
+  transition-property: background-image, background-size, background-position;
+  transition-duration: 1ms;
+  transition-timing-function: step-end;
+  transition-behavior: allow-discrete;
+  transition-delay: var(--showcase-delay);
+}
+/* The banner is tinted in the wordmark's two colours, top to bottom, under
+   the dark squares, so they stay the page's ground. */
+.showcase-banner-tint {
+  background-image: linear-gradient(var(--logo-gradient-top), var(--logo-gradient-bottom));
+  mix-blend-mode: color;
+  opacity: var(--effect-showcase-tint);
+}
+.showcase-banner > span {
+  transition: background-color var(--duration-fast) linear var(--showcase-delay);
+}
+.showcase-banner-frame[data-banner='luxemburg'] > .showcase-banner > [data-m~='01'],
+.showcase-banner-frame[data-banner='lichdenstein'] > .showcase-banner > [data-m~='02'],
+.showcase-banner-frame[data-banner='frangfurd'] > .showcase-banner > [data-m~='03'],
+:root:has(#chapter-luxemburg:checked) .showcase-banner-frame:not([data-banner]) > .showcase-banner > [data-m~='01'],
+:root:has(#chapter-lichdenstein:checked) .showcase-banner-frame:not([data-banner]) > .showcase-banner > [data-m~='02'],
+:root:has(#chapter-frangfurd:checked) .showcase-banner-frame:not([data-banner]) > .showcase-banner > [data-m~='03'] {
   background-color: var(--color-sunken);
 }
+
+/* Each banner square's column and row, for its slice of the picture. */
+.showcase-banner-art > * { --showcase-x: 0; --showcase-y: 0; }
+.showcase-banner-art > :nth-child(13n + 2) { --showcase-x: 1; }
+.showcase-banner-art > :nth-child(13n + 3) { --showcase-x: 2; }
+.showcase-banner-art > :nth-child(13n + 4) { --showcase-x: 3; }
+.showcase-banner-art > :nth-child(13n + 5) { --showcase-x: 4; }
+.showcase-banner-art > :nth-child(13n + 6) { --showcase-x: 5; }
+.showcase-banner-art > :nth-child(13n + 7) { --showcase-x: 6; }
+.showcase-banner-art > :nth-child(13n + 8) { --showcase-x: 7; }
+.showcase-banner-art > :nth-child(13n + 9) { --showcase-x: 8; }
+.showcase-banner-art > :nth-child(13n + 10) { --showcase-x: 9; }
+.showcase-banner-art > :nth-child(13n + 11) { --showcase-x: 10; }
+.showcase-banner-art > :nth-child(13n + 12) { --showcase-x: 11; }
+.showcase-banner-art > :nth-child(13n + 13) { --showcase-x: 12; }
+.showcase-banner-art > :nth-child(n + 14) { --showcase-y: 1; }
+.showcase-banner-art > :nth-child(n + 27) { --showcase-y: 2; }
+.showcase-banner-art > :nth-child(n + 40) { --showcase-y: 3; }
+
+/* The banner's delay buckets (mosaic.js's BANNER_DELAYS), over the wave. */
+.showcase-banner-frame [data-d='1'] { --showcase-delay: calc(var(--duration-wave) * 1 / 15); }
+.showcase-banner-frame [data-d='2'] { --showcase-delay: calc(var(--duration-wave) * 2 / 15); }
+.showcase-banner-frame [data-d='3'] { --showcase-delay: calc(var(--duration-wave) * 3 / 15); }
+.showcase-banner-frame [data-d='4'] { --showcase-delay: calc(var(--duration-wave) * 4 / 15); }
+.showcase-banner-frame [data-d='5'] { --showcase-delay: calc(var(--duration-wave) * 5 / 15); }
+.showcase-banner-frame [data-d='6'] { --showcase-delay: calc(var(--duration-wave) * 6 / 15); }
+.showcase-banner-frame [data-d='7'] { --showcase-delay: calc(var(--duration-wave) * 7 / 15); }
+.showcase-banner-frame [data-d='8'] { --showcase-delay: calc(var(--duration-wave) * 8 / 15); }
+.showcase-banner-frame [data-d='9'] { --showcase-delay: calc(var(--duration-wave) * 9 / 15); }
+.showcase-banner-frame [data-d='10'] { --showcase-delay: calc(var(--duration-wave) * 10 / 15); }
+.showcase-banner-frame [data-d='11'] { --showcase-delay: calc(var(--duration-wave) * 11 / 15); }
+.showcase-banner-frame [data-d='12'] { --showcase-delay: calc(var(--duration-wave) * 12 / 15); }
+.showcase-banner-frame [data-d='13'] { --showcase-delay: calc(var(--duration-wave) * 13 / 15); }
+.showcase-banner-frame [data-d='14'] { --showcase-delay: calc(var(--duration-wave) * 14 / 15); }
+.showcase-banner-frame [data-d='15'] { --showcase-delay: calc(var(--duration-wave) * 15 / 15); }
 
 @media (prefers-reduced-motion: reduce) {
   .showcase-panel,
@@ -215,10 +303,12 @@
   .showcase-tint,
   .showcase-fade,
   .showcase-state,
+  .showcase-banner > span,
   .showcase-pixels > span {
     transition: none;
   }
-  .showcase-art > span {
+  .showcase-art > span,
+  .showcase-banner-art > span {
     transition-delay: 0ms;
   }
 }

@@ -106,6 +106,10 @@
   --transition-duration-spin: 1000ms;
   --duration-cycle: 5000ms;
   --transition-duration-cycle: 5000ms;
+  --duration-banner: 7500ms;
+  --transition-duration-banner: 7500ms;
+  --duration-wave: 2400ms;
+  --transition-duration-wave: 2400ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);

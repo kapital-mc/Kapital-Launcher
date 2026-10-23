@@ -406,8 +406,9 @@
 
     <!--release:start-->
     <!-- The download popup: the browser's own popover, opened by the Download
-         button with no script. The banner is the open chapter's picture
-         through a fixed pattern of dark squares (mosaic.js). The OS switch is
+         button with no script. The banner is the open chapter's picture,
+         tinted in the wordmark's colours, through its dark squares
+         (mosaic.js); src/cycle.js moves it on while the popup is open. The OS switch is
          two radios and :has() in the group classes, so it works without
          script too; src/detect.js only checks the radio for the visitor's OS,
          or for the system a button names. %TAG% and the URLs are filled in by
@@ -420,10 +421,9 @@
       aria-labelledby="download-title"
       class="bg-sunken text-fg border-line-strong m-auto w-[min(calc(100vw-2rem),32.5rem)] border-3 p-0 shadow-2xl backdrop:scrim-wash"
     >
-      <div class="relative h-31 overflow-hidden">
-        <img data-for="luxemburg" src="../frontend/src/assets/screenshots/luxemburg.webp" alt="" class="absolute inset-0 size-full object-cover" />
-        <img data-for="lichdenstein" src="../frontend/src/assets/screenshots/lichdenstein.webp" alt="" class="absolute inset-0 size-full object-cover" />
-        <img data-for="frangfurd" src="../frontend/src/assets/screenshots/frangfurd.webp" alt="" class="absolute inset-0 size-full object-cover" />
+      <div class="showcase-banner-frame relative h-31 overflow-hidden">
+        <div class="showcase-banner-art absolute inset-0" aria-hidden="true"><!--mosaic:banner-art--></div>
+        <div class="showcase-banner-tint absolute inset-0" aria-hidden="true"></div>
         <div class="showcase-banner absolute inset-0" aria-hidden="true"><!--mosaic:banner--></div>
         <p class="text-fg-soft font-pixel absolute top-4.5 left-5.5 m-0 text-sm uppercase">%TAG%</p>
         <button

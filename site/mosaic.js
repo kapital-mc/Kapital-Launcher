@@ -17,8 +17,10 @@ export const ROWS = 12
 export const BANNER_COLS = 13
 export const BANNER_ROWS = 4
 
-// The number of delay buckets src/showcase.css spreads over the switch.
+// The number of delay buckets src/showcase.css spreads over the switch, and
+// over the banner's slower wave.
 export const DELAYS = 8
+export const BANNER_DELAYS = 16
 
 // The chapters' numbers, as data/launcher.json writes them.
 const CHAPTERS = ['01', '02', '03']
@@ -59,15 +61,45 @@ export function backdropSquares() {
   return squares
 }
 
-// The banner's dark squares, one pattern: dark on the left, clearing towards
-// the right, with the bottom row darker so the heading below meets the ground.
+// What each chapter's picture is of, in banner squares: the columns that stay
+// clear top to bottom, and single squares that stay clear too. Read off the
+// three screenshots cropped to the banner: Bellum Castle across the middle,
+// Lichdenstein's tower and the houses under it, the Obelisk and the moon.
+const SUBJECTS = [
+  { columns: [4, 8], squares: [] },
+  { columns: [4, 7], squares: [] },
+  { columns: [7, 8], squares: [[3, 1], [4, 1]] },
+]
+// Always dark: under the tag, top left, and the close button, top right.
+const COVERED = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [12, 0]]
+
+// The banner's squares: for each, its delay bucket and the chapters it is dark
+// in. Each chapter has its own pattern, dark at the edges and along the bottom
+// row so the heading below meets the ground, and clear over its subject. A
+// switch replaces the picture and the pattern in a wave from right to left:
+// the delay grows with the distance from the right edge, plus a little
+// randomness, so the wave front is ragged.
 export function bannerSquares() {
-  const rnd = random(13)
+  const delay = random(13)
+  const dark = CHAPTERS.map((_, i) => random(7349 * (i + 1) + 11))
   const squares = []
   for (let y = 0; y < BANNER_ROWS; y++) {
     for (let x = 0; x < BANNER_COLS; x++) {
-      const p = 1 - (x + 0.5) / (BANNER_COLS * 0.7) + (y === BANNER_ROWS - 1 ? 0.35 : 0)
-      squares.push(rnd() < p)
+      const distance = (BANNER_COLS - 1 - x) / (BANNER_COLS - 1)
+      const edge = Math.abs(x - (BANNER_COLS - 1) / 2) / ((BANNER_COLS - 1) / 2)
+      const p = edge * 0.75 + (y === BANNER_ROWS - 1 ? 0.35 : 0) + (y === 0 ? 0.15 : 0)
+      const covered = COVERED.some(([cx, cy]) => cx === x && cy === y)
+      squares.push({
+        d: Math.min(BANNER_DELAYS - 1, Math.floor(distance * (BANNER_DELAYS - 3) + delay() * 3)),
+        m: CHAPTERS.filter((_, i) => {
+          const roll = dark[i]()
+          if (covered) return true
+          const { columns, squares: clear } = SUBJECTS[i]
+          if (x >= columns[0] && x <= columns[1]) return false
+          if (clear.some(([cx, cy]) => cx === x && cy === y)) return false
+          return roll < p
+        }),
+      })
     }
   }
   return squares
@@ -83,6 +115,12 @@ export function renderBackdropPixels(squares) {
     .join('')
 }
 
-export function renderBanner(squares) {
-  return squares.map((dark) => (dark ? '<span data-dark></span>' : '<span></span>')).join('')
+export function renderBannerArt(squares) {
+  return renderBackdropArt(squares)
 }
+
+export function renderBanner(squares) {
+  return renderBackdropPixels(squares)
+}
+
+export { SUBJECTS, COVERED }

@@ -2,7 +2,14 @@ import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import { parseChangelog, renderChangelog } from './changelog.js'
-import { backdropSquares, bannerSquares, renderBackdropArt, renderBackdropPixels, renderBanner } from './mosaic.js'
+import {
+  backdropSquares,
+  bannerSquares,
+  renderBackdropArt,
+  renderBackdropPixels,
+  renderBanner,
+  renderBannerArt,
+} from './mosaic.js'
 
 // The page's links, filled in at build time so the built HTML carries no inline
 // script. GitHub and `release` come from links.json and stay null until there
@@ -244,6 +251,7 @@ async function links() {
 const MOSAIC = {
   '<!--mosaic:art-->': () => renderBackdropArt(backdropSquares()),
   '<!--mosaic:pixels-->': () => renderBackdropPixels(backdropSquares()),
+  '<!--mosaic:banner-art-->': () => renderBannerArt(bannerSquares()),
   '<!--mosaic:banner-->': () => renderBanner(bannerSquares()),
 }
 
@@ -257,7 +265,7 @@ function mosaic() {
         for (const [marker, render] of Object.entries(MOSAIC)) {
           const count = out.split(marker).length - 1
           // The banner is in the download popup, which a build with no release leaves out.
-          if (count === 0 && marker === '<!--mosaic:banner-->') continue
+          if (count === 0 && marker.startsWith('<!--mosaic:banner')) continue
           if (count !== 1) throw new Error(`site: index.html has ${count} ${marker}, expected one`)
           out = out.replace(marker, render)
         }

@@ -48,7 +48,8 @@ paths:
   to the header bar or to those facts is a change to the site's copy, in the
   same pull request.
 - **The backdrop's squares are written by the build.** `mosaic.js` fills
-  `<!--mosaic:art-->`, `<!--mosaic:pixels-->` and `<!--mosaic:banner-->` with
+  `<!--mosaic:art-->`, `<!--mosaic:pixels-->`, `<!--mosaic:banner-art-->` and
+  `<!--mosaic:banner-->` with
   empty spans; `src/showcase.css` places, paints and times them. The grid
   sizes are in both files: change them together. `pnpm test` covers it.
 - **Links are data.** `links.json` holds `release` (a tag, or `null`) and
