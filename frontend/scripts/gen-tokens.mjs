@@ -153,9 +153,9 @@ function fontStack(families) {
   return families.map((f) => (BARE_FAMILIES.has(f) ? f : `'${f}'`)).join(', ')
 }
 
-function variation(axes) {
-  return Object.entries(axes)
-    .map(([axis, value]) => `'${axis}' ${value}`)
+function fontSettings(tags) {
+  return Object.entries(tags)
+    .map(([tag, value]) => `'${tag}' ${value}`)
     .join(', ')
 }
 
@@ -237,7 +237,11 @@ function emitThemeValues(src, push) {
     push(`  --font-${name}: ${fontStack(families)};`)
     // Same companion mechanism: font-display applies the variation axes too.
     const axes = src.type.variation?.[name]
-    if (axes) push(`  --font-${name}--font-variation-settings: ${variation(axes)};`)
+    if (axes) push(`  --font-${name}--font-variation-settings: ${fontSettings(axes)};`)
+    // JetBrains Mono draws its ligatures through calt, which joins the `//` and
+    // `::` of an address into one glyph, so the mono face turns it off.
+    const features = src.type.features?.[name]
+    if (features) push(`  --font-${name}--font-feature-settings: ${fontSettings(features)};`)
   }
   push()
   push(`  /* Letter-spacing by role, read as tracking-<role>. */`)

@@ -64,6 +64,7 @@
   --font-display: 'Fraunces', 'Iowan Old Style', 'Georgia', serif;
   --font-display--font-variation-settings: 'SOFT' 0, 'WONK' 0;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+  --font-mono--font-feature-settings: 'calt' 0;
   --font-pixel: 'Silkscreen', ui-monospace, monospace;
 
   /* Letter-spacing by role, read as tracking-<role>. */
@@ -137,6 +138,7 @@
   --layout-controls-mac: 80px;
   --layout-sidebar-compact: 95px;
   --layout-play-min: 240px;
+  --layout-pending: 160px;
   --layout-icon-2xs: 10px;
   --layout-icon-xs: 14px;
   --layout-icon-sm: 16px;

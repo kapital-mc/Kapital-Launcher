@@ -148,6 +148,15 @@
             "propertyNames": { "pattern": "^[A-Za-z]{4}$" },
             "additionalProperties": { "type": "number" }
           }
+        },
+        "features": {
+          "type": "object",
+          "description": "font-feature-settings per family, as feature tag to value: 0 turns a feature off.",
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": { "pattern": "^[a-z0-9]{4}$" },
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          }
         }
       }
     },
@@ -172,7 +181,7 @@
     },
     "layout": {
       "type": "object",
-      "required": ["unit", "sidebar", "sidebarCompact", "titlebar", "titlebarMac", "controlsMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "compact", "splash"],
+      "required": ["unit", "sidebar", "sidebarCompact", "titlebar", "titlebarMac", "controlsMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "pending", "window", "compact", "splash"],
       "additionalProperties": false,
       "properties": {
         "unit": { "const": "px" },
@@ -217,6 +226,11 @@
           "type": "integer",
           "minimum": 1,
           "description": "The least width of the play button, in px, measured at the widest label it carries with the real fonts (Install Lichdenstein, 237px), so Play, Join, Install and Stop never change its width and the state line beside it never moves."
+        },
+        "pending": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The height of the card a settings section holds in its place while its data is read and its page slides in (ui/SettingsLayout), in px, about what the shortest list fills, so the card grows from it by a little when the data shows."
         },
         "scrollbar": {
           "type": "integer",

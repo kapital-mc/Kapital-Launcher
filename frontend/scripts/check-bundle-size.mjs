@@ -130,7 +130,9 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // and the morph's own code load on demand. Measured 97.9 KB, from 96.5 KB on main.
 // 98.2 the same day: the chapter store moves every chapter's slide together in compact, a
 // rule of the store, which is in the first paint. Measured 98.1 KB.
-const BUDGET_KB = 98.2
+// 98.3 the same day: main's chapter settings tell their page when it has slid in
+// (lib/pageSettled, in PageLayer), added on top of the compact launcher. Measured 98.22 KB.
+const BUDGET_KB = 98.3
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)
