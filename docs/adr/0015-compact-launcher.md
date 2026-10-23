@@ -33,7 +33,9 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   (40 px) past both sides. Shrinking takes compact at once, mid-drag, so the
   full layout is never seen cut; growing waits for the drag to pause.
 - **The window keeps its size.** Choosing compact changes the layout, never
-  the window. The window minimum drops to 720 × 480, which compact fits.
+  the window. The window minimum drops to 720 × 240. A panel shorter than
+  `layout.compact.short` drops its number and kind and takes a smaller title,
+  so Play and the title still fit.
 - **A left-click in compact goes back to full.** The sidebar button's usual
   click (narrowing the sidebar) has nothing to act on there.
 - **Both layouts are laid out; actors carry one into the other.** The full
@@ -54,6 +56,13 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   (`ease-settle`). These are motion tokens.
 - **Pages open over whichever layout shows.** The settings, the account and a
   chapter's pages slide over the panels as they do over the card.
+- **The panels' pictures change together.** Every panel shows its chapter's
+  slide, so opening another chapter in compact changes no picture; once a
+  minute they all move on at once (the author, 2026-10-23).
+- **A switch between panels is soft.** Widths, the title and Play's row move
+  over `duration.switch` (600 ms) on `ease-travel`. Under the pointer another
+  chapter's panel leans toward the open one by `effect.panel.lean`, taking the
+  room from the open panel alone.
 
 ## Consequences
 

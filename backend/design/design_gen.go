@@ -10,7 +10,7 @@ const (
 	WindowWidth     = 1280
 	WindowHeight    = 800
 	WindowMinWidth  = 720
-	WindowMinHeight = 480
+	WindowMinHeight = 240
 )
 
 // The size below which the full layout does not fit and the launcher shows

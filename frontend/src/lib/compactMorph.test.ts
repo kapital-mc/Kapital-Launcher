@@ -88,6 +88,17 @@ describe('planMorph', () => {
     }
   })
 
+  it('carries the washes over the picture with its frame, stretched from the hero to the panel', () => {
+    const wash = step('wash')
+    expect(wash.box).toEqual(measure().panel)
+    expect(wash.kf[0]!.transform).toBe(`translate(-2px, 12px) scale(${984 / 712}, ${398 / 752})`)
+    expect(wash.kf[1]!.transform).toBe('none')
+    expect(wash.t).toEqual([0, TRAVEL_END])
+    // The washes themselves only fade, inside it.
+    expect(step('scrim').box).toBeUndefined()
+    expect(step('shade').box).toBeUndefined()
+  })
+
   it('takes the title to the panel foot with the picture, then lets it rise as Play fades in', () => {
     const title = step('title')
     expect(title.kf[0]!.transform).toBe('translate(2px, -394px) scale(1)')

@@ -128,7 +128,9 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // window shrunk past the floor calls for compact at any time: the size rule, the sidebar
 // button's menu, and the layout that holds both launchers and starts the morph. The panels
 // and the morph's own code load on demand. Measured 97.9 KB, from 96.5 KB on main.
-const BUDGET_KB = 98
+// 98.2 the same day: the chapter store moves every chapter's slide together in compact, a
+// rule of the store, which is in the first paint. Measured 98.1 KB.
+const BUDGET_KB = 98.2
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

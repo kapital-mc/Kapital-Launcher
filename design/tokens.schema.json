@@ -258,8 +258,8 @@
         },
         "compact": {
           "type": "object",
-          "description": "The compact launcher: the three chapters as panels side by side (docs/adr/0015-compact-launcher.md). Below width or height, in logical px, the full layout does not fit and compact is held on; it lets go once the window is hysteresis px past both. gap is the space around and between the panels; title and titleIdle the width of the chapter's title artwork on the open panel and on the others.",
-          "required": ["width", "height", "hysteresis", "gap", "title", "titleIdle"],
+          "description": "The compact launcher: the three chapters as panels side by side (docs/adr/0015-compact-launcher.md). Below width or height, in logical px, the full layout does not fit and compact is held on; it lets go once the window is hysteresis px past both. gap is the space around and between the panels; title and titleIdle the width of the chapter's title artwork on the open panel and on the others. Below short px of height a panel drops its number and kind and the open title is titleShort wide.",
+          "required": ["width", "height", "hysteresis", "gap", "title", "titleIdle", "short", "titleShort"],
           "additionalProperties": false,
           "properties": {
             "width": { "type": "integer", "minimum": 1 },
@@ -267,7 +267,9 @@
             "hysteresis": { "type": "integer", "minimum": 0 },
             "gap": { "type": "integer", "minimum": 0 },
             "title": { "type": "integer", "minimum": 1 },
-            "titleIdle": { "type": "integer", "minimum": 1 }
+            "titleIdle": { "type": "integer", "minimum": 1 },
+            "short": { "type": "integer", "minimum": 1 },
+            "titleShort": { "type": "integer", "minimum": 1 }
           }
         },
         "splash": {
@@ -362,11 +364,12 @@
         },
         "panel": {
           "type": "object",
-          "description": "The compact launcher's panels (docs/adr/0015-compact-launcher.md): grow is how many times wider the open chapter's panel is than each other one; dim and dimHover the opacity of the other chapters' pictures, at rest and under the pointer; shade the strength in percent of the wash rising from a panel's foot, clear above shadeFrom percent of its height.",
-          "required": ["grow", "dim", "dimHover", "shade", "shadeFrom"],
+          "description": "The compact launcher's panels (docs/adr/0015-compact-launcher.md): grow is how many times wider the open chapter's panel is than each other one; lean how much of one panel's width another chapter's panel takes from the open one under the pointer; dim and dimHover the opacity of the other chapters' pictures, at rest and under the pointer; shade the strength in percent of the wash rising from a panel's foot, clear above shadeFrom percent of its height.",
+          "required": ["grow", "lean", "dim", "dimHover", "shade", "shadeFrom"],
           "additionalProperties": false,
           "properties": {
             "grow": { "type": "number", "minimum": 1 },
+            "lean": { "type": "number", "minimum": 0, "maximum": 1 },
             "dim": { "type": "number", "minimum": 0, "maximum": 1 },
             "dimHover": { "type": "number", "minimum": 0, "maximum": 1 },
             "shade": { "type": "number", "minimum": 0, "maximum": 100 },

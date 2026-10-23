@@ -14,6 +14,7 @@ const sel = (name: string) => `[data-morph="${name}"]`
 
 interface Pieces {
   full: HTMLElement
+  compact: HTMLElement
   hero: HTMLElement
   side: HTMLElement
   actions: HTMLElement
@@ -35,8 +36,8 @@ function find(area: HTMLElement): Pieces | null {
   const active = panels.findIndex((p) => p.dataset.active !== undefined)
   const on = panels[active]
   const art = on?.querySelector<HTMLElement>(sel('panel-art'))
-  if (!full || !hero || !actions || !side || !on || !art) return null
-  return { full, hero, side, actions, panels, active, on, art }
+  if (!full || !compact || !hero || !actions || !side || !on || !art) return null
+  return { full, compact, hero, side, actions, panels, active, on, art }
 }
 
 /** The picture's natural size; a box with none (the pending grid) keeps the panel's aspect. */
@@ -114,12 +115,14 @@ function buildActors(layer: HTMLElement, p: Pieces): Map<ActorKey, HTMLElement> 
   const backdrop = div('morph-backdrop')
   const clip = div('morph-clip')
   const art = copy(p.art)
+  const wash = div('morph-wash')
   const scrim = div('scrim-hero')
   const shade = copy(p.on.querySelector(sel('panel-shade')) ?? div('scrim-foot'))
-  clip.append(art, scrim, shade)
+  wash.append(scrim, shade)
+  clip.append(art, wash)
   layer.append(backdrop, clip)
-  els.set('backdrop', backdrop).set('clip', clip).set('art', art).set('scrim', scrim)
-  els.set('shade', shade)
+  els.set('backdrop', backdrop).set('clip', clip).set('art', art).set('wash', wash)
+  els.set('scrim', scrim).set('shade', shade)
   p.panels.forEach((panel, i) => {
     if (i === p.active) return
     const k = copy(panel, true)
@@ -173,7 +176,11 @@ export function runMorph(area: HTMLElement, layer: HTMLElement, toCompact: boole
     a.pause()
     return a
   })
+  // The actors stand in for the compact layout and the card's picture from this
+  // frame; the sidebar and the card's Play row are real, so the full one shows.
   pieces.hero.style.visibility = 'hidden'
+  pieces.compact.style.visibility = 'hidden'
+  pieces.full.style.visibility = 'visible'
 
   // The window changed size mid-way: measure again and move every piece's end, keeping its progress.
   const resize = new ResizeObserver(() => {
@@ -197,7 +204,8 @@ export function runMorph(area: HTMLElement, layer: HTMLElement, toCompact: boole
   const end = () => {
     resize.disconnect()
     for (const a of anims) a.cancel()
-    pieces.hero.style.removeProperty('visibility')
+    for (const el of [pieces.hero, pieces.compact, pieces.full])
+      el.style.removeProperty('visibility')
     layer.replaceChildren()
   }
   return { finished, end }

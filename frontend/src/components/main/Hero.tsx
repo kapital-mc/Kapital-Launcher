@@ -122,9 +122,11 @@ export function Hero({
         </div>
         {/* The heading is the artwork when there is one, at one height for
             every chapter (#77); its alt keeps the name for readers. */}
-        <h1 data-morph="hero-title" className="font-display text-display m-0 font-semibold">
+        {/* The morph measures the title itself, not the heading's full width. */}
+        <h1 className="font-display text-display m-0 font-semibold">
           {title ? (
             <img
+              data-morph="hero-title"
               src={title}
               alt={chapter.name}
               // Decoded at startup (preloadImages): drawn with the card, not after it.
@@ -133,7 +135,7 @@ export function Hero({
               draggable={false}
             />
           ) : (
-            chapter.name
+            <span data-morph="hero-title">{chapter.name}</span>
           )}
         </h1>
         {/* The words that leave first when the launcher goes compact (lib/compactMorph). */}

@@ -8,7 +8,7 @@ vi.mock('../../../wailsjs/go/main/App')
 const chapters = BUNDLED_MANIFEST.chapters
 const noop = () => undefined
 
-function stage(selectedId: string, shown = true) {
+function stage(selectedId: string, shown = true, live = shown) {
   const onSelect = vi.fn()
   const onOpenSettings = vi.fn()
   render(
@@ -20,6 +20,7 @@ function stage(selectedId: string, shown = true) {
       onOpenLogs={noop}
       onOpenMap={noop}
       shown={shown}
+      live={live}
     />,
   )
   return { onSelect, onOpenSettings }
@@ -57,5 +58,12 @@ describe('CompactStage', () => {
     expect(root).toHaveClass('invisible')
     expect(root).toHaveAttribute('inert')
     expect(root).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('stays on screen but takes no input while a morph carries the window out of it', () => {
+    stage(chapters[0]!.id, true, false)
+    const root = document.querySelector('[data-layout="compact"]')!
+    expect(root).not.toHaveClass('invisible')
+    expect(root).toHaveAttribute('inert')
   })
 })

@@ -35,6 +35,7 @@ export default function App() {
   const loadWikiPages = useChapterStore((s) => s.loadWikiPages)
   const loadWikiShots = useChapterStore((s) => s.loadWikiShots)
   const advanceSlide = useChapterStore((s) => s.advance)
+  const setSlidesTogether = useChapterStore((s) => s.setTogether)
   const canRotate = useChapterStore(selectCanRotate)
   const loadPanoramas = useChapterStore((s) => s.loadPanoramas)
   const heroArt = useSettingsStore((s) => heroArtOf(s.settings))
@@ -107,8 +108,13 @@ export default function App() {
   // The open chapter's slide moves on every minute (issue 142): a timer for
   // what is on screen, not a poll of anything Go holds. It runs only while the
   // window is in view, starts over on every switch, and not at all unless the
-  // slideshow is what the hero shows, or with nothing to move on to.
+  // slideshow is what the hero shows, or with nothing to move on to. The
+  // compact launcher shows every chapter's slide, and they move on together:
+  // a switch there changes no picture and does not start the minute over.
   const slideshow = heroArt === 'slideshow'
+  const together = layout.compact
+  useEffect(() => setSlidesTogether(together), [together, setSlidesTogether])
+  const rotation = together ? '' : selectedId
   useEffect(() => {
     if (!slideshow || !canRotate) return
     let timer: number | undefined
@@ -127,7 +133,7 @@ export default function App() {
       stop()
       document.removeEventListener('visibilitychange', start)
     }
-  }, [slideshow, canRotate, selectedId, advanceSlide])
+  }, [slideshow, canRotate, rotation, advanceSlide])
 
   // An instance appears when the user imports one in Prism, which happens in
   // another window. Coming back is the moment to look again; a focus event,

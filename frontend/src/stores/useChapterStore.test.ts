@@ -16,6 +16,7 @@ describe('useChapterStore', () => {
       wikiPages: [],
       wikiShots: [],
       slides: {},
+      together: false,
       panoramas: {},
     })
     vi.mocked(App.GetManifest).mockReset()
@@ -152,6 +153,36 @@ describe('useChapterStore', () => {
       expect(next.page?.id).not.toBe(first.page?.id)
       useChapterStore.getState().select('luxemburg')
       expect(useChapterStore.getState().slides.luxemburg).toBe(next)
+    })
+
+    it('together, shows every chapter a slide, keeps them on a switch and moves them all on advance', async () => {
+      useChapterStore.setState({
+        wikiPages: [page('castle', 'Luxemburg'), page('obelisk', 'Frangfurd')],
+        wikiShots: [
+          shot('/l1', 'Luxemburg'),
+          shot('/l2', 'Luxemburg'),
+          shot('/f1', 'Frangfurd'),
+          shot('/f2', 'Frangfurd'),
+        ],
+      })
+      useChapterStore.getState().setTogether(true)
+      const first = useChapterStore.getState().slides
+      expect(first.luxemburg?.art).toMatch(/^\/l/)
+      expect(first.frangfurd?.art).toMatch(/^\/f/)
+
+      useChapterStore.getState().select('frangfurd')
+      expect(useChapterStore.getState().slides).toBe(first)
+
+      await useChapterStore.getState().advance()
+      const next = useChapterStore.getState().slides
+      expect(next.luxemburg?.art).not.toBe(first.luxemburg?.art)
+      expect(next.frangfurd?.art).not.toBe(first.frangfurd?.art)
+
+      // Apart again, a switch picks the chapter switched to a new slide, as before.
+      useChapterStore.getState().setTogether(false)
+      useChapterStore.getState().select('luxemburg')
+      expect(useChapterStore.getState().slides.luxemburg?.art).not.toBe(next.luxemburg?.art)
+      expect(useChapterStore.getState().slides.frangfurd).toBe(next.frangfurd)
     })
 
     it('reads the pictures again after a new draw and gives a slide whose picture was pruned another (issue 172)', async () => {

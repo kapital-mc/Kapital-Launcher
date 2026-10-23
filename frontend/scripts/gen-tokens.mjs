@@ -183,7 +183,16 @@ function emitCss(src) {
   push()
   emitAccents(src, push)
   push()
+  emitVariants(src, push)
+  push()
   return lines.join('\n')
+}
+
+function emitVariants(src, push) {
+  push(`/* A compact panel too short for its whole foot (the window's own minimum is`)
+  push(`   lower than the full foot needs). A container query cannot read a custom`)
+  push(`   property, so the height is written here, from the token. */`)
+  push(`@custom-variant panel-short (@container panel (height < ${src.layout.compact.short}px));`)
 }
 
 function emitThemeMapping(src, push) {

@@ -41,7 +41,8 @@ interface Props {
  * chapter card) or the compact one (the chapters as panels), and the morph
  * between them (docs/adr/0015-compact-launcher.md). The full layout is always
  * laid out, hidden while compact shows; the compact one is in the page while
- * it shows or a morph runs. The pages open over whichever is shown.
+ * it shows or a morph runs. Until a morph's first frame is up, the layout
+ * being left stays on screen. The pages open over whichever is shown.
  */
 export function LauncherLayout({ chapter, chapters, select, pages, compact }: Props) {
   const { settings, account, chapterPage } = pages
@@ -60,8 +61,10 @@ export function LauncherLayout({ chapter, chapters, select, pages, compact }: Pr
     return () => cancelAnimationFrame(frame)
   }, [loaded])
   const { mode, morphTo } = useLayoutMorph(compact, ready, area, layer, stage)
-  const fullShown = mode === 'full' || morphTo !== null
-  const compactShown = mode === 'compact' && morphTo === null
+  // Each layout shows while it is the mode, until the morph's actors take over
+  // from it (lib/compactMorphRun), and takes input only when no morph runs.
+  const fullLive = mode === 'full' && morphTo === null
+  const compactLive = mode === 'compact' && morphTo === null
 
   const layers = (
     <>
@@ -96,9 +99,9 @@ export function LauncherLayout({ chapter, chapters, select, pages, compact }: Pr
     <div ref={area} className="relative flex min-h-0 grow overflow-clip">
       <div
         data-layout="full"
-        inert={!fullShown || morphTo !== null}
-        aria-hidden={!fullShown || undefined}
-        className={`flex min-h-0 grow ${fullShown ? '' : 'invisible'}`}
+        inert={!fullLive}
+        aria-hidden={mode !== 'full' || undefined}
+        className={`flex min-h-0 grow ${mode === 'full' ? '' : 'invisible'}`}
       >
         <Sidebar onOpenAccount={pages.toggleAccount} accountOpen={account.slot?.open === true} />
         {/* The chapter card scrolls under the header bar and beside the
@@ -127,7 +130,8 @@ export function LauncherLayout({ chapter, chapters, select, pages, compact }: Pr
             onOpenSettings={pages.openChapterSettings}
             onOpenLogs={pages.openLogs}
             onOpenMap={pages.openMap}
-            shown={compactShown}
+            shown={mode === 'compact'}
+            live={compactLive}
             covered={pages.covered}
           >
             {mode === 'compact' && layers}

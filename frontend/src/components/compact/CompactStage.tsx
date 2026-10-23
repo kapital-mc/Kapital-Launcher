@@ -11,6 +11,8 @@ interface Props {
   onOpenMap: (chapterId: string) => void
   /** Whether the layout is the one shown. Hidden, it stays laid out, so the morph can measure it. */
   shown: boolean
+  /** Whether it takes input: shown, with no morph running. */
+  live: boolean
   /** Whether a page covers the panels, which leaves them inert beneath. */
   covered?: boolean
   /** The pages laid over the panels, each a `PageLayer`, while this is the layout shown. */
@@ -33,6 +35,7 @@ export function CompactStage({
   onOpenLogs,
   onOpenMap,
   shown,
+  live,
   covered = false,
   children,
   ref,
@@ -41,14 +44,14 @@ export function CompactStage({
     <div
       ref={ref}
       data-layout="compact"
-      inert={!shown}
+      inert={!live}
       aria-hidden={!shown || undefined}
       className={`bg-sunken absolute inset-0 ${shown ? '' : 'invisible'}`}
     >
       <div
         inert={covered}
         aria-hidden={covered || undefined}
-        className="flex size-full gap-(--layout-compact-gap) p-(--layout-compact-gap)"
+        className="compact-row flex size-full gap-(--layout-compact-gap) p-(--layout-compact-gap)"
       >
         {chapters.map((c) => (
           <CompactPanel

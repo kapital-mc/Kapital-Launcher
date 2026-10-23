@@ -104,6 +104,7 @@ export type ActorKey =
   | 'backdrop'
   | 'clip'
   | 'art'
+  | 'wash'
   | 'scrim'
   | 'shade'
   | 'label'
@@ -147,6 +148,9 @@ const inset = (r: Box, m: MorphMeasure, radius: string) =>
   `inset(${px(r.y)} ${px(m.W - r.x - r.w)} ${px(m.H - r.y - r.h)} ${px(r.x)} round ${radius})`
 const fromTo = (a: Box, b: Box, scale: boolean) =>
   `translate(${px(a.x - b.x)}, ${px(a.y - b.y)}) scale(${scale ? a.w / b.w : 1})`
+/** Laid out at `b`, drawn over `a`: each side scales on its own, for a wash that fills its frame. */
+const stretch = (a: Box, b: Box) =>
+  `translate(${px(a.x - b.x)}, ${px(a.y - b.y)}) scale(${a.w / b.w}, ${a.h / b.h})`
 
 /** The picture, its frame, the scrims and the other chapters' panels. */
 function planPictures(m: MorphMeasure, c: Curves): Step[] {
@@ -170,20 +174,16 @@ function planPictures(m: MorphMeasure, c: Curves): Step[] {
       t: [0, A],
       ease: c.travel,
     },
+    // The washes over the picture fill its frame all the way, the hero's turning into the panel's.
     {
-      key: 'scrim',
-      box: m.hero,
-      kf: [{ opacity: 1 }, { opacity: 0 }],
-      t: [0, 0.2],
-      ease: 'linear',
-    },
-    {
-      key: 'shade',
+      key: 'wash',
       box: m.panel,
-      kf: [{ opacity: 0 }, { opacity: 1 }],
-      t: [0.1, A],
-      ease: 'linear',
+      kf: [{ transform: stretch(m.hero, m.panel) }, { transform: 'none' }],
+      t: [0, A],
+      ease: c.travel,
     },
+    { key: 'scrim', kf: [{ opacity: 1 }, { opacity: 0 }], t: [0, 0.3], ease: 'linear' },
+    { key: 'shade', kf: [{ opacity: 0 }, { opacity: 1 }], t: [0.1, A], ease: 'linear' },
   ]
   // The other chapters come in from the side they sit on: their far edge starts at the window's edge.
   m.panels.forEach((r, i) => {
