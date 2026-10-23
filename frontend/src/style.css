@@ -839,9 +839,23 @@
    falls rather than jumping, and the row fades in once it has room. While the
    layout is hidden nothing transitions, so what the morph measures there is
    where things end. */
+/* The open panel's width once a switch has settled, from the row's. Play's row is
+   laid out at it from the first frame, so its line never wraps or unwraps while
+   the panel's width moves. Registered, so it resolves against the row. */
+@property --panel-open-w {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+.compact-row {
+  container: row / inline-size;
+}
 .compact-panel {
   flex: 1 1 0;
   container: panel / size;
+  --panel-open-w: calc(
+    (100cqw - 2 * var(--layout-compact-gap)) * var(--panel-grow) / (var(--panel-grow) + 2)
+  );
   transition: flex-grow var(--duration-switch) var(--ease-travel);
 }
 .compact-panel[data-active] {
@@ -899,6 +913,9 @@
     grid-template-rows var(--duration-switch) var(--ease-travel),
     opacity var(--duration-slow) var(--ease-out) var(--duration-slow),
     transform var(--duration-slow) var(--ease-out) var(--duration-slow);
+}
+.compact-foot-row {
+  width: calc(var(--panel-open-w) - 12 * var(--spacing));
 }
 .compact-tools {
   transition: opacity var(--duration-slow) linear var(--duration-reveal);

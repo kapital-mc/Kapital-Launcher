@@ -120,7 +120,7 @@ export function CompactPanel({
             It is not clipped while it opens: Play fades in once there is room. */}
         <div inert={!active} className="compact-foot -mt-3.5">
           <div className="min-h-0">
-            <div className="pt-3.5">
+            <div className="compact-foot-row pt-3.5">
               <ChapterActions chapter={chapter} layout="panel" />
             </div>
           </div>
