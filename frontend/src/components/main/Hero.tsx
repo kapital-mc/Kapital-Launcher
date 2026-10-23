@@ -63,13 +63,15 @@ export function Hero({
   const spec = knownFacts(chapter.pack.loader, chapter.pack.minecraft)
   const mods = knownFacts(chapter.pack.mods)
 
+  // It takes all the height the card has spare, so a taller window grows the
+  // picture and keeps Play and the panels at the card's foot.
   // Its own layer, so the card's rounded corner clips the picture and the scrim
   // over it once, together: clipped one by one, the picture shows past the
   // scrim along the corner's curve as a light line.
   return (
     <section
       data-morph="hero"
-      className="border-line relative flex max-h-(--layout-hero) min-h-0 grow flex-col justify-end overflow-hidden border-b px-7 py-11 will-change-transform"
+      className="border-line relative flex min-h-0 grow flex-col justify-end overflow-hidden border-b px-7 py-11 will-change-transform"
     >
       {art ? (
         <>

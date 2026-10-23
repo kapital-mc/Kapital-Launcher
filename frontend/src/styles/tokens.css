@@ -128,7 +128,6 @@
    shorthand, w-(--layout-sidebar), or from style.css. */
 :root {
   --layout-sidebar: 264px;
-  --layout-hero: 440px;
   --layout-titlebar: 40px;
   --layout-scrollbar: 6px;
   --layout-slide: 32px;

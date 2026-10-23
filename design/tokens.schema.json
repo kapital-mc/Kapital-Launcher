@@ -172,7 +172,7 @@
     },
     "layout": {
       "type": "object",
-      "required": ["unit", "sidebar", "sidebarCompact", "hero", "titlebar", "titlebarMac", "controlsMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "compact", "splash"],
+      "required": ["unit", "sidebar", "sidebarCompact", "titlebar", "titlebarMac", "controlsMac", "icon", "scrollbar", "slide", "drift", "revealRise", "title", "playMin", "window", "compact", "splash"],
       "additionalProperties": false,
       "properties": {
         "unit": { "const": "px" },
@@ -181,11 +181,6 @@
           "type": "integer",
           "minimum": 1,
           "description": "The sidebar's width when compact: the chapter rows' icon column (an icon in its row's padding and border) between the sidebar's own side padding, plus its 1px right border, so nothing moves sideways as it narrows and the account tile is square."
-        },
-        "hero": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "The hero's greatest height; it shrinks below this so the chapter card fits the window (#68)."
         },
         "titlebar": { "type": "integer", "minimum": 1 },
         "titlebarMac": {

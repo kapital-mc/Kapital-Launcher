@@ -348,7 +348,6 @@ export const WINDOW = { width: ${w.width}, height: ${w.height}, minWidth: ${w.mi
 
 export const LAYOUT = {
   sidebar: ${src.layout.sidebar},
-  hero: ${src.layout.hero},
   titlebar: ${src.layout.titlebar},
   titlebarMac: ${src.layout.titlebarMac},
   controlsMac: ${src.layout.controlsMac},

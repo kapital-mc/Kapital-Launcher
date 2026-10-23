@@ -9,7 +9,7 @@ export function emitLayout(src, push) {
   push(`   shorthand, w-(--layout-sidebar), or from style.css. */`)
   push(`:root {`)
   const { unit } = src.layout
-  for (const k of ['sidebar', 'hero', 'titlebar', 'scrollbar', 'slide', 'drift', 'title']) {
+  for (const k of ['sidebar', 'titlebar', 'scrollbar', 'slide', 'drift', 'title']) {
     push(`  --layout-${k}: ${src.layout[k]}${unit};`)
   }
   push(`  --layout-titlebar-mac: ${src.layout.titlebarMac}${unit};`)

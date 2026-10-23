@@ -31,7 +31,6 @@ export const WINDOW = { width: 1280, height: 800, minWidth: 960, minHeight: 360 
 
 export const LAYOUT = {
   sidebar: 264,
-  hero: 440,
   titlebar: 40,
   titlebarMac: 52,
   controlsMac: 80,
