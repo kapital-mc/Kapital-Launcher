@@ -1,325 +1,361 @@
-/* The launcher window on the download page, cycling through its three
-   chapters with no script: one CSS animation per moving part, all on the
-   same clock. The motion is the app's own (frontend/src/style.css): the
-   chapter card slides the way the content moves, blurring at the middle of
-   its travel, while the nav highlight glides to the next row in the same
-   duration and easing. Every length, duration and easing is a token; the
-   only numbers here are the keyframe stops, which are fractions of the cycle.
+/* The one thing the page draws that the app does not: the chapter strip in the
+   launcher window and the backdrop behind it, on the app's tokens.
 
-   The clock: a chapter dwells (motion.duration.dwell), then the next slides
-   in over the slow duration. Three chapters make one cycle, so a step is one
-   third of it and a slide is slow / cycle of it. With dwell 3780 ms and slow
-   420 ms a step is 4200 ms, the cycle 12600 ms and a slide 3.333% of it.
-   Change either duration and the stops below must follow. */
+   The open chapter is a radio (name="chapter", #chapter-<id>), and the strip's
+   panels are its labels, so choosing a chapter needs no script: everything
+   that follows the open chapter reads it with :has() on the root. That sets
+   the accent (the pack card, the tint), the picture of the backdrop and of the
+   download popup's banner, which of the floating cards shows, and which panel
+   is wide. */
 
-/* On the root, not the window: the glow and the Download button outside it
-   run on the same clock. */
-:root {
-  --showcase-step: calc(var(--duration-dwell) + var(--duration-slow));
-  --showcase-cycle: calc(3 * var(--showcase-step));
+:root:has(#chapter-luxemburg:checked) {
+  --accent: var(--chapter-luxemburg);
+  /* The picture's width over its height, for the backdrop's cover sizing. */
+  --showcase-art: url('../../frontend/src/assets/screenshots/luxemburg.webp');
+  --showcase-ratio: 1.8692;
+  /* The popup banner's grade, for when no script sets its chapter. */
+  --showcase-banner-grey: var(--effect-banner-grey-luxemburg);
+  --showcase-banner-tint: var(--effect-banner-tint-luxemburg);
+  /* The colour of the server card's square: offline. */
+  --showcase-state: var(--color-danger);
 }
-
-/* The second and third chapter take their turn one and two steps after the
-   first, in the stage and in the nav alike; the parts read the delay from
-   here. A negative delay starts an animation part-way through, so the second
-   chapter begins two steps in (one step from its own turn) and the third one
-   step in. */
-.showcase-stage > :nth-child(2),
-.showcase-rows > :nth-child(2) {
-  --showcase-delay: calc(-2 * var(--showcase-step));
+:root:has(#chapter-lichdenstein:checked) {
+  --accent: var(--chapter-lichdenstein);
+  --showcase-art: url('../../frontend/src/assets/screenshots/lichdenstein.webp');
+  --showcase-ratio: 1.7758;
+  --showcase-banner-grey: var(--effect-banner-grey-lichdenstein);
+  --showcase-banner-tint: var(--effect-banner-tint-lichdenstein);
+  --showcase-state: var(--color-danger);
 }
-.showcase-stage > :nth-child(3),
-.showcase-rows > :nth-child(3) {
-  --showcase-delay: calc(-1 * var(--showcase-step));
+:root:has(#chapter-frangfurd:checked) {
+  --accent: var(--chapter-frangfurd);
+  --showcase-art: url('../../frontend/src/assets/screenshots/frangfurd.webp');
+  --showcase-ratio: 1.7758;
+  --showcase-banner-grey: var(--effect-banner-grey-frangfurd);
+  --showcase-banner-tint: var(--effect-banner-tint-frangfurd);
+  /* Not known until /status answers (src/cards.js sets data-server). */
+  --showcase-state: var(--color-fg-faint);
 }
-
-/* The card. Picking the chapter below brings the new card up from below and
-   sends the old one up and out; the wrap from the last chapter to the first
-   runs the other way, as it does in the app. */
-.showcase-stage > :nth-child(1) {
-  --showcase-in: calc(-1 * var(--layout-slide));
-  --showcase-out: calc(-1 * var(--layout-slide));
+:root[data-server='online']:has(#chapter-frangfurd:checked) {
+  --showcase-state: var(--color-success);
 }
-.showcase-stage > :nth-child(2) {
-  --showcase-in: var(--layout-slide);
-  --showcase-out: calc(-1 * var(--layout-slide));
-}
-.showcase-stage > :nth-child(3) {
-  --showcase-in: var(--layout-slide);
-  --showcase-out: var(--layout-slide);
-}
-@keyframes showcase-card {
-  0% {
-    transform: translateY(var(--showcase-in));
-    opacity: 0;
-  }
-  3.333%,
-  33.333% {
-    transform: none;
-    opacity: 1;
-  }
-  36.667%,
-  100% {
-    transform: translateY(var(--showcase-out));
-    opacity: 0;
-  }
-}
-@keyframes showcase-blur {
-  0%,
-  3.333%,
-  33.333%,
-  36.667%,
-  100% {
-    filter: blur(0);
-  }
-  1.667%,
-  35% {
-    filter: blur(var(--effect-motion-blur));
-  }
-}
-.showcase-card {
-  animation:
-    showcase-card var(--showcase-cycle) var(--ease-glide) infinite,
-    showcase-blur var(--showcase-cycle) ease-in-out infinite;
-  animation-delay: var(--showcase-delay, 0s);
+:root[data-server='offline']:has(#chapter-frangfurd:checked) {
+  --showcase-state: var(--color-danger);
 }
 
-/* The open chapter's art behind its nav row, faded in while it is the one shown. */
-@keyframes showcase-row-art {
-  0%,
-  36.667%,
-  100% {
-    opacity: 0;
-  }
-  3.333%,
-  33.333% {
-    opacity: 1;
-  }
+/* What belongs to one chapter (data-for) shows only while it is open. In a
+   floating card the chapters' versions share one cell and cross-fade, so the
+   card keeps its size; with src/cards.js running the new one shows at once
+   and its letters scramble into place instead. Their colours come from the
+   root (the accent, --showcase-state) and fade there. */
+:root:not(:has(#chapter-luxemburg:checked)) [data-for='luxemburg']:not(.showcase-fade),
+:root:not(:has(#chapter-lichdenstein:checked)) [data-for='lichdenstein']:not(.showcase-fade),
+:root:not(:has(#chapter-frangfurd:checked)) [data-for='frangfurd']:not(.showcase-fade) {
+  display: none;
 }
-.showcase-row-art {
-  animation: showcase-row-art var(--showcase-cycle) var(--ease-glide) infinite;
-  animation-delay: var(--showcase-delay, 0s);
+.showcase-fade {
+  grid-area: 1 / 1;
+  transition: opacity var(--duration-slow) var(--ease-standard);
 }
-
-/* The nav highlight: one element the height of a row, gliding row to row
-   behind the three, its border the open chapter's accent. The rows are
-   gap-1 apart, so a row down is its own height plus one spacing unit. */
-@keyframes showcase-highlight {
-  0% {
-    transform: translateY(calc(200% + 2 * var(--spacing)));
-    border-color: color-mix(
-      in srgb,
-      var(--chapter-frangfurd) var(--accent-edge-mix),
-      transparent
-    );
-  }
-  3.333%,
-  33.333% {
-    transform: none;
-    border-color: color-mix(
-      in srgb,
-      var(--chapter-luxemburg) var(--accent-edge-mix),
-      transparent
-    );
-  }
-  36.667%,
-  66.667% {
-    transform: translateY(calc(100% + var(--spacing)));
-    border-color: color-mix(
-      in srgb,
-      var(--chapter-lichdenstein) var(--accent-edge-mix),
-      transparent
-    );
-  }
-  70%,
-  100% {
-    transform: translateY(calc(200% + 2 * var(--spacing)));
-    border-color: color-mix(
-      in srgb,
-      var(--chapter-frangfurd) var(--accent-edge-mix),
-      transparent
-    );
-  }
+.showcase-card[data-scramble] > .showcase-fade {
+  transition: none;
 }
-.showcase-highlight {
-  height: calc((100% - 2 * var(--spacing)) / 3);
-  animation: showcase-highlight var(--showcase-cycle) var(--ease-glide) infinite;
+/* A block in scrambling text (src/cards.js): one letter wide with a letter's
+   gap, one capital tall, on the baseline, so it is the size of the letters
+   around it. */
+.scramble-block {
+  display: inline-block;
+  width: 1ch;
+  height: 1cap;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 75% 100%;
 }
-
-/* The open chapter's colour, for what sits outside the window: the glow
-   behind it, the Download button above it and the download buttons in the
-   popup. One clock for all of them: the colour is animated once, on the root,
-   as a registered property each of them reads. An animation on the element
-   itself restarts whenever the browser starts drawing it again, so the popup,
-   drawn only while open, and its two panels, swapped by display, would begin
-   the cycle at Frangfurd on every opening and every switch, out of step with
-   the page. Reading the root's colour, they show where the page is. */
-@property --showcase-accent {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
+.scramble-block[data-block='top'] {
+  background-size: 75% 50%;
 }
-@keyframes showcase-accent {
-  0%,
-  70%,
-  100% {
-    --showcase-accent: var(--chapter-frangfurd);
-  }
-  3.333%,
-  33.333% {
-    --showcase-accent: var(--chapter-luxemburg);
-  }
-  36.667%,
-  66.667% {
-    --showcase-accent: var(--chapter-lichdenstein);
-  }
+.scramble-block[data-block='bottom'] {
+  background-position: bottom;
+  background-size: 75% 50%;
 }
-:root {
-  animation: showcase-accent var(--showcase-cycle) var(--ease-glide) infinite;
+.showcase-state {
+  background-color: var(--showcase-state);
+  transition: background-color var(--duration-slow) var(--ease-standard);
 }
-.showcase-accent {
-  background-color: var(--showcase-accent);
-}
-/* The glow behind the window is a radial gradient, not a blurred box. Safari
-   repaints a large blur filter in pieces when something beside it changes,
-   such as the Download button's hover, and the glow flashed clipped. */
-.showcase-glow {
-  background: radial-gradient(closest-side, var(--showcase-accent) 40%, transparent);
-}
-
-/* With reduced motion the cards only cross-fade, on the same clock, and the
-   highlight steps to its row instead of gliding; the colours still ease. */
-@keyframes showcase-fade {
-  0%,
-  36.667%,
-  100% {
-    opacity: 0;
-  }
-  3.333%,
-  33.333% {
-    opacity: 1;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .showcase-card {
-    animation: showcase-fade var(--showcase-cycle) ease-in-out infinite;
-    animation-delay: var(--showcase-delay, 0s);
-  }
-  .showcase-highlight {
-    animation-timing-function: step-end;
-  }
-}
-
-/* Clickable rows (src/showcase.js). With the script the root carries
-   data-showcase="live": the animations above stop, and the same motion runs
-   from attributes the script sets. data-showcase-open is the open chapter's
-   place in the list, data-open marks its card, aria-current its row, and
-   data-motion a card entering or leaving and which way it travels. */
-:root[data-showcase="live"] {
-  animation: none;
-  --showcase-index: 0;
-  --showcase-accent: var(--chapter-luxemburg);
-  transition: --showcase-accent var(--duration-slow) var(--ease-glide);
-}
-:root[data-showcase="live"][data-showcase-open="1"] {
-  --showcase-index: 1;
-  --showcase-accent: var(--chapter-lichdenstein);
-}
-:root[data-showcase="live"][data-showcase-open="2"] {
-  --showcase-index: 2;
-  --showcase-accent: var(--chapter-frangfurd);
-}
-
-[data-showcase="live"] .showcase-highlight {
-  animation: none;
-  transform: translateY(calc(var(--showcase-index) * (100% + var(--spacing))));
-  border-color: color-mix(
-    in srgb,
-    var(--showcase-accent) var(--accent-edge-mix),
-    transparent
-  );
-  transition: transform var(--duration-slow) var(--ease-glide);
-}
-
-[data-showcase="live"] .showcase-row-art {
-  animation: none;
-  opacity: 0;
-  transition: opacity var(--duration-slow) var(--ease-glide);
-}
-[data-showcase="live"] [aria-current="true"] > .showcase-row-art {
-  opacity: 1;
-}
-
-/* A card travels the slide distance, blurring at the middle of its travel,
-   the way the cycle above moves it. */
-[data-showcase="live"] .showcase-card {
-  animation: none;
+:root:not(:has(#chapter-luxemburg:checked)) .showcase-fade[data-for='luxemburg'],
+:root:not(:has(#chapter-lichdenstein:checked)) .showcase-fade[data-for='lichdenstein'],
+:root:not(:has(#chapter-frangfurd:checked)) .showcase-fade[data-for='frangfurd'] {
   opacity: 0;
 }
-[data-showcase="live"] .showcase-card[data-open] {
+
+/* The strip: the open chapter's panel takes most of the width, its picture
+   at full strength and its title larger; the others are dimmed. Below the
+   tablet width the panels stack. */
+.showcase-panel {
+  flex: 1 1 calc(var(--spacing) * 50);
+  transition: flex-grow var(--duration-slow) var(--ease-standard);
+}
+.showcase-panel:has(:checked) {
+  flex-grow: 2.6;
+}
+.showcase-panel-art {
+  opacity: var(--effect-showcase-dim);
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+.showcase-panel:has(:checked) .showcase-panel-art {
   opacity: 1;
 }
-[data-showcase="live"] .showcase-card[data-motion="enter-up"],
-[data-showcase="live"] .showcase-card[data-motion="leave-down"] {
-  --showcase-shift: var(--layout-slide);
+.showcase-panel-title {
+  width: calc(var(--spacing) * 45);
+  transition: width var(--duration-slow) var(--ease-standard);
 }
-[data-showcase="live"] .showcase-card[data-motion="enter-down"],
-[data-showcase="live"] .showcase-card[data-motion="leave-up"] {
-  --showcase-shift: calc(-1 * var(--layout-slide));
+.showcase-panel:has(:checked) .showcase-panel-title {
+  width: calc(var(--spacing) * 100);
 }
-@keyframes showcase-enter {
-  from {
-    transform: translateY(var(--showcase-shift));
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-@keyframes showcase-leave {
-  from {
-    transform: none;
-    opacity: 1;
-  }
-  to {
-    transform: translateY(var(--showcase-shift));
-    opacity: 0;
-  }
-}
-@keyframes showcase-travel-blur {
-  0%,
-  100% {
-    filter: blur(0);
-  }
-  50% {
-    filter: blur(var(--effect-motion-blur));
-  }
-}
-[data-showcase="live"] .showcase-card[data-motion^="enter"] {
-  animation:
-    showcase-enter var(--duration-slow) var(--ease-glide) both,
-    showcase-travel-blur var(--duration-slow) ease-in-out;
-}
-[data-showcase="live"] .showcase-card[data-motion^="leave"] {
-  animation:
-    showcase-leave var(--duration-slow) var(--ease-glide) both,
-    showcase-travel-blur var(--duration-slow) ease-in-out;
+.showcase-panel:has(:focus-visible) > label {
+  outline: var(--focus-ring-width) solid var(--color-fg);
+  outline-offset: var(--focus-ring-offset);
 }
 
-/* Reduced motion, as for the cycle: the cards cross-fade in place and the
-   highlight steps to its row. */
+/* The backdrop: the open chapter's picture cut into a grid of squares under a
+   second grid of dark ones (mosaic.js writes both). A switch replaces the
+   picture and the dark squares square by square, each at its own delay. The
+   picture is darkened toward the page ground and tinted toward the accent,
+   lightly, and not blurred: a blur reads across the squares' edges, which
+   then show seams mid-swap. Each square paints its own slice of one picture,
+   sized as object-fit: cover over the whole backdrop through container units,
+   so the slices join and nothing larger than a square is ever painted. The
+   grid's 24 by 12 is mosaic.js's COLS and ROWS. */
+.showcase-backdrop {
+  container-type: size;
+}
+.showcase-art,
+.showcase-pixels {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  grid-template-rows: repeat(12, minmax(0, 1fr));
+}
+/* The shade is out of the grid's flow, over every square at once. */
+.showcase-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-sunken);
+  opacity: var(--effect-showcase-shade);
+}
+.showcase-art > span {
+  --showcase-width: max(100cqw, 100cqh * var(--showcase-ratio));
+  --showcase-height: max(100cqw / var(--showcase-ratio), 100cqh);
+  background-image: var(--showcase-art);
+  background-repeat: no-repeat;
+  background-size: var(--showcase-width) var(--showcase-height);
+  background-position:
+    calc((100cqw - var(--showcase-width)) / 2 - var(--showcase-x) * 100cqw / 24)
+    calc((100cqh - var(--showcase-height)) / 2 - var(--showcase-y) * 100cqh / 12);
+  transition-property: background-image, background-size, background-position;
+  transition-duration: 1ms;
+  transition-timing-function: step-end;
+  transition-behavior: allow-discrete;
+  transition-delay: var(--showcase-delay);
+}
+.showcase-tint {
+  background-color: var(--accent);
+  mix-blend-mode: color;
+  opacity: var(--effect-showcase-tint);
+  transition: background-color var(--duration-slow) var(--ease-standard);
+}
+.showcase-pixels > span {
+  transition: background-color var(--duration-fast) linear var(--showcase-delay);
+}
+:root:has(#chapter-luxemburg:checked) .showcase-pixels > [data-m~='01'],
+:root:has(#chapter-lichdenstein:checked) .showcase-pixels > [data-m~='02'],
+:root:has(#chapter-frangfurd:checked) .showcase-pixels > [data-m~='03'] {
+  background-color: var(--color-sunken);
+  /* A square goes dark at the moment its picture changes: faded in, it let
+     the new picture show through for the length of the fade. A square that
+     opens still fades out, over the picture it opens on. */
+  transition-duration: 0s;
+}
+
+/* Each square's column and row, for its slice of the picture. */
+.showcase-art > * { --showcase-x: 0; --showcase-y: 0; }
+.showcase-art > :nth-child(24n + 2) { --showcase-x: 1; }
+.showcase-art > :nth-child(24n + 3) { --showcase-x: 2; }
+.showcase-art > :nth-child(24n + 4) { --showcase-x: 3; }
+.showcase-art > :nth-child(24n + 5) { --showcase-x: 4; }
+.showcase-art > :nth-child(24n + 6) { --showcase-x: 5; }
+.showcase-art > :nth-child(24n + 7) { --showcase-x: 6; }
+.showcase-art > :nth-child(24n + 8) { --showcase-x: 7; }
+.showcase-art > :nth-child(24n + 9) { --showcase-x: 8; }
+.showcase-art > :nth-child(24n + 10) { --showcase-x: 9; }
+.showcase-art > :nth-child(24n + 11) { --showcase-x: 10; }
+.showcase-art > :nth-child(24n + 12) { --showcase-x: 11; }
+.showcase-art > :nth-child(24n + 13) { --showcase-x: 12; }
+.showcase-art > :nth-child(24n + 14) { --showcase-x: 13; }
+.showcase-art > :nth-child(24n + 15) { --showcase-x: 14; }
+.showcase-art > :nth-child(24n + 16) { --showcase-x: 15; }
+.showcase-art > :nth-child(24n + 17) { --showcase-x: 16; }
+.showcase-art > :nth-child(24n + 18) { --showcase-x: 17; }
+.showcase-art > :nth-child(24n + 19) { --showcase-x: 18; }
+.showcase-art > :nth-child(24n + 20) { --showcase-x: 19; }
+.showcase-art > :nth-child(24n + 21) { --showcase-x: 20; }
+.showcase-art > :nth-child(24n + 22) { --showcase-x: 21; }
+.showcase-art > :nth-child(24n + 23) { --showcase-x: 22; }
+.showcase-art > :nth-child(24n + 24) { --showcase-x: 23; }
+.showcase-art > :nth-child(n + 25) { --showcase-y: 1; }
+.showcase-art > :nth-child(n + 49) { --showcase-y: 2; }
+.showcase-art > :nth-child(n + 73) { --showcase-y: 3; }
+.showcase-art > :nth-child(n + 97) { --showcase-y: 4; }
+.showcase-art > :nth-child(n + 121) { --showcase-y: 5; }
+.showcase-art > :nth-child(n + 145) { --showcase-y: 6; }
+.showcase-art > :nth-child(n + 169) { --showcase-y: 7; }
+.showcase-art > :nth-child(n + 193) { --showcase-y: 8; }
+.showcase-art > :nth-child(n + 217) { --showcase-y: 9; }
+.showcase-art > :nth-child(n + 241) { --showcase-y: 10; }
+.showcase-art > :nth-child(n + 265) { --showcase-y: 11; }
+
+/* The delay buckets (mosaic.js's DELAYS), spread over the slow duration. */
+[data-d] { --showcase-delay: 0ms; }
+[data-d='1'] { --showcase-delay: calc(var(--duration-slow) * 1 / 7); }
+[data-d='2'] { --showcase-delay: calc(var(--duration-slow) * 2 / 7); }
+[data-d='3'] { --showcase-delay: calc(var(--duration-slow) * 3 / 7); }
+[data-d='4'] { --showcase-delay: calc(var(--duration-slow) * 4 / 7); }
+[data-d='5'] { --showcase-delay: calc(var(--duration-slow) * 5 / 7); }
+[data-d='6'] { --showcase-delay: calc(var(--duration-slow) * 6 / 7); }
+[data-d='7'] { --showcase-delay: var(--duration-slow); }
+
+/* The download popup's banner: a chapter's picture cut into 13 by 4 squares
+   (mosaic.js's BANNER_COLS and BANNER_ROWS) under that chapter's own pattern
+   of dark squares, which leaves its subject clear. The chapter is the open
+   one, or, while the popup is open, the one src/cycle.js has put in
+   data-banner, every --duration-banner. A change sweeps from right to left
+   over --duration-wave: each square changes picture and darkness at its own
+   delay. */
+.showcase-banner-frame {
+  container-type: size;
+  --banner-art: var(--showcase-art);
+  --banner-ratio: var(--showcase-ratio);
+  --banner-grey: var(--showcase-banner-grey);
+  --banner-tint: var(--showcase-banner-tint);
+}
+.showcase-banner-frame[data-banner='luxemburg'] {
+  --banner-art: url('../../frontend/src/assets/screenshots/luxemburg.webp');
+  --banner-ratio: 1.8692;
+  --banner-grey: var(--effect-banner-grey-luxemburg);
+  --banner-tint: var(--effect-banner-tint-luxemburg);
+}
+.showcase-banner-frame[data-banner='lichdenstein'] {
+  --banner-art: url('../../frontend/src/assets/screenshots/lichdenstein.webp');
+  --banner-ratio: 1.7758;
+  --banner-grey: var(--effect-banner-grey-lichdenstein);
+  --banner-tint: var(--effect-banner-tint-lichdenstein);
+}
+.showcase-banner-frame[data-banner='frangfurd'] {
+  --banner-art: url('../../frontend/src/assets/screenshots/frangfurd.webp');
+  --banner-ratio: 1.7758;
+  --banner-grey: var(--effect-banner-grey-frangfurd);
+  --banner-tint: var(--effect-banner-tint-frangfurd);
+}
+.showcase-banner-art,
+.showcase-banner {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+.showcase-banner-art > span {
+  --showcase-width: max(100cqw, 100cqh * var(--banner-ratio));
+  --showcase-height: max(100cqw / var(--banner-ratio), 100cqh);
+  /* Graded in the picture's own squares, so the grade changes with the
+     picture in the wave: greyed by --banner-grey (a saturation blend), then
+     tinted top to bottom in the wordmark's colours by --banner-tint (a colour
+     blend). The amounts differ per chapter so the three pictures read alike. */
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--logo-gradient-top) var(--banner-tint), transparent),
+      color-mix(in srgb, var(--logo-gradient-bottom) var(--banner-tint), transparent)
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--bg-cover) var(--banner-grey), transparent),
+      color-mix(in srgb, var(--bg-cover) var(--banner-grey), transparent)
+    ),
+    var(--banner-art);
+  background-blend-mode: color, saturation, normal;
+  background-repeat: no-repeat;
+  background-size: var(--showcase-width) var(--showcase-height);
+  background-position:
+    calc((100cqw - var(--showcase-width)) / 2 - var(--showcase-x) * 100cqw / 13)
+    calc((100cqh - var(--showcase-height)) / 2 - var(--showcase-y) * 100cqh / 4);
+  transition-property: background-image, background-size, background-position;
+  transition-duration: 1ms;
+  transition-timing-function: step-end;
+  transition-behavior: allow-discrete;
+  transition-delay: var(--showcase-delay);
+}
+.showcase-banner > span {
+  transition: background-color var(--duration-fast) linear var(--showcase-delay);
+}
+.showcase-banner-frame[data-banner='luxemburg'] > .showcase-banner > [data-m~='01'],
+.showcase-banner-frame[data-banner='lichdenstein'] > .showcase-banner > [data-m~='02'],
+.showcase-banner-frame[data-banner='frangfurd'] > .showcase-banner > [data-m~='03'],
+:root:has(#chapter-luxemburg:checked) .showcase-banner-frame:not([data-banner]) > .showcase-banner > [data-m~='01'],
+:root:has(#chapter-lichdenstein:checked) .showcase-banner-frame:not([data-banner]) > .showcase-banner > [data-m~='02'],
+:root:has(#chapter-frangfurd:checked) .showcase-banner-frame:not([data-banner]) > .showcase-banner > [data-m~='03'] {
+  background-color: var(--color-sunken);
+  /* As the backdrop's: dark at once, open with a fade. */
+  transition-duration: 0s;
+}
+
+/* Each banner square's column and row, for its slice of the picture. */
+.showcase-banner-art > * { --showcase-x: 0; --showcase-y: 0; }
+.showcase-banner-art > :nth-child(13n + 2) { --showcase-x: 1; }
+.showcase-banner-art > :nth-child(13n + 3) { --showcase-x: 2; }
+.showcase-banner-art > :nth-child(13n + 4) { --showcase-x: 3; }
+.showcase-banner-art > :nth-child(13n + 5) { --showcase-x: 4; }
+.showcase-banner-art > :nth-child(13n + 6) { --showcase-x: 5; }
+.showcase-banner-art > :nth-child(13n + 7) { --showcase-x: 6; }
+.showcase-banner-art > :nth-child(13n + 8) { --showcase-x: 7; }
+.showcase-banner-art > :nth-child(13n + 9) { --showcase-x: 8; }
+.showcase-banner-art > :nth-child(13n + 10) { --showcase-x: 9; }
+.showcase-banner-art > :nth-child(13n + 11) { --showcase-x: 10; }
+.showcase-banner-art > :nth-child(13n + 12) { --showcase-x: 11; }
+.showcase-banner-art > :nth-child(13n + 13) { --showcase-x: 12; }
+.showcase-banner-art > :nth-child(n + 14) { --showcase-y: 1; }
+.showcase-banner-art > :nth-child(n + 27) { --showcase-y: 2; }
+.showcase-banner-art > :nth-child(n + 40) { --showcase-y: 3; }
+
+/* The banner's delay buckets (mosaic.js's BANNER_DELAYS), over the wave. */
+.showcase-banner-frame [data-d='1'] { --showcase-delay: calc(var(--duration-wave) * 1 / 15); }
+.showcase-banner-frame [data-d='2'] { --showcase-delay: calc(var(--duration-wave) * 2 / 15); }
+.showcase-banner-frame [data-d='3'] { --showcase-delay: calc(var(--duration-wave) * 3 / 15); }
+.showcase-banner-frame [data-d='4'] { --showcase-delay: calc(var(--duration-wave) * 4 / 15); }
+.showcase-banner-frame [data-d='5'] { --showcase-delay: calc(var(--duration-wave) * 5 / 15); }
+.showcase-banner-frame [data-d='6'] { --showcase-delay: calc(var(--duration-wave) * 6 / 15); }
+.showcase-banner-frame [data-d='7'] { --showcase-delay: calc(var(--duration-wave) * 7 / 15); }
+.showcase-banner-frame [data-d='8'] { --showcase-delay: calc(var(--duration-wave) * 8 / 15); }
+.showcase-banner-frame [data-d='9'] { --showcase-delay: calc(var(--duration-wave) * 9 / 15); }
+.showcase-banner-frame [data-d='10'] { --showcase-delay: calc(var(--duration-wave) * 10 / 15); }
+.showcase-banner-frame [data-d='11'] { --showcase-delay: calc(var(--duration-wave) * 11 / 15); }
+.showcase-banner-frame [data-d='12'] { --showcase-delay: calc(var(--duration-wave) * 12 / 15); }
+.showcase-banner-frame [data-d='13'] { --showcase-delay: calc(var(--duration-wave) * 13 / 15); }
+.showcase-banner-frame [data-d='14'] { --showcase-delay: calc(var(--duration-wave) * 14 / 15); }
+.showcase-banner-frame [data-d='15'] { --showcase-delay: calc(var(--duration-wave) * 15 / 15); }
+
 @media (prefers-reduced-motion: reduce) {
-  [data-showcase="live"] .showcase-card[data-motion] {
-    --showcase-shift: 0;
-  }
-  [data-showcase="live"] .showcase-card[data-motion^="enter"] {
-    animation: showcase-enter var(--duration-slow) ease-in-out both;
-  }
-  [data-showcase="live"] .showcase-card[data-motion^="leave"] {
-    animation: showcase-leave var(--duration-slow) ease-in-out both;
-  }
-  [data-showcase="live"] .showcase-highlight {
+  .showcase-panel,
+  .showcase-panel-art,
+  .showcase-panel-title,
+  .showcase-tint,
+  .showcase-fade,
+  .showcase-state,
+  .showcase-banner > span,
+  .showcase-pixels > span {
     transition: none;
+  }
+  .showcase-art > span,
+  .showcase-banner-art > span {
+    transition-delay: 0ms;
   }
 }

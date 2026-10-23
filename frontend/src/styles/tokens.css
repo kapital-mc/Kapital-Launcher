@@ -64,6 +64,7 @@
   --font-display: 'Fraunces', 'Iowan Old Style', 'Georgia', serif;
   --font-display--font-variation-settings: 'SOFT' 0, 'WONK' 0;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+  --font-pixel: 'Silkscreen', ui-monospace, monospace;
 
   /* Letter-spacing by role, read as tracking-<role>. */
   --tracking-control: 0.01em;
@@ -103,6 +104,12 @@
   --transition-duration-tooltip: 2000ms;
   --duration-spin: 1000ms;
   --transition-duration-spin: 1000ms;
+  --duration-cycle: 5000ms;
+  --transition-duration-cycle: 5000ms;
+  --duration-banner: 7500ms;
+  --transition-duration-banner: 7500ms;
+  --duration-wave: 7000ms;
+  --transition-duration-wave: 7000ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
@@ -159,6 +166,15 @@
   --cover-art: 40%;
   --cover-spot: 36%;
   --cover-blur: 36px;
+  --effect-showcase-tint: 34%;
+  --effect-showcase-shade: 35%;
+  --effect-showcase-dim: 28%;
+  --effect-banner-grey-luxemburg: 35%;
+  --effect-banner-tint-luxemburg: 25%;
+  --effect-banner-grey-lichdenstein: 15%;
+  --effect-banner-tint-lichdenstein: 60%;
+  --effect-banner-grey-frangfurd: 10%;
+  --effect-banner-tint-frangfurd: 20%;
   --layout-reveal-rise: 4px;
   --effect-reveal-blur: 2px;
   --effect-glow-blur: 18px;

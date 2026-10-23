@@ -271,7 +271,7 @@
     "effect": {
       "type": "object",
       "description": "Values a utility cannot name on its own: the hover lift on the filled button, the focus outline, the stops of the scrim over artwork, and the grid shown where a chapter has no artwork yet.",
-      "required": ["hoverBrightness", "focusRing", "scrim", "accent", "artPending", "motionBlur", "revealBlur", "glow", "tileBlur", "tileTint", "panorama", "cover"],
+      "required": ["hoverBrightness", "focusRing", "scrim", "accent", "artPending", "motionBlur", "revealBlur", "glow", "tileBlur", "tileTint", "panorama", "cover", "showcase"],
       "additionalProperties": false,
       "properties": {
         "hoverBrightness": { "type": "number", "exclusiveMinimum": 1, "maximum": 2 },
@@ -344,6 +344,52 @@
             "art": { "type": "number", "minimum": 0, "maximum": 100 },
             "spot": { "type": "number", "minimum": 0, "maximum": 100 },
             "blur": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "showcase": {
+          "type": "object",
+          "description": "The download page's chapter backdrop and strip (site/src/showcase.css): tint as the percent of the open chapter's accent over it, shade as the opacity in percent of the page ground over the picture, dim as the opacity in percent of a chapter panel that is not open. banner grades the download popup's banner per chapter, so the three pictures read alike: grey as the percent the picture is desaturated, then tint as the percent of the wordmark's colours over it.",
+          "required": ["unit", "tint", "shade", "dim", "banner"],
+          "additionalProperties": false,
+          "properties": {
+            "unit": { "const": "%" },
+            "tint": { "type": "number", "minimum": 0, "maximum": 100 },
+            "shade": { "type": "number", "minimum": 0, "maximum": 100 },
+            "dim": { "type": "number", "minimum": 0, "maximum": 100 },
+            "banner": {
+              "type": "object",
+              "required": ["luxemburg", "lichdenstein", "frangfurd"],
+              "additionalProperties": false,
+              "properties": {
+                "luxemburg": {
+                  "type": "object",
+                  "required": ["grey", "tint"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "grey": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "tint": { "type": "number", "minimum": 0, "maximum": 100 }
+                  }
+                },
+                "lichdenstein": {
+                  "type": "object",
+                  "required": ["grey", "tint"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "grey": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "tint": { "type": "number", "minimum": 0, "maximum": 100 }
+                  }
+                },
+                "frangfurd": {
+                  "type": "object",
+                  "required": ["grey", "tint"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "grey": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "tint": { "type": "number", "minimum": 0, "maximum": 100 }
+                  }
+                }
+              }
+            }
           }
         },
         "tileTint": {
