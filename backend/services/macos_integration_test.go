@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"kapital/backend/design"
 	"kapital/backend/models"
 )
 
@@ -560,20 +561,36 @@ func checkWindowChrome(t *testing.T, pid, stderr string) {
 	shot("header")
 
 	// The sidebar's button: 12 px past the lights (pl-3) and half of its 28 px
-	// box, on the bar's middle. A click that lands saves the compact sidebar.
+	// box, on the bar's middle. A click that lands saves the compact sidebar. A
+	// window smaller than the full layout (a runner's small screen) shows the
+	// compact launcher instead (ADR-15), where the click asks for the full one:
+	// it lands if the settings are written again.
 	x, y := win[0]+controlsEnd+12+14, win[1]+titlebar/2
+	held := win[2] < design.CompactWidth || win[3] < design.CompactHeight
+	settings := filepath.Join(DataDir(), SettingsFileName)
+	var before time.Time
+	if info, err := os.Stat(settings); err == nil {
+		before = info.ModTime()
+	}
 	if out, err := exec.Command("/usr/bin/osascript", "-l", "JavaScript", "-e", clickScript, fmt.Sprint(x), fmt.Sprint(y)).CombinedOutput(); err != nil {
 		t.Logf("click unsent: %v: %s", err, out)
 		return
 	}
-	settings := filepath.Join(DataDir(), SettingsFileName)
+	landed := func() bool {
+		if held {
+			info, err := os.Stat(settings)
+			return err == nil && info.ModTime().After(before)
+		}
+		b, err := os.ReadFile(settings)
+		return err == nil && strings.Contains(string(b), `"sidebarCompact": true`)
+	}
 	deadline := time.Now().Add(5 * time.Second)
 	for {
-		if b, err := os.ReadFile(settings); err == nil && strings.Contains(string(b), `"sidebarCompact": true`) {
+		if landed() {
 			break
 		}
 		if time.Now().After(deadline) {
-			t.Errorf("a click on the sidebar's button at (%v, %v) did not compact the sidebar", x, y)
+			t.Errorf("a click on the sidebar's button at (%v, %v) did not land (compact launcher: %v)", x, y, held)
 			break
 		}
 		time.Sleep(250 * time.Millisecond)
