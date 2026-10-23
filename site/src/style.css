@@ -15,5 +15,5 @@
    the backdrop behind the launcher window, on the app's own tokens. */
 @import "./showcase.css";
 
-/* The popups' opening and closing and the download panel fade, on the same tokens. */
+/* The popups' opening and closing, on the same tokens. */
 @import "./popup.css";

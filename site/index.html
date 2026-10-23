@@ -12,11 +12,16 @@
     <link rel="stylesheet" href="/src/style.css" />
     <script type="module" src="/src/detect.js"></script>
     <script type="module" src="/src/popup.js"></script>
+    <script type="module" src="/src/cycle.js"></script>
+    <script type="module" src="/src/cards.js"></script>
   </head>
   <!--
-    One page and two small scripts: src/detect.js picks the OS for the
+    One page and four small scripts: src/detect.js picks the OS for the
     Download button and the download popup, src/popup.js opens and closes the
-    popups with motion. Vite bundles them into one file, and the build makes
+    popups with motion, src/cycle.js opens the next chapter every few seconds
+    and src/cards.js scrambles the cards' text into the new chapter's and
+    fills in the server card from the site's own /status.
+    Vite bundles them into one file, and the build makes
     it a classic script after the stylesheet, so the body is not parsed, and
     cannot be painted unstyled, until the stylesheet has loaded
     (stylesheetFirst in vite.config.js). The links are filled in at build time
@@ -92,48 +97,49 @@
 
         <!-- The open chapter's pack, from data/launcher.json, on the left. -->
         <div
-          class="border-accent bg-sunken duration-slow ease-standard absolute top-21 -left-12 z-20 hidden w-60 border-3 transition-[border-color] lg:block"
+          class="showcase-card border-accent bg-sunken duration-slow ease-standard absolute top-21 -left-12 z-20 hidden w-60 border-3 transition-[border-color] lg:grid"
           aria-hidden="true"
         >
-            <div data-for="luxemburg" class="flex flex-col gap-1 px-3.5 py-3">
+            <div data-for="luxemburg" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
               <div class="flex items-center gap-2">
-                <span class="bg-accent text-sunken font-pixel px-1.5 text-2xs uppercase">Pack</span>
+                <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
                 <span class="text-fg-soft font-pixel text-sm">1.5.0</span>
               </div>
-              <div class="text-base font-semibold">202 mods · Forge 1.19.2</div>
+              <div class="text-base font-semibold whitespace-nowrap">202 mods · Forge 1.19.2</div>
             </div>
-            <div data-for="lichdenstein" class="flex flex-col gap-1 px-3.5 py-3">
+            <div data-for="lichdenstein" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
               <div class="flex items-center gap-2">
-                <span class="bg-accent text-sunken font-pixel px-1.5 text-2xs uppercase">Pack</span>
+                <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
                 <span class="text-fg-soft font-pixel text-sm">1.0.0</span>
               </div>
-              <div class="text-base font-semibold">37 mods · Fabric 1.20.6</div>
+              <div class="text-base font-semibold whitespace-nowrap">37 mods · Fabric 1.20.6</div>
             </div>
-            <div data-for="frangfurd" class="flex flex-col gap-1 px-3.5 py-3">
+            <div data-for="frangfurd" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
               <div class="flex items-center gap-2">
-                <span class="bg-accent text-sunken font-pixel px-1.5 text-2xs uppercase">Pack</span>
+                <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
                 <span class="text-fg-soft font-pixel text-sm">1.0.6</span>
               </div>
-              <div class="text-base font-semibold">98 mods · NeoForge 1.21.1</div>
+              <div class="text-base font-semibold whitespace-nowrap">98 mods · NeoForge 1.21.1</div>
             </div>
         </div>
 
-        <!-- The open chapter's state, from data/launcher.json, on the right. -->
+        <!-- The open chapter's server, on the right: Frangfurd's from /status
+             (src/cards.js), the other two offline. -->
         <div
-          class="border-fg bg-sunken absolute top-21 -right-10 z-20 hidden border-3 px-4 py-3 text-sm lg:block"
+          class="showcase-card border-fg bg-sunken absolute top-21 -right-10 z-20 hidden border-3 px-4 py-3 text-sm lg:grid"
           aria-hidden="true"
         >
-            <span data-for="luxemburg" class="flex items-center gap-2.5">
-              <span class="bg-success size-2.5"></span>
-              <span class="font-pixel uppercase">Released</span>
+            <span data-for="luxemburg" class="showcase-fade flex items-center gap-2.5">
+              <span class="showcase-state size-2.5"></span>
+              <span class="font-pixel whitespace-nowrap uppercase">Server offline</span>
             </span>
-            <span data-for="lichdenstein" class="flex items-center gap-2.5">
-              <span class="bg-success size-2.5"></span>
-              <span class="font-pixel uppercase">Released</span>
+            <span data-for="lichdenstein" class="showcase-fade flex items-center gap-2.5">
+              <span class="showcase-state size-2.5"></span>
+              <span class="font-pixel whitespace-nowrap uppercase">Server offline</span>
             </span>
-            <span data-for="frangfurd" class="flex items-center gap-2.5">
-              <span class="bg-warning size-2.5"></span>
-              <span class="font-pixel uppercase">In development</span>
+            <span data-for="frangfurd" class="showcase-fade flex items-center gap-2.5">
+              <span class="showcase-state size-2.5"></span>
+              <span data-status class="font-pixel whitespace-nowrap uppercase">Server</span>
             </span>
         </div>
 
@@ -163,7 +169,7 @@
           </div>
 
           <!-- The chapters: a radio group whose labels are the panels. -->
-          <fieldset class="bg-sunken m-0 flex min-w-0 flex-wrap gap-1 border-0 p-1">
+          <fieldset class="showcase-strip bg-sunken m-0 flex min-w-0 flex-wrap gap-1 border-0 p-1">
             <legend class="sr-only">Chapter</legend>
               <div class="showcase-panel relative min-w-0" data-chapter="luxemburg">
                 <input type="radio" name="chapter" id="chapter-luxemburg" value="luxemburg" class="sr-only" />
@@ -443,23 +449,23 @@
           <div class="grid grid-cols-2 gap-2.5">
             <div class="relative">
               <input type="radio" name="os" id="os-windows" value="windows" checked class="peer sr-only" />
-              <label for="os-windows" class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-raised peer-checked:text-fg peer-checked:border-logo-gradient-top peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-fast ease-standard flex min-h-16 cursor-pointer flex-col justify-center gap-0.5 border-3 px-3.5 py-3 transition-[background-color,border-color,color]">
+              <label for="os-windows" class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-raised peer-checked:text-fg peer-checked:border-logo-gradient-top peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-slow ease-standard flex min-h-16 cursor-pointer flex-col justify-center gap-0.5 border-3 px-3.5 py-3 transition-[background-color,border-color,color]">
                 <span class="text-md font-semibold">Windows</span>
                 <span class="text-fg-faint text-xs">Windows 11</span>
               </label>
               <span
-                class="bg-logo-gradient-top pointer-events-none absolute top-2.5 right-2.5 hidden size-2.5 peer-checked:block"
+                class="bg-logo-gradient-top duration-slow ease-standard pointer-events-none absolute top-2.5 right-2.5 size-2.5 opacity-0 transition-opacity peer-checked:opacity-100"
                 aria-hidden="true"
               ></span>
             </div>
             <div class="relative">
               <input type="radio" name="os" id="os-macos" value="macos" class="peer sr-only" />
-              <label for="os-macos" class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-raised peer-checked:text-fg peer-checked:border-logo-gradient-top peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-fast ease-standard flex min-h-16 cursor-pointer flex-col justify-center gap-0.5 border-3 px-3.5 py-3 transition-[background-color,border-color,color]">
+              <label for="os-macos" class="border-line-strong text-fg-soft hover:bg-hover hover:text-fg peer-checked:bg-raised peer-checked:text-fg peer-checked:border-logo-gradient-top peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:outline-offset-(--focus-ring-offset) duration-slow ease-standard flex min-h-16 cursor-pointer flex-col justify-center gap-0.5 border-3 px-3.5 py-3 transition-[background-color,border-color,color]">
                 <span class="text-md font-semibold">macOS</span>
                 <span class="text-fg-faint text-xs">12 or later</span>
               </label>
               <span
-                class="bg-logo-gradient-top pointer-events-none absolute top-2.5 right-2.5 hidden size-2.5 peer-checked:block"
+                class="bg-logo-gradient-top duration-slow ease-standard pointer-events-none absolute top-2.5 right-2.5 size-2.5 opacity-0 transition-opacity peer-checked:opacity-100"
                 aria-hidden="true"
               ></span>
             </div>
@@ -467,17 +473,19 @@
         </fieldset>
 
         <div class="flex flex-col gap-2">
-          <div class="download-panel group-has-[#os-macos:checked]/dl:hidden flex flex-col">
-            <a href="%WINDOWS_URL%" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14.5 items-center justify-center gap-3 border-3 font-pixel text-md uppercase no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md)" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
-              Download for Windows
-            </a>
-          </div>
-          <div class="download-panel group-not-has-[#os-macos:checked]/dl:hidden flex flex-col">
-            <a href="%MACOS_URL%" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14.5 items-center justify-center gap-3 border-3 font-pixel text-md uppercase no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md)" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
-              Download for macOS
-            </a>
+          <!-- One button for both systems: only the word changes. The two links
+               lie over it, one per system, and the other system's is left out. -->
+          <div class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard relative inline-flex h-14.5 items-center justify-center gap-3 border-3 font-pixel text-md uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md)" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
+            <span aria-hidden="true"
+              >Download for
+              <span class="inline-grid"
+                ><span class="group-has-[#os-macos:checked]/dl:opacity-0 duration-slow ease-standard col-start-1 row-start-1 transition-opacity">Windows</span
+                ><span class="group-not-has-[#os-macos:checked]/dl:opacity-0 duration-slow ease-standard col-start-1 row-start-1 transition-opacity">macOS</span></span
+              ></span
+            >
+            <a href="%WINDOWS_URL%" class="group-has-[#os-macos:checked]/dl:hidden absolute -inset-0.75"><span class="sr-only">Download for Windows</span></a>
+            <a href="%MACOS_URL%" class="group-not-has-[#os-macos:checked]/dl:hidden absolute -inset-0.75"><span class="sr-only">Download for macOS</span></a>
           </div>
           <a
             href="%NOTES_URL%"

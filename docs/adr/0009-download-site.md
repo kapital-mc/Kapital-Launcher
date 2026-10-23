@@ -271,10 +271,14 @@ download easy and looks good, at most two screens tall. What changed:
 - **The window is a strip of chapters, not the app's layout.** The header bar
   is still the app's (`HeaderBar`, tools on the left, Windows' buttons on the
   right), but under it the three chapters are panels side by side; the open
-  one is wide with its picture at full strength, the others dimmed. The cycle
-  is gone. The panels are the labels of a radio group, so choosing a chapter
-  needs no script, and `src/showcase.js` is removed: the page runs two
-  scripts, `detect.js` and `popup.js`.
+  one is wide with its picture at full strength, the others dimmed. The
+  panels are the labels of a radio group, so choosing a chapter needs no
+  script, and `src/showcase.js` is removed. A small `cycle.js` opens the next
+  chapter every 5 s (`duration.cycle`), starting the wait again after a
+  switch by hand, holding while the pointer or focus is on the strip or a
+  popup is open, and never under reduced motion (WCAG 2.2.2). On a switch
+  `cards.js` runs the floating cards' letters through random ones into
+  the new chapter's text, as the backdrop changes its squares.
 - **A backdrop of squares.** Behind the window the open chapter's picture
   shows through a grid of dark squares and changes square by square on a
   switch. The squares are spans `mosaic.js` writes at build time, since the
@@ -293,10 +297,15 @@ download easy and looks good, at most two screens tall. What changed:
   picked. The popup has a banner of the open chapter's picture. Changelog,
   GitHub and the code signing policy moved to the footer, and the logo is the
   only thing above the button.
-- **Cards from the manifest, not live data.** Beside the window are the open
-  chapter's pack (version, mods, loader) and its state. A live player count
-  was in the mockups, but the page does not touch the network, so it shows
-  whether the chapter is released instead.
+- **A live server card, through the site's own endpoint.** Beside the window
+  are the open chapter's pack (version, mods, loader) and its server. The
+  page had touched no network; the author asked for the server's status, so
+  it now makes one request, to its own `/status`, a Pages Function that
+  pings Frangfurd's Germany address (playit.gg) and caches the answer for
+  30 s. A public status API was the other way considered; it would hand every
+  visitor's address to a third party. The visitor's browser never
+  meets the game server, and the CSP gains only `connect-src 'self'`.
+  Luxemburg and Lichdenstein are offline and are never asked.
 - **No operating system logos.** Apple's trademark guidelines do not allow
   the Apple logo on a website without a licence, and Microsoft's logos only
   under its brand guidelines, so the systems are named in words.

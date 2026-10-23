@@ -13,23 +13,54 @@
   /* The picture's width over its height, for the backdrop's cover sizing. */
   --showcase-art: url('../../frontend/src/assets/screenshots/luxemburg.webp');
   --showcase-ratio: 1.8692;
+  /* The colour of the server card's square: offline. */
+  --showcase-state: var(--color-danger);
 }
 :root:has(#chapter-lichdenstein:checked) {
   --accent: var(--chapter-lichdenstein);
   --showcase-art: url('../../frontend/src/assets/screenshots/lichdenstein.webp');
   --showcase-ratio: 1.7758;
+  --showcase-state: var(--color-danger);
 }
 :root:has(#chapter-frangfurd:checked) {
   --accent: var(--chapter-frangfurd);
   --showcase-art: url('../../frontend/src/assets/screenshots/frangfurd.webp');
   --showcase-ratio: 1.7758;
+  /* Not known until /status answers (src/cards.js sets data-server). */
+  --showcase-state: var(--color-fg-faint);
+}
+:root[data-server='online']:has(#chapter-frangfurd:checked) {
+  --showcase-state: var(--color-success);
+}
+:root[data-server='offline']:has(#chapter-frangfurd:checked) {
+  --showcase-state: var(--color-danger);
 }
 
-/* What belongs to one chapter (data-for) shows only while it is open. */
-:root:not(:has(#chapter-luxemburg:checked)) [data-for='luxemburg'],
-:root:not(:has(#chapter-lichdenstein:checked)) [data-for='lichdenstein'],
-:root:not(:has(#chapter-frangfurd:checked)) [data-for='frangfurd'] {
+/* What belongs to one chapter (data-for) shows only while it is open. In a
+   floating card the chapters' versions share one cell and cross-fade, so the
+   card keeps its size; with src/cards.js running the new one shows at once
+   and its letters scramble into place instead. Their colours come from the
+   root (the accent, --showcase-state) and fade there. */
+:root:not(:has(#chapter-luxemburg:checked)) [data-for='luxemburg']:not(.showcase-fade),
+:root:not(:has(#chapter-lichdenstein:checked)) [data-for='lichdenstein']:not(.showcase-fade),
+:root:not(:has(#chapter-frangfurd:checked)) [data-for='frangfurd']:not(.showcase-fade) {
   display: none;
+}
+.showcase-fade {
+  grid-area: 1 / 1;
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+.showcase-card[data-scramble] > .showcase-fade {
+  transition: none;
+}
+.showcase-state {
+  background-color: var(--showcase-state);
+  transition: background-color var(--duration-slow) var(--ease-standard);
+}
+:root:not(:has(#chapter-luxemburg:checked)) .showcase-fade[data-for='luxemburg'],
+:root:not(:has(#chapter-lichdenstein:checked)) .showcase-fade[data-for='lichdenstein'],
+:root:not(:has(#chapter-frangfurd:checked)) .showcase-fade[data-for='frangfurd'] {
+  opacity: 0;
 }
 
 /* The strip: the open chapter's panel takes most of the width, its picture
@@ -182,6 +213,8 @@
   .showcase-panel-art,
   .showcase-panel-title,
   .showcase-tint,
+  .showcase-fade,
+  .showcase-state,
   .showcase-pixels > span {
     transition: none;
   }

@@ -8,11 +8,17 @@ paths:
 `site/README.md` covers the page, its links and the Cloudflare setup, and
 `docs/adr/0009-download-site.md` records why it is built this way. The rules:
 
-- **Two small scripts, bundled into one, with no network and no storage.**
+- **Four small scripts, bundled into one, with no storage and one request,
+  to the site's own `/status`.**
   `src/detect.js` picks the visitor's system (data-os on the root, for the
   Download button and the link under it, and the download popup's radio);
   `src/popup.js` starts the popups' opening fade after their first frame and
-  plays the closing before it hides them. Vite bundles both into one file, and
+  plays the closing before it hides them; `src/cycle.js` opens the next
+  chapter every `duration.cycle`; `src/cards.js` scrambles the floating
+  cards' text into the new chapter's and fills in the server card from
+  `/status`, the one Pages Function (`functions/status.js`, whose ping is
+  `status.js`, tested). It pings only the manifest's Frangfurd Germany
+  address and passes on nothing but whether it answered and two counts. Vite bundles them into one file, and
   the build places it after the stylesheet as a classic script, so the parser
   waits for the stylesheet and no browser paints the page unstyled
   (`stylesheetFirst` in `vite.config.js`); keep it free of imports, exports and
@@ -22,15 +28,15 @@ paths:
   attribute included), a data: URI or a remote asset means changing that
   policy on purpose, in the same change. Choosing a chapter needs no script:
   the panels are a radio group's labels and `src/showcase.css` reads the
-  radio with `:has()`. Its icons are lucide's paths inlined as SVG markup,
-  which the policy allows.
+  radio with `:has()`; the cycle only checks the next radio. Its icons are
+  lucide's paths inlined as SVG markup, which the policy allows.
 - **The app's tokens and base styles, not the site's.** `src/style.css`
   imports `frontend/src/styles/tokens.css` and `frontend/src/styles/base.css`
   (faces, base rules, scrims), then `src/fonts.css` (Silkscreen, the pixel
   face only the site draws, served from `src/fonts/` with its OFL licence),
   `src/showcase.css` (the chapter strip and the backdrop, the one thing the
   page draws that the app does not) and `src/popup.css` (the popups' opening
-  and closing and the download panel fade). A token change moves the app and
+  and closing). A token change moves the app and
   the site together. The frontend style rules apply here: token utilities
   only, no literal colour, no pixel text size, no em dash. The suite's
   invariants cover `site/index.html` and `site/src`.

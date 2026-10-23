@@ -132,8 +132,37 @@ There are two Download buttons and two links under them, one per system, and
 `data-os` on the root shows one of each: the button for the visitor's system,
 the link for the other. Without the script Windows is shown.
 
-`src/detect.js` is bundled with `src/popup.js` into the page's one script
-file, emitted by Vite under `assets/`. The build turns its tag into a classic script placed after the
+`src/cycle.js` opens the next chapter every `duration.cycle` (5 s). A
+switch by hand starts the wait again; it waits while the pointer or the focus
+is on the strip, while a popup is open or the tab is hidden, and never runs
+under reduced motion.
+
+The two floating cards hold every chapter's version in one cell. On a switch
+`src/cards.js` shows the new version at once and runs each letter that
+differs through random letters until it lands, each at its own moment within
+the slow duration, as the backdrop's squares do. Their colours (the accent,
+the server's square) come from the root and fade there. Without the script, or
+under reduced motion, the versions cross-fade.
+
+### The server card and /status
+
+The right-hand card is the open chapter's server. Luxemburg and Lichdenstein
+are offline and say so. Frangfurd's comes from `/status`, a Cloudflare Pages
+Function (`functions/status.js`, routed by its file name from the root
+directory `site`): it pings the Germany address of `data/launcher.json` (the
+playit.gg tunnel, through its `_minecraft._tcp` SRV record over DNS over
+HTTPS) with the launcher's Server List Ping, at most 4 s, and answers with
+whether it answered and its player counts. The answer is cached for 30 s, so
+the server is asked at most that often per Cloudflare location. The ping
+itself is `status.js`, which `pnpm test` covers without Cloudflare;
+`status.test.js` also holds the address to the manifest's. `src/cards.js`
+asks on load and when Frangfurd opens after 30 s, and sets `data-server` on
+the root. Until it answers, or without the script or the function (`pnpm
+preview` has none), the card says Server. The CSP allows `connect-src
+'self'` for it and nothing else.
+
+`src/detect.js` is bundled with `src/popup.js`, `src/cycle.js` and
+`src/cards.js` into the page's one script file, emitted by Vite under `assets/`. The build turns its tag into a classic script placed after the
 stylesheet (`stylesheetFirst` in `vite.config.js`), which stops the parser
 until the stylesheet has loaded. Without that, the body was parsed while the
 stylesheet was still on its way, and Safari and Firefox could paint it
@@ -151,8 +180,9 @@ Its heading is in the pixel face; the tag sits in the banner, filled in at
 build time. It opens with the app's reveal (a short rise out of
 a slight blur) while the page dims and softens behind it, and closes the same
 way in reverse over the slow duration on the glide curve, so the fade is seen.
-The other system's panel fades in when the switch moves: `src/popup.css`, on
-the motion tokens. The changelog and code signing popups move the same way.
+The Download button stays when the switch moves and only its last word
+cross-fades; the two systems' links lie over it and the other one is left
+out. The tiles' outline and square fade on the slow duration. The changelog and code signing popups move the same way.
 Both halves go through `src/popup.js`. Only Chromium keeps a closing popover
 in the top layer while it fades, and other browsers drop it at once, so the
 script makes each popover manual, plays the closing animation on the Close
