@@ -2,10 +2,9 @@ import { Suspense, lazy } from 'react'
 import type { Chapter } from '../../types'
 import { chapterArt, chapterTitleArt } from '../../lib/art'
 import { isPlaceholder, knownFacts } from '../../lib/manifest'
-import { MapIcon, Pencil, SquareTerminal } from '../../lib/icons'
 import { panoramaStart, usePanoramaReady } from '../../lib/panorama'
 import { Drift } from '../ui/Drift'
-import { IconButton } from '../ui/IconButton'
+import { HeroTools } from './HeroTools'
 import { Spinner } from '../ui/Spinner'
 import { Pill } from '../ui/Pill'
 import { useLoadedImage } from '../../lib/useLoadedImage'
@@ -68,7 +67,10 @@ export function Hero({
   // over it once, together: clipped one by one, the picture shows past the
   // scrim along the corner's curve as a light line.
   return (
-    <section className="border-line relative flex max-h-(--layout-hero) min-h-0 grow flex-col justify-end overflow-hidden border-b px-7 py-11 will-change-transform">
+    <section
+      data-morph="hero"
+      className="border-line relative flex max-h-(--layout-hero) min-h-0 grow flex-col justify-end overflow-hidden border-b px-7 py-11 will-change-transform"
+    >
       {art ? (
         <>
           <Drift id={art} className="absolute inset-0" layer="absolute inset-0">
@@ -84,7 +86,7 @@ export function Hero({
               <PanoramaCube key={panorama[0]} faces={panorama} start={panoramaStart(chapter.id)} />
             </Suspense>
           )}
-          <div className="scrim-hero absolute inset-0" aria-hidden />
+          <div data-morph="hero-scrim" className="scrim-hero absolute inset-0" aria-hidden />
           {panorama && panorama.length === 6 && !panoramaReady && (
             <span
               role="status"
@@ -104,37 +106,23 @@ export function Hero({
         </>
       )}
 
-      {/* A wash behind the tools, so they read on bright art too (#77). They
-          are one group (issue 162): each cell's hover fills it edge to edge,
-          with no gap between cells, and only the group's outer corners round. */}
-      <div
-        role="group"
-        aria-label={`${chapter.name} tools`}
-        className="bg-sunken/55 absolute top-7 right-7 flex overflow-hidden rounded-md backdrop-blur-sm"
-      >
-        <IconButton
-          grouped
-          icon={Pencil}
-          title={`${chapter.name} settings`}
-          onClick={onOpenSettings}
-        />
-        <IconButton
-          grouped
-          icon={SquareTerminal}
-          title={`Logs for ${chapter.name}`}
-          onClick={onOpenLogs}
-        />
-        <IconButton grouped icon={MapIcon} title={`Map of ${chapter.name}`} onClick={onOpenMap} />
-      </div>
+      <HeroTools
+        name={chapter.name}
+        onOpenSettings={onOpenSettings}
+        onOpenLogs={onOpenLogs}
+        onOpenMap={onOpenMap}
+        className="absolute top-7 right-7"
+        morph="hero-tools"
+      />
 
       <div className="relative flex max-w-140 flex-col gap-3.5">
-        <div className="text-fg-muted flex items-baseline gap-2.5 text-sm">
+        <div data-morph="hero-label" className="text-fg-muted flex items-baseline gap-2.5 text-sm">
           <span className="text-accent font-mono">{chapter.number}</span>
           <span>{chapter.kind}</span>
         </div>
         {/* The heading is the artwork when there is one, at one height for
             every chapter (#77); its alt keeps the name for readers. */}
-        <h1 className="font-display text-display m-0 font-semibold">
+        <h1 data-morph="hero-title" className="font-display text-display m-0 font-semibold">
           {title ? (
             <img
               src={title}
@@ -148,11 +136,14 @@ export function Hero({
             chapter.name
           )}
         </h1>
-        <p className="text-fg-soft m-0 text-lg leading-normal">{chapter.blurb}</p>
-        <div className="flex flex-wrap gap-2">
-          {spec && <Pill>{spec}</Pill>}
-          {mods && <Pill>{mods} mods</Pill>}
-          {version && !isPlaceholder(version) && <Pill>Version {version}</Pill>}
+        {/* The words that leave first when the launcher goes compact (lib/compactMorph). */}
+        <div data-morph="hero-blurb" className="flex flex-col gap-3.5">
+          <p className="text-fg-soft m-0 text-lg leading-normal">{chapter.blurb}</p>
+          <div className="flex flex-wrap gap-2">
+            {spec && <Pill>{spec}</Pill>}
+            {mods && <Pill>{mods} mods</Pill>}
+            {version && !isPlaceholder(version) && <Pill>Version {version}</Pill>}
+          </div>
         </div>
       </div>
     </section>

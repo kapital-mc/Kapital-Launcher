@@ -124,7 +124,11 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 96.6 on 2026-10-21: the storage section's three bound methods (GetChapterStorage,
 // ClearChapterStorage, OpenStorageFolder) are in the generated App.js, one module in the shared
 // chunk, though the section itself loads on demand. Measured 96.52 KB, from 96.48 KB on main.
-const BUDGET_KB = 96.6
+// 98 on 2026-10-23 (ADR-15): the compact launcher's switch is in the first paint, since a
+// window shrunk past the floor calls for compact at any time: the size rule, the sidebar
+// button's menu, and the layout that holds both launchers and starts the morph. The panels
+// and the morph's own code load on demand. Measured 97.9 KB, from 96.5 KB on main.
+const BUDGET_KB = 98
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

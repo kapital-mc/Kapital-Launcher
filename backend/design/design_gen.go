@@ -9,8 +9,8 @@ package design
 const (
 	WindowWidth     = 1280
 	WindowHeight    = 800
-	WindowMinWidth  = 1024
-	WindowMinHeight = 640
+	WindowMinWidth  = 720
+	WindowMinHeight = 480
 )
 
 // The loading card the window becomes while a game starts (#43), in logical

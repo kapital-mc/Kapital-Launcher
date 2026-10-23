@@ -24,6 +24,9 @@ export function emitLayout(src, push) {
   push(`  --layout-splash-height: ${src.layout.splash.height}${src.layout.unit};`)
   push(`  --layout-window-width: ${src.layout.window.width}${src.layout.unit};`)
   push(`  --layout-window-height: ${src.layout.window.height}${src.layout.unit};`)
+  push(`  --layout-compact-gap: ${src.layout.compact.gap}${unit};`)
+  push(`  --layout-compact-title: ${src.layout.compact.title}${unit};`)
+  push(`  --layout-compact-title-idle: ${src.layout.compact.titleIdle}${unit};`)
   push(`}`)
 }
 
@@ -39,6 +42,7 @@ export function emitEffects(src, push) {
     tileTint,
     panorama,
     cover,
+    panel,
   } = src.effect
   push(`/* Effects: values a utility cannot name on its own. Read by the shared`)
   push(`   styles/base.css and by brightness-(--effect-hover-brightness). */`)
@@ -67,6 +71,11 @@ export function emitEffects(src, push) {
   push(`  --cover-art: ${cover.art}${cover.unit};`)
   push(`  --cover-spot: ${cover.spot}${cover.unit};`)
   push(`  --cover-blur: ${cover.blur}px;`)
+  push(`  --panel-grow: ${panel.grow};`)
+  push(`  --panel-dim: ${panel.dim};`)
+  push(`  --panel-dim-hover: ${panel.dimHover};`)
+  push(`  --panel-shade: ${panel.shade}%;`)
+  push(`  --panel-shade-from: ${panel.shadeFrom}%;`)
   emitRevealValues(src, push)
   push(`}`)
 }

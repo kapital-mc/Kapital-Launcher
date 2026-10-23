@@ -2,10 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { HeaderBar } from './components/shell/HeaderBar'
 import { Toasts } from './components/shell/Toasts'
 import { LaunchIntro } from './components/shell/LaunchIntro'
-import { Sidebar } from './components/sidebar/Sidebar'
-import { ChapterStage } from './components/main/ChapterStage'
-import { PageLayer } from './components/main/PageLayer'
-import { Scrollable } from './components/ui/Scrollable'
+import { LauncherLayout } from './components/shell/LauncherLayout'
 import { selectCanRotate, selectChapter, useChapterStore } from './stores/useChapterStore'
 import { useEngineStore } from './stores/useEngineStore'
 import { useSettingsStore } from './stores/useSettingsStore'
@@ -17,21 +14,8 @@ import { guessPlatform } from './lib/platform'
 import { SLIDE_INTERVAL_MS } from './lib/slides'
 import { usePages } from './lib/usePages'
 import { heroArtOf } from './lib/heroArt'
+import { useCompactLayout } from './lib/compactMode'
 
-// The pages that slide over the chapter card are opened on demand, so they
-// load when asked for and stay out of the launcher's first paint and its
-// bundle budget (scripts/check-bundle-size.mjs): the settings, and a chapter's
-// own pages (components/main/ChapterPage), its settings, its logs, its map and
-// the run report, opened rarely, from Details beside a game that went wrong.
-const SettingsPanel = lazy(() =>
-  import('./components/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })),
-)
-const AccountPanel = lazy(() =>
-  import('./components/settings/AccountPanel').then((m) => ({ default: m.AccountPanel })),
-)
-const ChapterPage = lazy(() =>
-  import('./components/main/ChapterPage').then((m) => ({ default: m.ChapterPage })),
-)
 // What's new, shown once on the first start after an update, loads in a chunk of
 // its own after the first paint, which keeps it out of the bundle budget.
 const WhatsNew = lazy(() =>
@@ -81,6 +65,15 @@ export default function App() {
       console.warn('save sidebar', errMsg(e)),
     )
   }
+  // The compact launcher: chosen from the sidebar button's menu, or held on by a
+  // window too small for the full layout (lib/compactMode).
+  const launcherCompact = useSettingsStore((s) => s.settings.launcherCompact === true)
+  const layout = useCompactLayout(launcherCompact)
+  const chooseLayout = (compact: boolean) => {
+    updateSettings({ launcherCompact: compact }).catch((e) =>
+      console.warn('save layout', errMsg(e)),
+    )
+  }
 
   // Which OS draws the window, for the header's controls: guessed from the
   // WebView at once, then Wails' answer (lib/platform).
@@ -94,9 +87,6 @@ export default function App() {
   // The pages over the chapter card: the settings from the gear, a chapter's
   // own from its hero and from the corner's notices (lib/usePages).
   const pages = usePages(selectedId, select)
-  const { settings, account, chapterPage } = pages
-  const openedChapter =
-    chapterPage.slot && chapters.find((c) => c.id === chapterPage.slot?.page.chapterId)
 
   // One read per store on mount. These are reads of state Go holds, not
   // events, so an effect is the right tool.
@@ -214,48 +204,15 @@ export default function App() {
         onOpenSettings={pages.toggleSettings}
         sidebarCompact={sidebarCompact}
         onToggleSidebar={toggleSidebar}
+        launcher={{ compact: layout.compact, held: layout.held, choose: chooseLayout }}
       />
-      <div className="flex min-h-0 grow">
-        <Sidebar onOpenAccount={pages.toggleAccount} accountOpen={account.slot?.open === true} />
-        {/* The chapter card scrolls under the header bar and beside the
-            sidebar when the window is shorter than it (issue 56). A page slides
-            over the card in the same stage, and scrolls inside its own frame. */}
-        <Scrollable as="main" className="flex flex-col">
-          <ChapterStage
-            chapter={chapter}
-            chapters={chapters}
-            onOpenSettings={pages.openChapterSettings}
-            onOpenLogs={pages.openLogs}
-            onOpenMap={pages.openMap}
-            covered={pages.covered}
-          >
-            {chapterPage.slot && openedChapter && (
-              <PageLayer
-                key={`${chapterPage.slot.page.kind}:${openedChapter.id}`}
-                edge="right"
-                open={chapterPage.slot.open}
-                onExited={chapterPage.done}
-              >
-                <ChapterPage
-                  page={chapterPage.slot.page}
-                  chapter={openedChapter}
-                  onClose={chapterPage.hide}
-                />
-              </PageLayer>
-            )}
-            {settings.slot && (
-              <PageLayer edge="top" open={settings.slot.open} onExited={settings.done}>
-                <SettingsPanel onClose={settings.hide} onShowChapter={pages.showChapter} />
-              </PageLayer>
-            )}
-            {account.slot && (
-              <PageLayer edge="bottom" open={account.slot.open} onExited={account.done}>
-                <AccountPanel onClose={account.hide} />
-              </PageLayer>
-            )}
-          </ChapterStage>
-        </Scrollable>
-      </div>
+      <LauncherLayout
+        chapter={chapter}
+        chapters={chapters}
+        select={select}
+        pages={pages}
+        compact={layout.compact}
+      />
       <Toasts onOpenReport={pages.openReport} />
       <Suspense fallback={null}>
         <WhatsNew />

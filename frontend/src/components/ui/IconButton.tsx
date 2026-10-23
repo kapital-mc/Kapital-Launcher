@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react'
 import type { LucideIcon } from '../../lib/icons'
 import { Icon } from './Icon'
 
@@ -9,6 +10,10 @@ interface Props {
    */
   title: string
   onClick: () => void
+  /** A right-click, or the keyboard's menu key: the header's sidebar button opens a menu with it. */
+  onContextMenu?: (e: MouseEvent<HTMLButtonElement>) => void
+  /** Whether the button has a menu, and whether it is open. */
+  menu?: { open: boolean; id: string }
   /**
    * `md` is the 44px box the hero tools use; `sm` the 32px one in the account card; `xs`
    * the 28px one in a column's corner, with the smaller glyph; `2xs` the 20px one on a line of
@@ -43,6 +48,8 @@ export function IconButton({
   icon,
   title,
   onClick,
+  onContextMenu,
+  menu,
   size = 'md',
   disabled,
   grouped,
@@ -54,6 +61,10 @@ export function IconButton({
     <button
       type="button"
       onClick={onClick}
+      onContextMenu={onContextMenu}
+      aria-haspopup={menu ? 'menu' : undefined}
+      aria-expanded={menu?.open}
+      aria-controls={menu?.open ? menu.id : undefined}
       aria-label={title}
       disabled={disabled}
       className={`${BOX[size]} ${colour} hover:bg-hover duration-fast ease-standard ${tooltip ? 'group relative' : ''} inline-flex shrink-0 items-center justify-center ${grouped ? '' : 'rounded-md'} transition-colors disabled:opacity-50 disabled:hover:bg-transparent`}
@@ -62,7 +73,7 @@ export function IconButton({
       {tooltip && (
         <span
           aria-hidden
-          className="border-line-strong bg-raised-2 text-fg duration-fast ease-standard text-2xs pointer-events-none absolute top-full left-0 z-50 mt-1.5 border px-2 py-1 font-mono whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-hover:delay-(--duration-tooltip) group-focus-visible:opacity-100 motion-reduce:transition-none"
+          className="border-line-strong bg-raised-2 text-fg duration-fast ease-standard text-2xs pointer-events-none absolute top-full left-0 z-50 mt-1.5 border px-2 py-1 font-mono whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-hover:delay-(--duration-tooltip) group-focus-visible:opacity-100 group-aria-expanded:hidden motion-reduce:transition-none"
         >
           {title}
         </span>

@@ -828,3 +828,108 @@
     transition: none;
   }
 }
+
+/* The compact launcher (components/compact, docs/adr/0015-compact-launcher.md):
+   the three chapters as panels side by side. The open chapter's panel is wider
+   and its picture full; the others are dimmed, a little less under the pointer.
+   A switch moves the panels' widths, the titles' sizes and Play's row together
+   over the page's 320 ms: the row opens under the new chapter's title and
+   closes under the old one's (grid rows 0fr to 1fr), so a title rises and
+   falls rather than jumping, and the row fades in once it has room. While the
+   layout is hidden nothing transitions, so what the morph measures there is
+   where things end. */
+.compact-panel {
+  flex: 1 1 0;
+  transition: flex-grow var(--duration-page) var(--ease-standard);
+}
+.compact-panel[data-active] {
+  flex-grow: var(--panel-grow);
+}
+.compact-art {
+  opacity: var(--panel-dim);
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+.compact-panel[data-active] .compact-art {
+  opacity: 1;
+}
+.compact-panel:not([data-active]):hover .compact-art {
+  opacity: var(--panel-dim-hover);
+}
+.compact-title {
+  width: min(var(--layout-compact-title-idle), 100%);
+  transition: width var(--duration-page) var(--ease-standard);
+}
+.compact-panel[data-active] .compact-title {
+  width: min(var(--layout-compact-title), 100%);
+}
+.compact-foot {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--duration-page) var(--ease-standard),
+    opacity var(--duration-fast) linear;
+}
+.compact-panel[data-active] .compact-foot {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--duration-page) var(--ease-standard),
+    opacity var(--duration-reveal) linear var(--duration-fast);
+}
+.compact-tools {
+  transition: opacity var(--duration-reveal) linear;
+}
+.compact-panel:not([data-active]) .compact-tools {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-fast) linear,
+    visibility 0s var(--duration-fast);
+}
+[data-layout='compact'][inert] *,
+.morph-actors * {
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .compact-panel,
+  .compact-panel * {
+    transition: none !important;
+  }
+}
+/* The wash rising from a panel's foot, under its title and Play. */
+@utility scrim-foot {
+  background: linear-gradient(
+    180deg,
+    transparent var(--panel-shade-from),
+    color-mix(in srgb, var(--bg) var(--panel-shade), transparent) 100%
+  );
+}
+
+/* The morph's actors (lib/compactMorph): copies of the pieces that move, laid
+   over both layouts, each placed at its compact rectangle and moved from its
+   full one by a transform from its top-left corner. */
+.morph-actors {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: clip;
+}
+.morph-actors > *,
+.morph-clip > * {
+  position: absolute;
+  margin: 0;
+  box-sizing: border-box;
+  transform-origin: 0 0;
+  will-change: transform, opacity;
+}
+.morph-clip,
+.morph-backdrop {
+  inset: 0;
+}
+.morph-clip {
+  will-change: clip-path;
+}
+.morph-backdrop {
+  background: var(--bg-sunken);
+}

@@ -103,9 +103,14 @@
   --transition-duration-tooltip: 2000ms;
   --duration-spin: 1000ms;
   --transition-duration-spin: 1000ms;
+  --duration-morph: 900ms;
+  --transition-duration-morph: 900ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
+  --ease-travel: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.33, 0, 0.2, 1);
+  --ease-leave: cubic-bezier(0.55, 0, 0.75, 0.2);
 }
 
 /* Layout geometry is not a Tailwind namespace. Read it with the var()
@@ -130,6 +135,9 @@
   --layout-splash-height: 405px;
   --layout-window-width: 1280px;
   --layout-window-height: 800px;
+  --layout-compact-gap: 4px;
+  --layout-compact-title: 400px;
+  --layout-compact-title-idle: 160px;
 }
 
 /* Effects: values a utility cannot name on its own. Read by the shared
@@ -159,6 +167,11 @@
   --cover-art: 40%;
   --cover-spot: 36%;
   --cover-blur: 36px;
+  --panel-grow: 2.6;
+  --panel-dim: 0.28;
+  --panel-dim-hover: 0.42;
+  --panel-shade: 85%;
+  --panel-shade-from: 30%;
   --layout-reveal-rise: 4px;
   --effect-reveal-blur: 2px;
   --effect-glow-blur: 18px;
