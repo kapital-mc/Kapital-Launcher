@@ -107,6 +107,27 @@ function copy(el: Element, whole = false): HTMLElement {
   return c
 }
 
+/**
+ * A panel's picture may be part-way through the fade a passing pointer starts (style.css,
+ * `.compact-art`): its copy, which no pointer is over, takes it up from there and settles,
+ * rather than snapping to rest on the morph's first frame.
+ */
+function carryOn(panel: Element, copied: Element) {
+  const from = panel.querySelector('.compact-art')
+  const to = copied.querySelector('.compact-art')
+  if (!from || !to) return
+  const now = getComputedStyle(from)
+  const rest = getComputedStyle(to)
+  if (now.opacity === rest.opacity && now.filter === rest.filter) return
+  to.animate(
+    [
+      { opacity: now.opacity, filter: now.filter },
+      { opacity: rest.opacity, filter: rest.filter },
+    ],
+    { duration: ms('--duration-switch'), easing: token('--ease-travel') },
+  )
+}
+
 /** The actors, each keyed as the plan names it; the sidebar and the card's Play row are the real ones. */
 function buildActors(layer: HTMLElement, p: Pieces): Map<ActorKey, HTMLElement> {
   const els = new Map<ActorKey, HTMLElement>()
@@ -128,6 +149,7 @@ function buildActors(layer: HTMLElement, p: Pieces): Map<ActorKey, HTMLElement> 
     const k = copy(panel, true)
     layer.append(k)
     els.set(`panel${i}`, k)
+    carryOn(panel, k)
   })
   for (const k of ['label', 'title', 'tools', 'play', 'status'] as const) {
     const e = copy(p.on.querySelector(sel(`panel-${k}`))!)

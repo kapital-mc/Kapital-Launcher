@@ -934,7 +934,10 @@
     opacity var(--duration-fast) linear,
     visibility 0s var(--duration-fast);
 }
-[data-layout='compact'][inert] *,
+/* While a morph runs (the compact layout inert), the panels' layout settles at
+   once so it measures true, and the actors only move as the morph moves them. A
+   picture's fade under a passing pointer runs on: the actors take it up. */
+[data-layout='compact'][inert] *:not(.compact-art),
 .morph-actors * {
   transition: none !important;
 }
