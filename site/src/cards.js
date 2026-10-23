@@ -48,12 +48,15 @@ document.addEventListener(
     const frames = new Map()
 
     // A scrambling text node is emptied and drawn in a span before it: its
-    // letters as text, its blocks as boxes. `shown` is what each node shows.
+    // letters as text, its blocks as boxes. The drawing takes no width and
+    // lies over a hidden copy of the text it lands on, so the text keeps its
+    // final width throughout and nothing beside it moves (the popup's word sits
+    // in a centred button). `shown` is what each node shows.
     const overlays = new Map()
     const shown = new Map()
     const textShown = (node) => shown.get(node) ?? node.data
-    const draw = (node, letters) => {
-      if (letters.every((letter) => typeof letter === 'string')) {
+    const draw = (node, letters, final = letters.join('')) => {
+      if (letters.every((letter) => typeof letter === 'string') && letters.join('') === final) {
         overlays.get(node)?.remove()
         overlays.delete(node)
         node.data = letters.join('')
@@ -82,7 +85,13 @@ document.addEventListener(
         parts.push(box)
       }
       if (run) parts.push(run)
-      overlay.replaceChildren(...parts)
+      const drawing = document.createElement('span')
+      drawing.className = 'scramble-draw'
+      drawing.replaceChildren(...parts)
+      const size = document.createElement('span')
+      size.className = 'scramble-size'
+      size.textContent = final
+      overlay.replaceChildren(drawing, size)
       // Something in place of every block, for what swap() reads back.
       shown.set(node, letters.map((letter) => (typeof letter === 'string' ? letter : '\u2588')).join(''))
     }
@@ -110,7 +119,7 @@ document.addEventListener(
             else if (to[i] === ' ' || from[i] === ' ') letters[i] = ' '
             else letters[i] = { block: block() }
           }
-          draw(node, letters)
+          draw(node, letters, to)
         }
         if (t < span) frames.set(node, requestAnimationFrame(frame))
         else {

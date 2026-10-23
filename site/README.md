@@ -122,9 +122,9 @@ With a release set, each Download button opens a native popover
 (`popovertarget`), no script needed: a banner of the open chapter's picture,
 tinted in the wordmark's two colours (`--logo-gradient-top` and `-bottom`),
 through a pattern of dark squares (`<!--mosaic:banner-art-->` and
-`<!--mosaic:banner-->`) with the version and a close button, a heading, a Windows or macOS switch, the one
-download for the chosen system, a link to the release notes for how to open
-it, and the Prism instance zips folded into a dropdown that slides open (a
+`<!--mosaic:banner-->`) with a close button, a heading, a Windows or macOS switch, the one
+download for the chosen system, the version as a link to its release page
+(which says how to open the download), and the Prism instance zips folded into a dropdown that slides open (a
 checkbox and a grid row easing from `0fr` to `1fr`, so the popup grows with it
 and no script is needed). The switch is a fieldset of two radios and CSS
 `:has()`, so it works without script. Windows is checked by default.
@@ -136,8 +136,7 @@ nearly the whole wait, so two pictures share the banner most of the time.
 Each picture is graded in its own squares (`effect.showcase.banner`: greyed,
 then tinted), by a different amount per chapter so the three read alike.
 Each chapter has its own pattern, clear over what its picture is of
-(`SUBJECTS` in `mosaic.js`) and always dark under the tag and the close
-button. Without the script, or under reduced motion, the banner stays on the
+(`SUBJECTS` in `mosaic.js`) and always dark under the close button. Without the script, or under reduced motion, the banner stays on the
 open chapter.
 
 There are two Download buttons and two links under them, one per system, and
@@ -193,8 +192,8 @@ network, no storage. iPhone, iPad, Android and Linux are neither, and keep
 Windows. With `release` set to `null`, the
 build leaves the popup out of the page.
 
-Its heading is in the pixel face; the tag sits in the banner, filled in at
-build time. It opens with the app's reveal (a short rise out of
+Its heading is in the pixel face; the tag sits under the Download button,
+filled in at build time. It opens with the app's reveal (a short rise out of
 a slight blur) while the page dims and softens behind it, and closes the same
 way in reverse over the slow duration on the glide curve, so the fade is seen.
 The Download button stays when the switch moves and only its last word
