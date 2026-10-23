@@ -60,9 +60,18 @@
 .showcase-card[data-scramble] > .showcase-fade {
   transition: none;
 }
-/* A block in scrambling text (src/cards.js): one letter wide with a letter's
-   gap, one capital tall, on the baseline, so it is the size of the letters
-   around it. */
+/* Scrambling text (src/cards.js) is drawn over a hidden copy of the text it
+   lands on, and takes no width itself, so nothing beside it moves. */
+.scramble-draw {
+  display: inline-block;
+  width: 0;
+  white-space: pre;
+}
+.scramble-size {
+  visibility: hidden;
+}
+/* A block in scrambling text: one letter wide with a letter's gap, one
+   capital tall, on the baseline, so it is the size of the letters around it. */
 .scramble-block {
   display: inline-block;
   width: 1ch;
