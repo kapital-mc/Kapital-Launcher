@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import * as App from '../../../wailsjs/go/main/App'
 import { useGameStore } from '../../stores/useGameStore'
 import { useModStore } from '../../stores/useModStore'
+import { PageSettledContext } from '../../lib/pageSettled'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
 import type { ChapterMods, GamePhase } from '../../types'
 import { ModsSection } from './ModsSection'
@@ -238,5 +239,58 @@ describe('ModsSection', () => {
     await waitFor(() => expect(useModStore.getState().unavailable).toBe(true))
     expect(bare.container).toBeEmptyDOMElement()
     expect(container).toBeDefined()
+  })
+
+  describe('while the page slides in', () => {
+    const at = (settled: boolean) => (
+      <PageSettledContext value={settled}>
+        <ModsSection chapter={frangfurd} />
+      </PageSettledContext>
+    )
+    const card = () => screen.getByRole('region', { name: 'Mods' }).querySelector('.rounded-lg')
+    const pending = () => document.querySelector('[class~="h-(--layout-pending)"]')
+
+    it('reads at once, holds the rows back until the page has settled, then draws them', async () => {
+      const { rerender } = render(at(false))
+      expect(App.GetChapterMods).toHaveBeenCalledWith('frangfurd')
+      await waitFor(() => expect(useModStore.getState().byChapter.frangfurd).toBeDefined())
+      // The answer is in; the page has not changed for it.
+      expect(screen.getByRole('heading', { level: 2, name: 'Mods' })).toBeInTheDocument()
+      expect(screen.queryByRole('switch')).toBeNull()
+      expect(screen.queryByText(/ on$/)).toBeNull()
+      expect(pending()).toHaveAttribute('aria-hidden', 'true')
+      const before = card()
+      rerender(at(true))
+      expect(screen.getAllByRole('switch')).toHaveLength(3)
+      expect(screen.getByText('2 of 3 on')).toBeInTheDocument()
+      expect(pending()).toBeNull()
+      // The card the rows come into is the one that held their place, so it grows into them.
+      expect(card()).toBe(before)
+    })
+
+    it('draws the rows as the answer comes when the page has settled already', async () => {
+      render(at(true))
+      expect(await screen.findAllByRole('switch')).toHaveLength(3)
+      expect(pending()).toBeNull()
+    })
+
+    it('holds back an answer kept from an earlier visit as well', async () => {
+      useModStore.setState({ byChapter: { frangfurd: view() } })
+      const { rerender } = render(at(false))
+      expect(screen.queryByRole('switch')).toBeNull()
+      rerender(at(true))
+      expect(screen.getAllByRole('switch')).toHaveLength(3)
+    })
+
+    it('keeps the section and its pending card on the page when the read fails, until it has settled', async () => {
+      vi.mocked(App.GetChapterMods).mockRejectedValue('Frangfurd is not installed')
+      const { rerender } = render(at(false))
+      await waitFor(() => expect(useModStore.getState().readError.frangfurd).toBeDefined())
+      expect(screen.queryByRole('alert')).toBeNull()
+      expect(pending()).not.toBeNull()
+      rerender(at(true))
+      expect(screen.getByRole('alert')).toHaveTextContent('Frangfurd is not installed')
+      expect(pending()).toBeNull()
+    })
   })
 })
