@@ -55,6 +55,9 @@ The `generated` check in `.claude/suite.json` diffs them; CI runs it.
 - `--font-display--font-variation-settings` and `--text-display--line-height`
   are Tailwind v4 companions: applying `font-display` or `text-display` applies
   them too, which is how Fraunces stays on its neutral axes.
+  `--font-mono--font-feature-settings` works the same way and turns off
+  JetBrains Mono's `calt` ligatures, which drew `https://` and `[::1]` as
+  joined glyphs in an address field.
 
 ## Provenance
 

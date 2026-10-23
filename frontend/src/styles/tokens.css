@@ -64,6 +64,7 @@
   --font-display: 'Fraunces', 'Iowan Old Style', 'Georgia', serif;
   --font-display--font-variation-settings: 'SOFT' 0, 'WONK' 0;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+  --font-mono--font-feature-settings: 'calt' 0;
   --font-pixel: 'Silkscreen', ui-monospace, monospace;
 
   /* Letter-spacing by role, read as tracking-<role>. */

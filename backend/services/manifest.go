@@ -309,6 +309,9 @@ func CheckLocalPackURL(raw string) error {
 		return fmt.Errorf("pack override: %w", err)
 	}
 	switch {
+	// packwiz serve has no TLS, so https on this machine is a typo for http.
+	case u.Scheme == "https":
+		return fmt.Errorf("pack override: %q is https; packwiz serve is http only", raw)
 	case u.Scheme != "http":
 		return fmt.Errorf("pack override: %q is not http", raw)
 	case !slices.Contains(loopbackHosts, strings.ToLower(u.Hostname())):

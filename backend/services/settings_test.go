@@ -355,6 +355,11 @@ func TestPackOverridesAreRefusedOnSaveAndDroppedOnLoad(t *testing.T) {
 			t.Errorf("%s: %s was saved", name, raw)
 		}
 	}
+	// The field's likeliest slip gets an answer that names the fix.
+	https := models.AppSettings{Theme: "dark", PackOverrides: map[string]string{"frangfurd": "https://localhost:8080/pack.toml"}}
+	if err := svc.Save(https); err == nil || !strings.Contains(err.Error(), "packwiz serve is http only") {
+		t.Errorf("https on localhost: got %v, want the http-only answer", err)
+	}
 	if err := svc.Save(models.AppSettings{Theme: "dark", PackOverrides: map[string]string{"../x": "http://localhost:8080/pack.toml"}}); err == nil {
 		t.Error("a key that is not a chapter id was saved")
 	}
