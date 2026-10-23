@@ -275,8 +275,10 @@ download easy and looks good, at most two screens tall. What changed:
   panels are the labels of a radio group, so choosing a chapter needs no
   script, and `src/showcase.js` is removed. A small `cycle.js` opens the next
   chapter every 5 s (`duration.cycle`), starting the wait again after a
-  switch by hand, holding while the pointer or focus is on the strip or a
-  popup is open, and never under reduced motion (WCAG 2.2.2). On a switch
+  switch by hand, holding while keyboard focus is on the strip or a popup is
+  open, and never under reduced motion (WCAG 2.2.2). It held for the pointer
+  too at first; the author found it stopping, since a pointer rests on the
+  window and a click leaves focus there, so a pointer no longer pauses it. On a switch
   `cards.js` runs the floating cards' letters through letter-sized blocks
   into the new chapter's text, as the backdrop changes its squares, and the
   download popup's button word the same way on a system switch.

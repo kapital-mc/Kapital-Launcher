@@ -1,8 +1,10 @@
 // Opens the next chapter in the strip every --duration-cycle, so the page
 // shows all three without a click. Choosing a chapter starts the wait again
-// from that moment. It waits while the pointer or the keyboard focus is on
-// the window, while a popup is open and while the tab is hidden, and never
-// runs for a visitor who asks for reduced motion. Without the script the strip
+// from that moment. It waits while keyboard focus is on the window, while a
+// popup is open and while the tab is hidden, and never runs for a visitor who
+// asks for reduced motion. The pointer does not hold it: a visitor reading the
+// page rests it on the window, and a click leaves focus on the chapter's
+// radio, so only focus the keyboard moved (:focus-visible) counts. Without the script the strip
 // stays on the chapter it opened with and still switches on a click.
 //
 // The download popup's banner cycles too, while the popup is open: it starts
@@ -44,11 +46,10 @@ document.addEventListener(
     }
 
     let timer = 0
-    let hovered = false
     let focused = false
 
     const popupOpen = () => document.querySelector(':popover-open') !== null
-    const held = () => hovered || focused || document.hidden || popupOpen()
+    const held = () => focused || document.hidden || popupOpen()
 
     const next = () => {
       const open = radios.findIndex((radio) => radio.checked)
@@ -64,12 +65,15 @@ document.addEventListener(
     }
 
     for (const radio of radios) radio.addEventListener('change', restart)
-    const track = (on, off, set) => {
-      strip.addEventListener(on, () => (set(true), restart()))
-      strip.addEventListener(off, () => (set(false), restart()))
+    const track = () => {
+      const was = focused
+      focused = strip.querySelector(':focus-visible') !== null
+      if (focused !== was) restart()
     }
-    track('pointerenter', 'pointerleave', (value) => (hovered = value))
-    track('focusin', 'focusout', (value) => (focused = value))
+    strip.addEventListener('focusin', track)
+    strip.addEventListener('focusout', () => queueMicrotask(track))
+    // Arrow keys move the radio without moving focus in or out.
+    strip.addEventListener('keydown', () => queueMicrotask(track))
     document.addEventListener('visibilitychange', restart)
     for (const popup of document.querySelectorAll('[popover]')) popup.addEventListener('toggle', restart)
 

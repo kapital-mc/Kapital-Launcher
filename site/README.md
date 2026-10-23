@@ -145,9 +145,11 @@ There are two Download buttons and two links under them, one per system, and
 the link for the other. Without the script Windows is shown.
 
 `src/cycle.js` opens the next chapter every `duration.cycle` (5 s). A
-switch by hand starts the wait again; it waits while the pointer or the focus
-is on the strip, while a popup is open or the tab is hidden, and never runs
-under reduced motion.
+switch by hand starts the wait again; it waits while keyboard focus
+(`:focus-visible`) is on the strip, while a popup is open or the tab is
+hidden, and never runs under reduced motion. The pointer does not hold it:
+a pointer resting on the window, and the focus a click leaves on a chapter's
+radio, had stopped it for as long as they stayed.
 
 The two floating cards hold every chapter's version in one cell. On a switch
 `src/cards.js` shows the new version at once and runs each letter that
