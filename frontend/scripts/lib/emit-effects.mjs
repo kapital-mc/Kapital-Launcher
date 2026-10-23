@@ -76,6 +76,7 @@ export function emitEffects(src, push) {
   push(`  --panel-dim: ${panel.dim};`)
   push(`  --panel-dim-hover: ${panel.dimHover};`)
   push(`  --panel-lean: ${panel.lean};`)
+  push(`  --panel-blur: ${panel.blur}px;`)
   push(`  --panel-shade: ${panel.shade}%;`)
   push(`  --panel-shade-from: ${panel.shadeFrom}%;`)
   emitRevealValues(src, push)

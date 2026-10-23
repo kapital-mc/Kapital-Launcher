@@ -107,6 +107,8 @@
   --transition-duration-morph: 900ms;
   --duration-switch: 600ms;
   --transition-duration-switch: 600ms;
+  --duration-lean: 700ms;
+  --transition-duration-lean: 700ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
@@ -173,7 +175,8 @@
   --panel-grow: 2.6;
   --panel-dim: 0.28;
   --panel-dim-hover: 0.42;
-  --panel-lean: 0.18;
+  --panel-lean: 0.08;
+  --panel-blur: 2px;
   --panel-shade: 85%;
   --panel-shade-from: 30%;
   --layout-reveal-rise: 4px;

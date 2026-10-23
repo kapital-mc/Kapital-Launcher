@@ -831,7 +831,8 @@
 
 /* The compact launcher (components/compact, docs/adr/0015-compact-launcher.md):
    the three chapters as panels side by side. The open chapter's panel is wider
-   and its picture full; the others are dimmed, a little less under the pointer.
+   and its picture full; the others are dimmed and softly blurred, a little
+   less dim under the pointer.
    A switch moves the panels' widths, the titles' sizes and Play's row together
    over one soft curve: the row opens under the new chapter's title and
    closes under the old one's (grid rows 0fr to 1fr), so a title rises and
@@ -846,20 +847,27 @@
 .compact-panel[data-active] {
   flex-grow: var(--panel-grow);
 }
-/* Under the pointer another chapter's panel leans toward the open one: it takes
-   its extra width from the open panel alone, so its far edge stays put. */
+/* A pointer resting on another chapter's panel leans it toward the open one: it
+   takes its extra width from the open panel alone, so its far edge stays put.
+   Only a pointer that stays: one passing over starts nothing. */
 .compact-panel:not([data-active]):hover {
   flex-grow: calc(1 + var(--panel-lean));
+  transition-delay: var(--duration-lean);
 }
 .compact-row:has(> .compact-panel:not([data-active]):hover) > .compact-panel[data-active] {
   flex-grow: calc(var(--panel-grow) - var(--panel-lean));
+  transition-delay: var(--duration-lean);
 }
 .compact-art {
   opacity: var(--panel-dim);
-  transition: opacity var(--duration-switch) var(--ease-travel);
+  filter: blur(var(--panel-blur));
+  transition:
+    opacity var(--duration-switch) var(--ease-travel),
+    filter var(--duration-switch) var(--ease-travel);
 }
 .compact-panel[data-active] .compact-art {
   opacity: 1;
+  filter: none;
 }
 .compact-panel:not([data-active]):hover .compact-art {
   opacity: var(--panel-dim-hover);

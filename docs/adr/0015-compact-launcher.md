@@ -60,9 +60,11 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   slide, so opening another chapter in compact changes no picture; once a
   minute they all move on at once (the author, 2026-10-23).
 - **A switch between panels is soft.** Widths, the title and Play's row move
-  over `duration.switch` (600 ms) on `ease-travel`. Under the pointer another
-  chapter's panel leans toward the open one by `effect.panel.lean`, taking the
-  room from the open panel alone.
+  over `duration.switch` (600 ms) on `ease-travel`. A pointer resting on
+  another chapter's panel for `duration.lean` (700 ms) leans it toward the
+  open one by `effect.panel.lean`, taking the room from the open panel alone;
+  a pointer passing over starts nothing. The other chapters' pictures are
+  dimmed and blurred by `effect.panel.blur`.
 
 ## Consequences
 
