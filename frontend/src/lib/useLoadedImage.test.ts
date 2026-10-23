@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { useLoadedImage } from './useLoadedImage'
+import { preload } from './slides'
 
 /** An Image whose decode the test settles by hand, per src. */
 const pending = new Map<string, { resolve: () => void; reject: () => void }>()
@@ -35,6 +36,14 @@ describe('useLoadedImage', () => {
     expect(result.current).toBe('/own.webp')
     await settle('/wiki-art/a-1.webp')
     expect(result.current).toBe('/wiki-art/a-1.webp')
+  })
+
+  it('draws a picture a slide preloaded at once, with no fallback first', async () => {
+    const loading = preload('/wiki-art/p-1.webp')
+    await settle('/wiki-art/p-1.webp')
+    await loading
+    const { result } = renderHook(() => useLoadedImage('/wiki-art/p-1.webp', '/own.webp'))
+    expect(result.current).toBe('/wiki-art/p-1.webp')
   })
 
   it('keeps the last picture while the next one loads, so a change starts only when it is ready', async () => {

@@ -140,6 +140,23 @@ describe('useChapterStore', () => {
       expect(['castle', 'avari']).toContain(slide.page?.id)
     })
 
+    it('gives every chapter a picture once the screenshots arrive, so the compact launcher opens on them', async () => {
+      vi.mocked(App.GetWikiShots).mockResolvedValue([
+        shot('/l1', 'Luxemburg'),
+        shot('/c1', 'Lichdenstein'),
+        shot('/f1', 'Frangfurd'),
+      ])
+      await useChapterStore.getState().loadWikiShots()
+      const before = useChapterStore.getState().slides
+      expect([before.luxemburg?.art, before.lichdenstein?.art, before.frangfurd?.art]).toEqual([
+        '/l1',
+        '/c1',
+        '/f1',
+      ])
+      useChapterStore.getState().setTogether(true)
+      expect(useChapterStore.getState().slides).toEqual(before)
+    })
+
     it('moves on to another picture and post on advance, and keeps them on a click of the open chapter', async () => {
       useChapterStore.setState({
         wikiPages: [page('castle', 'Luxemburg', ['avari']), page('avari', 'Luxemburg', ['castle'])],
