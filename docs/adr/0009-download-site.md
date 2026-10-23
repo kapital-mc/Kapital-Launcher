@@ -261,3 +261,59 @@ button until the button opens it again. What it does is unchanged: it opens
 `services.DownloadPage` and nothing else. Not now, Cancel and Close across
 the launcher's popups and prompts are the same small borderless button
 (`Button`'s `quiet`), so the action beside them leads. What's new keeps its X.
+
+## Amendment, 2026-10-22: the pixel window
+
+The author redesigned the page with Claude over a set of mockups, after
+essential.gg and other Minecraft sites: no sales line, a page that makes the
+download easy and looks good, at most two screens tall. What changed:
+
+- **The window is a strip of chapters, not the app's layout.** The header bar
+  is still the app's (`HeaderBar`, tools on the left, Windows' buttons on the
+  right), but under it the three chapters are panels side by side; the open
+  one is wide with its picture at full strength, the others dimmed. The
+  panels are the labels of a radio group, so choosing a chapter needs no
+  script, and `src/showcase.js` is removed. A small `cycle.js` opens the next
+  chapter every 5 s (`duration.cycle`), starting the wait again after a
+  switch by hand, holding while keyboard focus is on the strip or a popup is
+  open, and never under reduced motion (WCAG 2.2.2). It held for the pointer
+  too at first; the author found it stopping, since a pointer rests on the
+  window and a click leaves focus there, so a pointer no longer pauses it. On a switch
+  `cards.js` runs the floating cards' letters through letter-sized blocks
+  into the new chapter's text, as the backdrop changes its squares, and the
+  download popup's button word the same way on a system switch.
+- **A backdrop of squares.** Behind the window the open chapter's picture
+  shows through a grid of dark squares and changes square by square on a
+  switch. The squares are spans `mosaic.js` writes at build time, since the
+  CSP allows no `style` attribute; each paints only its own slice of the
+  picture, so the page never paints a full-size copy per square (an early
+  mockup that did so glitched the whole viewport). The picture is lightly
+  tinted toward the accent: `effect.showcase` joined the tokens, with the dim
+  of a closed panel. It is not blurred: a blur reads across the squares'
+  edges, which showed seams mid-swap and softened the dark squares.
+- **A pixel face.** Buttons, labels and the popups' headings are in
+  Silkscreen (OFL), the face of the first mockup the author liked, served
+  from the site like the others; it is `type.family.pixel` in the tokens. The
+  Download buttons are the logo's rose with square corners.
+- **One Download button for the visitor's system**, with the version and the
+  other system under it; both open the download popup with that system
+  picked. The popup has a banner of the open chapter's picture, tinted in
+  the wordmark's two colours by a different amount per picture so the three
+  read alike, which moves on to the next chapter every 7.5 s in a 7 s wave of
+  squares from the right, so two pictures are usually in it at once; each chapter's dark squares leave its
+  subject clear. Changelog,
+  GitHub and the code signing policy moved to the footer, and the logo is the
+  only thing above the button.
+- **A live server card, through the site's own endpoint.** Beside the window
+  are the open chapter's pack (version, mods, loader) and its server. The
+  page had touched no network; the author asked for the server's status, so
+  it now makes one request, to its own `/status`, a Pages Function that
+  pings Frangfurd's Germany address (playit.gg) and caches the answer for
+  30 s. A public status API was the other way considered; it would hand every
+  visitor's address to a third party. The visitor's browser never
+  meets the game server, and the CSP gains only `connect-src 'self'`.
+  Luxemburg and Lichdenstein are offline and are never asked.
+- **No operating system logos.** Apple's trademark guidelines do not allow
+  the Apple logo on a website without a licence, and Microsoft's logos only
+  under its brand guidelines, so the systems are named in words.
+

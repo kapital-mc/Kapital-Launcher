@@ -1,0 +1,18 @@
+/* Silkscreen, the page's pixel face (type.family.pixel in the tokens), for
+   its buttons, labels and popup headings. The site's own: the app does not
+   draw it. Latin only, the two weights the page uses, served from the site
+   (font-src 'self'); the licence is beside the files. */
+@font-face {
+  font-family: 'Silkscreen';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/silkscreen-latin-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Silkscreen';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./fonts/silkscreen-latin-700.woff2') format('woff2');
+}

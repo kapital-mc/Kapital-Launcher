@@ -45,6 +45,7 @@ export function emitEffects(src, push) {
     panorama,
     cover,
     panel,
+    showcase,
   } = src.effect
   push(`/* Effects: values a utility cannot name on its own. Read by the shared`)
   push(`   styles/base.css and by brightness-(--effect-hover-brightness). */`)
@@ -80,6 +81,13 @@ export function emitEffects(src, push) {
   push(`  --panel-blur: ${panel.blur}px;`)
   push(`  --panel-shade: ${panel.shade}%;`)
   push(`  --panel-shade-from: ${panel.shadeFrom}%;`)
+  push(`  --effect-showcase-tint: ${showcase.tint}${showcase.unit};`)
+  push(`  --effect-showcase-shade: ${showcase.shade}${showcase.unit};`)
+  push(`  --effect-showcase-dim: ${showcase.dim}${showcase.unit};`)
+  for (const [chapter, grade] of Object.entries(showcase.banner)) {
+    push(`  --effect-banner-grey-${chapter}: ${grade.grey}${showcase.unit};`)
+    push(`  --effect-banner-tint-${chapter}: ${grade.tint}${showcase.unit};`)
+  }
   emitRevealValues(src, push)
   push(`}`)
 }

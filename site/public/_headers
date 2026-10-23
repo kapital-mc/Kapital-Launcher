@@ -1,12 +1,15 @@
 # Response headers for every file the site serves, applied by Cloudflare Pages
 # (https://developers.cloudflare.com/pages/configuration/headers/).
-# The page runs one script file, its own (src/detect.js picks the OS in the
-# download popup, src/showcase.js makes the window's chapter rows clickable,
-# src/popup.js opens and closes the popups with motion),
-# and loads nothing from another origin, so the policy allows
-# its own scripts, styles, images and fonts and nothing else. No inline script.
+# The page runs one script file, its own (src/detect.js picks the OS for the
+# Download button and the download popup, src/popup.js opens and closes the
+# popups with motion, src/cycle.js opens the next chapter every few seconds,
+# src/cards.js scrambles the cards' text on a switch and asks the site's own
+# /status for the server card), and loads nothing from another origin, so the
+# policy allows its own scripts, styles, images, fonts and requests and nothing
+# else. No inline script. /status is a Pages Function (functions/status.js)
+# and sets its own headers; this file covers the static files.
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 

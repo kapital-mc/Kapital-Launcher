@@ -1,6 +1,9 @@
-// Checks the download popup's radio for the visitor's operating system, and
-// does nothing else: no network, no storage. Without this script, or on any
-// other system, Windows stays checked and the switch still works.
+// Picks the visitor's operating system, and does nothing else: no network, no
+// storage. It sets data-os on the root, which the Download button and the
+// link under it read (data-when-os), and checks the download popup's radio
+// for it. A button that opens the popup for one system (data-os-pick) checks
+// that system's radio first. Without this script, or on any other system,
+// Windows is shown and checked, and the switch in the popup still works.
 //
 // The build makes this a classic script in the head, after the stylesheet
 // (stylesheetFirst in vite.config.js), so it runs before the popup exists and
@@ -21,13 +24,19 @@ document.addEventListener(
     const touchMac = /mac/.test(platform) && navigator.maxTouchPoints > 1
     const other = /iphone|ipad|ipod|android|linux|cros/.test(platform) || touchMac
 
-    let id = null
-    if (!other) {
-      if (/win/.test(platform) && !/darwin/.test(platform)) id = 'os-windows'
-      else if (/mac/.test(platform)) id = 'os-macos'
+    const check = (os) => {
+      const radio = document.getElementById(`os-${os}`)
+      if (radio instanceof HTMLInputElement) radio.checked = true
     }
-    const radio = id && document.getElementById(id)
-    if (radio instanceof HTMLInputElement) radio.checked = true
+
+    if (!other && /mac/.test(platform)) {
+      document.documentElement.dataset.os = 'macos'
+      check('macos')
+    }
+
+    for (const button of document.querySelectorAll('[data-os-pick]')) {
+      button.addEventListener('click', () => check(button.dataset.osPick))
+    }
   },
   { once: true },
 )

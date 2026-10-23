@@ -100,23 +100,24 @@
   animation: popup-backdrop-out var(--duration-slow) var(--ease-glide) forwards;
 }
 
-/* The two systems' panels swap by display, so the one coming in starts clear
-   and fades up. */
-.download-panel {
-  transition: opacity var(--duration-reveal) var(--ease-standard);
+/* The download popup's button word: with src/cards.js running the new word
+   shows at once and scrambles into place instead of cross-fading. */
+.download-word[data-scramble] > span {
+  transition: none;
 }
-@starting-style {
-  .download-panel {
-    opacity: 0;
-  }
+
+/* The Download button and the link under it, one per system: data-os on the
+   root is the visitor's system (src/detect.js), Windows without it. */
+:root[data-os='macos'] [data-when-os='windows'],
+:root:not([data-os='macos']) [data-when-os='macos'] {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   [popover],
   [popover]:popover-open,
   [popover]::backdrop,
-  [popover]:popover-open::backdrop,
-  .download-panel {
+  [popover]:popover-open::backdrop {
     transition: none;
   }
   [popover][data-closing],
