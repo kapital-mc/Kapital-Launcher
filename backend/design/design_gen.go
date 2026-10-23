@@ -9,8 +9,8 @@ package design
 const (
 	WindowWidth     = 1280
 	WindowHeight    = 800
-	WindowMinWidth  = 480
-	WindowMinHeight = 180
+	WindowMinWidth  = 960
+	WindowMinHeight = 360
 )
 
 // The size below which the full layout does not fit and the launcher shows

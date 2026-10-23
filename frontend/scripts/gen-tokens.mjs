@@ -123,8 +123,10 @@ function validate(src) {
     fail('layout.window minimum exceeds its default size')
   }
   const c = src.layout.compact
-  if (c.width <= w.minWidth || c.height <= w.minHeight) {
-    fail('layout.compact must lie above the window minimum, or compact is never held on')
+  if (c.width <= w.minWidth && c.height <= w.minHeight) {
+    fail(
+      'layout.compact must lie above the window minimum on one side, or compact is never held on',
+    )
   }
   const sp = src.layout.splash
   if (!(sp?.width > 0 && sp?.height > 0)) fail('layout.splash needs a width and a height')
@@ -189,12 +191,10 @@ function emitCss(src) {
 }
 
 function emitVariants(src, push) {
-  push(`/* A compact panel too short for its whole foot, and one with room for only its`)
-  push(`   title and Play (the window's own minimum is lower than the full foot needs).`)
-  push(`   A container query cannot read a custom property, so the heights are written`)
-  push(`   here, from the tokens. */`)
+  push(`/* A compact panel too short for its whole foot (the window's own minimum is`)
+  push(`   lower than the full foot needs). A container query cannot read a custom`)
+  push(`   property, so the height is written here, from the token. */`)
   push(`@custom-variant panel-short (@container panel (height < ${src.layout.compact.short}px));`)
-  push(`@custom-variant panel-tiny (@container panel (height < ${src.layout.compact.tiny}px));`)
 }
 
 function emitThemeMapping(src, push) {

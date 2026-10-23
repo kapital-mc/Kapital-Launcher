@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { TRAVEL_END, cover, mirror, planMorph, reverseKeyframes, timing } from './compactMorph'
+import {
+  TRAVEL_END,
+  cover,
+  keyframesFor,
+  mirror,
+  planMorph,
+  reverseKeyframes,
+  timing,
+} from './compactMorph'
 import type { Box, Curves, MorphMeasure } from './compactMorph'
 
 const box = (x: number, y: number, w: number, h: number): Box => ({ x, y, w, h })
@@ -134,10 +142,33 @@ describe('timing', () => {
     expect(t.duration).toBeCloseTo(360)
   })
 
-  it('going out, mirrors the window and the curve', () => {
+  it('going out, fades Play as the travel starts', () => {
     const t = timing(s, false, 1000)
     expect(t.delay).toBe(0)
-    expect(t.duration).toBeCloseTo(360)
-    expect(t.easing).toBe(mirror(curves.settle))
+    expect(t.duration).toBeCloseTo(200)
+    expect(t.easing).toBe('linear')
+  })
+
+  it('going out, mirrors the rest within the travel, starting the travel at once on its own curve', () => {
+    const steps = planMorph(measure(), curves)
+    for (const x of steps) {
+      const t = timing(x, false, 1000)
+      expect(t.delay).toBeGreaterThanOrEqual(0)
+      expect((t.delay ?? 0) + Number(t.duration)).toBeLessThanOrEqual(TRAVEL_END * 1000 + 1e-6)
+    }
+    const clip = steps.find((x) => x.key === 'clip')!
+    expect(timing(clip, false, 1000)).toMatchObject({ delay: 0, easing: curves.travel })
+    const side = steps.find((x) => x.key === 'side')!
+    expect(timing(side, false, 1000).delay).toBeCloseTo((TRAVEL_END - 0.34) * 1000)
+  })
+
+  it('going out, sends the title straight from its place to the hero', () => {
+    const title = planMorph(measure(), curves).find((x) => x.key === 'title')!
+    const kf = keyframesFor(title, false)
+    expect(kf).toHaveLength(2)
+    expect(kf[0]!.transform).toBe('translate(0px, 0px) scale(1)')
+    expect(kf[1]!.transform).toBe(title.kf[0]!.transform)
+    expect(timing(title, false, 1000)).toMatchObject({ delay: 0, easing: curves.travel })
+    expect(keyframesFor(title, true)).toBe(title.kf)
   })
 })

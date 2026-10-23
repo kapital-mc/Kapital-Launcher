@@ -15,10 +15,13 @@
  *   The blurb, the pills and the card's own Play row fade first.
  *
  * Leaving is the same keyframes played from the other end, with each curve
- * mirrored, so it is the arrival run backwards. Everything is described once,
- * as keyframes from the full layout to the compact one (`planMorph`), and the
- * travel uses one even curve, so the picture, the panels and the title move as
- * one. Nothing starts before every picture in the layer is decoded, so the
+ * mirrored, so it is the arrival run backwards, except that nothing waits for
+ * the compact layout's last touches to undo: Play and the server line fade out
+ * as the travel starts, the title travels straight from its place, and the
+ * travel keeps its own curve so it starts at once. The way out is the travel's
+ * length. Everything is described once, as keyframes from
+ * the full layout to the compact one (`planMorph`), and the travel uses one
+ * even curve, so the picture, the panels and the title move as one. Nothing starts before every picture in the layer is decoded, so the
  * first frames are not dropped. A window resized mid-way is measured again and
  * every piece's end moves, keeping its progress.
  */
@@ -126,6 +129,11 @@ export interface Step {
   /** The start and end of its window, as shares of the whole. */
   t: [number, number]
   ease: string
+  /**
+   * How it leaves, where the arrival run backwards would not do: its window (for
+   * a step that ends after the travel), its own keyframes, its own curve.
+   */
+  away?: { t?: [number, number]; kf?: Keyframe[]; ease?: string }
 }
 
 export interface Curves {
@@ -222,8 +230,14 @@ function planWords(m: MorphMeasure, c: Curves): Step[] {
     ],
     t: [0, 1],
     ease: 'linear',
+    // Leaving, it travels from where it stands, with the picture.
+    away: {
+      t: [0, A],
+      kf: [{ transform: HOME }, { transform: fromTo(a, b, key === 'title') }],
+      ease: c.travel,
+    },
   })
-  const fadeUp = (key: 'play' | 'status', box: Box, from: number): Step => ({
+  const fadeUp = (key: 'play' | 'status', box: Box, from: number, gone: number): Step => ({
     key,
     box,
     // A soft fade with a small lift, on an even curve: an ease-out would pop it in.
@@ -233,6 +247,8 @@ function planWords(m: MorphMeasure, c: Curves): Step[] {
     ],
     t: [from, 1],
     ease: c.settle,
+    // Leaving, it fades as the travel starts, while the picture is still near its panel.
+    away: { t: [0, gone], ease: 'linear' },
   })
   const leave = (key: 'actions' | 'blurb', drop: number, until: number, box?: Box): Step => ({
     key,
@@ -255,8 +271,8 @@ function planWords(m: MorphMeasure, c: Curves): Step[] {
       t: [0, A],
       ease: c.travel,
     },
-    fadeUp('play', m.play, 0.64),
-    fadeUp('status', m.status, 0.7),
+    fadeUp('play', m.play, 0.64, 0.2),
+    fadeUp('status', m.status, 0.7, 0.16),
     // The card's own Play row and the blurb leave before the picture covers them.
     leave('actions', 8, 0.14),
     leave('blurb', 6, 0.16, m.blurb),
@@ -269,18 +285,34 @@ function planWords(m: MorphMeasure, c: Curves): Step[] {
   ]
 }
 
-/** The whole morph, as keyframes from the full layout to the compact one. */
+/**
+ * The whole morph, as keyframes from the full layout to the compact one. Leaving,
+ * the travel keeps its own curve rather than its mirror, which would start slowly:
+ * the picture moves off the moment the click lands, and settles into the hero.
+ */
 export function planMorph(m: MorphMeasure, c: Curves): Step[] {
-  return [...planPictures(m, c), ...planWords(m, c)]
+  return [...planPictures(m, c), ...planWords(m, c)].map((s) =>
+    s.ease === c.travel ? { ...s, away: { ...s.away, ease: c.travel } } : s,
+  )
 }
 
-/** A step's timing played in either direction: going out, its window and its curve mirror. */
+/** A step's keyframes played in either direction. */
+export function keyframesFor(s: Step, toCompact: boolean): Keyframe[] {
+  if (toCompact) return s.kf
+  return s.away?.kf ?? reverseKeyframes(s.kf)
+}
+
+/**
+ * A step's timing played in either direction. Going out, its window and its curve
+ * mirror within the travel, which the way out lasts, or it takes its own (`away`).
+ */
 export function timing(s: Step, toCompact: boolean, duration: number): KeyframeAnimationOptions {
-  const [a, b] = toCompact ? s.t : [1 - s.t[1], 1 - s.t[0]]
+  const [a, b] = toCompact ? s.t : (s.away?.t ?? [TRAVEL_END - s.t[1], TRAVEL_END - s.t[0]])
+  const out = s.away?.ease ?? mirror(s.ease)
   return {
     duration: duration * (b - a),
     delay: duration * a,
-    easing: toCompact ? s.ease : mirror(s.ease),
+    easing: toCompact ? s.ease : out,
     fill: 'both',
   }
 }

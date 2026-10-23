@@ -33,10 +33,11 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   (40 px) past both sides. Shrinking takes compact at once, mid-drag, so the
   full layout is never seen cut; growing waits for the drag to pause.
 - **The window keeps its size.** Choosing compact changes the layout, never
-  the window. The window minimum drops to 480 × 180 (the author, 2026-10-23).
-  A panel shorter than `layout.compact.short` drops its number and kind and
-  takes a smaller title; one shorter than `layout.compact.tiny` keeps only its
-  title and Play, so both still fit.
+  the window. The window minimum drops to 960 × 360 (the author, 2026-10-23,
+  after trying 480 × 180, where Play crowded the open panel and the server
+  line had no room). It is wider than the floor, so only the height holds
+  compact on. A panel shorter than `layout.compact.short` drops its number and
+  kind and takes a smaller title.
 - **A left-click in compact goes back to full.** The sidebar button's usual
   click (narrowing the sidebar) has nothing to act on there.
 - **Both layouts are laid out; actors carry one into the other.** The full
@@ -49,7 +50,11 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   the other panels from the window's edge on their side; the title and label to
   the panel's foot with the picture, then up into place; Play and the server
   line fading up after. The way out is the same keyframes reversed with each
-  curve mirrored. It waits for every picture to decode before the first frame,
+  curve mirrored, except that nothing waits for the compact layout's last
+  touches: the travel starts on the click, on its own curve, while Play and the
+  server line fade out over its first 200 ms and the title travels straight
+  from its place (the author found the mirrored wait sluggish, 2026-10-23). It
+  lasts the travel's 558 ms. It waits for every picture to decode before the first frame,
   retargets if the window is resized mid-way, and with reduced motion or in a
   hidden window the layouts simply swap.
 - **One timing for the travel.** 900 ms; the picture, the panels and the title

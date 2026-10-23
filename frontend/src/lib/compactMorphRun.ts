@@ -1,4 +1,4 @@
-import { boxOf, cover, planMorph, reverseKeyframes, timing } from './compactMorph'
+import { boxOf, cover, keyframesFor, planMorph, timing } from './compactMorph'
 import type { ActorKey, Box, Curves, MorphMeasure, Step } from './compactMorph'
 import { ms, token } from './smoothResize'
 
@@ -166,7 +166,7 @@ export function runMorph(area: HTMLElement, layer: HTMLElement, toCompact: boole
   const els = buildActors(layer, pieces)
   const duration = ms('--duration-morph')
   const c = curves()
-  const keyframes = (s: Step) => (toCompact ? s.kf : reverseKeyframes(s.kf))
+  const keyframes = (s: Step) => keyframesFor(s, toCompact)
   const steps = planMorph(m, c)
   const anims = steps.map((s) => {
     const el = els.get(s.key)!

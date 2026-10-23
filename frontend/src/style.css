@@ -923,14 +923,6 @@
 }
 .compact-foot-row {
   width: calc(var(--panel-open-w) - 12 * var(--spacing));
-  /* A tiny panel keeps Play and lets its status line go. */
-  @variant panel-tiny {
-    width: calc(var(--panel-open-w) - 6 * var(--spacing));
-    & [data-morph='panel-status'] {
-      visibility: hidden;
-      position: absolute;
-    }
-  }
 }
 .compact-tools {
   transition: opacity var(--duration-slow) linear var(--duration-reveal);

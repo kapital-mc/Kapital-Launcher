@@ -258,8 +258,8 @@
         },
         "compact": {
           "type": "object",
-          "description": "The compact launcher: the three chapters as panels side by side (docs/adr/0015-compact-launcher.md). Below width or height, in logical px, the full layout does not fit and compact is held on; it lets go once the window is hysteresis px past both. gap is the space around and between the panels; title and titleIdle the width of the chapter's title artwork on the open panel and on the others. Below short px of height a panel drops its number and kind and the open title is titleShort wide. rise is how far Play's row lifts into place as it fades in. Below tiny px of height a panel keeps only its title and Play, closer to its edges.",
-          "required": ["width", "height", "hysteresis", "gap", "title", "titleIdle", "short", "tiny", "rise", "titleShort"],
+          "description": "The compact launcher: the three chapters as panels side by side (docs/adr/0015-compact-launcher.md). Below width or height, in logical px, the full layout does not fit and compact is held on; it lets go once the window is hysteresis px past both. gap is the space around and between the panels; title and titleIdle the width of the chapter's title artwork on the open panel and on the others. Below short px of height a panel drops its number and kind and the open title is titleShort wide. rise is how far Play's row lifts into place as it fades in.",
+          "required": ["width", "height", "hysteresis", "gap", "title", "titleIdle", "short", "rise", "titleShort"],
           "additionalProperties": false,
           "properties": {
             "width": { "type": "integer", "minimum": 1 },
@@ -269,7 +269,6 @@
             "title": { "type": "integer", "minimum": 1 },
             "titleIdle": { "type": "integer", "minimum": 1 },
             "short": { "type": "integer", "minimum": 1 },
-            "tiny": { "type": "integer", "minimum": 1 },
             "rise": { "type": "integer", "minimum": 0 },
             "titleShort": { "type": "integer", "minimum": 1 }
           }
