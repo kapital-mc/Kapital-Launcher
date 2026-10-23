@@ -277,8 +277,9 @@ download easy and looks good, at most two screens tall. What changed:
   chapter every 5 s (`duration.cycle`), starting the wait again after a
   switch by hand, holding while the pointer or focus is on the strip or a
   popup is open, and never under reduced motion (WCAG 2.2.2). On a switch
-  `cards.js` runs the floating cards' letters through random ones into
-  the new chapter's text, as the backdrop changes its squares.
+  `cards.js` runs the floating cards' letters through block characters
+  into the new chapter's text, as the backdrop changes its squares, and the
+  download popup's button word the same way on a system switch.
 - **A backdrop of squares.** Behind the window the open chapter's picture
   shows through a grid of dark squares and changes square by square on a
   switch. The squares are spans `mosaic.js` writes at build time, since the

@@ -15,10 +15,11 @@ paths:
   `src/popup.js` starts the popups' opening fade after their first frame and
   plays the closing before it hides them; `src/cycle.js` opens the next
   chapter every `duration.cycle`; `src/cards.js` scrambles the floating
-  cards' text into the new chapter's and fills in the server card from
-  `/status`, the one Pages Function (`functions/status.js`, whose ping is
-  `status.js`, tested). It pings only the manifest's Frangfurd Germany
-  address and passes on nothing but whether it answered and two counts. Vite bundles them into one file, and
+  cards' text (and the popup's Download word) through block characters and
+  fills in the server card from `/status`, the one Pages Function
+  (`functions/status.js`, whose ping is `status.js`, tested). It pings only
+  the manifest's Frangfurd Germany address and passes on nothing but whether
+  it answered and two counts. Vite bundles them into one file, and
   the build places it after the stylesheet as a classic script, so the parser
   waits for the stylesheet and no browser paints the page unstyled
   (`stylesheetFirst` in `vite.config.js`); keep it free of imports, exports and

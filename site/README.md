@@ -139,7 +139,8 @@ under reduced motion.
 
 The two floating cards hold every chapter's version in one cell. On a switch
 `src/cards.js` shows the new version at once and runs each letter that
-differs through random letters until it lands, each at its own moment within
+differs through block characters (█▓▒░▀▄▌▐, the backdrop's squares as
+text) until it lands, each at its own moment within
 the slow duration, as the backdrop's squares do. Their colours (the accent,
 the server's square) come from the root and fade there. Without the script, or
 under reduced motion, the versions cross-fade.
@@ -181,7 +182,8 @@ build time. It opens with the app's reveal (a short rise out of
 a slight blur) while the page dims and softens behind it, and closes the same
 way in reverse over the slow duration on the glide curve, so the fade is seen.
 The Download button stays when the switch moves and only its last word
-cross-fades; the two systems' links lie over it and the other one is left
+changes, scrambled through block characters by `src/cards.js` (cross-faded
+without it); the two systems' links lie over it and the other one is left
 out. The tiles' outline and square fade on the slow duration. The changelog and code signing popups move the same way.
 Both halves go through `src/popup.js`. Only Chromium keeps a closing popover
 in the top layer while it fades, and other browsers drop it at once, so the
