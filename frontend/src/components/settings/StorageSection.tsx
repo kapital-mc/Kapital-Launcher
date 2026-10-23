@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Chapter, ChapterStorage, StorageItem } from '../../types'
 import { errMsg } from '../../lib/ipc'
 import { formatBytes } from '../../lib/bytes'
+import { usePageSettled } from '../../lib/pageSettled'
 import { ChevronDown, FolderOpen, HardDrive, Trash2 } from '../../lib/icons'
 import {
   alwaysAsks,
@@ -28,6 +29,7 @@ import { IconButton } from '../ui/IconButton'
 import { ErrorLine, Hint, WarningLine } from '../ui/Notes'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { DeleteConfirm } from './DeleteConfirm'
+import { PendingBar, PendingRow } from './PendingSection'
 import { RunningHint } from './RunningHint'
 
 interface Props {
@@ -45,8 +47,14 @@ interface Props {
  * disables the deletes; `running` is the log's guess, shown as a hint. The view is read again when
  * the game ends and when the window regains focus, and the World data card is read again after
  * terrain is deleted.
+ *
+ * The walk starts when the section mounts, with the page still sliding in, but the bar and the
+ * rows are drawn only once the page has settled (lib/pageSettled): until then the section is its
+ * heading over an empty bar and card of the pending height (PendingSection), which the rows then
+ * replace.
  */
 export function StorageSection({ chapter }: Props) {
+  const settled = usePageSettled()
   const view = useStorageStore((s) => s.byChapter[chapter.id])
   const unavailable = useStorageStore((s) => s.unavailable)
   const readError = useStorageStore((s) => s.readError[chapter.id])
@@ -77,12 +85,22 @@ export function StorageSection({ chapter }: Props) {
   }, [chapter.id, load])
 
   if (unavailable) return null
-  if (!view) {
-    return readError ? (
+  if (!view && readError && settled) {
+    return (
       <SettingsSection title="Storage" icon={HardDrive}>
         <ErrorLine>{readError}</ErrorLine>
       </SettingsSection>
-    ) : null
+    )
+  }
+  if (!view || !settled) {
+    return (
+      <SettingsSection title="Storage" icon={HardDrive}>
+        <PendingBar />
+        <SettingsCard>
+          <PendingRow />
+        </SettingsCard>
+      </SettingsSection>
+    )
   }
 
   const remove = async (item: StorageItem) => {
