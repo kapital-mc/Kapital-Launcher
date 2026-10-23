@@ -9,8 +9,15 @@ package design
 const (
 	WindowWidth     = 1280
 	WindowHeight    = 800
-	WindowMinWidth  = 1024
-	WindowMinHeight = 640
+	WindowMinWidth  = 960
+	WindowMinHeight = 360
+)
+
+// The size below which the full layout does not fit and the launcher shows
+// the compact one (docs/adr/0015-compact-launcher.md), in logical pixels.
+const (
+	CompactWidth  = 880
+	CompactHeight = 700
 )
 
 // The loading card the window becomes while a game starts (#43), in logical

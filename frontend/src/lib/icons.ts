@@ -21,6 +21,7 @@ export {
   ChevronDown,
   Clock,
   Code,
+  Columns3,
   Copy,
   Download,
   Ellipsis,

@@ -96,6 +96,11 @@ type AppSettings struct {
 	// SidebarCompact narrows the sidebar to the chapter icons and a square
 	// account tile, from the button at the header's left. Off by default.
 	SidebarCompact bool `json:"sidebarCompact,omitempty"`
+	// LauncherCompact shows the three chapters as panels side by side in place
+	// of the sidebar and the chapter card, chosen from the menu on the
+	// sidebar's button (docs/adr/0015-compact-launcher.md). A window too small
+	// for the full layout shows the panels whatever this says. Off by default.
+	LauncherCompact bool `json:"launcherCompact,omitempty"`
 	// SkipDeleteConfirm leaves out the "Are you sure?" popup after a delete of
 	// screenshots is confirmed in the storage section, from the popup's "Don't
 	// ask me again". Off by default.
