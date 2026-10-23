@@ -108,8 +108,8 @@
   --transition-duration-cycle: 5000ms;
   --duration-banner: 7500ms;
   --transition-duration-banner: 7500ms;
-  --duration-wave: 2400ms;
-  --transition-duration-wave: 2400ms;
+  --duration-wave: 7000ms;
+  --transition-duration-wave: 7000ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
@@ -169,6 +169,12 @@
   --effect-showcase-tint: 34%;
   --effect-showcase-shade: 35%;
   --effect-showcase-dim: 28%;
+  --effect-banner-grey-luxemburg: 35%;
+  --effect-banner-tint-luxemburg: 25%;
+  --effect-banner-grey-lichdenstein: 15%;
+  --effect-banner-tint-lichdenstein: 60%;
+  --effect-banner-grey-frangfurd: 10%;
+  --effect-banner-tint-frangfurd: 20%;
   --layout-reveal-rise: 4px;
   --effect-reveal-blur: 2px;
   --effect-glow-blur: 18px;

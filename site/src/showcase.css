@@ -13,6 +13,9 @@
   /* The picture's width over its height, for the backdrop's cover sizing. */
   --showcase-art: url('../../frontend/src/assets/screenshots/luxemburg.webp');
   --showcase-ratio: 1.8692;
+  /* The popup banner's grade, for when no script sets its chapter. */
+  --showcase-banner-grey: var(--effect-banner-grey-luxemburg);
+  --showcase-banner-tint: var(--effect-banner-tint-luxemburg);
   /* The colour of the server card's square: offline. */
   --showcase-state: var(--color-danger);
 }
@@ -20,12 +23,16 @@
   --accent: var(--chapter-lichdenstein);
   --showcase-art: url('../../frontend/src/assets/screenshots/lichdenstein.webp');
   --showcase-ratio: 1.7758;
+  --showcase-banner-grey: var(--effect-banner-grey-lichdenstein);
+  --showcase-banner-tint: var(--effect-banner-tint-lichdenstein);
   --showcase-state: var(--color-danger);
 }
 :root:has(#chapter-frangfurd:checked) {
   --accent: var(--chapter-frangfurd);
   --showcase-art: url('../../frontend/src/assets/screenshots/frangfurd.webp');
   --showcase-ratio: 1.7758;
+  --showcase-banner-grey: var(--effect-banner-grey-frangfurd);
+  --showcase-banner-tint: var(--effect-banner-tint-frangfurd);
   /* Not known until /status answers (src/cards.js sets data-server). */
   --showcase-state: var(--color-fg-faint);
 }
@@ -227,18 +234,26 @@
   container-type: size;
   --banner-art: var(--showcase-art);
   --banner-ratio: var(--showcase-ratio);
+  --banner-grey: var(--showcase-banner-grey);
+  --banner-tint: var(--showcase-banner-tint);
 }
 .showcase-banner-frame[data-banner='luxemburg'] {
   --banner-art: url('../../frontend/src/assets/screenshots/luxemburg.webp');
   --banner-ratio: 1.8692;
+  --banner-grey: var(--effect-banner-grey-luxemburg);
+  --banner-tint: var(--effect-banner-tint-luxemburg);
 }
 .showcase-banner-frame[data-banner='lichdenstein'] {
   --banner-art: url('../../frontend/src/assets/screenshots/lichdenstein.webp');
   --banner-ratio: 1.7758;
+  --banner-grey: var(--effect-banner-grey-lichdenstein);
+  --banner-tint: var(--effect-banner-tint-lichdenstein);
 }
 .showcase-banner-frame[data-banner='frangfurd'] {
   --banner-art: url('../../frontend/src/assets/screenshots/frangfurd.webp');
   --banner-ratio: 1.7758;
+  --banner-grey: var(--effect-banner-grey-frangfurd);
+  --banner-tint: var(--effect-banner-tint-frangfurd);
 }
 .showcase-banner-art,
 .showcase-banner {
@@ -249,7 +264,21 @@
 .showcase-banner-art > span {
   --showcase-width: max(100cqw, 100cqh * var(--banner-ratio));
   --showcase-height: max(100cqw / var(--banner-ratio), 100cqh);
-  background-image: var(--banner-art);
+  /* Graded in the picture's own squares, so the grade changes with the
+     picture in the wave: greyed by --banner-grey (a saturation blend), then
+     tinted top to bottom in the wordmark's colours by --banner-tint (a colour
+     blend). The amounts differ per chapter so the three pictures read alike. */
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--logo-gradient-top) var(--banner-tint), transparent),
+      color-mix(in srgb, var(--logo-gradient-bottom) var(--banner-tint), transparent)
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--bg-cover) var(--banner-grey), transparent),
+      color-mix(in srgb, var(--bg-cover) var(--banner-grey), transparent)
+    ),
+    var(--banner-art);
+  background-blend-mode: color, saturation, normal;
   background-repeat: no-repeat;
   background-size: var(--showcase-width) var(--showcase-height);
   background-position:
@@ -260,13 +289,6 @@
   transition-timing-function: step-end;
   transition-behavior: allow-discrete;
   transition-delay: var(--showcase-delay);
-}
-/* The banner is tinted in the wordmark's two colours, top to bottom, under
-   the dark squares, so they stay the page's ground. */
-.showcase-banner-tint {
-  background-image: linear-gradient(var(--logo-gradient-top), var(--logo-gradient-bottom));
-  mix-blend-mode: color;
-  opacity: var(--effect-showcase-tint);
 }
 .showcase-banner > span {
   transition: background-color var(--duration-fast) linear var(--showcase-delay);

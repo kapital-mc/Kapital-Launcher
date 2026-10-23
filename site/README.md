@@ -131,7 +131,10 @@ and no script is needed). The switch is a fieldset of two radios and CSS
 
 While the popup is open, `src/cycle.js` moves the banner on to the next
 chapter every `--duration-banner`, by `data-banner` on its frame, and the new
-picture and its dark squares come in from the right over `--duration-wave`.
+picture and its dark squares come in from the right over `--duration-wave`,
+nearly the whole wait, so two pictures share the banner most of the time.
+Each picture is graded in its own squares (`effect.showcase.banner`: greyed,
+then tinted), by a different amount per chapter so the three read alike.
 Each chapter has its own pattern, clear over what its picture is of
 (`SUBJECTS` in `mosaic.js`) and always dark under the tag and the close
 button. Without the script, or under reduced motion, the banner stays on the

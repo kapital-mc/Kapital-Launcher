@@ -296,8 +296,9 @@ download easy and looks good, at most two screens tall. What changed:
 - **One Download button for the visitor's system**, with the version and the
   other system under it; both open the download popup with that system
   picked. The popup has a banner of the open chapter's picture, tinted in
-  the wordmark's two colours, which moves on to the next chapter every 7.5 s
-  in a wave of squares from the right; each chapter's dark squares leave its
+  the wordmark's two colours by a different amount per picture so the three
+  read alike, which moves on to the next chapter every 7.5 s in a 7 s wave of
+  squares from the right, so two pictures are usually in it at once; each chapter's dark squares leave its
   subject clear. Changelog,
   GitHub and the code signing policy moved to the footer, and the logo is the
   only thing above the button.

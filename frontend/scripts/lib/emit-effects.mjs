@@ -71,6 +71,10 @@ export function emitEffects(src, push) {
   push(`  --effect-showcase-tint: ${showcase.tint}${showcase.unit};`)
   push(`  --effect-showcase-shade: ${showcase.shade}${showcase.unit};`)
   push(`  --effect-showcase-dim: ${showcase.dim}${showcase.unit};`)
+  for (const [chapter, grade] of Object.entries(showcase.banner)) {
+    push(`  --effect-banner-grey-${chapter}: ${grade.grey}${showcase.unit};`)
+    push(`  --effect-banner-tint-${chapter}: ${grade.tint}${showcase.unit};`)
+  }
   emitRevealValues(src, push)
   push(`}`)
 }
