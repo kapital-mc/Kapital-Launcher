@@ -66,8 +66,8 @@ const inView = (s: Pick<ChapterStore, 'manifest' | 'selectedId' | 'together'>): 
 
 /**
  * Picks `chapters` their next slides, loads every picture, then shows them in
- * one go, those still on screen by then: a switch while they loaded has picked
- * that chapter's own slide.
+ * one go, those whose slide nothing changed meanwhile: a switch while they
+ * loaded has picked that chapter's own slide.
  */
 async function showNext(
   get: () => ChapterStore,
@@ -79,9 +79,9 @@ async function showNext(
     (c) => [c.id, pickSlide(wikiShots, wikiPages, c, slides[c.id])] as const,
   )
   await Promise.all(next.map(([, n]) => preload(n.art)))
-  const still = new Set(inView(get()).map((c) => c.id))
-  const shown = next.filter(([id]) => still.has(id))
-  if (shown.length > 0) set({ slides: { ...get().slides, ...Object.fromEntries(shown) } })
+  const now = get().slides
+  const shown = next.filter(([id]) => now[id] === slides[id])
+  if (shown.length > 0) set({ slides: { ...now, ...Object.fromEntries(shown) } })
 }
 
 export const useChapterStore = create<ChapterStore>((set, get) => ({
@@ -117,16 +117,17 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
     set({ slides: { ...slides, ...Object.fromEntries(picked) } })
   },
 
-  // Go waits for the downloads, so the pictures come after the pages. A slide
-  // on screen takes a picture as soon as there is one for it. Read again when
-  // the number of pictures changes (issue 172): a new draw prunes what it did
-  // not pick, so a slide on screen, if its picture is gone, takes another. The
-  // other chapters' slides are picked again when they are switched to.
+  // Go waits for the downloads, so the pictures come after the pages. Every
+  // chapter's slide takes a picture, loaded, as soon as there is one for it, so
+  // the compact launcher opens on them with nothing left to swap in. Read again
+  // when the number of pictures changes (issue 172): a new draw prunes what it
+  // did not pick, so a slide whose picture is gone takes another. A chapter
+  // switched to in the full launcher still picks again.
   loadWikiShots: async () => {
     const wikiShots = asList<WikiShot>(await readOr(GetWikiShots, []))
     set({ wikiShots })
-    const { slides } = get()
-    const stale = inView(get()).filter(
+    const { manifest, slides } = get()
+    const stale = manifest.chapters.filter(
       (c) =>
         !wikiShots.some((s) => s.src === slides[c.id]?.art) &&
         shotsForChapter(wikiShots, c).length > 0,

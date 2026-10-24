@@ -16,8 +16,11 @@ const failed = new Set<string>()
  */
 const kept: HTMLImageElement[] = []
 
-/** Loads and decodes `src`, resolving when it can be drawn without a gap. */
-function load(src: string, keep = false): Promise<void> {
+/**
+ * Loads and decodes `src`, resolving when it can be drawn without a gap. A
+ * picture loaded here is drawn at once by every `useLoadedImage` after.
+ */
+export function loadImage(src: string, keep = false): Promise<void> {
   if (decoded.has(src)) return Promise.resolve()
   const img = new Image()
   img.src = src
@@ -41,7 +44,7 @@ function load(src: string, keep = false): Promise<void> {
  */
 export function preloadImages(srcs: readonly (string | undefined)[]): void {
   for (const src of srcs) {
-    if (src) void load(src, true)
+    if (src) void loadImage(src, true)
   }
 }
 
@@ -63,7 +66,7 @@ export function useLoadedImage(
   useEffect(() => {
     if (!src || decoded.has(src) || failed.has(src)) return
     let live = true
-    void load(src).then(() => {
+    void loadImage(src).then(() => {
       if (live) loaded()
     })
     return () => {
