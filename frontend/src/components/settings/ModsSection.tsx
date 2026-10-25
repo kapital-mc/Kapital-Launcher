@@ -12,6 +12,7 @@ import { ErrorLine, Hint, WarningLine } from '../ui/Notes'
 import { Scrollable } from '../ui/Scrollable'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { Toggle } from '../ui/Toggle'
+import { PendingRow } from './PendingSection'
 import { RunningHint } from './RunningHint'
 
 interface Props {
@@ -29,6 +30,9 @@ interface Props {
  * a switch, with a write in flight; `running` is the log's guess, shown as a hint, and Go
  * refuses the write if it was right (issue 126). The view is read again when the game ends
  * and when the window regains focus.
+ *
+ * Until the first read answers, the section is its heading over an empty card (PendingSection),
+ * which the rows then replace. A later open draws the view already read and reads it again.
  */
 export function ModsSection({ chapter }: Props) {
   const view = useModStore((s) => s.byChapter[chapter.id])
@@ -66,7 +70,13 @@ export function ModsSection({ chapter }: Props) {
       <SettingsSection title="Mods" icon={Puzzle}>
         <ErrorLine>{readError}</ErrorLine>
       </SettingsSection>
-    ) : null
+    ) : (
+      <SettingsSection title="Mods" icon={Puzzle}>
+        <SettingsCard>
+          <PendingRow />
+        </SettingsCard>
+      </SettingsSection>
+    )
   }
 
   const busy = playing || writing

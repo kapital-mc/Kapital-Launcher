@@ -3,7 +3,7 @@ import type { Chapter, ChapterSettings } from '../../types'
 import { selectInstalled, useEngineStore } from '../../stores/useEngineStore'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
 import { errMsg } from '../../lib/ipc'
-import { FolderOpen, MemoryStick, Triangle } from '../../lib/icons'
+import { FolderOpen, HardDrive, MemoryStick, Puzzle, Triangle } from '../../lib/icons'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { ErrorLine } from '../ui/Notes'
@@ -11,6 +11,7 @@ import { Page } from '../ui/Page'
 import { SettingsSection } from '../ui/SettingsLayout'
 import { ChapterServerSection } from './ChapterServerSection'
 import { ChapterSettingsForm } from './ChapterSettingsForm'
+import { PendingSection } from './PendingSection'
 
 // The mods section lists the mods folder and has a search; like the pack source it loads when
 // the panel asks for it, so its store and its list stay out of the launcher's bundle.
@@ -214,7 +215,14 @@ export function ChapterSettingsPanel({ chapter, onClose }: Props) {
       )}
       <ChapterServerSection chapter={chapter} />
       {installed === true && (
-        <Suspense fallback={null}>
+        <Suspense
+          fallback={
+            <>
+              <PendingSection title="Mods" icon={Puzzle} />
+              <PendingSection title="Storage" icon={HardDrive} bar />
+            </>
+          }
+        >
           <ModsSection chapter={chapter} />
           <StorageSection chapter={chapter} />
           <PackSourceSection chapter={chapter} />

@@ -72,6 +72,8 @@ export function ChapterStage({
     <div data-popup-frame className="card-stage relative m-4 flex min-h-0 grow flex-col">
       <div
         key={chapter.id}
+        // The open chapter's card, which the compact morph measures (lib/compactMorph).
+        data-morph-card
         inert={covered}
         aria-hidden={covered || undefined}
         className={`${CARD} ${entering}`}

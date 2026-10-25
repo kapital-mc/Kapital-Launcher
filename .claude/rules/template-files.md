@@ -7,6 +7,7 @@ paths:
   - ".aislop/base.yml"
   - ".github/workflows/**"
   - ".github/scripts/release-notes.py"
+  - ".github/scripts/changelog-section.py"
 ---
 
 # Files that come from AllesSandro

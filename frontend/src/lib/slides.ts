@@ -1,5 +1,6 @@
 import type { Chapter, WikiPage, WikiShot } from '../types'
 import { pagesForChapter, pickPage } from './wiki'
+import { loadImage } from './useLoadedImage'
 
 /**
  * The chapter's slide (#142): one of the wiki's screenshots of the chapter's
@@ -63,16 +64,11 @@ export function pickSlide(
 
 /**
  * Loads a picture before it is shown, so a slide never changes to a picture
- * that is still arriving. A failure is not an error: the slide shows what the
+ * that is still arriving, and a panel that mounts on it later draws it at once
+ * (lib/useLoadedImage). A failure is not an error: the slide shows what the
  * webview makes of it.
  */
-export async function preload(src: string | undefined): Promise<void> {
-  if (!src || typeof Image === 'undefined') return
-  const img = new Image()
-  img.src = src
-  try {
-    await img.decode()
-  } catch {
-    // An image that will not decode is shown as the webview shows it.
-  }
+export function preload(src: string | undefined): Promise<void> {
+  if (!src || typeof Image === 'undefined') return Promise.resolve()
+  return loadImage(src)
 }

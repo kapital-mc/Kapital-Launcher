@@ -33,7 +33,12 @@ import { IconButton } from '../ui/IconButton'
 // the last of (issue 161).
 const GetPrism = lazy(() => import('./GetPrism').then((m) => ({ default: m.GetPrism })))
 
+/** The chapter card's bar, one row across it; or a compact panel's foot, Play over its line. */
+export type ActionLayout = 'bar' | 'panel'
+
 interface Props {
+  /** Where the bar sits; the card's by default. */
+  layout?: ActionLayout
   chapter: Chapter
   engine: EngineInfo | null
   status: ServerStatus | undefined
@@ -117,8 +122,8 @@ const CONFIRM_MS = 5000
  * to, the same whether the installed pack is in step or behind its source.
  *
  * While the chapter's game is starting, running or closing (#44) its own line
- * sits beside Play, right after the hand-over to Prism, and Play and Install
- * wait. Play becomes Stop, so a start that stalls or a game that has died
+ * sits beside Play, right after the hand-over to Prism (on a compact panel,
+ * in the status line's place), and Play and Install wait. Play becomes Stop, so a start that stalls or a game that has died
  * can be ended at once: one click while the start is only getting ready, and
  * once the game has a window the first click asks "Confirm" for five
  * seconds. Stop and Confirm are red, the danger colour, where Play is the
@@ -136,6 +141,7 @@ const CONFIRM_MS = 5000
  * button opens Prism's website instead.
  */
 export function ActionBar({
+  layout = 'bar',
   chapter,
   engine,
   status,
@@ -256,45 +262,67 @@ export function ActionBar({
     ;[state, meta] = ['● Updated', version ? `Version ${version}` : 'Version pending']
   }
 
+  const panel = layout === 'panel'
+  // A compact panel's foot has no room beside Play, so the game's rows take
+  // the status line's place there and the foot keeps its two rows.
+  if (panel && beside) {
+    ;[state, meta, tone] = beside
+    serverShown = false
+  }
+  // Play, and on the card the game's line beside it; on a compact panel one group, which the morph moves.
+  const play = (
+    <>
+      {playing || launching ? (
+        <Button variant="stop" onClick={clickStop} disabled={launching}>
+          <Icon icon={Square} size="sm" className="fill-current" />
+          <span>{needsConfirm && confirming ? 'Confirm' : 'Stop'}</span>
+        </Button>
+      ) : needsInstall || foreign ? (
+        <Button
+          variant="play"
+          onClick={missing ? getPrism : foreign ? onReinstall : onInstall}
+          disabled={!published || installing || working}
+        >
+          <Icon icon={Download} size="sm" />
+          <span>{foreign ? 'Reinstall' : installLabel(chapter)}</span>
+        </Button>
+      ) : (
+        <Button
+          variant="play"
+          onClick={missing ? getPrism : onPlay}
+          disabled={installing || working}
+        >
+          <Icon icon={Play} size="sm" className="fill-current" />
+          <span>{playLabel(chapter, joinServer)}</span>
+        </Button>
+      )}
+      {beside && !panel && (
+        <div className="flex max-w-sm min-w-0 flex-col gap-0.5">
+          <span className={`font-ui text-xs font-medium ${beside[2]}`}>{beside[0]}</span>
+          {/* Truncated to keep the bar one row; the title carries the full detail. */}
+          <span className="text-fg-faint truncate text-xs" title={beside[1]}>
+            {beside[1]}
+          </span>
+        </div>
+      )}
+    </>
+  )
   return (
-    <section className="border-line flex flex-col gap-3 border-b px-7 py-5">
-      <div className="flex items-center gap-3">
-        {playing || launching ? (
-          <Button variant="stop" onClick={clickStop} disabled={launching}>
-            <Icon icon={Square} size="sm" className="fill-current" />
-            <span>{needsConfirm && confirming ? 'Confirm' : 'Stop'}</span>
-          </Button>
-        ) : needsInstall || foreign ? (
-          <Button
-            variant="play"
-            onClick={missing ? getPrism : foreign ? onReinstall : onInstall}
-            disabled={!published || installing || working}
-          >
-            <Icon icon={Download} size="sm" />
-            <span>{foreign ? 'Reinstall' : installLabel(chapter)}</span>
-          </Button>
-        ) : (
-          <Button
-            variant="play"
-            onClick={missing ? getPrism : onPlay}
-            disabled={installing || working}
-          >
-            <Icon icon={Play} size="sm" className="fill-current" />
-            <span>{playLabel(chapter, joinServer)}</span>
-          </Button>
-        )}
-        {beside && (
-          <div className="flex max-w-sm min-w-0 flex-col gap-0.5">
-            <span className={`font-ui text-xs font-medium ${beside[2]}`}>{beside[0]}</span>
-            {/* Truncated to keep the bar one row; the title carries the full detail. */}
-            <span className="text-fg-faint truncate text-xs" title={beside[1]}>
-              {beside[1]}
-            </span>
+    <section
+      data-morph={panel ? undefined : 'actions'}
+      className={`flex flex-col gap-3 ${panel ? '' : 'border-line border-b px-7 py-5'}`}
+    >
+      <div className={`flex items-center ${panel ? 'flex-wrap gap-x-4.5 gap-y-3' : 'gap-3'}`}>
+        {panel ? (
+          <div data-morph="panel-play" className="flex min-w-0 items-center gap-3">
+            {play}
           </div>
+        ) : (
+          play
         )}
-        <div className="grow" />
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col items-end gap-0.5">
+        {!panel && <div className="grow" />}
+        <div data-morph={panel ? 'panel-status' : undefined} className="flex items-center gap-2">
+          <div className={`flex flex-col gap-0.5 ${panel ? 'items-start' : 'items-end'}`}>
             <span className={`font-ui text-xs font-medium ${tone}`}>{state}</span>
             <span className="text-fg-faint text-xs">{meta || BLANK}</span>
           </div>

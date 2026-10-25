@@ -13,6 +13,7 @@ import {
 import type { WindowChrome } from '../../types'
 import { Icon } from '../ui/Icon'
 import { HeaderTools } from './HeaderTools'
+import type { LauncherChoice } from './SidebarButton'
 
 interface Props {
   /** Wails' `Environment().platform`: "windows", "darwin" or "linux". */
@@ -22,6 +23,8 @@ interface Props {
   sidebarCompact?: boolean
   /** Narrows the sidebar to its icons, or widens it again. */
   onToggleSidebar?: () => void
+  /** The compact launcher, for the sidebar button's menu. */
+  launcher?: LauncherChoice
 }
 
 /**
@@ -45,6 +48,7 @@ export function HeaderBar({
   onOpenSettings,
   sidebarCompact = false,
   onToggleSidebar,
+  launcher,
 }: Props) {
   const mac = platform === 'darwin'
   const chrome = useWindowChrome(mac)
@@ -67,6 +71,7 @@ export function HeaderBar({
           sidebarCompact={sidebarCompact}
           onToggleSidebar={onToggleSidebar}
           onOpenSettings={onOpenSettings}
+          launcher={launcher}
         />
       </div>
       {!mac && (

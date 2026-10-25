@@ -254,4 +254,31 @@ describe('StorageSection', () => {
     await waitFor(() => expect(useStorageStore.getState().unavailable).toBe(true))
     expect(container).toBeEmptyDOMElement()
   })
+
+  describe('before the first read answers', () => {
+    const card = () => screen.getByRole('region', { name: 'Storage' }).querySelector('.rounded-lg')
+    const pending = () => document.querySelector('[class~="h-(--layout-pending)"]')
+
+    it("holds the section's place with an empty card, which the rows then come into", async () => {
+      let answer: (v: Awaited<ReturnType<typeof App.GetChapterStorage>>) => void = () => undefined
+      vi.mocked(App.GetChapterStorage).mockReturnValue(new Promise((r) => (answer = r)))
+      render(<StorageSection chapter={frangfurd} />)
+      expect(screen.getByRole('heading', { level: 2, name: 'Storage' })).toBeInTheDocument()
+      expect(pending()).toHaveAttribute('aria-hidden', 'true')
+      const before = card()
+      await act(async () => answer(view([shots, mods]) as never))
+      expect(screen.getByText('Screenshots')).toBeInTheDocument()
+      expect(pending()).toBeNull()
+      // The card the rows come into is the one that held their place, so it grows into them.
+      expect(card()).toBe(before)
+    })
+
+    it('draws a view kept from an earlier visit at once, and reads it again', () => {
+      useStorageStore.setState({ byChapter: { frangfurd: view([shots, mods]) } })
+      render(<StorageSection chapter={frangfurd} />)
+      expect(screen.getByText('Screenshots')).toBeInTheDocument()
+      expect(pending()).toBeNull()
+      expect(App.GetChapterStorage).toHaveBeenCalledWith('frangfurd')
+    })
+  })
 })

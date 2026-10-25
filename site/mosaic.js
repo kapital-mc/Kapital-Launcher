@@ -70,8 +70,8 @@ const SUBJECTS = [
   { columns: [4, 7], squares: [] },
   { columns: [7, 8], squares: [[3, 1], [4, 1]] },
 ]
-// Always dark: under the tag, top left, and the close button, top right.
-const COVERED = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [12, 0]]
+// Always dark: under the close button, top right.
+const COVERED = [[12, 0]]
 
 // The banner's squares: for each, its delay bucket and the chapters it is dark
 // in. Each chapter has its own pattern, dark at the edges and along the bottom

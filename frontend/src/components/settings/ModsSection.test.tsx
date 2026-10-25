@@ -150,7 +150,7 @@ describe('ModsSection', () => {
     const camera = {
       id: 'camera',
       name: 'Camera Tools',
-      description: 'Flashback. About 220 MB, downloaded at the next Play.',
+      description: 'Flashback, Sinytra Connector · 220 MB',
       enabled: false,
       jars: [],
     }
@@ -281,5 +281,32 @@ describe('ModsSection', () => {
     await waitFor(() => expect(useModStore.getState().unavailable).toBe(true))
     expect(bare.container).toBeEmptyDOMElement()
     expect(container).toBeDefined()
+  })
+
+  describe('before the first read answers', () => {
+    const card = () => screen.getByRole('region', { name: 'Mods' }).querySelector('.rounded-lg')
+    const pending = () => document.querySelector('[class~="h-(--layout-pending)"]')
+
+    it("holds the section's place with an empty card, which the rows then come into", async () => {
+      let answer: (v: Awaited<ReturnType<typeof App.GetChapterMods>>) => void = () => undefined
+      vi.mocked(App.GetChapterMods).mockReturnValue(new Promise((r) => (answer = r)))
+      render(<ModsSection chapter={frangfurd} />)
+      expect(screen.getByRole('heading', { level: 2, name: 'Mods' })).toBeInTheDocument()
+      expect(pending()).toHaveAttribute('aria-hidden', 'true')
+      const before = card()
+      await act(async () => answer(view() as never))
+      expect(screen.getAllByRole('switch')).toHaveLength(3)
+      expect(pending()).toBeNull()
+      // The card the rows come into is the one that held their place, so it grows into them.
+      expect(card()).toBe(before)
+    })
+
+    it('draws a view kept from an earlier visit at once, and reads it again', () => {
+      useModStore.setState({ byChapter: { frangfurd: view() } })
+      render(<ModsSection chapter={frangfurd} />)
+      expect(screen.getAllByRole('switch')).toHaveLength(3)
+      expect(pending()).toBeNull()
+      expect(App.GetChapterMods).toHaveBeenCalledWith('frangfurd')
+    })
   })
 })

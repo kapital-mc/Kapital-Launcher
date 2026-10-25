@@ -28,6 +28,7 @@ import { IconButton } from '../ui/IconButton'
 import { ErrorLine, Hint, WarningLine } from '../ui/Notes'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { DeleteConfirm } from './DeleteConfirm'
+import { PendingBar, PendingRow } from './PendingSection'
 import { RunningHint } from './RunningHint'
 
 interface Props {
@@ -45,6 +46,10 @@ interface Props {
  * disables the deletes; `running` is the log's guess, shown as a hint. The view is read again when
  * the game ends and when the window regains focus, and the World data card is read again after
  * terrain is deleted.
+ *
+ * Until the first walk answers, the section is its heading over an empty bar and card
+ * (PendingSection), which the rows then replace. A later open draws the view already measured
+ * and measures again.
  */
 export function StorageSection({ chapter }: Props) {
   const view = useStorageStore((s) => s.byChapter[chapter.id])
@@ -82,7 +87,14 @@ export function StorageSection({ chapter }: Props) {
       <SettingsSection title="Storage" icon={HardDrive}>
         <ErrorLine>{readError}</ErrorLine>
       </SettingsSection>
-    ) : null
+    ) : (
+      <SettingsSection title="Storage" icon={HardDrive}>
+        <PendingBar />
+        <SettingsCard>
+          <PendingRow />
+        </SettingsCard>
+      </SettingsSection>
+    )
   }
 
   const remove = async (item: StorageItem) => {

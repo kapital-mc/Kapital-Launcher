@@ -44,10 +44,20 @@ const EDGE = {
  * accessibility tree, and clicks fall through to the chapter. The animation is
  * one keyframe set on the layer (style.css), and with reduced motion a fade
  * that still ends, so the exit always completes.
+ *
+ * Once the entrance has ended the layer carries `data-page-settled`, which hides the compact
+ * panels beneath (style.css); a window hidden when the page opens has it at once, as no
+ * animation would end there. A page that closes loses it again.
  */
 export function PageLayer({ edge, open, onExited, children }: Props) {
   const layer = useRef<HTMLDivElement>(null)
   const [opener] = useState(() => document.activeElement)
+  const [settled, setSettled] = useState(() => document.visibilityState === 'hidden')
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (!open) setSettled(false)
+  }
   const motion = EDGE[edge]
 
   useLayoutEffect(() => {
@@ -70,13 +80,16 @@ export function PageLayer({ edge, open, onExited, children }: Props) {
 
   const onAnimationEnd = (e: AnimationEvent<HTMLDivElement>) => {
     // The page's own animations (its reveal) end inside this element too.
-    if (!open && e.target === e.currentTarget) onExited()
+    if (e.target !== e.currentTarget) return
+    if (open) setSettled(true)
+    else onExited()
   }
 
   return (
     <div
       inert={!open}
       aria-hidden={!open || undefined}
+      data-page-settled={settled || undefined}
       className={`absolute inset-0 ${motion.frame} ${open ? '' : 'pointer-events-none'}`}
     >
       <div

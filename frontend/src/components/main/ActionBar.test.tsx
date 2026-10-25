@@ -155,6 +155,26 @@ describe('ActionBar game line', () => {
     expect(screen.getByText('● Server online')).toBeInTheDocument()
   })
 
+  it("puts the game's rows in the status line's place on a compact panel", () => {
+    bar({ layout: 'panel', game: game('running'), status: online })
+    expect(stop().nextElementSibling).toBeNull()
+    expect(screen.getByText('● Playing')).toHaveClass('text-accent')
+    expect(screen.getByText(`${chapter.name} is running`)).toBeInTheDocument()
+    expect(screen.queryByText('● Server online')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Check the server now' })).toBeNull()
+  })
+
+  it("puts the hand-over to Prism in the status line's place on a compact panel", () => {
+    bar({ layout: 'panel', launching: true, devPack: 'http://localhost:8080/pack.toml' })
+    expect(stop().nextElementSibling).toBeNull()
+    expect(screen.getByText('◐ Launching')).toBeInTheDocument()
+  })
+
+  it('brings the server line back on a compact panel once the game has ended', () => {
+    bar({ layout: 'panel', game: game('closed'), status: online })
+    expect(screen.getByText('● Server online')).toBeInTheDocument()
+  })
+
   it('keeps Stop disabled while the hand-over to Prism has not returned', () => {
     const onStop = vi.fn()
     bar({ launching: true, onStop })

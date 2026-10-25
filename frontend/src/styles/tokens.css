@@ -111,16 +111,24 @@
   --transition-duration-banner: 7500ms;
   --duration-wave: 7000ms;
   --transition-duration-wave: 7000ms;
+  --duration-morph: 900ms;
+  --transition-duration-morph: 900ms;
+  --duration-switch: 600ms;
+  --transition-duration-switch: 600ms;
+  --duration-lean: 700ms;
+  --transition-duration-lean: 700ms;
   --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.45, 0, 0.15, 1);
+  --ease-travel: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.33, 0, 0.2, 1);
+  --ease-leave: cubic-bezier(0.55, 0, 0.75, 0.2);
 }
 
 /* Layout geometry is not a Tailwind namespace. Read it with the var()
    shorthand, w-(--layout-sidebar), or from style.css. */
 :root {
   --layout-sidebar: 264px;
-  --layout-hero: 440px;
   --layout-titlebar: 40px;
   --layout-scrollbar: 6px;
   --layout-slide: 32px;
@@ -130,6 +138,7 @@
   --layout-controls-mac: 80px;
   --layout-sidebar-compact: 95px;
   --layout-play-min: 240px;
+  --layout-pending: 160px;
   --layout-icon-2xs: 10px;
   --layout-icon-xs: 14px;
   --layout-icon-sm: 16px;
@@ -138,6 +147,10 @@
   --layout-splash-height: 405px;
   --layout-window-width: 1280px;
   --layout-window-height: 800px;
+  --layout-compact-gap: 4px;
+  --layout-compact-title: 400px;
+  --layout-compact-title-idle: 160px;
+  --layout-compact-rise: 6px;
 }
 
 /* Effects: values a utility cannot name on its own. Read by the shared
@@ -167,6 +180,13 @@
   --cover-art: 40%;
   --cover-spot: 36%;
   --cover-blur: 36px;
+  --panel-grow: 2.6;
+  --panel-dim: 0.28;
+  --panel-dim-hover: 0.42;
+  --panel-lean: 0.08;
+  --panel-blur: 2px;
+  --panel-shade: 85%;
+  --panel-shade-from: 30%;
   --effect-showcase-tint: 34%;
   --effect-showcase-shade: 35%;
   --effect-showcase-dim: 28%;

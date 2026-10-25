@@ -51,7 +51,7 @@ test('the banner has one square per cell in both of its grids', () => {
   assert.equal(renderBanner(squares).match(/<span /g).length, BANNER_COLS * BANNER_ROWS)
 })
 
-test("each chapter's banner keeps its subject clear and the tag and close button dark", () => {
+test("each chapter's banner keeps its subject clear and the close button dark", () => {
   const squares = bannerSquares()
   const at = (x, y) => squares[y * BANNER_COLS + x]
   SUBJECTS.forEach(({ columns, squares: clear }, i) => {

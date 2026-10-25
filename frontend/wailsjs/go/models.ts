@@ -43,6 +43,7 @@ export namespace models {
 	    wikiPictures?: number;
 	    mapIn?: string;
 	    sidebarCompact?: boolean;
+	    launcherCompact?: boolean;
 	    skipDeleteConfirm?: boolean;
 	    seenVersion?: string;
 	
@@ -74,6 +75,7 @@ export namespace models {
 	        this.wikiPictures = source["wikiPictures"];
 	        this.mapIn = source["mapIn"];
 	        this.sidebarCompact = source["sidebarCompact"];
+	        this.launcherCompact = source["launcherCompact"];
 	        this.skipDeleteConfirm = source["skipDeleteConfirm"];
 	        this.seenVersion = source["seenVersion"];
 	    }

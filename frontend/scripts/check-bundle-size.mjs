@@ -124,11 +124,21 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 96.6 on 2026-10-21: the storage section's three bound methods (GetChapterStorage,
 // ClearChapterStorage, OpenStorageFolder) are in the generated App.js, one module in the shared
 // chunk, though the section itself loads on demand. Measured 96.52 KB, from 96.48 KB on main.
-// 96.7 on 2026-10-25: Camera Tools, the first add-on (ADR-2's twenty-second amendment). The
+// 98 on 2026-10-23 (ADR-15): the compact launcher's switch is in the first paint, since a
+// window shrunk past the floor calls for compact at any time: the size rule, the sidebar
+// button's menu, and the layout that holds both launchers and starts the morph. The panels
+// and the morph's own code load on demand. Measured 97.9 KB, from 96.5 KB on main.
+// 98.2 the same day: the chapter store moves every chapter's slide together in compact, a
+// rule of the store, which is in the first paint. Measured 98.1 KB.
+// 98.3 the same day: main's chapter settings tell their page when it has slid in
+// (lib/pageSettled, in PageLayer), added on top of the compact launcher. Measured 98.22 KB.
+// 98.2 on 2026-10-25: that signal is gone again; the layer keeps only the mark the compact
+// panels read. Measured 98.1 KB.
+// 98.3 on 2026-10-25: Camera Tools, the first add-on (ADR-2's twenty-second amendment). The
 // bundled manifest carries its name, line and pack URL, and SetAddonEnabled is one more
 // export of the generated App.js; the section that shows it loads on demand. Measured
-// 96.62 KB, from 96.51 KB on main.
-const BUDGET_KB = 96.7
+// 98.23 KB.
+const BUDGET_KB = 98.3
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

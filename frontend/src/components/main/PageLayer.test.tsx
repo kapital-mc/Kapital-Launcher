@@ -108,6 +108,33 @@ describe('PageLayer', () => {
     expect(fallback.parentElement).toHaveClass('page-in-right')
   })
 
+  describe('settling', () => {
+    it('marks the layer settled once the entrance ends, for the compact panels beneath', () => {
+      const { rerender } = render(layer())
+      expect(frame()).not.toHaveAttribute('data-page-settled')
+      endAnimation(sliding())
+      expect(frame()).toHaveAttribute('data-page-settled')
+      rerender(layer({ open: false }))
+      expect(frame()).not.toHaveAttribute('data-page-settled')
+    })
+
+    it("is not settled by the end of the page's own animations", () => {
+      render(layer())
+      endAnimation(screen.getByText('Body'))
+      expect(frame()).not.toHaveAttribute('data-page-settled')
+    })
+
+    it('is settled from the start when the window is hidden, where no animation would end', () => {
+      const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
+      try {
+        render(layer())
+        expect(frame()).toHaveAttribute('data-page-settled')
+      } finally {
+        visibility.mockRestore()
+      }
+    })
+  })
+
   describe('focus', () => {
     it('moves to the page when it opens and back to the control that opened it when it closes', () => {
       const opener = document.createElement('button')
@@ -153,10 +180,18 @@ describe('PageLayer', () => {
   })
 
   it('is built from tokens and, with reduced motion, only fades, over the same duration', () => {
-    for (const name of ['in-right', 'out-right', 'in-top', 'out-top', 'in-bottom', 'out-bottom']) {
+    // A page comes in on the standard curve, moving from its first frame, and leaves on the glide.
+    for (const [name, ease] of [
+      ['in-right', 'standard'],
+      ['out-right', 'glide'],
+      ['in-top', 'standard'],
+      ['out-top', 'glide'],
+      ['in-bottom', 'standard'],
+      ['out-bottom', 'glide'],
+    ]) {
       expect(css).toMatch(
         new RegExp(
-          `@utility page-${name} \\{\\s*animation: page-${name} var\\(--duration-page\\) var\\(--ease-glide\\) both;`,
+          `@utility page-${name} \\{\\s*animation: page-${name} var\\(--duration-page\\) var\\(--ease-${ease}\\) both;`,
         ),
       )
     }

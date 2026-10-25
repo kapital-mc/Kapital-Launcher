@@ -122,6 +122,12 @@ function validate(src) {
   if (w.minWidth > w.width || w.minHeight > w.height) {
     fail('layout.window minimum exceeds its default size')
   }
+  const c = src.layout.compact
+  if (c.width <= w.minWidth && c.height <= w.minHeight) {
+    fail(
+      'layout.compact must lie above the window minimum on one side, or compact is never held on',
+    )
+  }
   const sp = src.layout.splash
   if (!(sp?.width > 0 && sp?.height > 0)) fail('layout.splash needs a width and a height')
 }
@@ -337,12 +343,12 @@ export const WINDOW = { width: ${w.width}, height: ${w.height}, minWidth: ${w.mi
 
 export const LAYOUT = {
   sidebar: ${src.layout.sidebar},
-  hero: ${src.layout.hero},
   titlebar: ${src.layout.titlebar},
   titlebarMac: ${src.layout.titlebarMac},
   controlsMac: ${src.layout.controlsMac},
   icon: { '2xs': ${src.layout.icon['2xs']}, xs: ${src.layout.icon.xs}, sm: ${src.layout.icon.sm}, md: ${src.layout.icon.md}, stroke: ${src.layout.icon.stroke} },
   splash: { width: ${src.layout.splash.width}, height: ${src.layout.splash.height} },
+  compact: { width: ${src.layout.compact.width}, height: ${src.layout.compact.height}, hysteresis: ${src.layout.compact.hysteresis} },
 } as const
 `
 }
@@ -365,6 +371,13 @@ const (
 	WindowHeight    = ${w.height}
 	WindowMinWidth  = ${w.minWidth}
 	WindowMinHeight = ${w.minHeight}
+)
+
+// The size below which the full layout does not fit and the launcher shows
+// the compact one (docs/adr/0015-compact-launcher.md), in logical pixels.
+const (
+	CompactWidth  = ${src.layout.compact.width}
+	CompactHeight = ${src.layout.compact.height}
 )
 
 // The loading card the window becomes while a game starts (#43), in logical

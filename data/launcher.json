@@ -113,7 +113,7 @@
           {
             "id": "camera",
             "name": "Camera Tools",
-            "description": "Flashback, to record play and render it later, with Sinytra Connector to run it. About 220 MB, downloaded at the next Play.",
+            "description": "Flashback, Sinytra Connector · 220 MB",
             "packwiz": "https://kapital-packs.alessandrogekeler.workers.dev/frangfurd-camera/pack.toml"
           }
         ],

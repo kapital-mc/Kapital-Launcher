@@ -47,6 +47,7 @@ export function Sidebar({ onOpenAccount, accountOpen = false }: Props) {
 
   return (
     <aside
+      data-morph="side"
       className={`bg-sunken border-line flex shrink-0 flex-col gap-7 overflow-x-clip border-r p-4 ${
         compact ? 'w-(--layout-sidebar-compact)' : 'w-(--layout-sidebar)'
       } ${

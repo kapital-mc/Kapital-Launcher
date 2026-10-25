@@ -518,6 +518,8 @@ export interface AppSettings {
   mapIn?: MapIn | string
   /** The sidebar narrowed to the chapter icons and a square account tile. Absent is the full sidebar. */
   sidebarCompact?: boolean
+  /** The three chapters as panels side by side, chosen from the sidebar button's menu. Absent is the full layout. */
+  launcherCompact?: boolean
   /** No "Are you sure?" popup after a delete of screenshots is confirmed. Absent asks. */
   skipDeleteConfirm?: boolean
   /** The launcher version whose What's new was last seen. Set by Go; a save keeps the stored one. */

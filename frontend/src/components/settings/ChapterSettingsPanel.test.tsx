@@ -7,6 +7,7 @@ import { useGameStore } from '../../stores/useGameStore'
 import { DEFAULT_SETTINGS, useSettingsStore } from '../../stores/useSettingsStore'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
 import type { ChapterSettingsInfo, GamePhase } from '../../types'
+import { PageLayer } from '../main/PageLayer'
 import { ChapterSettingsPanel } from './ChapterSettingsPanel'
 
 vi.mock('../../../wailsjs/go/main/App')
@@ -511,6 +512,57 @@ describe('ChapterSettingsPanel', () => {
       expect(card('Dev pack')).toBeDisabled()
       expect(card('Published pack')).toBeDisabled()
       expect(screen.getAllByText('Not made by this launcher.')).toHaveLength(2)
+    })
+  })
+
+  describe('in a page that slides in', () => {
+    const jar = 'DistantHorizons-3.3.3-1.21.1-fabric-neoforge.jar'
+    const page = (
+      <PageLayer edge="right" open onExited={() => undefined}>
+        <ChapterSettingsPanel chapter={frangfurd} onClose={() => undefined} />
+      </PageLayer>
+    )
+    beforeEach(() => {
+      vi.mocked(App.GetChapterMods).mockResolvedValue({
+        chapterId: 'frangfurd',
+        running: false,
+        mods: [{ name: jar, disabled: false, size: 1 }],
+        toggles: [
+          { name: 'Distant Horizons', jarPrefix: 'DistantHorizons-', jars: [jar], disabled: false },
+        ],
+      } as never)
+      vi.mocked(App.GetChapterStorage).mockResolvedValue({
+        chapterId: 'frangfurd',
+        totalBytes: 1,
+        freeBytes: -1,
+        partial: false,
+        running: false,
+        items: [{ kind: 'mods', name: '', label: '', bytes: 1, files: 1, lastModified: '' }],
+      } as never)
+    })
+
+    it('reads mods and storage as the slide starts, and draws their rows as the answers come', async () => {
+      render(page)
+      expect(await screen.findByRole('switch', { name: 'Distant Horizons' })).toBeChecked()
+      expect(screen.getByText('1 of 1 on')).toBeInTheDocument()
+      expect(await screen.findByRole('img', { name: /Mods/ })).toBeInTheDocument()
+    })
+
+    it('draws them again at once on a later open, from what was read before', async () => {
+      const { unmount } = render(page)
+      expect(await screen.findByRole('img', { name: /Mods/ })).toBeInTheDocument()
+      unmount()
+      vi.mocked(App.GetChapterMods).mockReturnValue(new Promise(() => undefined))
+      vi.mocked(App.GetChapterStorage).mockReturnValue(new Promise(() => undefined))
+      render(page)
+      expect(await screen.findByRole('switch', { name: 'Distant Horizons' })).toBeChecked()
+      expect(screen.getByRole('img', { name: /Mods/ })).toBeInTheDocument()
+    })
+
+    it('reads and draws them outside a page layer too', async () => {
+      render(<ChapterSettingsPanel chapter={frangfurd} onClose={() => undefined} />)
+      expect(await screen.findByRole('switch', { name: 'Distant Horizons' })).toBeChecked()
+      expect(await screen.findByRole('img', { name: /Mods/ })).toBeInTheDocument()
     })
   })
 })
