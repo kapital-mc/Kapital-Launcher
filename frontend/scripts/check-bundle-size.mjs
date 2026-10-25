@@ -134,7 +134,11 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // (lib/pageSettled, in PageLayer), added on top of the compact launcher. Measured 98.22 KB.
 // 98.2 on 2026-10-25: that signal is gone again; the layer keeps only the mark the compact
 // panels read. Measured 98.1 KB.
-const BUDGET_KB = 98.2
+// 98.3 on 2026-10-25: Camera Tools, the first add-on (ADR-2's twenty-second amendment). The
+// bundled manifest carries its name, line and pack URL, and SetAddonEnabled is one more
+// export of the generated App.js; the section that shows it loads on demand. Measured
+// 98.23 KB.
+const BUDGET_KB = 98.3
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { ChapterMods } from '../types'
 import { errMsg, hasWailsBridge } from '../lib/ipc'
 import { withJars, withJarsSet } from '../lib/mods'
-import { GetChapterMods, SetModsDisabled } from '../../wailsjs/go/main/App'
+import { GetChapterMods, SetAddonEnabled, SetModsDisabled } from '../../wailsjs/go/main/App'
 
 /**
  * A chapter's mods as the settings page shows them (issue 156): the jars in the instance's
@@ -27,6 +27,8 @@ interface ModStore {
   load: (chapterId: string) => Promise<void>
   /** Switches `jars` off or on in the chapter's folder and settings; rejects with Go's reason. */
   setJars: (chapterId: string, jars: readonly string[], off: boolean) => Promise<void>
+  /** Turns one of the chapter's add-ons on or off; rejects with Go's reason. */
+  setAddon: (chapterId: string, addonId: string, enabled: boolean) => Promise<void>
 }
 
 export const useModStore = create<ModStore>((set, get) => ({
@@ -73,6 +75,28 @@ export const useModStore = create<ModStore>((set, get) => ({
       set((s) => ({ writing: null, byChapter: { ...s.byChapter, [chapterId]: before } }))
       // A rename that failed halfway leaves the list saved and the folder partly changed:
       // read again so the view is the folder's, then let the section show the reason.
+      void get().load(chapterId)
+      throw e
+    }
+  },
+
+  setAddon: async (chapterId, addonId, enabled) => {
+    const before = get().byChapter[chapterId]
+    if (!before) return
+    const drawn = {
+      ...before,
+      addons: before.addons?.map((a) => (a.id === addonId ? { ...a, enabled } : a)),
+    }
+    set((s) => ({ writing: chapterId, byChapter: { ...s.byChapter, [chapterId]: drawn } }))
+    if (!hasWailsBridge()) {
+      set({ writing: null })
+      return
+    }
+    try {
+      const saved = (await SetAddonEnabled(chapterId, addonId, enabled)) as ChapterMods
+      set((s) => ({ writing: null, byChapter: { ...s.byChapter, [chapterId]: saved } }))
+    } catch (e) {
+      set((s) => ({ writing: null, byChapter: { ...s.byChapter, [chapterId]: before } }))
       void get().load(chapterId)
       throw e
     }

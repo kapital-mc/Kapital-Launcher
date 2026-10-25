@@ -49,8 +49,9 @@ summed). A different count is new surface to classify: add the method to this ta
 | `SaveChapterSettings` | a chapter id and a `ChapterSettings` | five keys rewritten in the chapter's own `instance.cfg`, held to the preset list, the machine's memory and, for the player's own Java arguments, `ValidateJVMArgs` (issue 191); refused while the game runs or a Prism is open (the launcher's own is closed first) | S3.2, S3.3, S3.9, S4.6 |
 | `GetRunLogs` | a chapter id | the names, times and sizes of `logs/latest.log`, `logs/*.log.gz` and `crash-reports/*.txt` in that chapter's instance game folder, listed through an `os.Root`; no file is opened | S3.3, S3.10 |
 | `ReadRunLog` | a chapter id, a kind (`log` or `crash`), a base name the listing produces and a byte offset | one chunk (at most 256 KiB, from a whole line) of one such file in that game folder, unpacked if `.log.gz` up to 256 MiB, redacted before it leaves Go; nothing written | S3.3, S3.10, S7.5 |
-| `GetChapterMods` | a chapter id | the file names, sizes and disabled state of the regular files directly in that chapter's instance `mods` folder, listed through an `os.Root`; when the game is not running, a left-over sync journal is recovered (jars in it that are still on the player's list are renamed to `.jar.disabled`) | S3.3, S3.11 |
+| `GetChapterMods` | a chapter id | the file names, sizes and disabled state of the regular files directly in that chapter's instance `mods` folder, listed through an `os.Root`, and each manifest add-on's record (`kapital-addon-<id>.json` in the game folder, a regular file of at most 1 MiB) for the jars it lists under `mods/`, which the list leaves out; when the game is not running, a left-over sync journal is recovered (jars in it that are still on the player's list are renamed to `.jar.disabled`) | S3.3, S3.11 |
 | `SetModsDisabled` | a chapter id and a list of jar base names | the settings file (the chapter's `disabledMods`), then renames of `x.jar` and `x.jar.disabled` in that `mods` folder only, each name a plain jar name present in the folder; refused while the game runs and under a developer preview | S3.3, S3.11 |
+| `SetAddonEnabled` | a chapter id, an add-on id and on or off | the settings file (the chapter's `enabledAddons`, ids the manifest names), then renames of the add-on's jars, as its installer record lists them, in that `mods` folder only; refused while the game runs and under a developer preview | S3.3, S3.11 |
 | `WatchLiveLog` | a chapter id | the same chunk of `logs/latest.log` as `ReadRunLog` (at most 256 KiB, redacted), and a follower of that one file in that game folder, which emits what is appended as `log:live` events (at most 64 KiB each, redacted); one follower at a time, ended by the app's shutdown; nothing written | S3.3, S3.10, S7.5 |
 | `StopLiveLog` | a chapter id | the follower of that chapter's log, ended; nothing else | S3.3, S3.10 |
 | `CheckChapterMap` | a chapter id | one GET (5 s, no redirect followed, body dropped after 4 KiB) of the address the manifest names as that chapter's `map`, a playit tunnel with a port; nothing is kept, and a chapter with no map makes no request | S2.2, S5.4 |
@@ -536,7 +537,14 @@ and removed only when the mods are away again. (f) The launcher's copy of itself
 the path written into `instance.cfg` is held to no `$`, no `"`, no control
 character and absolute (`checkSyncExePath`), and a command is the launcher's own
 only when it names `<anything>/sync/kapital-launcher(.exe)` or `sync-dev`, the
-flag and a URL (`classifyPreLaunch`).
+flag and a URL (`classifyPreLaunch`). (g) A chapter's add-on (ADR-2 twenty-second
+amendment) carries an id of `^[a-z][a-z0-9-]{1,23}$`, which is the only part of it
+that reaches a file name (`kapital-addon-<id>.json` in the game folder), and a pack
+URL held to the pack URL's rules; the sync runs it with the packwiz template's
+arguments plus `--meta-file` and that name (`packwizAddonSyncArgs`), the same one
+process, and renames only the jars its record lists directly under `mods/` by a name
+`ModJarName` accepts, through the same `os.Root`. An add-on is off unless the
+settings say otherwise.
 Verify: `TestModJarNameAcceptsTheRealOnesAndNothingThatCouldNameAPath`,
 `TestSetDisabledRefusesAFolderOrALinkNamedLikeAJar`,
 `TestSetDisabledNeverFollowsALink` and
@@ -548,7 +556,10 @@ a test runner cannot make links), `TestSyncRenamesNothingOutsideTheModsFolder`,
 `TestSetModsDisabledRefusesBeforeChangingAnything`,
 `TestSetModsDisabledIsRefusedWhileTheGameRunsAndUnderAPreview`,
 `TestCheckSyncExePathRefusesWhatPrismWouldReadAsSomethingElse`,
-`TestValidateManifestRefusesBadToggles`; `grep -rn 'exec.Command' backend | grep -v _test`
+`TestValidateManifestRefusesBadToggles`, `TestValidateManifestRefusesABadAddon`,
+`TestAddonJarsTakesOnlyJarsDirectlyInTheModsFolder`,
+`TestAddonSyncArgsNameTheAddonsOwnRecord`, `TestSyncTreatsUnreadableSettingsAsEveryAddonOff`,
+`TestSetAddonEnabledRefusesWhatTheManifestDoesNotName`; `grep -rn 'exec.Command' backend | grep -v _test`
 shows `ExecSyncRunner`'s as the one new process.
 Probe: a settings file with `../options.txt` or `mods/x.jar` as a name; a `mods`
 folder that is a link out of the instance; a jar-named folder; INST_MC_DIR

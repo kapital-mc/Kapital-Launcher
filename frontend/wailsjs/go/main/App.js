@@ -258,6 +258,10 @@ export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
 
+export function SetAddonEnabled(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetAddonEnabled'](arg1, arg2, arg3);
+}
+
 export function SetModsDisabled(arg1, arg2) {
   return window['go']['main']['App']['SetModsDisabled'](arg1, arg2);
 }

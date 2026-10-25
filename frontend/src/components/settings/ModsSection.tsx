@@ -21,8 +21,9 @@ interface Props {
 
 /**
  * A chapter's mods (issue 156, ADR-2's ninth amendment): the few the manifest names as quick
- * switches, and under them a collapsible list of every mod in the instance's mods folder with
- * a switch and a search. A switch shows the mod as it is, on or off. The choice is the
+ * switches, the add-ons it offers on top of the pack (Camera Tools, off until the player turns
+ * it on, and downloaded only then: the twenty-second amendment), and under them a collapsible
+ * list of every mod in the instance's mods folder with a switch and a search. A switch shows the mod as it is, on or off. The choice is the
  * launcher's own, kept in its settings and applied by the sync Prism runs before the game, so
  * a disabled mod is not downloaded again; Go also renames the files at once, so the folder
  * matches before the next Play does anything. Only the tracker's answer (`playing`) disables
@@ -40,6 +41,7 @@ export function ModsSection({ chapter }: Props) {
   const writing = useModStore((s) => s.writing !== null)
   const load = useModStore((s) => s.load)
   const setJars = useModStore((s) => s.setJars)
+  const setAddon = useModStore((s) => s.setAddon)
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const wasPlaying = useRef(playing)
   const [open, setOpen] = useState(false)
@@ -82,6 +84,15 @@ export function ModsSection({ chapter }: Props) {
     setError(null)
     try {
       await setJars(chapter.id, jars, off)
+    } catch (e) {
+      setError(errMsg(e))
+    }
+  }
+
+  const switchAddon = async (addonId: string, enabled: boolean) => {
+    setError(null)
+    try {
+      await setAddon(chapter.id, addonId, enabled)
     } catch (e) {
       setError(errMsg(e))
     }
@@ -145,6 +156,20 @@ export function ModsSection({ chapter }: Props) {
           <span>Advanced mod control</span>
         </button>
       </SettingsCard>
+      {(view.addons?.length ?? 0) > 0 && (
+        <SettingsCard>
+          {view.addons?.map((a) => (
+            <Toggle
+              key={a.id}
+              label={a.name}
+              checked={a.enabled}
+              hint={a.description}
+              disabled={busy}
+              onChange={(on) => void switchAddon(a.id, on)}
+            />
+          ))}
+        </SettingsCard>
+      )}
       <Grow className="-mt-3" inner="pt-3">
         {playing && <WarningLine>Close the game to change mods.</WarningLine>}
       </Grow>

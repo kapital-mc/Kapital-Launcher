@@ -109,6 +109,14 @@
           { "name": "Frangfurd Menu", "jarPrefix": "frangfurd_menu-" },
           { "name": "Frangfurd Tempo", "jarPrefix": "frangfurd_tempo-" }
         ],
+        "addons": [
+          {
+            "id": "camera",
+            "name": "Camera Tools",
+            "description": "Flashback, Sinytra Connector · 220 MB",
+            "packwiz": "https://kapital-packs.alessandrogekeler.workers.dev/frangfurd-camera/pack.toml"
+          }
+        ],
         "dhSnapshot": "https://dh.frangfurd.click/dh/latest.json"
       },
       "server": {

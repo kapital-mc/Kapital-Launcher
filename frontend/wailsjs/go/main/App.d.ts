@@ -130,6 +130,8 @@ export function SaveChapterSettings(arg1:string,arg2:models.ChapterSettings):Pro
 
 export function SaveSettings(arg1:models.AppSettings):Promise<void>;
 
+export function SetAddonEnabled(arg1:string,arg2:string,arg3:boolean):Promise<models.ChapterMods>;
+
 export function SetModsDisabled(arg1:string,arg2:Array<string>):Promise<models.ChapterMods>;
 
 export function SetPackSource(arg1:string,arg2:string):Promise<models.InstanceReport>;

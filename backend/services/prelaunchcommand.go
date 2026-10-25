@@ -87,6 +87,15 @@ func packwizSyncArgs(mcDir, packURL string) []string {
 	}
 }
 
+// packwizAddonSyncArgs is packwizSyncArgs for an add-on's pack: the same pinned
+// jars in the same game folder, with the add-on's own record in place of the
+// pack's packwiz.json, so neither run sees the other's files (ADR-2, twenty-second
+// amendment). record is a file name the launcher made, never a path.
+func packwizAddonSyncArgs(mcDir, packURL, record string) []string {
+	args := packwizSyncArgs(mcDir, packURL)
+	return append(args[:len(args)-1:len(args)-1], "--meta-file", record, packURL)
+}
+
 // ErrSyncExePath is returned for a copy path that cannot go on Prism's command
 // line.
 var ErrSyncExePath = errors.New("the launcher's sync copy has a path that cannot go on a command line")

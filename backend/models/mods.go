@@ -16,6 +16,36 @@ type ModToggle struct {
 	Requires string `json:"requires,omitempty"`
 }
 
+// PackAddon is a second packwiz pack a chapter's manifest offers on top of its
+// own: Camera Tools, Flashback and what it needs. It is off for every player
+// until they turn it on, and only then does the pre-launch sync download it into
+// the chapter's instance, with a record of its own beside the pack's. It names a
+// pack and never runs one: the URL is held to the pack URL's rules.
+type PackAddon struct {
+	// ID is the add-on's stable name, in the settings and in the file name of
+	// its record ("kapital-addon-camera.json"): lower case letters, digits and
+	// dashes.
+	ID string `json:"id"`
+	// Name is what the switch is called: "Camera Tools".
+	Name string `json:"name"`
+	// Description is the line under the switch: what it adds and what it costs.
+	Description string `json:"description"`
+	// Packwiz is the https URL of the add-on's pack.toml.
+	Packwiz string `json:"packwiz"`
+}
+
+// AddonState is a manifest add-on as the settings page shows it.
+type AddonState struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Enabled is the player's choice, saved in the launcher's settings.
+	Enabled bool `json:"enabled"`
+	// Jars are the base names of the add-on's jars in the mods folder, enabled
+	// or put away; none before its first sync.
+	Jars []string `json:"jars"`
+}
+
 // ModFile is one jar in an instance's mods folder as the settings page lists it.
 type ModFile struct {
 	// Name is the jar's base name, "Mod-1.2.3.jar", whether the file on disk is
@@ -52,6 +82,9 @@ type ChapterMods struct {
 	// Mods is every jar, sorted by name; empty before the pack's first sync.
 	Mods    []ModFile        `json:"mods"`
 	Toggles []ModToggleState `json:"toggles"`
+	// Addons are the manifest's add-ons with the player's choice. Their jars are
+	// not in Mods: the add-on's switch is the only one they have.
+	Addons []AddonState `json:"addons"`
 	// Running is whether the game's tracker or its log says the instance is
 	// running, as ChapterSettingsInfo.Running: a snapshot, a hint in the view.
 	Running bool `json:"running"`

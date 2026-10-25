@@ -68,6 +68,10 @@ type Pack struct {
 	// as a quick choice (issue 156). Optional: a pack that names none has only
 	// the advanced list.
 	Toggles []ModToggle `json:"toggles,omitempty"`
+	// Addons are packs a player may add to the chapter's instance from its
+	// settings, each off until they turn it on (ADR-2, twenty-second amendment).
+	// Optional: most chapters name none.
+	Addons []PackAddon `json:"addons,omitempty"`
 	// DHSnapshot is the https address of the server's Distant Horizons
 	// snapshot pointer, a latest.json that Konnekt publishes (issue 136), or nil
 	// when the chapter has none. A URL and nothing else: the folders the

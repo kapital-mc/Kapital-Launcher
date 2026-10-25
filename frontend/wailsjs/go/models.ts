@@ -1,5 +1,25 @@
 export namespace models {
 	
+	export class AddonState {
+	    id: string;
+	    name: string;
+	    description: string;
+	    enabled: boolean;
+	    jars: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AddonState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.enabled = source["enabled"];
+	        this.jars = source["jars"];
+	    }
+	}
 	export class AppSettings {
 	    theme: string;
 	    prismExecutable: string;
@@ -14,6 +34,7 @@ export namespace models {
 	    joinServers?: string[];
 	    tailscaleServers?: string[];
 	    disabledMods?: Record<string, Array<string>>;
+	    enabledAddons?: Record<string, Array<string>>;
 	    loadingSplash?: boolean;
 	    loadingSplashAvailable?: boolean;
 	    loadingSplashOn?: boolean;
@@ -45,6 +66,7 @@ export namespace models {
 	        this.joinServers = source["joinServers"];
 	        this.tailscaleServers = source["tailscaleServers"];
 	        this.disabledMods = source["disabledMods"];
+	        this.enabledAddons = source["enabledAddons"];
 	        this.loadingSplash = source["loadingSplash"];
 	        this.loadingSplashAvailable = source["loadingSplashAvailable"];
 	        this.loadingSplashOn = source["loadingSplashOn"];
@@ -220,6 +242,24 @@ export namespace models {
 		    return a;
 		}
 	}
+	export class PackAddon {
+	    id: string;
+	    name: string;
+	    description: string;
+	    packwiz: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new PackAddon(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.packwiz = source["packwiz"];
+	    }
+	}
 	export class ModToggle {
 	    name: string;
 	    jarPrefix: string;
@@ -247,6 +287,7 @@ export namespace models {
 	    mrpack?: string;
 	    jvm?: string;
 	    toggles?: ModToggle[];
+	    addons?: PackAddon[];
 	    dhSnapshot?: string;
 	
 	    static createFrom(source: any = {}) {
@@ -265,6 +306,7 @@ export namespace models {
 	        this.mrpack = source["mrpack"];
 	        this.jvm = source["jvm"];
 	        this.toggles = this.convertValues(source["toggles"], ModToggle);
+	        this.addons = this.convertValues(source["addons"], PackAddon);
 	        this.dhSnapshot = source["dhSnapshot"];
 	    }
 	
@@ -394,6 +436,7 @@ export namespace models {
 	    chapterId: string;
 	    mods: ModFile[];
 	    toggles: ModToggleState[];
+	    addons: AddonState[];
 	    running: boolean;
 	
 	    static createFrom(source: any = {}) {
@@ -405,6 +448,7 @@ export namespace models {
 	        this.chapterId = source["chapterId"];
 	        this.mods = this.convertValues(source["mods"], ModFile);
 	        this.toggles = this.convertValues(source["toggles"], ModToggleState);
+	        this.addons = this.convertValues(source["addons"], AddonState);
 	        this.running = source["running"];
 	    }
 	
@@ -715,6 +759,7 @@ export namespace models {
 	        this.reason = source["reason"];
 	    }
 	}
+	
 	
 	
 	

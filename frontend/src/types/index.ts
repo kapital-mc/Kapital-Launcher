@@ -104,6 +104,8 @@ export interface Pack {
   mrpack?: string | null
   /** Mods a player may switch off from the chapter's settings as a quick choice (issue 156). */
   toggles?: ModToggle[] | null
+  /** Packs a player may add to the chapter's instance, each off until they turn it on (ADR-2, twenty-second amendment). */
+  addons?: PackAddon[] | null
   /** The https address of the server's Distant Horizons terrain snapshot (issue 136). */
   dhSnapshot?: string | null
 }
@@ -413,6 +415,31 @@ export interface ModFile {
   size: number
 }
 
+/**
+ * A second pack the manifest offers on top of a chapter's own, such as Camera Tools: downloaded
+ * by the pre-launch sync only for a player who turned it on. It names a pack and never runs one.
+ */
+export interface PackAddon {
+  id: string
+  /** What the switch is called. */
+  name: string
+  /** The line under the switch: what it adds and what it costs. */
+  description: string
+  /** The add-on's pack.toml. */
+  packwiz: string
+}
+
+/** A manifest add-on with the player's choice, as the mods page shows it. */
+export interface AddonState {
+  id: string
+  name: string
+  description: string
+  /** The player's choice; every add-on is off until they turn it on. */
+  enabled: boolean
+  /** Its jars in the mods folder, on or put away; none before its first sync. */
+  jars: string[]
+}
+
 /** A manifest toggle resolved against the mods folder. */
 export interface ModToggleState extends ModToggle {
   /** The jars it matches now; none before the pack's first sync. */
@@ -428,6 +455,8 @@ export interface ChapterMods {
   chapterId: string
   mods: ModFile[]
   toggles: ModToggleState[]
+  /** The manifest's add-ons; their jars are not in `mods`, their switch is the only one they have. */
+  addons?: AddonState[]
   /** The tracker or the game log says the game runs; the log half is a guess, shown as a hint. */
   running: boolean
 }

@@ -757,3 +757,54 @@ and for worlds to be deletable after all.
   through the same `os.Root`, only a regular file of at most 64 KiB that sniffs
   as a PNG, and hands it to the page as a data URL (`img-src` already allows
   `data:`). Nothing else is opened.
+
+## Twenty-second amendment, 2026-10-25
+
+The author wanted Flashback, a replay recorder, in Frangfurd as a switch that is
+off by default, and asked that the mods be downloaded only for a player who turns
+it on. Flashback is a Fabric mod and needs Sinytra Connector and Forgified Fabric
+API to run on NeoForge; the four jars are about 220 MB, Flashback's alone
+210.8 MB (Modrinth, 2026-10-23). Shipping them in the pack and switching them off
+(the ninth amendment) would make every player download them.
+
+- **An add-on is a second packwiz pack.** `pack.addons` in the manifest names it:
+  an id (`^[a-z][a-z0-9-]{1,23}$`), a name, a line of description, and the https
+  URL of its `pack.toml`, held to the pack URL's rules (allowlist, `commandSafeURL`)
+  and never the chapter's own. Frangfurd's is `camera`, Camera Tools, at
+  `kapital-packs/frangfurd-camera/`. At most four per chapter; a chapter with one
+  needs a packwiz pack of its own.
+- **Off until the player turns it on.** The choice is `enabledAddons` in the
+  launcher's settings, per chapter, written only by `SetAddonEnabled`, which
+  refuses while the game runs and under a developer preview, as the mod switches
+  do. An add-on not listed is off: a new player, a hand-edited entry of the wrong
+  shape and settings that cannot be read all mean off.
+- **The sync runs it after the pack.** With the add-on on, the pre-launch sync
+  runs the same pinned packwiz-installer a second time, after the chapter's own run
+  and only when that one succeeded, with `--meta-file kapital-addon-<id>.json`
+  before the URL (`packwizAddonSyncArgs`). That flag is the installer's own
+  (`Main.kt:128`, v0.5.14), and it is what keeps the two runs apart: the installer
+  deletes only files its own record lists and the pack has since dropped
+  (`UpdateManager.kt:250-261`) and leaves every other file alone, so neither run
+  touches the other's jars. Seen on 2026-10-25 with the pinned jars against the
+  real add-on pack served locally: the four jars arrived, a jar and a
+  `packwiz.json` already in the folder were left as they were, and the record is
+  `testdata/addon/kapital-addon-camera.json`. The sync exits with the pack's code,
+  or the add-on's when only the add-on failed.
+- **Off again keeps the jars, put away.** The add-on's jars are the
+  `cachedLocation`s its record lists directly under `mods/`, by a name the jar
+  shape accepts (`AddonJars`). An add-on that is off is not synced, and every run
+  renames its jars to `.jar.disabled`; one that is on has them renamed back before
+  any installer runs, so its own run downloads nothing that did not change.
+  `SetAddonEnabled` does the same at once. A jar of the add-on on the player's own
+  disabled list stays away.
+- **The add-on's jars have one switch.** The mods page leaves them out of the
+  advanced list, a save of that list never takes one into `disabledMods`, and it
+  applies the list with the jars of every add-on that is off still away.
+- **What it costs.** packwiz-installer writes a pack's Minecraft and loader
+  versions into the instance (`LauncherUtils.kt:70-135`), so an add-on whose
+  `[versions]` differ from its chapter's would change the loader at every sync.
+  kapital-packs' `tools/check_packs.py` holds them equal (`ADDONS`); the launcher
+  cannot check it without fetching the pack. An instance left on the plain
+  packwiz command (no sync copy) never gets an add-on, which is the safe side.
+  Connector is a beta (2.0.0-beta.17) and had not been started with the
+  Frangfurd pack when this shipped.

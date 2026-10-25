@@ -439,6 +439,7 @@ func (a *App) GetSettings() (models.AppSettings, error) {
 	// The disabled mods are the mods page's, through GetChapterMods; the screen
 	// holds no copy to send back (SaveSettings keeps what is stored).
 	settings.DisabledMods = nil
+	settings.EnabledAddons = nil
 	return services.WithLoadingSplash(runtime.GOOS, settings), nil
 }
 
@@ -477,6 +478,8 @@ func (a *App) SaveSettings(settings models.AppSettings) error {
 	// it against the instance's mods folder; the screen's copy is none, and a
 	// save from it never changes the stored one (issue 156).
 	settings.DisabledMods = before.DisabledMods
+	// The add-ons too, by SetAddonEnabled.
+	settings.EnabledAddons = before.EnabledAddons
 	// So is the name learned from the game's log (learnPlayerName), and the
 	// version whose What's new was seen (MarkWhatsNewSeen).
 	settings.PlayerName = before.PlayerName
