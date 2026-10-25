@@ -859,7 +859,6 @@
 }
 .compact-panel {
   flex: 1 1 0;
-  container: panel / size;
   --panel-open-w: calc(
     (100cqw - 2 * var(--layout-compact-gap)) * var(--panel-grow) / (var(--panel-grow) + 2)
   );
@@ -897,9 +896,6 @@
 }
 .compact-panel[data-active] .compact-title {
   width: min(var(--layout-compact-title), 100%);
-  @variant panel-short {
-    width: min(var(--layout-compact-title-short), 100%);
-  }
 }
 .compact-foot {
   display: grid;

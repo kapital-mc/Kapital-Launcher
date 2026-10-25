@@ -36,8 +36,9 @@ read 2026-10-22), so a menu choice that resized the window would jump.
   the window. The window minimum drops to 960 × 360 (the author, 2026-10-23,
   after trying 480 × 180, where Play crowded the open panel and the server
   line had no room). It is wider than the floor, so only the height holds
-  compact on. A panel shorter than `layout.compact.short` drops its number and
-  kind and takes a smaller title.
+  compact on. At that minimum the open panel still has room for its number,
+  kind and full-size title above Play, so a short panel keeps them (the author,
+  2026-10-25: a smaller title there was a jump for nothing).
 - **A left-click in compact goes back to full.** The sidebar button's usual
   click (narrowing the sidebar) has nothing to act on there.
 - **Both layouts are laid out; actors carry one into the other.** The full
