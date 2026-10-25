@@ -28,7 +28,6 @@ export function emitLayout(src, push) {
   push(`  --layout-compact-gap: ${src.layout.compact.gap}${unit};`)
   push(`  --layout-compact-title: ${src.layout.compact.title}${unit};`)
   push(`  --layout-compact-title-idle: ${src.layout.compact.titleIdle}${unit};`)
-  push(`  --layout-compact-title-short: ${src.layout.compact.titleShort}${unit};`)
   push(`  --layout-compact-rise: ${src.layout.compact.rise}${unit};`)
   push(`}`)
 }

@@ -95,7 +95,7 @@ export function CompactPanel({
       <div data-morph="panel-body" className="absolute inset-x-6 bottom-6 flex flex-col gap-3.5">
         <div
           data-morph="panel-label"
-          className="text-fg-muted panel-short:invisible panel-short:absolute flex items-baseline gap-2.5 overflow-hidden text-sm whitespace-nowrap"
+          className="text-fg-muted flex items-baseline gap-2.5 overflow-hidden text-sm whitespace-nowrap"
         >
           <span className="text-accent font-mono">{chapter.number}</span>
           <span className="truncate">{chapter.kind}</span>
