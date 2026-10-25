@@ -134,7 +134,7 @@ func ValidateManifest(m models.Manifest) error {
 // validatePack holds a chapter's pack to its rules: a known type, a loader and
 // a game version, the packwiz URL on the allowlist and safe for the pre-launch
 // command line, a JVM preset the launcher knows and the game version allows,
-// the quick mod switches, and the mrpack URL.
+// the quick mod switches, the add-ons, and the mrpack URL.
 func validatePack(where string, pack models.Pack) error {
 	if !slices.Contains(packTypes, pack.Type) {
 		return fmt.Errorf("%s: pack type %q is not one of %v", where, pack.Type, packTypes)
@@ -160,6 +160,9 @@ func validatePack(where string, pack models.Pack) error {
 		}
 	}
 	if err := validateToggles(where, pack.Toggles); err != nil {
+		return err
+	}
+	if err := validateAddons(where, pack); err != nil {
 		return err
 	}
 	if pack.Mrpack != nil {

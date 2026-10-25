@@ -31,6 +31,10 @@ import (
 //  4. renames the disabled mods to ".jar.disabled" again whatever the installer's
 //     exit code was, removes the journal and exits with that code.
 //
+// Around 3 it also handles the chapter's add-ons (modsync_addons.go): one that
+// is on has its jars put back and its own pack synced after the chapter's; one
+// that is off is not synced, and its jars, if it ever was, are put away.
+//
 // What it never does: start a window, read anything of Prism's account data,
 // touch a file other than the regular files directly inside <INST_MC_DIR>/mods
 // by a name modJarName accepts (and its own journal), or run anything but the
@@ -221,14 +225,17 @@ func checkSyncPackURL(url string) error {
 	return nil
 }
 
-// disabledFor is the player's list for a chapter: the settings file's, each name
-// held to the jar shape again, which a hand-edited file may not meet.
-func (s *syncRun) disabledFor(chapterID string) (names []string, loaded bool) {
+// choicesFor is the player's list of disabled mods for a chapter, the settings
+// file's, each name held to the jar shape again, which a hand-edited file may not
+// meet; and the add-ons they turned on. Settings that cannot be read are no add-on
+// on, every add-on's default.
+func (s *syncRun) choicesFor(chapterID string) (names, addons []string, loaded bool) {
 	settings, err := NewSettingsService(s.d.DataDir).Load()
 	if err != nil {
 		s.say("the launcher's settings cannot be read (%s)", errKind(err))
-		return nil, false
+		return nil, nil, false
 	}
+	addons = settings.EnabledAddons[chapterID]
 	for _, name := range settings.DisabledMods[chapterID] {
 		if !ModJarName(name) {
 			s.say("skip %s: not a jar name", q(name))
@@ -238,7 +245,7 @@ func (s *syncRun) disabledFor(chapterID string) (names []string, loaded bool) {
 			names = append(names, name)
 		}
 	}
-	return names, true
+	return names, addons, true
 }
 
 // errKind is an error's class, without the text: a path in it is the player's.
@@ -277,8 +284,9 @@ func (s *syncRun) start(args []string) int {
 			chapter = &s.d.Manifest.Chapters[i]
 		}
 	}
-	var disabled []string
+	var disabled, enabledAddons []string
 	var toggles []models.ModToggle
+	var addons []syncAddon
 	handle := false
 	switch {
 	case chapter == nil:
@@ -288,7 +296,7 @@ func (s *syncRun) start(args []string) int {
 	default:
 		toggles = chapter.Pack.Toggles
 		var loaded bool
-		disabled, loaded = s.disabledFor(chapter.ID)
+		disabled, enabledAddons, loaded = s.choicesFor(chapter.ID)
 		if !loaded {
 			// The journal of a run that was killed is the one other record of what
 			// the player had switched off.
@@ -302,15 +310,19 @@ func (s *syncRun) start(args []string) int {
 			}
 		}
 		handle = true
+		addons = s.addonsFor(env, chapter.Pack.Addons, enabledAddons)
 	}
 
 	if handle {
 		handle = s.restore(env, disabled)
 	}
+	s.prepareAddons(env, addons)
 	code := s.install(env, url)
+	code = s.installAddons(env, addons, code)
 	if handle {
 		s.putAway(env, disabled, toggles)
 	}
+	s.putAwayAddons(env, addons)
 	return code
 }
 

@@ -109,6 +109,14 @@
           { "name": "Frangfurd Menu", "jarPrefix": "frangfurd_menu-" },
           { "name": "Frangfurd Tempo", "jarPrefix": "frangfurd_tempo-" }
         ],
+        "addons": [
+          {
+            "id": "camera",
+            "name": "Camera Tools",
+            "description": "Flashback, to record play and render it later, with Sinytra Connector to run it. About 220 MB, downloaded at the next Play.",
+            "packwiz": "https://kapital-packs.alessandrogekeler.workers.dev/frangfurd-camera/pack.toml"
+          }
+        ],
         "dhSnapshot": "https://dh.frangfurd.click/dh/latest.json"
       },
       "server": {

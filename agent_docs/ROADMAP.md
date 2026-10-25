@@ -77,6 +77,10 @@ the scaffold changed the picture.
       applied by the launcher's own copy as Prism's pre-launch command, which
       puts the disabled jars back for packwiz-installer and away again (issue
       156; ADR-2's ninth amendment)
+- [x] Add-ons a player turns on from a chapter's Mods section, off by default
+      and downloaded only then: a second packwiz pack synced after the
+      chapter's with its own record. Frangfurd's Camera Tools is Flashback
+      (ADR-2's twenty-second amendment)
 - [x] Developer setting: override a chapter's `pack.toml` URL with a local
       `packwiz serve` address, so a pack is tried from a working copy first
       (`packOverrides` in settings.json, #41; edited on the settings screen

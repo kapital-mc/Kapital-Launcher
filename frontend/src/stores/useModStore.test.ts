@@ -104,4 +104,25 @@ describe('useModStore', () => {
     expect(useModStore.getState().byChapter.frangfurd?.mods[0]?.disabled).toBe(true)
     expect(useModStore.getState().writing).toBeNull()
   })
+
+  it('turns an add-on on at once, keeps Go’s answer, and goes back when Go refuses', async () => {
+    const camera = { id: 'camera', name: 'Camera Tools', description: 'Flashback.', jars: [] }
+    const withCamera = (enabled: boolean): ChapterMods => ({
+      ...view(),
+      addons: [{ ...camera, enabled }],
+    })
+    useModStore.setState({ byChapter: { frangfurd: withCamera(false) } })
+    vi.mocked(Bindings.SetAddonEnabled).mockResolvedValue(withCamera(true) as never)
+    await useModStore.getState().setAddon('frangfurd', 'camera', true)
+    expect(Bindings.SetAddonEnabled).toHaveBeenCalledWith('frangfurd', 'camera', true)
+    expect(useModStore.getState().byChapter.frangfurd?.addons?.[0]?.enabled).toBe(true)
+
+    vi.mocked(Bindings.SetAddonEnabled).mockRejectedValue('refused')
+    vi.mocked(Bindings.GetChapterMods).mockResolvedValue(withCamera(true) as never)
+    await expect(useModStore.getState().setAddon('frangfurd', 'camera', false)).rejects.toBe(
+      'refused',
+    )
+    expect(useModStore.getState().byChapter.frangfurd?.addons?.[0]?.enabled).toBe(true)
+    expect(useModStore.getState().writing).toBeNull()
+  })
 })

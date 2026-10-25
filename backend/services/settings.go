@@ -159,6 +159,24 @@ func (s *SettingsService) load() (models.AppSettings, error) {
 		}
 		settings.DisabledMods[id] = kept
 	}
+	// The add-ons a player turned on, the same way: an id of the wrong shape is
+	// dropped, and with it the add-on is off, its default.
+	for id, addons := range settings.EnabledAddons {
+		kept := make([]string, 0, len(addons))
+		for _, addon := range addons {
+			if chapterIDPattern.MatchString(id) && AddonID(addon) && len(kept) < maxAddons {
+				kept = append(kept, addon)
+			}
+		}
+		if len(kept) != len(addons) {
+			slog.Warn("settings: enabled add-ons dropped", "chapter", id, "dropped", len(addons)-len(kept))
+		}
+		if len(kept) == 0 {
+			delete(settings.EnabledAddons, id)
+			continue
+		}
+		settings.EnabledAddons[id] = kept
+	}
 	// The join and Tailscale switches are the app's too, and the file the
 	// player's: an id that is not chapter-shaped, or any past the cap, is
 	// dropped with a log line.
@@ -275,6 +293,26 @@ func ValidateSettings(s models.AppSettings) error {
 			}
 		}
 	}
+	return validateEnabledAddons(s.EnabledAddons)
+}
+
+// validateEnabledAddons holds the add-ons a player turned on to their shape: a
+// chapter id, and add-on ids, at most maxAddons of them. That each one is the
+// manifest's is checked where it is written (SetAddonEnabled).
+func validateEnabledAddons(enabled map[string][]string) error {
+	for id, addons := range enabled {
+		if !chapterIDPattern.MatchString(id) {
+			return fmt.Errorf("settings: enabled add-ons for %q: not a chapter id", id)
+		}
+		if len(addons) > maxAddons {
+			return fmt.Errorf("settings: enabled add-ons for %q: more than %d", id, maxAddons)
+		}
+		for _, addon := range addons {
+			if !AddonID(addon) {
+				return fmt.Errorf("settings: enabled add-ons for %q: %q is not an add-on id", id, addon)
+			}
+		}
+	}
 	return nil
 }
 
@@ -345,6 +383,18 @@ func normalize(s models.AppSettings) models.AppSettings {
 		kept[id] = names
 	}
 	s.DisabledMods = kept
+	// Nor a chapter with no add-on on.
+	var on map[string][]string
+	for id, addons := range s.EnabledAddons {
+		if len(addons) == 0 {
+			continue
+		}
+		if on == nil {
+			on = map[string][]string{}
+		}
+		on[id] = slices.Compact(slices.Sorted(slices.Values(addons)))
+	}
+	s.EnabledAddons = on
 	return s
 }
 

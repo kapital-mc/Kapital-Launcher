@@ -60,6 +60,11 @@ type AppSettings struct {
 	// ninth amendment). A save from the frontend never sets it, and GetSettings
 	// does not hand it back.
 	DisabledMods map[string][]string `json:"disabledMods,omitempty"`
+	// EnabledAddons maps a chapter id to the ids of the manifest add-ons the
+	// player turned on (ADR-2, twenty-second amendment). An add-on that is not
+	// listed is off, which is every add-on's default. Written only by
+	// SetAddonEnabled and read by the pre-launch sync, like DisabledMods.
+	EnabledAddons map[string][]string `json:"enabledAddons,omitempty"`
 	// LoadingSplash shows a loading card, a window of its own, while a game
 	// starts, and on Windows holds the game's window until its resource reload
 	// begins (#43, #45, #97). Nil means the default: on for Windows, off for

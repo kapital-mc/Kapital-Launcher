@@ -124,7 +124,11 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 96.6 on 2026-10-21: the storage section's three bound methods (GetChapterStorage,
 // ClearChapterStorage, OpenStorageFolder) are in the generated App.js, one module in the shared
 // chunk, though the section itself loads on demand. Measured 96.52 KB, from 96.48 KB on main.
-const BUDGET_KB = 96.6
+// 96.7 on 2026-10-25: Camera Tools, the first add-on (ADR-2's twenty-second amendment). The
+// bundled manifest carries its name, line and pack URL, and SetAddonEnabled is one more
+// export of the generated App.js; the section that shows it loads on demand. Measured
+// 96.62 KB, from 96.51 KB on main.
+const BUDGET_KB = 96.7
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

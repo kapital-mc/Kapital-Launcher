@@ -86,3 +86,38 @@ func TestSettingsUpdateChangesUnderTheLockAndSavesNothingOnAnError(t *testing.T)
 		t.Fatal("a corrupt file was replaced")
 	}
 }
+
+func TestEnabledAddonsAreHeldToAddonIDsInSettings(t *testing.T) {
+	dir := t.TempDir()
+	svc := NewSettingsService(dir)
+	ok := models.AppSettings{Theme: "dark", EnabledAddons: map[string][]string{"frangfurd": {"camera", "camera"}, "luxemburg": {}}}
+	if err := svc.Save(ok); err != nil {
+		t.Fatal(err)
+	}
+	got, err := svc.Load()
+	if want := map[string][]string{"frangfurd": {"camera"}}; err != nil || !reflect.DeepEqual(got.EnabledAddons, want) {
+		t.Fatalf("%+v, %v", got.EnabledAddons, err)
+	}
+	for name, list := range map[string]map[string][]string{
+		"a path":           {"frangfurd": {"../camera"}},
+		"upper case":       {"frangfurd": {"Camera"}},
+		"a bad chapter id": {"../x": {"camera"}},
+		"too many":         {"frangfurd": {"a1", "b1", "c1", "d1", "e1"}},
+	} {
+		if err := svc.Save(models.AppSettings{Theme: "dark", EnabledAddons: list}); err == nil {
+			t.Errorf("%s was saved", name)
+		}
+	}
+	// By hand: what is not an add-on id goes, and with it the add-on is off.
+	file := `{"theme":"light","enabledAddons":{"frangfurd":["camera","../x"],"../x":["camera"]}}`
+	if err := os.WriteFile(filepath.Join(dir, SettingsFileName), []byte(file), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got, err = svc.Load()
+	if want := map[string][]string{"frangfurd": {"camera"}}; err != nil || !reflect.DeepEqual(got.EnabledAddons, want) {
+		t.Fatalf("got %v, %v", got.EnabledAddons, err)
+	}
+	if err := svc.Save(got); err != nil {
+		t.Fatalf("a hand-edited file blocked a save: %v", err)
+	}
+}

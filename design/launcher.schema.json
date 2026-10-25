@@ -94,6 +94,22 @@
                 }
               }
             },
+            "addons": {
+              "type": "array",
+              "maxItems": 4,
+              "description": "Packs a player may add to the chapter's instance from its settings, each off until they turn it on (docs/adr/0002, twenty-second amendment). The pre-launch sync downloads one only for a player who did, with packwiz-installer and a record of its own beside the pack's. Ids, names and URLs are unique, and the chapter needs a packwiz pack of its own.",
+              "items": {
+                "type": "object",
+                "required": ["id", "name", "description", "packwiz"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,23}$", "description": "The add-on's stable name, in the settings and in its record's file name." },
+                  "name": { "type": "string", "minLength": 1, "maxLength": 40, "description": "What the switch is called." },
+                  "description": { "type": "string", "minLength": 1, "maxLength": 160, "description": "The line under the switch: what it adds and what it costs." },
+                  "packwiz": { "$ref": "#/$defs/httpsUrl", "description": "The add-on's pack.toml, on an allowlisted host. Its Minecraft and loader versions must be the chapter's: packwiz-installer writes them into the instance." }
+                }
+              }
+            },
             "dhSnapshot": {
               "type": "string",
               "pattern": "^https://[^?#]+/latest\\.json$",

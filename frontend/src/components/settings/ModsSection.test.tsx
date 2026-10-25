@@ -146,6 +146,49 @@ describe('ModsSection', () => {
     await waitFor(() => expect(screen.getByRole('switch', { name: 'Colorwheel' })).toBeChecked())
   })
 
+  it('shows Camera Tools off by default and turns it on with Go', async () => {
+    const camera = {
+      id: 'camera',
+      name: 'Camera Tools',
+      description: 'Flashback. About 220 MB, downloaded at the next Play.',
+      enabled: false,
+      jars: [],
+    }
+    vi.mocked(App.GetChapterMods).mockResolvedValue({ ...view(), addons: [camera] } as never)
+    vi.mocked(App.SetAddonEnabled).mockResolvedValue({
+      ...view(),
+      addons: [{ ...camera, enabled: true }],
+    } as never)
+    render(<ModsSection chapter={frangfurd} />)
+    const sw = await screen.findByRole('switch', { name: 'Camera Tools' })
+    expect(sw).not.toBeChecked()
+    expect(sw).toHaveAccessibleDescription(/220 MB/)
+    fireEvent.click(sw)
+    await waitFor(() =>
+      expect(App.SetAddonEnabled).toHaveBeenCalledWith('frangfurd', 'camera', true),
+    )
+    await waitFor(() => expect(screen.getByRole('switch', { name: 'Camera Tools' })).toBeChecked())
+    expect(App.SetModsDisabled).not.toHaveBeenCalled()
+  })
+
+  it('puts Camera Tools back when Go refuses it', async () => {
+    const camera = {
+      id: 'camera',
+      name: 'Camera Tools',
+      description: 'Flashback.',
+      enabled: false,
+      jars: [],
+    }
+    vi.mocked(App.GetChapterMods).mockResolvedValue({ ...view(), addons: [camera] } as never)
+    vi.mocked(App.SetAddonEnabled).mockRejectedValue('Frangfurd is running: close the game first')
+    render(<ModsSection chapter={frangfurd} />)
+    fireEvent.click(await screen.findByRole('switch', { name: 'Camera Tools' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/close the game first/)
+    await waitFor(() =>
+      expect(screen.getByRole('switch', { name: 'Camera Tools' })).not.toBeChecked(),
+    )
+  })
+
   it('keeps the advanced list closed until asked, then lists every mod with a search', async () => {
     vi.mocked(App.SetModsDisabled).mockResolvedValue(view([dh, jade]) as never)
     render(<ModsSection chapter={frangfurd} />)
