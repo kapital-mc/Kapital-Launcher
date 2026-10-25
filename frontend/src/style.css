@@ -934,6 +934,13 @@
     opacity var(--duration-fast) linear,
     visibility 0s var(--duration-fast);
 }
+/* A page at rest over the panels hides them. Its corners are the card's, rounder
+   than a panel's, and the open panel's picture would show past them; at equal
+   radii the two curves' edges would still let a line of it through. They show
+   again as the page leaves. */
+[data-layout='compact']:has([data-page-settled]) > .compact-row {
+  visibility: hidden;
+}
 /* While a morph runs (the compact layout inert), the panels' layout settles at
    once so it measures true, and the actors only move as the morph moves them. A
    picture's fade under a passing pointer runs on: the actors take it up. */

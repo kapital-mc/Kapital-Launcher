@@ -135,6 +135,15 @@ describe('PageLayer', () => {
       expect(screen.getByText('settled')).toBeInTheDocument()
     })
 
+    it('marks the layer settled for the compact panels beneath, and unmarks it as the page leaves', () => {
+      const { rerender } = render(probed())
+      expect(frame()).not.toHaveAttribute('data-page-settled')
+      endAnimation(sliding())
+      expect(frame()).toHaveAttribute('data-page-settled')
+      rerender(probed({ open: false }))
+      expect(frame()).not.toHaveAttribute('data-page-settled')
+    })
+
     it("is not settled by the end of the page's own animations", () => {
       render(probed())
       endAnimation(screen.getByText('sliding'))
