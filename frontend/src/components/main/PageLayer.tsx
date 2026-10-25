@@ -1,7 +1,5 @@
-import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, useLayoutEffect, useRef, useState } from 'react'
 import type { AnimationEvent, ReactNode } from 'react'
-import { PageSettledContext } from '../../lib/pageSettled'
-import { ms } from '../../lib/smoothResize'
 import { CARD } from '../ui/card'
 
 /**
@@ -18,19 +16,6 @@ interface Props {
   onExited: () => void
   /** The page, usually a lazy one: its frame shows while its code is on the way. */
   children: ReactNode
-}
-
-/** How long the slide is given when no clock can be read for it, in ms. */
-const SLIDE_FALLBACK = 1000
-
-/**
- * How long past its start an entrance may take before the page counts as settled without hearing
- * its end: the slide, and the slower motion beyond it. The end is what normally settles it; this
- * is for a webview that never reports one (a window that is not being drawn).
- */
-function settleAfter(): number {
-  const t = ms('--duration-page') + ms('--duration-slow')
-  return Number.isFinite(t) ? t : SLIDE_FALLBACK
 }
 
 // A chapter's page is clipped by the card's own rounded frame; the settings
@@ -60,12 +45,9 @@ const EDGE = {
  * one keyframe set on the layer (style.css), and with reduced motion a fade
  * that still ends, so the exit always completes.
  *
- * The layer also tells its page when the entrance is over (`usePageSettled`, lib/pageSettled).
- * A page with slow reads starts them at once and holds back what they add to its layout until
- * then, so it does not grow while it moves. The end of the entrance settles it; so does a
- * timer past the entrance's length, and a window that is hidden when the page opens is settled
- * at once, as neither would report an end there. A page that closes is unsettled again. The
- * layer carries it as `data-page-settled`, which hides the compact panels beneath (style.css).
+ * Once the entrance has ended the layer carries `data-page-settled`, which hides the compact
+ * panels beneath (style.css); a window hidden when the page opens has it at once, as no
+ * animation would end there. A page that closes loses it again.
  */
 export function PageLayer({ edge, open, onExited, children }: Props) {
   const layer = useRef<HTMLDivElement>(null)
@@ -77,12 +59,6 @@ export function PageLayer({ edge, open, onExited, children }: Props) {
     if (!open) setSettled(false)
   }
   const motion = EDGE[edge]
-
-  useEffect(() => {
-    if (!open || settled) return
-    const timer = setTimeout(() => setSettled(true), settleAfter())
-    return () => clearTimeout(timer)
-  }, [open, settled])
 
   useLayoutEffect(() => {
     if (open) {
@@ -122,9 +98,7 @@ export function PageLayer({ edge, open, onExited, children }: Props) {
         onAnimationEnd={onAnimationEnd}
         className={`flex h-full flex-col outline-none ${open ? motion.in : motion.out}`}
       >
-        <PageSettledContext value={settled}>
-          <Suspense fallback={<div aria-hidden className={CARD} />}>{children}</Suspense>
-        </PageSettledContext>
+        <Suspense fallback={<div aria-hidden className={CARD} />}>{children}</Suspense>
       </div>
     </div>
   )

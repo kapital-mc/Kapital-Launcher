@@ -17,9 +17,7 @@ import { PendingSection } from './PendingSection'
 // the panel asks for it, so its store and its list stay out of the launcher's bundle.
 const ModsSection = lazy(() => import('./ModsSection').then((m) => ({ default: m.ModsSection })))
 
-// Storage measures the instance folder when it mounts, so it loads with the mods section. Both
-// start their reads as they mount, while the page is still sliding in, and draw their rows only
-// once it has settled (lib/pageSettled), so a large instance does not grow the page mid-slide.
+// Storage measures the instance folder when it mounts, so it loads with the mods section.
 const StorageSection = lazy(() =>
   import('./StorageSection').then((m) => ({ default: m.StorageSection })),
 )

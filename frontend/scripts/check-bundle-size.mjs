@@ -132,7 +132,9 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // rule of the store, which is in the first paint. Measured 98.1 KB.
 // 98.3 the same day: main's chapter settings tell their page when it has slid in
 // (lib/pageSettled, in PageLayer), added on top of the compact launcher. Measured 98.22 KB.
-const BUDGET_KB = 98.3
+// 98.2 on 2026-10-25: that signal is gone again; the layer keeps only the mark the compact
+// panels read. Measured 98.1 KB.
+const BUDGET_KB = 98.2
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

@@ -522,13 +522,6 @@ describe('ChapterSettingsPanel', () => {
         <ChapterSettingsPanel chapter={frangfurd} onClose={() => undefined} />
       </PageLayer>
     )
-    /** The element that slides: jsdom has no AnimationEvent, so React hears the prefixed name. */
-    const endSlide = () =>
-      fireEvent(
-        screen.getByRole('region', { name: 'Frangfurd settings' }).parentElement!,
-        new Event('webkitAnimationEnd', { bubbles: true }),
-      )
-
     beforeEach(() => {
       vi.mocked(App.GetChapterMods).mockResolvedValue({
         chapterId: 'frangfurd',
@@ -548,27 +541,25 @@ describe('ChapterSettingsPanel', () => {
       } as never)
     })
 
-    it('starts the mods and storage reads with the slide, and draws their rows when it has ended', async () => {
+    it('reads mods and storage as the slide starts, and draws their rows as the answers come', async () => {
       render(page)
-      // The headings and their empty cards are there from the first frame of the slide.
-      expect(await screen.findByRole('heading', { level: 2, name: 'Mods' })).toBeInTheDocument()
-      expect(screen.getByRole('heading', { level: 2, name: 'Storage' })).toBeInTheDocument()
-      // Both reads were made while it moves, and have been answered.
-      await waitFor(() => {
-        expect(App.GetChapterMods).toHaveBeenCalledWith('frangfurd')
-        expect(App.GetChapterStorage).toHaveBeenCalledWith('frangfurd')
-      })
-      await act(async () => undefined)
-      expect(screen.queryByRole('switch', { name: 'Distant Horizons' })).toBeNull()
-      expect(screen.queryByRole('img', { name: /Mods/ })).toBeNull()
-      expect(screen.queryByText('1 of 1 on')).toBeNull()
-      endSlide()
       expect(await screen.findByRole('switch', { name: 'Distant Horizons' })).toBeChecked()
       expect(screen.getByText('1 of 1 on')).toBeInTheDocument()
+      expect(await screen.findByRole('img', { name: /Mods/ })).toBeInTheDocument()
+    })
+
+    it('draws them again at once on a later open, from what was read before', async () => {
+      const { unmount } = render(page)
+      expect(await screen.findByRole('img', { name: /Mods/ })).toBeInTheDocument()
+      unmount()
+      vi.mocked(App.GetChapterMods).mockReturnValue(new Promise(() => undefined))
+      vi.mocked(App.GetChapterStorage).mockReturnValue(new Promise(() => undefined))
+      render(page)
+      expect(await screen.findByRole('switch', { name: 'Distant Horizons' })).toBeChecked()
       expect(screen.getByRole('img', { name: /Mods/ })).toBeInTheDocument()
     })
 
-    it('still reads and draws them in a page that has no slide to wait for', async () => {
+    it('reads and draws them outside a page layer too', async () => {
       render(<ChapterSettingsPanel chapter={frangfurd} onClose={() => undefined} />)
       expect(await screen.findByRole('switch', { name: 'Distant Horizons' })).toBeChecked()
       expect(await screen.findByRole('img', { name: /Mods/ })).toBeInTheDocument()

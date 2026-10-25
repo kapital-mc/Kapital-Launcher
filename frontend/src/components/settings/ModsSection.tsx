@@ -4,7 +4,6 @@ import { errMsg } from '../../lib/ipc'
 import { ChevronRight, Puzzle } from '../../lib/icons'
 import { filterMods, modLabel } from '../../lib/mods'
 import { formatBytes } from '../../lib/bytes'
-import { usePageSettled } from '../../lib/pageSettled'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
 import { useModStore } from '../../stores/useModStore'
 import { Grow } from '../ui/Grow'
@@ -31,12 +30,10 @@ interface Props {
  * refuses the write if it was right (issue 126). The view is read again when the game ends
  * and when the window regains focus.
  *
- * The read starts when the section mounts, with the page still sliding in, but the list is drawn
- * only once the page has settled (lib/pageSettled): until then the section is its heading over
- * an empty card of the pending height (PendingSection), which the rows then replace.
+ * Until the first read answers, the section is its heading over an empty card (PendingSection),
+ * which the rows then replace. A later open draws the view already read and reads it again.
  */
 export function ModsSection({ chapter }: Props) {
-  const settled = usePageSettled()
   const view = useModStore((s) => s.byChapter[chapter.id])
   const unavailable = useModStore((s) => s.unavailable)
   const readError = useModStore((s) => s.readError[chapter.id])
@@ -66,15 +63,12 @@ export function ModsSection({ chapter }: Props) {
   }, [chapter.id, load])
 
   if (unavailable) return null
-  if (!view && readError && settled) {
-    return (
+  if (!view) {
+    return readError ? (
       <SettingsSection title="Mods" icon={Puzzle}>
         <ErrorLine>{readError}</ErrorLine>
       </SettingsSection>
-    )
-  }
-  if (!view || !settled) {
-    return (
+    ) : (
       <SettingsSection title="Mods" icon={Puzzle}>
         <SettingsCard>
           <PendingRow />
