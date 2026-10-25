@@ -64,7 +64,8 @@ const EDGE = {
  * A page with slow reads starts them at once and holds back what they add to its layout until
  * then, so it does not grow while it moves. The end of the entrance settles it; so does a
  * timer past the entrance's length, and a window that is hidden when the page opens is settled
- * at once, as neither would report an end there. A page that closes is unsettled again.
+ * at once, as neither would report an end there. A page that closes is unsettled again. The
+ * layer carries it as `data-page-settled`, which hides the compact panels beneath (style.css).
  */
 export function PageLayer({ edge, open, onExited, children }: Props) {
   const layer = useRef<HTMLDivElement>(null)
@@ -112,6 +113,7 @@ export function PageLayer({ edge, open, onExited, children }: Props) {
     <div
       inert={!open}
       aria-hidden={!open || undefined}
+      data-page-settled={settled || undefined}
       className={`absolute inset-0 ${motion.frame} ${open ? '' : 'pointer-events-none'}`}
     >
       <div
