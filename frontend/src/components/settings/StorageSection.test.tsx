@@ -4,7 +4,6 @@ import * as App from '../../../wailsjs/go/main/App'
 import { useGameStore } from '../../stores/useGameStore'
 import { DEFAULT_SETTINGS, useSettingsStore } from '../../stores/useSettingsStore'
 import { useStorageStore } from '../../stores/useStorageStore'
-import { PageSettledContext } from '../../lib/pageSettled'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
 import type { ChapterStorage, StorageItem } from '../../types'
 import { StorageSection } from './StorageSection'
@@ -256,64 +255,30 @@ describe('StorageSection', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  describe('while the page slides in', () => {
-    const at = (settled: boolean) => (
-      <PageSettledContext value={settled}>
-        <StorageSection chapter={frangfurd} />
-      </PageSettledContext>
-    )
+  describe('before the first read answers', () => {
     const card = () => screen.getByRole('region', { name: 'Storage' }).querySelector('.rounded-lg')
     const pending = () => document.querySelector('[class~="h-(--layout-pending)"]')
 
-    it('measures at once, holds the bar and rows back until the page has settled, then draws them', async () => {
-      const { rerender } = render(at(false))
-      expect(App.GetChapterStorage).toHaveBeenCalledWith('frangfurd')
-      await waitFor(() => expect(useStorageStore.getState().byChapter.frangfurd).toBeDefined())
+    it("holds the section's place with an empty card, which the rows then come into", async () => {
+      let answer: (v: Awaited<ReturnType<typeof App.GetChapterStorage>>) => void = () => undefined
+      vi.mocked(App.GetChapterStorage).mockReturnValue(new Promise((r) => (answer = r)))
+      render(<StorageSection chapter={frangfurd} />)
       expect(screen.getByRole('heading', { level: 2, name: 'Storage' })).toBeInTheDocument()
-      expect(screen.queryByRole('img')).toBeNull()
-      expect(screen.queryByText('Screenshots')).toBeNull()
-      expect(screen.queryByText('14 GB')).toBeNull()
       expect(pending()).toHaveAttribute('aria-hidden', 'true')
       const before = card()
-      rerender(at(true))
-      expect(screen.getByRole('img')).toBeInTheDocument()
+      await act(async () => answer(view([shots, mods]) as never))
       expect(screen.getByText('Screenshots')).toBeInTheDocument()
-      expect(screen.getByText('14 GB')).toBeInTheDocument()
       expect(pending()).toBeNull()
+      // The card the rows come into is the one that held their place, so it grows into them.
       expect(card()).toBe(before)
     })
 
-    it('draws the rows as the answer comes when the page has settled already', async () => {
-      render(at(true))
-      expect(await screen.findByText('Screenshots')).toBeInTheDocument()
-      expect(pending()).toBeNull()
-    })
-
-    it('holds back an answer kept from an earlier visit as well', () => {
+    it('draws a view kept from an earlier visit at once, and reads it again', () => {
       useStorageStore.setState({ byChapter: { frangfurd: view([shots, mods]) } })
-      const { rerender } = render(at(false))
-      expect(screen.queryByText('Screenshots')).toBeNull()
-      rerender(at(true))
+      render(<StorageSection chapter={frangfurd} />)
       expect(screen.getByText('Screenshots')).toBeInTheDocument()
-    })
-
-    it('reads again when the window regains focus while the page is still sliding', async () => {
-      render(at(false))
-      await waitFor(() => expect(App.GetChapterStorage).toHaveBeenCalledTimes(1))
-      act(() => {
-        window.dispatchEvent(new Event('focus'))
-      })
-      await waitFor(() => expect(App.GetChapterStorage).toHaveBeenCalledTimes(2))
-    })
-
-    it('shows a read error only once the page has settled', async () => {
-      vi.mocked(App.GetChapterStorage).mockRejectedValue('Frangfurd is not installed')
-      const { rerender } = render(at(false))
-      await waitFor(() => expect(useStorageStore.getState().readError.frangfurd).toBeDefined())
-      expect(screen.queryByRole('alert')).toBeNull()
-      expect(pending()).not.toBeNull()
-      rerender(at(true))
-      expect(screen.getByRole('alert')).toHaveTextContent('Frangfurd is not installed')
+      expect(pending()).toBeNull()
+      expect(App.GetChapterStorage).toHaveBeenCalledWith('frangfurd')
     })
   })
 })

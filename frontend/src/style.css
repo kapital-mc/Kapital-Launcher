@@ -370,10 +370,12 @@
 /* A page sliding over the chapter card (components/main/PageLayer): a chapter's
    own pages come in from the right inside the card's frame, the app's settings
    come down from the top over the card area, and each leaves the way it came.
-   The whole page is the travel, so the distance is its own size. They glide
-   like the card does, with the reveal's small blur and a fade. With reduced
-   motion they only fade, over the same duration, so the leaving page's
-   animationend still fires and it is still removed. */
+   The whole page is the travel, so the distance is its own size. Both carry the
+   reveal's small blur and a fade. A page comes in on the standard curve, so it
+   moves from the first frame after the click (the glide's slow start held it
+   still and nearly clear for its first frames), and leaves on the card's glide.
+   With reduced motion they only fade, over the same duration, so the leaving
+   page's animationend still fires and it is still removed. */
 @keyframes page-in-right {
   from {
     opacity: 0;
@@ -447,19 +449,19 @@
   }
 }
 @utility page-in-right {
-  animation: page-in-right var(--duration-page) var(--ease-glide) both;
+  animation: page-in-right var(--duration-page) var(--ease-standard) both;
 }
 @utility page-out-right {
   animation: page-out-right var(--duration-page) var(--ease-glide) both;
 }
 @utility page-in-top {
-  animation: page-in-top var(--duration-page) var(--ease-glide) both;
+  animation: page-in-top var(--duration-page) var(--ease-standard) both;
 }
 @utility page-out-top {
   animation: page-out-top var(--duration-page) var(--ease-glide) both;
 }
 @utility page-in-bottom {
-  animation: page-in-bottom var(--duration-page) var(--ease-glide) both;
+  animation: page-in-bottom var(--duration-page) var(--ease-standard) both;
 }
 @utility page-out-bottom {
   animation: page-out-bottom var(--duration-page) var(--ease-glide) both;

@@ -1,8 +1,7 @@
 import { lazy } from 'react'
 import type { ComponentProps } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { usePageSettled } from '../../lib/pageSettled'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { PageLayer } from './PageLayer'
 import { STYLE_CSS as css } from '../../test-css'
 
@@ -25,18 +24,6 @@ function layer(over: Partial<ComponentProps<typeof PageLayer>> = {}) {
 const sliding = () => screen.getByRole('region', { name: 'Things', hidden: true }).parentElement!
 /** The layer's frame, which clips it and is inert once the page is leaving. */
 const frame = () => sliding().parentElement!
-
-/** What a page's slow part sees: whether the slide-in is over. */
-function Probe() {
-  return <p>{usePageSettled() ? 'settled' : 'sliding'}</p>
-}
-const probed = (over: Partial<ComponentProps<typeof PageLayer>> = {}) => (
-  <PageLayer edge="right" open onExited={() => undefined} {...over}>
-    <section aria-label="Things">
-      <Probe />
-    </section>
-  </PageLayer>
-)
 
 describe('PageLayer', () => {
   afterEach(cleanup)
@@ -122,103 +109,29 @@ describe('PageLayer', () => {
   })
 
   describe('settling', () => {
-    afterEach(() => {
-      vi.useRealTimers()
-      document.documentElement.style.removeProperty('--duration-page')
-      document.documentElement.style.removeProperty('--duration-slow')
-    })
-
-    it('tells its page the slide is under way until the entrance ends', () => {
-      render(probed())
-      expect(screen.getByText('sliding')).toBeInTheDocument()
-      endAnimation(sliding())
-      expect(screen.getByText('settled')).toBeInTheDocument()
-    })
-
-    it('marks the layer settled for the compact panels beneath, and unmarks it as the page leaves', () => {
-      const { rerender } = render(probed())
+    it('marks the layer settled once the entrance ends, for the compact panels beneath', () => {
+      const { rerender } = render(layer())
       expect(frame()).not.toHaveAttribute('data-page-settled')
       endAnimation(sliding())
       expect(frame()).toHaveAttribute('data-page-settled')
-      rerender(probed({ open: false }))
+      rerender(layer({ open: false }))
       expect(frame()).not.toHaveAttribute('data-page-settled')
     })
 
     it("is not settled by the end of the page's own animations", () => {
-      render(probed())
-      endAnimation(screen.getByText('sliding'))
-      expect(screen.getByText('sliding')).toBeInTheDocument()
-    })
-
-    it('settles without an animation end once the entrance and the slower motion have had their time', () => {
-      vi.useFakeTimers()
-      const root = document.documentElement.style
-      root.setProperty('--duration-page', '320ms')
-      root.setProperty('--duration-slow', '420ms')
-      render(probed())
-      act(() => void vi.advanceTimersByTime(739))
-      expect(screen.getByText('sliding')).toBeInTheDocument()
-      act(() => void vi.advanceTimersByTime(1))
-      expect(screen.getByText('settled')).toBeInTheDocument()
-    })
-
-    it('settles on a timer when no clock can be read, as in a webview that reports no end', () => {
-      vi.useFakeTimers()
-      render(probed())
-      act(() => void vi.advanceTimersByTime(999))
-      expect(screen.getByText('sliding')).toBeInTheDocument()
-      act(() => void vi.advanceTimersByTime(1))
-      expect(screen.getByText('settled')).toBeInTheDocument()
-    })
-
-    it('settles with reduced motion too: the fade that replaces the slide ends, or the timer settles it', () => {
-      vi.stubGlobal(
-        'matchMedia',
-        vi.fn().mockImplementation(() => ({
-          matches: true,
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-        })),
-      )
-      try {
-        vi.useFakeTimers()
-        const { unmount } = render(probed())
-        expect(screen.getByText('sliding')).toBeInTheDocument()
-        endAnimation(sliding())
-        expect(screen.getByText('settled')).toBeInTheDocument()
-        unmount()
-        render(probed())
-        act(() => void vi.advanceTimersByTime(1000))
-        expect(screen.getByText('settled')).toBeInTheDocument()
-      } finally {
-        vi.unstubAllGlobals()
-      }
+      render(layer())
+      endAnimation(screen.getByText('Body'))
+      expect(frame()).not.toHaveAttribute('data-page-settled')
     })
 
     it('is settled from the start when the window is hidden, where no animation would end', () => {
       const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
       try {
-        render(probed())
-        expect(screen.getByText('settled')).toBeInTheDocument()
+        render(layer())
+        expect(frame()).toHaveAttribute('data-page-settled')
       } finally {
         visibility.mockRestore()
       }
-    })
-
-    it('is unsettled again when the page leaves, and settles again if it comes back', () => {
-      const { rerender } = render(probed())
-      endAnimation(sliding())
-      rerender(probed({ open: false }))
-      expect(screen.getByText('sliding')).toBeInTheDocument()
-      rerender(probed())
-      expect(screen.getByText('sliding')).toBeInTheDocument()
-      endAnimation(sliding())
-      expect(screen.getByText('settled')).toBeInTheDocument()
-    })
-
-    it('reads as settled outside a layer, for a page that never slides', () => {
-      render(<Probe />)
-      expect(screen.getByText('settled')).toBeInTheDocument()
     })
   })
 
@@ -267,10 +180,18 @@ describe('PageLayer', () => {
   })
 
   it('is built from tokens and, with reduced motion, only fades, over the same duration', () => {
-    for (const name of ['in-right', 'out-right', 'in-top', 'out-top', 'in-bottom', 'out-bottom']) {
+    // A page comes in on the standard curve, moving from its first frame, and leaves on the glide.
+    for (const [name, ease] of [
+      ['in-right', 'standard'],
+      ['out-right', 'glide'],
+      ['in-top', 'standard'],
+      ['out-top', 'glide'],
+      ['in-bottom', 'standard'],
+      ['out-bottom', 'glide'],
+    ]) {
       expect(css).toMatch(
         new RegExp(
-          `@utility page-${name} \\{\\s*animation: page-${name} var\\(--duration-page\\) var\\(--ease-glide\\) both;`,
+          `@utility page-${name} \\{\\s*animation: page-${name} var\\(--duration-page\\) var\\(--ease-${ease}\\) both;`,
         ),
       )
     }
