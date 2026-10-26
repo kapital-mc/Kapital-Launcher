@@ -971,10 +971,13 @@
 .morph-backdrop {
   inset: 0;
 }
-/* The washes over the picture, which fill the frame that carries them. */
+/* The washes over the picture, which fill the frame that carries them and reach a
+   little past it. The clip's edge is anti-aliased at fractions of a pixel and the
+   frame's snaps to whole ones, so a wash cut flush leaves the picture's last row or
+   column bare on some frames, a light line. Past the frame, the clip is the one edge. */
 .morph-wash > * {
   position: absolute;
-  inset: 0;
+  inset: calc(var(--spacing) * -1);
   will-change: opacity;
 }
 .morph-clip {
