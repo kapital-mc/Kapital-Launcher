@@ -189,7 +189,8 @@ function planPictures(m: MorphMeasure, c: Curves): Step[] {
     // The washes over the picture fill its frame all the way, the hero's turning into the
     // panel's. They move as layout, as the clip does: a transform runs on the compositor
     // (WebKit's Core Animation), the clip-path does not, and the two drift apart by a few
-    // pixels, leaving the picture bare along an edge.
+    // pixels. They also reach a little past the frame (style.css, `.morph-wash`), so the
+    // clip alone cuts the picture's edge.
     {
       key: 'wash',
       box: m.panel,
