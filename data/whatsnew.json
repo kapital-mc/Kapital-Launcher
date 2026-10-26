@@ -5,7 +5,7 @@
       "highlights": [
         {
           "title": "Camera Tools",
-          "text": "Flashback for recording and replaying Frangfurd. Turn it on under Mods in the chapter's settings; it downloads only for players who do."
+          "text": "Flashback for recording and replaying Frangfurd. Turn it on under Mods in the chapter's settings."
         },
         {
           "title": "Compact launcher",
@@ -13,11 +13,11 @@
         },
         {
           "title": "Storage",
-          "text": "Terrain, maps, screenshots and worlds by size under Storage in the chapter's settings, each with its folder and a delete that asks first."
+          "text": "Terrain, maps, screenshots and worlds by size under Storage in the chapter's settings, each with its folder."
         },
         {
           "title": "Updates in the launcher",
-          "text": "From the next version on, an update downloads in the background and installs when you restart the launcher."
+          "text": "Updates download in the background and install when you restart the launcher."
         },
         {
           "title": "UI improvements",
