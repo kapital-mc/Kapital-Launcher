@@ -20,22 +20,7 @@
           "text": "Updates download in the background and install when you restart the launcher."
         },
         {
-          "title": "UI improvements",
-          "items": [
-            "Wiki world covers as chapter art, and summer New Cliffhanger for Lichdenstein",
-            "Each chapter's slideshow keeps to its own world",
-            "Chapter settings slide in on the first frame",
-            "The window goes down to 960 × 360",
-            "The resize cursor at the window's edges on Windows",
-            "Addresses in the mono field shown as typed"
-          ]
-        },
-        {
-          "title": "Bug fixes",
-          "items": [
-            "Stop ends a download, and a game started from an open Prism",
-            "The wiki panel shows the era's page while the wiki loads"
-          ]
+          "title": "UI and bug fixes"
         }
       ]
     },

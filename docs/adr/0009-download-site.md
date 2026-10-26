@@ -230,8 +230,10 @@ under a dropdown.
 
 - **The highlights are written by hand and built in.** `data/whatsnew.json`
   holds each release's highlights, newest first in the popup: a title with a
-  line, or with the small changes it groups, or both. It is written before the
-  release is cut, since the build embeds it; a release without an entry shows
+  line, or with the small changes it groups, or both, or alone ("UI and bug
+  fixes", 2026-10-26: the author asked not to list small fixes). It is written
+  before the release is cut, since the build embeds it; a release without an
+  entry shows
   nothing. `ParseWhatsNew` refuses the file whole at startup on a fault, so a
   mistake fails CI rather than a player's start.
 - **Once per update.** Go records the version seen (`seenVersion`, written by
