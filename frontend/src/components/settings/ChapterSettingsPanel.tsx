@@ -191,11 +191,10 @@ export function ChapterSettingsPanel({ chapter, onClose }: Props) {
             <span>Open folder</span>
           </Button>
           {/* Prism's --show opens the instance's window (issue 190). Mods changed there are put
-              back by the next Play's sync, which the tooltip says. */}
+              back by the next Play's sync. */}
           <Button
             onClick={() => void runHeader(showInPrism)}
             disabled={installed !== true || playing}
-            title="Opens this instance's window in Prism. Mods changed there are put back on the next Play."
           >
             <Icon icon={Triangle} size="sm" />
             <span>Open in Prism</span>

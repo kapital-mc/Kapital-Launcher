@@ -196,7 +196,7 @@ describe('PageLayer', () => {
       )
     }
     const enter = /@keyframes page-in-right \{\s*from \{([^}]*)\}/.exec(css)![1]
-    expect(enter).toContain('blur(var(--effect-reveal-blur))')
+    expect(enter).not.toContain('filter')
     expect(css).toMatch(
       /\.page-in-right,\s*\.page-in-top,\s*\.page-in-bottom \{\s*animation: card-fade-in var\(--duration-page\) ease-in-out both;/,
     )
