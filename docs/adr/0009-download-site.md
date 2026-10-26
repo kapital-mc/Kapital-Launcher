@@ -233,9 +233,8 @@ under a dropdown.
   line, or with the small changes it groups, or both, or alone ("UI and bug
   fixes", 2026-10-26: the author asked not to list small fixes). It is written
   before the release is cut, since the build embeds it; a release without an
-  entry shows
-  nothing. `ParseWhatsNew` refuses the file whole at startup on a fault, so a
-  mistake fails CI rather than a player's start.
+  entry shows nothing. `ParseWhatsNew` refuses the file whole at startup on a
+  fault, so a mistake fails CI rather than a player's start.
 - **Once per update.** Go records the version seen (`seenVersion`, written by
   Go alone) when the popup is closed, and shows every release since it up to
   this build. A fresh install has nothing new and records its version
