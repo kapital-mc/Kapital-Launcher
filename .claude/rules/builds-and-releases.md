@@ -33,8 +33,9 @@ image, both exes and the zips with `actions/attest`, writes `checksums.txt` and 
 Release at that commit, a prerelease when the tag has a suffix. No
 code-signing certificate (ADR-6). The body is `.github/release-body.md` (the
 Minecraft disclaimer, the SmartScreen and Gatekeeper steps, how to verify)
-followed by `release-notes.py`'s notes, or GitHub's generated ones when it has
-no baseline. The Wails CLI is installed at `go.mod`'s version and the build
+followed by `release-notes.py`'s notes, measured from the newest published
+release with prereleases included (`BASE_TAG`), or GitHub's generated ones
+when it has no baseline. The Wails CLI is installed at `go.mod`'s version and the build
 fails if it changed `go.mod`. The macOS build sets `CGO_CFLAGS` and
 `CGO_LDFLAGS` to `-mmacosx-version-min=12.0` (Wails hardcodes 10.13) to match
 `LSMinimumSystemVersion` in `build/darwin/*.plist`: Go 1.26 and Prism 11 both

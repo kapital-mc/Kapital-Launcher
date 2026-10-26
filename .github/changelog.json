@@ -22,13 +22,17 @@
     "lefthook.yml",
     "package.json",
     "pnpm-lock.yaml",
-    "scripts/"
+    "scripts/",
+    "site/"
   ],
 
   "$nonAppPaths": [
     "Prefixes, matched against each changed file. A pull request touching only",
     "these did not change the binary being downloaded, so it is left out of the",
     "notes and counted in the footer instead.",
+    "",
+    "site/ is the download page, which Cloudflare Pages publishes on its own",
+    "(ADR-9); it imports the app's tokens and pictures but none of it ships.",
     "",
     "Not listed, on purpose: build/ holds the app icon and platform manifests,",
     "which ship; design/ and data/ are inputs the app is generated from; and the",

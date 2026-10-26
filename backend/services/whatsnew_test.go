@@ -50,7 +50,7 @@ func TestParseWhatsNewRefusesTheFileWhole(t *testing.T) {
 		"not a tag":     `{"releases":[` + releaseOf("1.0.0-dev") + `]}`,
 		"twice":         `{"releases":[` + releaseOf("v1.0.0") + `,` + releaseOf("v1.0.0") + `]}`,
 		"no highlights": `{"releases":[{"version":"v1.0.0","highlights":[]}]}`,
-		"no text":       `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":" "}]}]}`,
+		"no title":      `{"releases":[{"version":"v1.0.0","highlights":[{"title":" ","text":"B"}]}]}`,
 		"too long":      `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":"` + long + `"}]}]}`,
 		"em dash":       `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":"This — that"}]}]}`,
 		"highlight key": `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":"B","icon":"x"}]}]}`,
@@ -69,6 +69,15 @@ func TestParseWhatsNewTakesAGroupOfItems(t *testing.T) {
 	data := `{"releases":[{"version":"v1.0.0","highlights":[{"title":"Bug fixes","items":["A fix","Another fix"]}]}]}`
 	got, err := ParseWhatsNew([]byte(data))
 	if err != nil || len(got[0].Highlights[0].Items) != 2 {
+		t.Fatalf("got %+v, %v", got, err)
+	}
+}
+
+// A title alone names small changes without listing them.
+func TestParseWhatsNewTakesATitleAlone(t *testing.T) {
+	data := `{"releases":[{"version":"v1.0.0","highlights":[{"title":"UI and bug fixes"}]}]}`
+	got, err := ParseWhatsNew([]byte(data))
+	if err != nil || got[0].Highlights[0].Title != "UI and bug fixes" {
 		t.Fatalf("got %+v, %v", got, err)
 	}
 }

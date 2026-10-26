@@ -1,6 +1,30 @@
 {
   "releases": [
     {
+      "version": "v1.0.0-beta.6",
+      "highlights": [
+        {
+          "title": "Camera Tools",
+          "text": "Flashback for recording and replaying Frangfurd. Turn it on under Mods in the chapter's settings."
+        },
+        {
+          "title": "Compact launcher",
+          "text": "The three chapters side by side as panels. Open it from the sidebar button's right-click menu, or make the window short."
+        },
+        {
+          "title": "Storage",
+          "text": "Terrain, maps, screenshots and worlds by size under Storage in the chapter's settings, each with its folder."
+        },
+        {
+          "title": "Updates in the launcher",
+          "text": "Updates download in the background and install when you restart the launcher."
+        },
+        {
+          "title": "UI and bug fixes"
+        }
+      ]
+    },
+    {
       "version": "v1.0.0-beta.5",
       "highlights": [
         {
