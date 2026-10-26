@@ -389,7 +389,7 @@ jobs:
             *-*) args+=(--prerelease) ;;
           esac
 
-          BASE_TAG="$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName // ""')"
+          BASE_TAG="$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName // ""' || true)"
           export BASE_TAG
 
           if python3 .github/scripts/release-notes.py > changelog.md; then
