@@ -97,7 +97,7 @@ describe('Reveal', () => {
     )
     const rise = /@keyframes reveal-in \{\s*from \{([^}]*)\}/.exec(css)![1]
     expect(rise).toContain('translateY(var(--layout-reveal-rise))')
-    expect(rise).toContain('blur(var(--effect-reveal-blur))')
+    expect(rise).not.toContain('filter')
     expect(css).toMatch(
       /@media \(prefers-reduced-motion: reduce\) \{\s*\.reveal \{\s*animation: card-fade-in var\(--duration-fast\) ease-in-out both;\s*\}\s*\}/,
     )

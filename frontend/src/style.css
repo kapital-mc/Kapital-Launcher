@@ -214,9 +214,11 @@
   }
 }
 
-/* A page's content once its data has loaded (ui/Reveal): it rises a few px out
-   of a slight blur and fades in, once, subtler and snappier than the card's
-   slide. The distance, the blur and the duration are tokens. While the data is
+/* A page's content once its data has loaded (ui/Reveal): it rises a few px and
+   fades in, once, subtler and snappier than the card's slide. No blur: WebView2
+   cannot run an animated blur on the compositor and repaints every frame of it,
+   which dropped frames on a 4K screen. The distance and the duration are
+   tokens. While the data is
    on its way the page shows nothing for a short grace (the grace token), then
    a faint line, so a slow read is not a blank page. With reduced motion the
    content only fades, quickly. */
@@ -224,12 +226,10 @@
   from {
     opacity: 0;
     transform: translateY(var(--layout-reveal-rise));
-    filter: blur(var(--effect-reveal-blur));
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 /* A panel under the control that opens it (the header's update panel): it drops a
@@ -270,15 +270,14 @@
 @utility reveal {
   animation: reveal-in var(--duration-reveal) var(--ease-standard) both;
 }
-/* The way back: a popup with no column to lower into sinks the same few px into
-   the same blur as it fades (ui/Dialog), and is unmounted by its animationend.
+/* The way back: a popup with no column to lower into sinks the same few px as it
+   fades (ui/Dialog), and is unmounted by its animationend.
    Keyframes of its own, not reveal-in reversed: a browser keeps an animation
    whose name did not change and only turns it round, already finished. */
 @keyframes reveal-out {
   to {
     opacity: 0;
     transform: translateY(var(--layout-reveal-rise));
-    filter: blur(var(--effect-reveal-blur));
   }
 }
 @utility reveal-out {
@@ -370,8 +369,8 @@
 /* A page sliding over the chapter card (components/main/PageLayer): a chapter's
    own pages come in from the right inside the card's frame, the app's settings
    come down from the top over the card area, and each leaves the way it came.
-   The whole page is the travel, so the distance is its own size. Both carry the
-   reveal's small blur and a fade. A page comes in on the standard curve, so it
+   The whole page is the travel, so the distance is its own size. Both fade, with
+   no blur (see the reveal). A page comes in on the standard curve, so it
    moves from the first frame after the click (the glide's slow start held it
    still and nearly clear for its first frames), and leaves on the card's glide.
    With reduced motion they only fade, over the same duration, so the leaving
@@ -380,72 +379,60 @@
   from {
     opacity: 0;
     transform: translateX(100%);
-    filter: blur(var(--effect-reveal-blur));
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 @keyframes page-out-right {
   from {
     opacity: 1;
     transform: none;
-    filter: none;
   }
   to {
     opacity: 0;
     transform: translateX(100%);
-    filter: blur(var(--effect-reveal-blur));
   }
 }
 @keyframes page-in-top {
   from {
     opacity: 0;
     transform: translateY(-100%);
-    filter: blur(var(--effect-reveal-blur));
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 @keyframes page-out-top {
   from {
     opacity: 1;
     transform: none;
-    filter: none;
   }
   to {
     opacity: 0;
     transform: translateY(-100%);
-    filter: blur(var(--effect-reveal-blur));
   }
 }
 @keyframes page-in-bottom {
   from {
     opacity: 0;
     transform: translateY(100%);
-    filter: blur(var(--effect-reveal-blur));
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 @keyframes page-out-bottom {
   from {
     opacity: 1;
     transform: none;
-    filter: none;
   }
   to {
     opacity: 0;
     transform: translateY(100%);
-    filter: blur(var(--effect-reveal-blur));
   }
 }
 @utility page-in-right {

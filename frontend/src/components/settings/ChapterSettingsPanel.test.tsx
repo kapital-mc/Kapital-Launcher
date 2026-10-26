@@ -353,7 +353,7 @@ describe('ChapterSettingsPanel', () => {
     render(<ChapterSettingsPanel chapter={frangfurd} onClose={() => undefined} />)
     await screen.findByLabelText('Memory')
     const button = screen.getByRole('button', { name: 'Open in Prism' })
-    expect(button).toHaveAttribute('title', expect.stringContaining('put back on the next Play'))
+    expect(button).not.toHaveAttribute('title')
     fireEvent.click(button)
     await waitFor(() => expect(App.ShowInstanceInPrism).toHaveBeenCalledWith('frangfurd'))
 
