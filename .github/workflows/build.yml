@@ -371,10 +371,13 @@ jobs:
             release/*.exe
             release/*.zip
 
-      # The generator names what changed in the binary since the latest
-      # published release. It exits non-zero when there is none to measure from,
-      # which the first release is, and GitHub's own notes (laid out by
-      # .github/release.yml) take over. Either way the fixed header leads.
+      # The generator names what changed in the binary since the newest
+      # published release, prereleases included: its own default, GitHub's
+      # "latest release", skips prereleases, and every release so far is a beta,
+      # so without BASE_TAG it found none and GitHub's notes took over. It exits
+      # non-zero when there is none to measure from, which the first release
+      # is, and GitHub's own notes (laid out by .github/release.yml) take over.
+      # Either way the fixed header leads.
       - name: Publish the release
         env:
           REPO: ${{ github.repository }}
@@ -385,6 +388,9 @@ jobs:
           case "$TAG" in
             *-*) args+=(--prerelease) ;;
           esac
+
+          BASE_TAG="$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName // ""')"
+          export BASE_TAG
 
           if python3 .github/scripts/release-notes.py > changelog.md; then
             cat .github/release-body.md changelog.md > notes.md

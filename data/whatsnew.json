@@ -1,6 +1,45 @@
 {
   "releases": [
     {
+      "version": "v1.0.0-beta.6",
+      "highlights": [
+        {
+          "title": "Camera Tools",
+          "text": "Flashback for recording and replaying Frangfurd. Turn it on under Mods in the chapter's settings; it downloads only for players who do."
+        },
+        {
+          "title": "Compact launcher",
+          "text": "The three chapters side by side as panels. Open it from the sidebar button's right-click menu, or make the window short."
+        },
+        {
+          "title": "Storage",
+          "text": "Terrain, maps, screenshots and worlds by size under Storage in the chapter's settings, each with its folder and a delete that asks first."
+        },
+        {
+          "title": "Updates in the launcher",
+          "text": "From the next version on, an update downloads in the background and installs when you restart the launcher."
+        },
+        {
+          "title": "UI improvements",
+          "items": [
+            "Wiki world covers as chapter art, and summer New Cliffhanger for Lichdenstein",
+            "Each chapter's slideshow keeps to its own world",
+            "Chapter settings slide in on the first frame",
+            "The window goes down to 960 × 360",
+            "The resize cursor at the window's edges on Windows",
+            "Addresses in the mono field shown as typed"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Stop ends a download, and a game started from an open Prism",
+            "The wiki panel shows the era's page while the wiki loads"
+          ]
+        }
+      ]
+    },
+    {
       "version": "v1.0.0-beta.5",
       "highlights": [
         {

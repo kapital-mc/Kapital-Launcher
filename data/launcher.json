@@ -93,7 +93,7 @@
         "mods": 98,
         "memoryGb": 8,
         "jvm": "zgc",
-        "version": "1.0.6",
+        "version": "1.0.12",
         "packwiz": "https://kapital-packs.alessandrogekeler.workers.dev/frangfurd/pack.toml",
         "mrpack": null,
         "toggles": [
