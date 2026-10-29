@@ -11,7 +11,7 @@ body:
     attributes:
       value: |
         Before writing, it is worth a look at the
-        [roadmap](https://github.com/sandrogekeler/Kapital-Launcher/blob/main/agent_docs/ROADMAP.md).
+        [roadmap](https://github.com/kapital-mc/Kapital-Launcher/blob/main/agent_docs/ROADMAP.md).
         It lists what is planned and, at the bottom, what is deliberately out of scope.
 
   - type: checkboxes

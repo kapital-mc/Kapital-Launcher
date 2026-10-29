@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { parseChangelog, renderChangelog } from './changelog.js'
 
-const BASE = 'https://github.com/sandrogekeler/Kapital-Launcher'
+const BASE = 'https://github.com/kapital-mc/Kapital-Launcher'
 const feed = readFileSync(new URL('./test/fixtures/releases.atom', import.meta.url), 'utf8')
 
 const escapeXml = (s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
