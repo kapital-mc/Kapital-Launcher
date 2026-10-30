@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sandrogekeler/Kapital-Launcher/design/tokens.schema.json",
+  "$id": "https://github.com/kapital-mc/Kapital-Launcher/design/tokens.schema.json",
   "title": "Kapital Launcher design tokens",
   "description": "The one file a design value is defined in. Values are plain data, never CSS: a colour is { hex, alpha? }, an easing is four numbers, a size is a bare number with the unit on its group. frontend/scripts/gen-tokens.mjs turns this into the CSS, TypeScript and Go the app reads.",
   "type": "object",

@@ -910,7 +910,7 @@ Probe: the file answering a redirect, a 404, HTML, 1 MiB, or a line holding
 **S4.13 The launcher installs only a build its own key signed, from its own releases, and swaps it in whole or not at all.**
 Holds when: (a) the tag is the one `GetUpdate` read from the site, held to the
 release pattern with its `v`, and the files come only from
-`https://github.com/sandrogekeler/Kapital-Launcher/releases/download/<tag>/`, a
+`https://github.com/kapital-mc/Kapital-Launcher/releases/download/<tag>/`, a
 constant, with redirects only to `prismDownloadHosts`; (b) `checksums.txt.sig`
 verifies against a key in `UpdatePublicKeys`, whose private half is the
 `release` environment's `UPDATE_SIGNING_KEY` alone, and a build with no key

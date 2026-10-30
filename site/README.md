@@ -112,7 +112,7 @@ pnpm build` or `SITE_RELEASE=null pnpm build`.
 ```json
 {
   "release": "latest",
-  "github": "https://github.com/sandrogekeler/Kapital-Launcher"
+  "github": "https://github.com/kapital-mc/Kapital-Launcher"
 }
 ```
 

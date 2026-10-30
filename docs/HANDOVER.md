@@ -10,7 +10,7 @@ file is what a fresh session cannot work out on its own.
 ## Picking up
 
 ```bash
-git clone https://github.com/sandrogekeler/Kapital-Launcher
+git clone https://github.com/kapital-mc/Kapital-Launcher
 cd Kapital-Launcher/frontend && pnpm install && cd ../site && pnpm install && cd ..
 wails dev                    # Wails CLI v2.16.0, the version go.mod names
 .claude/suite-check.py       # all pass; aislop and release notes skip without ruff 0.16.7 or python3
@@ -205,7 +205,7 @@ one, the icon check on the PC is what is left), #35 (decided on 2026-10-01).
 
 ## The packs
 
-- **Source repository:** `sandrogekeler/kapital-packs`, private, cloned beside
+- **Source repository:** `kapital-mc/kapital-packs`, private, cloned beside
   this one (`KapitalLauncher/kapital-packs`). One packwiz folder per chapter;
   only `frangfurd/` exists (released as 1.0.0, tag `frangfurd-v1.0.0`,
   NeoForge 21.1.252, Minecraft 1.21.1): 96 mods, 105 files referenced on
