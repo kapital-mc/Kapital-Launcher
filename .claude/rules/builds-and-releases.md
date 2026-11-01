@@ -114,7 +114,8 @@ pins current.
 
 ## `build/`
 
-`appicon.png` is the Wails template's placeholder icon until Kapital has one;
+`appicon.png` and `windows/icon.ico` are rendered from the masters in
+`design/icon/` (`design/README.md`); never edit them by hand.
 `build/windows/` and `build/darwin/` are the template's manifest and plist,
 which `wails build` reads and regenerates if deleted. The Windows `info.json`
 reads `wails.json`'s `info` block, which is where the company name, product
