@@ -17,7 +17,7 @@ A personal desktop launcher for the **Kapitel Kapital** Minecraft packs. It is a
 
 - **Audience:** personal use, and possibly friends on the same servers. Not a public product.
 - **Name:** Kapital Launcher.
-- **Brand source:** the Kapitel Kapital site repo `sandrogekeler/kapitel-kapital-wiki`. Its `src/styles/tokens.css` holds the neutrals and fonts, and `public/` holds the fonts, wordmark and screenshots.
+- **Brand source:** the Kapitel Kapital site repo `kapital-mc/kapitel-kapital-wiki`. Its `src/styles/tokens.css` holds the neutrals and fonts, and `public/` holds the fonts, wordmark and screenshots.
 
 ### Why not a from-scratch launcher
 Microsoft/Minecraft sign-in needs an Azure app ID that Microsoft must approve for the Minecraft Services API. Solo developers in 2026 report being refused and redirected to the Xbox developer programme **[verified]**. Prism already has approved access **[verified]**. Using Prism avoids the entire auth problem.

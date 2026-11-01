@@ -6,9 +6,9 @@ blank_issues_enabled: false
 
 contact_links:
   - name: Report a security vulnerability
-    url: https://github.com/sandrogekeler/Kapital-Launcher/security/advisories/new
+    url: https://github.com/kapital-mc/Kapital-Launcher/security/advisories/new
     about: Report it privately through GitHub. Please do not open a public issue for a security problem.
 
   - name: Roadmap
-    url: https://github.com/sandrogekeler/Kapital-Launcher/blob/main/agent_docs/ROADMAP.md
+    url: https://github.com/kapital-mc/Kapital-Launcher/blob/main/agent_docs/ROADMAP.md
     about: What is built, what comes next, and what is deliberately out of scope.

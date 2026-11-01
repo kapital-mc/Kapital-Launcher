@@ -45,7 +45,7 @@ const EventPrismInstall = "prism:install"
 const (
 	prismLatestRelease = "https://api.github.com/repos/PrismLauncher/PrismLauncher/releases/latest"
 	prismDownloadBase  = "https://github.com/PrismLauncher/PrismLauncher/releases/download/"
-	prismUserAgent     = "KapitalLauncher (github.com/sandrogekeler/Kapital-Launcher)"
+	prismUserAgent     = "KapitalLauncher (github.com/kapital-mc/Kapital-Launcher)"
 	maxReleaseJSON     = 1 << 20   // the release document, assets and notes included
 	maxPrismAsset      = 250 << 20 // today's builds are 19 to 41 MB
 	maxPrismUnpacked   = 1 << 30

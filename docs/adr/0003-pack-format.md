@@ -100,7 +100,7 @@ command with `QProcess::splitCommand`, and running it against `packwiz serve`:
 
 ## Amendment, 2026-10-12: the project's own jars (#207)
 
-The mods from `sandrogekeler/frangfurd-mod` are on neither Modrinth nor
+The mods from `kapital-mc/frangfurd-mod` are on neither Modrinth nor
 CurseForge, and will not be. Under "never re-hosted" they could never be part
 of a pack, so they were copied by hand into the server and each client.
 

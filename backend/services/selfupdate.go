@@ -43,7 +43,7 @@ const EventLauncherUpdate = "launcher:update"
 
 const (
 	// aislop-ignore-next-line ai-slop/hardcoded-url -- fixed on purpose: only this repository's releases are installed
-	launcherReleaseBase = "https://github.com/sandrogekeler/Kapital-Launcher/releases/download/"
+	launcherReleaseBase = "https://github.com/kapital-mc/Kapital-Launcher/releases/download/"
 	// checksumsName and signatureName are the release's checksum file and its
 	// signature, written by the release workflow (scripts/update-sign).
 	checksumsName      = "checksums.txt"

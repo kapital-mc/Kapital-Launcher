@@ -63,7 +63,11 @@ with the numeric part.
 macOS: `hdiutil` makes a compressed image from the bundle and an Applications
 link. The bundle identifier is `io.github.sandrogekeler.kapital-launcher`,
 written in both plists and checked in the job; it is the app's identity
-(preferences, WebKit data) and does not change again.
+(preferences, WebKit data) and does not change again, though the repository
+moved to `kapital-mc`: the updater refuses a new copy whose identifier differs.
+Copies installed before the move fetch updates from
+`github.com/sandrogekeler/Kapital-Launcher`, which works only while GitHub
+redirects it, so nothing of that name may be created or forked there again.
 
 ## The toolchain directive is what CI runs
 

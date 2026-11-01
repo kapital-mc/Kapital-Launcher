@@ -23,7 +23,7 @@ Download `Kapital-Launcher-<version>-macos-universal.dmg` (Apple Silicon and Int
 Each file carries a build attestation that ties it to the workflow run in this repository that produced it. With the [GitHub CLI](https://cli.github.com/):
 
 ```
-gh attestation verify <file> -R sandrogekeler/Kapital-Launcher
+gh attestation verify <file> -R kapital-mc/Kapital-Launcher
 ```
 
 `checksums.txt` lists the SHA-256 of every file: check it with `sha256sum -c checksums.txt` (Linux, Git Bash) or `shasum -a 256 -c checksums.txt` (macOS), or compare `Get-FileHash <file>` in PowerShell with the matching line.
