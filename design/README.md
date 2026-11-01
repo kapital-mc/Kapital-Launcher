@@ -1,7 +1,6 @@
 # Design
 
-Two data files and their schemas. Both are read by machines; neither is styled
-code.
+Two data files and their schemas, read by machines, and the app icon's masters.
 
 ## `tokens.json`
 
@@ -53,3 +52,19 @@ accent in `tokens.json`, and every URL must be https on an allowlisted host.
 
 `node scripts/validate-schemas.mjs` checks both data files against their
 schemas with no dependency; the Go tests check the manifest again.
+
+## `icon/`
+
+The app icon's masters, as SVG on a 1024 canvas: a rose pixel K inlaid in a
+brown tile, its colours the logo gradient's.
+
+| File | Cut | Becomes |
+|------|-----|---------|
+| `kapital-icon-macos.svg` | squircle, 824 body in 1024, drop shadow | `build/appicon.png` (Wails makes the `.icns` from it) |
+| `kapital-icon-windows.svg` | rounded plate, edge-lit | `build/windows/icon.ico`, `site/public/favicon.svg` and `favicon-32.png` |
+| `kapital-icon-square.svg` | full bleed, no corner | `site/public/apple-touch-icon.png` (iOS rounds it) |
+
+`icon.ico` holds 16, 20, 24, 32, 40, 48, 64 and 256 px, each drawn at its own
+size rather than scaled from 256. At 48 px and under the K snaps to whole
+pixels (one K unit is 1 px at 16, 2 at 32, 3 at 40 and 48), so the small sizes
+stay sharp. A change to a master means rendering those files again.

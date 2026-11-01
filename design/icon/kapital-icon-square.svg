@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs>
+<linearGradient id="ttile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4E2929"/><stop offset="1" stop-color="#2A1414"/></linearGradient>
+<linearGradient id="tcav" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="7"><stop offset="0" stop-color="#F9AE9F"/><stop offset="1" stop-color="#B06A63"/></linearGradient>
+<clipPath id="tclip"><path d="M0 0H2V3H4V1H6V0H8V2H6V3H5V4H6V5H8V7H6V6H4V4H2V7H0Z"/></clipPath>
+</defs>
+<rect width="1024" height="1024" fill="url(#ttile)"/>
+<g transform="translate(224 260) scale(72)">
+<path fill="#FFE6DF" fill-opacity="0.45" transform="translate(0 0.12)" d="M0 0H2V3H4V1H6V0H8V2H6V3H5V4H6V5H8V7H6V6H4V4H2V7H0Z"/>
+<path fill="#1F0E0E" d="M0 0H2V3H4V1H6V0H8V2H6V3H5V4H6V5H8V7H6V6H4V4H2V7H0Z"/>
+<g clip-path="url(#tclip)"><path fill="url(#tcav)" transform="translate(0 0.24)" d="M0 0H2V3H4V1H6V0H8V2H6V3H5V4H6V5H8V7H6V6H4V4H2V7H0Z"/></g>
+</g></svg>
