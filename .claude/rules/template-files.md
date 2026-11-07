@@ -8,6 +8,7 @@ paths:
   - ".github/workflows/**"
   - ".github/scripts/release-notes.py"
   - ".github/scripts/changelog-section.py"
+  - ".claude/rules/writing.md"
 ---
 
 # Files that come from AllesSandro

@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier. Do not edit by hand.
-_commit: v0.3.0
+_commit: v0.5.0
 _src_path: https://github.com/sandrogekeler/AllesSandro.git
 aislop: true
 claude_action: true
@@ -10,6 +10,7 @@ kind: wails-desktop
 languages:
 - go
 - typescript
+license: none
 owner: sandrogekeler
 project_name: Kapital Launcher
 public: true
