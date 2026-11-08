@@ -1,3 +1,4 @@
+<<<<<<< before updating
 # Vendored into every repo in suite.repos.json, plus this one, as
 # .github/workflows/issue-priority.yml by scripts/sync-priority.sh. Edit it here.
 # The next sync overwrites the copy in a product, the same way it overwrites a
@@ -23,6 +24,17 @@
 # `opened` only, not `edited`: a form answer can only ever arrive when the issue is
 # created, so an edit can never introduce one, and re-running on edits would fight
 # a maintainer who removed a label on purpose.
+=======
+# Locked: comes from sandrogekeler/AllesSandro and is re-applied by every
+# template update. Change it there, not here (AllesSandro docs/updating.md).
+#
+# An issue form applies only the static `labels:` in its front matter. The
+# priority dropdown lands as text in the body, so this job reads it back out and
+# applies the p* label it means. An issue opened through the API has no form
+# answer; when it also has no p* label, the job comments instead of guessing.
+# It runs on `opened` only, so it never fights a maintainer who later changes
+# the label.
+>>>>>>> after updating
 name: Issue priority
 
 on:
@@ -36,16 +48,23 @@ jobs:
   priority:
     runs-on: ubuntu-latest
     steps:
+<<<<<<< before updating
       # Everything from the issue reaches the script through env rather than a
       # ${{ }} interpolation inside `run:`. An issue body is text a stranger wrote,
       # and `${{ }}` is substituted before bash ever sees it.
       - name: Apply the priority that was chosen, or say that none was
+=======
+      # The issue body reaches the script through env, never a ${{ }} inside
+      # `run:`: it is text a stranger wrote.
+      - name: Apply the chosen priority, or say that none was
+>>>>>>> after updating
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
           LABELS: ${{ toJSON(github.event.issue.labels.*.name) }}
           BODY: ${{ github.event.issue.body }}
+<<<<<<< before updating
           # The rendered form puts the field's `label:` in as a level-3 heading, so
           # this string has to stay identical to the one in the vendored form block.
           # scripts/sync-priority.sh --check is what notices when it does not.
@@ -55,10 +74,16 @@ jobs:
           # scripts/sync-priority.sh --check, so this is a copy that cannot drift
           # silently rather than a second source.
           # >>> suite:priority-map
+=======
+          # Must match the dropdown's `label:` in .github/ISSUE_TEMPLATE/*.yml.
+          HEADING: 'How urgent is this for you?'
+          # Leading word of each dropdown option, and the label it means.
+>>>>>>> after updating
           PRIORITY_MAP: |
             Blocking: p1
             Significant: p2
             Minor: p3
+<<<<<<< before updating
           # <<< suite:priority-map
           RUBRIC_URL: https://github.com/kollektiv-mc/Kollektiv/blob/main/docs/conventions.md#priority
           MARKER: '<!-- suite:priority -->'
@@ -66,13 +91,24 @@ jobs:
           set -euo pipefail
 
           # Already prioritised, by a form label or by whoever opened it. Nothing to do.
+=======
+          RUBRIC_URL: https://github.com/sandrogekeler/AllesSandro/blob/main/docs/conventions.md#priority
+          MARKER: '<!-- allessandro:priority -->'
+        run: |
+          set -euo pipefail
+
+>>>>>>> after updating
           if printf '%s' "$LABELS" | jq -e 'any(.[]; test("^p[0-3]$"))' > /dev/null; then
             echo "already carries a priority label"
             exit 0
           fi
 
+<<<<<<< before updating
           # The dropdown answer is the first non-blank line under the heading. CRs
           # come through in a webhook body and would otherwise defeat the match.
+=======
+          # The answer is the first non-blank line under the heading.
+>>>>>>> after updating
           answer="$(printf '%s\n' "$BODY" | tr -d '\r' | awk -v h="### $HEADING" '
             $0 == h { found = 1; next }
             found && NF { print; exit }
@@ -92,25 +128,35 @@ jobs:
             exit 0
           fi
 
+<<<<<<< before updating
           # No answer in the body. Either the issue was opened through the API, or
           # a form was filled in against a stale copy of the block. Both want a human
           # or an agent to look, and neither is something this job should guess at.
+=======
+>>>>>>> after updating
           if gh issue view "$NUMBER" --repo "$REPO" --json comments \
             --jq '.comments[].body' | grep -qF "$MARKER"; then
             echo "already flagged"
             exit 0
           fi
 
+<<<<<<< before updating
           # The rubric is not restated here on purpose. It is defined once, in
           # design/labels.json, and read once, in docs/conventions.md; a third copy
           # in a workflow is the copy that goes stale.
+=======
+>>>>>>> after updating
           gh issue comment "$NUMBER" --repo "$REPO" --body "$(cat <<EOF
           $MARKER
           This issue has no priority label.
 
+<<<<<<< before updating
           Every issue in the suite carries exactly one of \`p0\`, \`p1\`, \`p2\` or \`p3\`. Without one it mirrors into Linear at priority None and drops out of every ordered view, which is not the same as being low priority.
 
           Pick one against the rubric in [\`docs/conventions.md\`]($RUBRIC_URL). If it is genuinely unclear, the answer is \`p2\`, never nothing.
+=======
+          Every issue carries exactly one of \`p0\`, \`p1\`, \`p2\` or \`p3\`. Pick one against the [rubric]($RUBRIC_URL). If it is genuinely unclear, use \`p2\`.
+>>>>>>> after updating
           EOF
           )"
           echo "flagged for triage"
