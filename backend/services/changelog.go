@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"net/url"
 	"regexp"
 	"strings"
 	"sync"
@@ -42,21 +41,13 @@ const (
 
 var changelogVersion = regexp.MustCompile(`^[0-9A-Za-z.+-]{1,32}$`)
 
-// changelogURL is the changelog beside a pack.toml: the same URL with its last
-// path segment replaced, so the scheme, host and folder stay the pack's own. A
-// URL that does not end in /pack.toml, or carries user info, a query or a
-// fragment, has none.
+// changelogURL is the changelog beside a pack.toml (siblingURL).
 func changelogURL(packURL string) (string, error) {
-	u, err := url.Parse(packURL)
+	u, err := siblingURL(packURL, changelogName)
 	if err != nil {
 		return "", fmt.Errorf("changelog: %w", err)
 	}
-	dir, ok := strings.CutSuffix(u.Path, "/pack.toml")
-	if !ok || u.User != nil || u.RawQuery != "" || u.Fragment != "" || strings.Contains(packURL, "#") {
-		return "", errors.New("changelog: the pack URL does not end in /pack.toml, or carries more than a path")
-	}
-	u.Path, u.RawPath = dir+"/"+changelogName, ""
-	return u.String(), nil
+	return u, nil
 }
 
 // Changelog reads the changelog of the pack the chapter syncs from, the same

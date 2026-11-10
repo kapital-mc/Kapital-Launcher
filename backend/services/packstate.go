@@ -28,19 +28,16 @@ const (
 // source serves now: the pack URL the instance syncs from when the launcher
 // wrote it, else the developer override, else the manifest's. A chapter
 // whose instance is absent, or has never synced, is reported as not
-// installed; a source that cannot be read leaves the state unchecked. Only
-// the manifest's rules or the loopback rule let a URL be fetched, as at
-// Install.
+// installed, and its source is still read for the version and the mod count
+// the next Play brings. A source that cannot be read leaves the state
+// unchecked. Only the manifest's rules or the loopback rule let a URL be
+// fetched, as at Install.
 func (c *InstanceCreator) PackState(ctx context.Context, chapter models.Chapter, report models.InstanceReport, override string) models.PackState {
 	state := models.PackState{ChapterID: chapter.ID}
-	if !report.Present[chapter.ID] || report.Dir == "" {
-		return state
+	var installedHash string
+	if report.Present[chapter.ID] && report.Dir != "" {
+		installedHash, state.Installed = installedPackHash(filepath.Join(report.Dir, chapter.Instance.ID))
 	}
-	installedHash, ok := installedPackHash(filepath.Join(report.Dir, chapter.Instance.ID))
-	if !ok {
-		return state
-	}
-	state.Installed = true
 
 	packURL, check := c.packSource(chapter, report, override)
 	if packURL == "" {
@@ -53,9 +50,14 @@ func (c *InstanceCreator) PackState(ctx context.Context, chapter models.Chapter,
 	}
 	sum := sha256.Sum256(raw)
 	state.Checked = true
-	state.UpToDate = hex.EncodeToString(sum[:]) == installedHash
+	state.UpToDate = state.Installed && hex.EncodeToString(sum[:]) == installedHash
 	if v, err := scanPackVersions(bytes.NewReader(raw)); err == nil {
 		state.Version = v.pack
+	}
+	if n, err := c.packMods(ctx, packURL, check, raw); err != nil {
+		slog.Warn("pack mods", "chapter", chapter.ID, "error", err)
+	} else {
+		state.Mods = n
 	}
 	return state
 }

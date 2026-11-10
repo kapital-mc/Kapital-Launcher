@@ -18,7 +18,7 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetSettings` | nothing | the settings file | S1.2 |
 | `RefreshEngine` | nothing | detection: runs the resolved Prism with `--version` | S3.1 |
 | `GetInstances` | nothing | the two reads in a Prism root, and the size walk of each present instance folder | S1.1 |
-| `GetPackStates` | nothing | one value of each instance's `packwiz.json`, and one bounded GET of each chapter's `pack.toml` on its allowlisted or loopback source | S1.1, S4.3 |
+| `GetPackStates` | nothing | one value of each instance's `packwiz.json`, one bounded GET of each chapter's `pack.toml` on its allowlisted or loopback source, installed or not, and of the `index.toml` beside it when its hash is new in this run (S4.7a) | S1.1, S4.3 |
 | `GetChangelogs` | nothing | one bounded GET of each chapter's `changelog.json`, beside the `pack.toml` of the source `GetPackStates` uses (the instance's own pack URL, the loopback override or the manifest's), held to that source's URL rule, redirects included; the answer is parsed strictly and shown as plain text | S4.3, S4.7 |
 | `GetPrismRelease` | nothing | one bounded GET to Prism's fixed release URL | S4.5 |
 | `GetUpdate` | nothing | once a start, one GET (8 s, no redirect followed, 4 KiB) of the download site's fixed `version.json`, sending nothing but the request; only a tag of the release shape is read from it, and a dev build makes no request | S4.3, S4.9 |
@@ -766,6 +766,21 @@ pack.toml, a local pack serve, the concurrency bound) and
 Probe: a changelog 65 KiB long; `"entries"` holding a `<script>` line, a
 right-to-left override or an ANSI escape; `changelog.json` redirecting to
 another host; a pack URL `.../pack.toml?x=../..`.
+
+**S4.7a A pack's mod count is read from its own index, and only counted.**
+Holds when: the index's name comes from `pack.toml`'s `[index]` table and is a
+plain `.toml` name beside it (no `/`, no `..`), with a SHA-256 hash in 64 hex
+digits, else nothing is fetched (`scanPackIndex`); the URL is the vetted pack
+URL with its last segment replaced (`siblingURL`, the changelog's rule) and is
+checked against the pack's rule again; `fetchFile` reads it with a 1 MiB bound;
+the bytes must hash to what `pack.toml` names or the count is dropped; and the
+only thing kept is the number of `file = "mods/<name>"` entries, per index hash,
+at most 32 hashes. Nothing in the index is opened, run or fetched.
+Verify: `packstate_test.go` (`TestScanPackIndex`,
+`TestPackStateCountsTheIndexMods`: the count, one read per hash, a hash
+mismatch).
+Probe: `[index] file = "../../secrets.toml"`; an index 2 MiB long; an index
+whose hash does not match; `hash-format = "md5"`.
 
 **S4.8 The player's profile is asked of three Mojang hosts, with the name and then the UUID, and only a face is kept.**
 Holds when: (a) `GetPlayerProfile` checks the name against

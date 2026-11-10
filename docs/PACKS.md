@@ -17,7 +17,7 @@ Each part names the real system doing the work, so the technical record in
 | **Prism Launcher** | The engine: Microsoft sign-in, Java, the mod loader, the game | Owns the instances and starts the game |
 | **packwiz-installer** | packwiz's companion, two small Java programs placed in an instance | Runs inside Prism before every start and brings the instance in line with the pack |
 | **Kapital Launcher** | This app | Finds Prism, writes the instance, presses Prism's buttons, shows what is going on |
-| **The manifest** | `data/launcher.json`, built into the app | The chapter list: names, art, the server's addresses, and for each chapter the address of its published pack and the version shown under the title |
+| **The manifest** | `data/launcher.json`, built into the app | The chapter list: names, art, the server's addresses, and for each chapter the address of its published pack, with a version and a mod count shown only while the published pack cannot be read |
 
 ## A pack is a recipe, not a bundle
 
@@ -54,12 +54,15 @@ Everything inside a chapter folder becomes public on the host. The private
 things, the repository itself and the wiki, stay private; what is in a
 chapter folder (configs, scripts, art, the resource pack) is not.
 
-**Two version numbers.** `pack.toml` carries the pack's version, which is
-what packwiz and the launcher's update line read. The manifest carries
-`pack.version` for the same chapter, which is what the launcher prints under
-the title ("Pack 1.0.0"). Today both are edited by hand and should be bumped
-together. ADR-4 plans to have the wiki publish the manifest later, which will
-make that one edit.
+**A pack release needs no launcher release.** The launcher reads the pack's
+version from the published `pack.toml` and its mod count from the published
+`index.toml` (every entry directly under `mods/`), for every chapter, installed
+or not: beside Play, under the title, on the loading card and in the Version
+and Mods rows. The manifest's `pack.version` and `pack.mods` are what it shows
+only while the published pack cannot be read, such as offline, so they need
+no bump with a pack release. The pack's Minecraft version and loader are still
+checked against the manifest at Install, so a change to either is a launcher
+change.
 
 ## Install writes an instance and downloads nothing of the pack
 

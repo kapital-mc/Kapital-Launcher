@@ -210,7 +210,14 @@ describe('ActionBar game line', () => {
       const lux = serverless
       bar({
         chapter: lux,
-        packState: { chapterId: lux.id, installed: true, checked: true, upToDate, version },
+        packState: {
+          chapterId: lux.id,
+          installed: true,
+          checked: true,
+          upToDate,
+          version,
+          mods: 0,
+        },
       })
       expect(screen.getByRole('button', { name: `Play ${lux.name}` })).toBeEnabled()
       expect(screen.queryByRole('button', { name: /update/i })).toBeNull()
@@ -238,6 +245,7 @@ describe('ActionBar game line', () => {
           checked: true,
           upToDate,
           version: '1.0.1',
+          mods: 0,
         },
       })
       expect(play()).toBeEnabled()

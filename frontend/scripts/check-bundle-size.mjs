@@ -138,7 +138,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // bundled manifest carries its name, line and pack URL, and SetAddonEnabled is one more
 // export of the generated App.js; the section that shows it loads on demand. Measured
 // 98.23 KB.
-const BUDGET_KB = 98.3
+// 98.4 on 2026-11-10: the hero's mod count comes from the pack source, with the manifest's as
+// the fallback (lib/packState's packMods, ADR-4's 2026-11-10 amendment). Measured 98.32 KB,
+// from 98.3 KB on main.
+const BUDGET_KB = 98.4
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PackState } from '../types'
-import { packVersion, versionValue } from './packState'
+import { packMods, packVersion, versionValue } from './packState'
 
 const state = (over: Partial<PackState>): PackState => ({
   chapterId: 'frangfurd',
@@ -8,6 +8,7 @@ const state = (over: Partial<PackState>): PackState => ({
   checked: true,
   upToDate: true,
   version: '1.0.0',
+  mods: 98,
   ...over,
 })
 
@@ -27,5 +28,13 @@ describe('packState', () => {
     expect(packVersion(state({ version: '' }), '1.0.0')).toBe('1.0.0')
     expect(packVersion(undefined, '1.0.0')).toBe('1.0.0')
     expect(packVersion(undefined, null)).toBeNull()
+  })
+
+  it('counts the mods the source lists, else the manifest count', () => {
+    expect(packMods(state({ mods: 99 }), 98)).toBe(99)
+    expect(packMods(state({ installed: false, mods: 99 }), 98)).toBe(99)
+    expect(packMods(state({ checked: false }), 98)).toBe(98)
+    expect(packMods(state({ mods: 0 }), 98)).toBe(98)
+    expect(packMods(undefined, null)).toBeNull()
   })
 })
