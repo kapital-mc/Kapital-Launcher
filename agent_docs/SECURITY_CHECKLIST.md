@@ -45,7 +45,7 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetPanoramas` | nothing | per manifest chapter whose instance is present: the names in its game folder's `resourcepacks/`, then six files at one fixed path inside the first entry (a folder or `.zip`, name containing "resource") that holds them, each under 4 MiB, decoded as a PNG, square and of one size, and copied into the app data dir's `panorama/` and served at `/panorama/`; a zip's central directory only; nothing is written to the instance | S1.1 |
 | `OpenWikiPage` | a URL | the system browser, only for a URL `GetWikiPages` returned | S3.3 |
 | `GetChapterSettings` | a chapter id | four keys of the chapter's own `instance.cfg` | S1.1, S3.3 |
-| `GetPlayTime` | nothing | two keys, `totalTimePlayed` and `lastLaunchTime`, of the own `instance.cfg` of each installed manifest chapter, through `scanINIKeys`; nothing else of the file is read or logged | S1.1, S3.3 |
+| `GetPlayTime` | nothing | two keys, `totalTimePlayed` and `lastLaunchTime`, of the own `instance.cfg` of each installed manifest chapter, through `scanINIKeys`; each chapter's `logs/latest.log` and `logs/*.log.gz`, listed and read through an `os.Root` for marker lines; numbers and file names written to `playtime.json` in the app data dir; no line is kept or logged | S1.1, S3.3, S3.14 |
 | `SaveChapterSettings` | a chapter id and a `ChapterSettings` | five keys rewritten in the chapter's own `instance.cfg`, held to the preset list, the machine's memory and, for the player's own Java arguments, `ValidateJVMArgs` (issue 191); refused while the game runs or a Prism is open (the launcher's own is closed first) | S3.2, S3.3, S3.9, S4.6 |
 | `GetRunLogs` | a chapter id | the names, times and sizes of `logs/latest.log`, `logs/*.log.gz` and `crash-reports/*.txt` in that chapter's instance game folder, listed through an `os.Root`; no file is opened | S3.3, S3.10 |
 | `ReadRunLog` | a chapter id, a kind (`log` or `crash`), a base name the listing produces and a byte offset | one chunk (at most 256 KiB, from a whole line) of one such file in that game folder, unpacked if `.log.gz` up to 256 MiB, redacted before it leaves Go; nothing written | S3.3, S3.10, S7.5 |
@@ -645,6 +645,32 @@ cannot make links), `TestClearStorageWithoutAGameFolder`,
 Probe: a terrain name of `..`, `../mods`, `..\mods` or `C:`; a kind of
 `minimap` or `mods`; `xaero/world-map` as a link to the home folder; a
 delete while Distant Horizons holds its database open.
+
+**S3.14 The play time reads a chapter's own game logs for marker lines, and keeps numbers.**
+Holds when: `GetPlayTime` (issue 341, ADR-2 twenty-third amendment) takes no
+argument and reaches only the instances the manifest and the disk's report name
+(S3.3). `PlayLedger.Count` lists `logs/` through `listRunFiles`, so the one name
+test (`validRunLogName`) and its regular-file check apply and a link is not
+followed, and opens a file through an `os.Root` on the game folder. A log is
+streamed and unpacked up to 256 MiB, a line over 64 KiB is skipped unread, and
+a corrupt or truncated gzip is an error that stores nothing. A line is matched
+and dropped: the player's name lasts only while one log is read, is compared
+with the chat line and goes nowhere, and no line or part of one reaches `slog`
+or the frontend. `playtime.json`, written atomically at `0600` in the app data
+dir, holds a chapter id, an archive's name and size, seconds and two flags.
+Nothing is written to the instance.
+Chat is other players' text, so a chat line is never any marker but the AFK
+announcement, and that must be a system message whose whole body, after
+bracketed tags, is the player's own name and the fixed words.
+Verify: `TestPlayLedgerKeepsNothingOfTheLog`,
+`TestPlayLedgerIgnoresTheDebugLogs`,
+`TestPlayLedgerAsksAgainAboutALogItCouldNotRead`,
+`TestMeasurePlayTakesNoMarkerFromChat`,
+`TestMeasurePlayLeavesOutAFK` (`someone typing the words`, `a name that ends the
+same`), `TestMeasurePlaySkipsALineLongerThanItsBuffer`.
+Probe: `logs/2026-01-01-1.log.gz` as a link to a file outside the game folder; a
+gzip that unpacks past the cap; a player named so that a chat line reads as their
+announcement.
 
 ## S4. Downloads (milestone 4)
 

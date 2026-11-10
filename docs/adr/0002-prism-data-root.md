@@ -808,3 +808,47 @@ API to run on NeoForge; the four jars are about 220 MB, Flashback's alone
   packwiz command (no sync copy) never gets an add-on, which is the safe side.
   Connector is a beta (2.0.0-beta.17) and had not been started with the
   Frangfurd pack when this shipped.
+
+## Twenty-third amendment, 2026-11-08
+
+Play time counts time in a world, not time the game was open (issue 341). The
+account page showed Prism's `totalTimePlayed`, which runs from launch to exit:
+loading, the title screen and time spent AFK all counted. On the author's
+Frangfurd instance that was 71.9 h against 46.9 h in a world with AFK left out.
+
+- **Where the number comes from.** `GetPlayTime` counts from the instance's
+  `logs/latest.log` and `logs/*.log.gz` (`measurePlay`, `PlayLedger`). This is
+  the third amendment's rule applied to every finished log and not only a run
+  the launcher started: a line is matched and dropped, and no line or part of
+  one is logged, stored or emitted. Reading the files rather than following the
+  run means a game started from Prism directly counts, and that history is
+  filled in from the logs that still exist. `lastLaunchTime` stays Prism's.
+- **What is kept.** `playtime.json` in the app data dir: per chapter, each
+  finished archive's name and size, its seconds and how it ended. Nothing goes
+  into the instance. A log deleted later keeps its time; a log deleted before
+  the first count does not, and that time is gone.
+- **In a world.** A server is `Connecting to <host>, <port>` followed by
+  `Loaded N advancements` on the render thread, so a connection that failed
+  counts for nothing. Singleplayer is `Starting integrated minecraft server`. It
+  ends at `Stopping server`, `Stopping!`, `Client disconnected with reason`, or
+  Distant Horizons' `Client on ClientOnly mode disconnecting`. Vanilla writes
+  no line for leaving a server on purpose, so with Distant Horizons off, or in a
+  pack without it, the time runs on to the next join or the game closing.
+  Flashback replays are local worlds to Minecraft and are dropped.
+- **AFK.** The state is on the server (Frangfurd Essentials) and is not sent to
+  the client, but `afk.announce` puts it in chat and the client logs chat. The
+  launcher matches `[System] [CHAT] <name> is now AFK` and `is no longer AFK`,
+  the whole message after any tags, for the player's own name only, and leaves
+  out that stretch and the 5 minutes of idling before it (`afk.minutes` as
+  shipped; the launcher cannot read the server's). A `/afk` loses up to 5 minutes
+  it should keep. A server that turns announcing off, or changes the wording,
+  has its AFK time counted as play.
+- **Time.** A log's stamp is read as a time of day and rolled over at midnight:
+  the date before it is in the JVM's language and Fabric's lines have none. The
+  game starts a new log at midnight while it runs (seen on 7 of 74 logs), so a
+  log whose first line is not from the `main` thread carries on from the one
+  before it, taken in the order of the file times, because the number in an
+  archive's name does not follow the runs.
+- **Limits of the reading.** Only regular files the logs page's listing would
+  show are opened, through an `os.Root`, unpacked up to the same 256 MiB. See
+  SECURITY_CHECKLIST S3.14.
