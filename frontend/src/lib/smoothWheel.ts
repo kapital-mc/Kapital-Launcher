@@ -23,8 +23,11 @@ function canScroll(el: Element, dy: number) {
  * scroll inside a box of its own that can still move, a page at its end (so it
  * reaches an outer scroller), and everything with reduced motion. A scroll from
  * elsewhere (the thumb, the keys) stops the glide where it is.
+ *
+ * The wheel is read on `area`, `el` itself unless an ancestor is given, so a control laid over
+ * the scroller rather than inside it (a settings page's nav) scrolls it too.
  */
-export function smoothWheel(el: HTMLElement): () => void {
+export function smoothWheel(el: HTMLElement, area: HTMLElement = el): () => void {
   let target = 0
   let pos = 0
   let set = 0
@@ -51,7 +54,7 @@ export function smoothWheel(el: HTMLElement): () => void {
     if (e.defaultPrevented || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
     if (reducedMotion()) return
     const dy = e.deltaY * (e.deltaMode === 1 ? LINE : e.deltaMode === 2 ? el.clientHeight : 1)
-    for (let n = e.target as Element | null; n && n !== el; n = n.parentElement) {
+    for (let n = e.target as Element | null; n && n !== el && n !== area; n = n.parentElement) {
       if (canScroll(n, dy)) return
     }
     if (!frame) target = pos = set = el.scrollTop
@@ -66,9 +69,9 @@ export function smoothWheel(el: HTMLElement): () => void {
     }
   }
 
-  el.addEventListener('wheel', onWheel, { passive: false })
+  area.addEventListener('wheel', onWheel, { passive: false })
   return () => {
-    el.removeEventListener('wheel', onWheel)
+    area.removeEventListener('wheel', onWheel)
     cancelAnimationFrame(frame)
   }
 }

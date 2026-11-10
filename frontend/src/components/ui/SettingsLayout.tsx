@@ -13,6 +13,8 @@ import { ChevronDown } from '../../lib/icons'
 import type { LucideIcon } from '../../lib/icons'
 import { Grow } from './Grow'
 import { Icon } from './Icon'
+import { Reveal } from './Reveal'
+import { Scrollable } from './Scrollable'
 import { Smooth } from './Smooth'
 
 /** A section as the nav lists it. */
@@ -40,17 +42,30 @@ function scroller(el: HTMLElement | null): HTMLElement | null {
 }
 
 /**
- * A settings page's body (issue 188): the sections in one column, and beside it a nav of those
- * sections that follows the scroll and jumps on a click. The nav is built from the sections
- * that are actually there, each registering itself as it mounts, so a section that renders
- * nothing (a chapter without a server, the lazy mods list before it loads) is not listed.
- * In a narrow page the nav becomes a bar along the top that stays in view.
+ * A settings page's body (issue 188): the sections in one column, scrolling, and beside it a nav
+ * of those sections that follows the scroll and jumps on a click. The nav is built from the
+ * sections that are actually there, each registering itself as it mounts, so a section that
+ * renders nothing (a chapter without a server, the lazy mods list before it loads) is not listed.
+ * In a narrow page the nav becomes a bar along the top. The body reveals once `ready` (ui/Reveal).
+ *
+ * The nav is laid over the scroller, never inside it: WKWebView places a sticky box from its
+ * scrolling thread, and while the wheel glides (lib/smoothWheel) it drew the nav a frame apart
+ * from the page, a jump of up to 20px. Over the scroller it does not move, and its wheel still
+ * scrolls the page.
  *
  * The column grows with the card up to the other pages' measure (`max-w-200`) and the pair is
  * centred only past it, so when the sidebar compacts or widens the sections resize with the
- * card, frame by frame, rather than drifting as a fixed block in a wider space.
+ * card, frame by frame, rather than drifting as a fixed block in a wider space. The nav is one
+ * width (`w-40`, the widest entry's) so the scroller can leave its place.
  */
-export function SettingsLayout({ children }: { children: ReactNode }) {
+export function SettingsLayout({
+  ready = true,
+  children,
+}: {
+  ready?: boolean
+  children: ReactNode
+}) {
+  const root = useRef<HTMLDivElement>(null)
   const [entries, setEntries] = useState<readonly NavEntry[]>([])
   const register = useCallback<Register>((entry) => {
     setEntries((prev) =>
@@ -63,10 +78,22 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
 
   return (
     <NavContext.Provider value={register}>
-      <div className="@container">
-        <div className="flex flex-col gap-6 @2xl:flex-row @2xl:justify-center @2xl:gap-10">
-          <SettingsNav entries={entries} />
-          <div className="flex max-w-200 min-w-0 grow flex-col">{children}</div>
+      <div ref={root} className="@container relative flex min-h-0 grow flex-col px-7">
+        <div className="@2xl:pointer-events-none @2xl:absolute @2xl:inset-x-7 @2xl:top-7 @2xl:z-10">
+          <div className="@2xl:mx-auto @2xl:max-w-250">
+            <SettingsNav entries={entries} />
+          </div>
+        </div>
+        <div className="-mx-7 flex min-h-0 grow">
+          <Scrollable wheelArea={root}>
+            <div className="px-7 pt-7 pb-14">
+              <Reveal ready={ready}>
+                <div className="flex max-w-200 min-w-0 flex-col @2xl:mx-auto @2xl:max-w-250 @2xl:pl-50">
+                  {children}
+                </div>
+              </Reveal>
+            </div>
+          </Scrollable>
         </div>
       </div>
     </NavContext.Provider>
@@ -81,9 +108,9 @@ function SettingsNav({ entries }: { entries: readonly NavEntry[] }) {
   // The section in view is the last whose heading has passed the line under the page's top;
   // at the very bottom it is the last, which may never reach that line.
   useEffect(() => {
-    const el = scroller(nav.current)
     const first = entries.at(0)
     const last = entries.at(-1)
+    const el = scroller(first?.el ?? null)
     if (!el || !first || !last) return
     const measure = () => {
       const line = el.getBoundingClientRect().top + REACHED
@@ -112,7 +139,7 @@ function SettingsNav({ entries }: { entries: readonly NavEntry[] }) {
     <nav
       ref={nav}
       aria-label="Sections"
-      className="bg-raised border-line sticky top-0 z-10 -mx-7 flex shrink-0 gap-1 overflow-x-auto border-b px-7 py-2.5 @2xl:top-7 @2xl:mx-0 @2xl:w-max @2xl:min-w-36 @2xl:flex-col @2xl:self-start @2xl:overflow-visible @2xl:border-b-0 @2xl:border-l @2xl:bg-transparent @2xl:py-0 @2xl:pr-0 @2xl:pl-3"
+      className="bg-raised border-line reveal relative -mx-7 flex shrink-0 gap-1 overflow-x-auto border-b px-7 py-2.5 @2xl:pointer-events-auto @2xl:mx-0 @2xl:w-40 @2xl:flex-col @2xl:overflow-visible @2xl:border-b-0 @2xl:border-l @2xl:bg-transparent @2xl:py-0 @2xl:pr-0 @2xl:pl-3"
     >
       <span
         ref={bar}
@@ -188,7 +215,7 @@ export function SettingsSection({
     <section
       ref={ref}
       aria-label={title}
-      className="border-line-strong flex scroll-mt-16 flex-col gap-4 py-10 first:pt-0 @2xl:scroll-mt-7 [&+&]:border-t"
+      className="border-line-strong flex scroll-mt-7 flex-col gap-4 py-10 first:pt-0 [&+&]:border-t"
     >
       <div className="flex items-center gap-3.5">
         {collapsible ? (

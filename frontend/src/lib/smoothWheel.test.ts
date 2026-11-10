@@ -80,6 +80,20 @@ describe('smoothWheel', () => {
     expect(wheel(inner, 100).defaultPrevented).toBe(false)
   })
 
+  it('scrolls the element for a wheel anywhere in the area it is given', () => {
+    const area = document.createElement('div')
+    const nav = document.createElement('nav')
+    const el = box()
+    area.append(nav, el)
+    document.body.append(area)
+    const stop = smoothWheel(el, area)
+    expect(wheel(nav, 100).defaultPrevented).toBe(true)
+    run(60)
+    expect(el.scrollTop).toBe(100)
+    stop()
+    expect(wheel(nav, 100).defaultPrevented).toBe(false)
+  })
+
   it('lets a scroll from elsewhere win over the glide', () => {
     const el = box()
     smoothWheel(el)
