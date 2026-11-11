@@ -626,7 +626,14 @@ describe('App', () => {
     vi.mocked(Bindings.GetInstances).mockResolvedValue(report({ luxemburg: true }))
     vi.mocked(Bindings.LaunchChapter).mockResolvedValue()
     vi.mocked(Bindings.GetPackStates).mockResolvedValue([
-      { chapterId: 'luxemburg', installed: true, checked: true, upToDate: false, version: '4.2' },
+      {
+        chapterId: 'luxemburg',
+        installed: true,
+        checked: true,
+        upToDate: false,
+        version: '4.2',
+        mods: 0,
+      },
     ])
     render(<App />)
     expect(await screen.findByRole('button', { name: 'Play Luxemburg' })).toBeEnabled()
@@ -640,7 +647,14 @@ describe('App', () => {
 
     // Synced: the bar reads the same, and the settings row names the version.
     vi.mocked(Bindings.GetPackStates).mockResolvedValue([
-      { chapterId: 'luxemburg', installed: true, checked: true, upToDate: true, version: '4.2' },
+      {
+        chapterId: 'luxemburg',
+        installed: true,
+        checked: true,
+        upToDate: true,
+        version: '4.2',
+        mods: 0,
+      },
     ])
     fireEvent.focus(window)
     await waitFor(() =>

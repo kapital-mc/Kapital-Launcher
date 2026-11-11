@@ -141,7 +141,9 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 98.4 on 2026-11-11: the chip beside Play that names the pack version the next Play brings
 // when the installed pack is behind its source. It is part of the action bar, which the first
 // paint shows. Measured 98.38 KB, from 98.28 KB on main.
-const BUDGET_KB = 98.4
+// 98.5 the same day: the hero's mod count comes from the pack source, with the manifest's as
+// the fallback (lib/packState's packMods, ADR-4's 2026-11-10 amendment). Measured 98.42 KB.
+const BUDGET_KB = 98.5
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

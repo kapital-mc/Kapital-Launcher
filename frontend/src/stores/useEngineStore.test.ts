@@ -142,6 +142,7 @@ describe('useEngineStore', () => {
           checked: true,
           upToDate: true,
           version: '1',
+          mods: 0,
         },
       },
     })
@@ -153,6 +154,7 @@ describe('useEngineStore', () => {
         checked: true,
         upToDate: false,
         version: '2',
+        mods: 0,
       }),
     ])
     await useEngineStore.getState().setPackSource('frangfurd', 'dev')
