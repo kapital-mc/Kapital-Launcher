@@ -255,6 +255,35 @@ describe('ActionBar game line', () => {
     },
   )
 
+  describe('the update chip beside Play', () => {
+    const behind = {
+      chapterId: chapter.id,
+      installed: true,
+      checked: true,
+      upToDate: false,
+      version: '1.0.15',
+      mods: 0,
+    }
+
+    it('names the source version when the installed pack is behind', () => {
+      bar({ status: online, packState: behind })
+      expect(play().nextElementSibling).toHaveTextContent('Update 1.0.15')
+      expect(screen.getByText('● Server online')).toBeInTheDocument()
+    })
+
+    it.each([
+      ['in step', { packState: { ...behind, upToDate: true } }],
+      ['unchecked', { packState: { ...behind, checked: false } }],
+      ['not installed', { installed: false, packState: behind }],
+      ['made by hand', { instancePack: undefined, packState: behind }],
+      ['launching', { launching: true, packState: behind }],
+      ['running', { game: game('running'), packState: behind }],
+    ] as [string, Partial<ComponentProps<typeof ActionBar>>][])('is not shown %s', (_, over) => {
+      bar({ status: online, ...over })
+      expect(screen.queryByText(/^Update /)).toBeNull()
+    })
+  })
+
   it('shows the server refresh only while the server line is the one shown', () => {
     bar({ status: online })
     expect(screen.getByRole('button', { name: 'Check the server now' })).toBeInTheDocument()

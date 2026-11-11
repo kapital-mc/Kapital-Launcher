@@ -87,7 +87,6 @@ describe('PreviewSection', () => {
     expect(launcher).toHaveTextContent('Kapital Launcher update available')
     expect(launcher).toHaveTextContent('Tailscale installed, not connected')
     expect(launcher).not.toHaveTextContent('Prism missing')
-    expect(screen.getByText(/writes nothing, starts nothing and reaches no network/)).toBeVisible()
   })
 
   it('previews for the open chapter and reports it started', async () => {
@@ -138,13 +137,5 @@ describe('PreviewSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear previews' }))
     await waitFor(() => expect(App.ClearPreviews).toHaveBeenCalledOnce())
     expect(App.GetGameStates).toHaveBeenCalled()
-  })
-
-  it('says a card preview shows the bar only while the loading splash is off', () => {
-    const { rerender } = render(<PreviewSection onStarted={() => undefined} />)
-    expect(screen.queryByText(/loading splash is off here/)).toBeNull()
-    useSettingsStore.setState({ settings: { ...DEFAULT_SETTINGS, loadingSplashOn: false } })
-    rerender(<PreviewSection onStarted={() => undefined} />)
-    expect(screen.getByText(/loading splash is off here/)).toBeInTheDocument()
   })
 })

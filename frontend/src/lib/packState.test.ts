@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PackState } from '../types'
-import { packMods, packVersion, versionValue } from './packState'
+import { packBehind, packMods, packVersion, versionValue } from './packState'
 
 const state = (over: Partial<PackState>): PackState => ({
   chapterId: 'frangfurd',
@@ -36,5 +36,13 @@ describe('packState', () => {
     expect(packMods(state({ checked: false }), 98)).toBe(98)
     expect(packMods(state({ mods: 0 }), 98)).toBe(98)
     expect(packMods(undefined, null)).toBeNull()
+  })
+
+  it('is behind only when installed, checked and not the source pack', () => {
+    expect(packBehind(state({ upToDate: false }))).toBe(true)
+    expect(packBehind(state({}))).toBe(false)
+    expect(packBehind(state({ upToDate: false, checked: false }))).toBe(false)
+    expect(packBehind(state({ upToDate: false, installed: false }))).toBe(false)
+    expect(packBehind(undefined)).toBe(false)
   })
 })

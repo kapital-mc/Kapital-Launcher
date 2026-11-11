@@ -34,3 +34,10 @@ export function versionValue(state: PackState | undefined): string {
   const version = state.version || PLACEHOLDER
   return state.upToDate ? version : `older than ${version}`
 }
+
+/**
+ * Whether the installed pack is behind its source, so the next Play updates
+ * it: installed, checked and not the source's. Unknown is not behind.
+ */
+export const packBehind = (state: PackState | undefined): boolean =>
+  !!state && state.installed && state.checked && !state.upToDate
