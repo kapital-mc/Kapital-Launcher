@@ -138,7 +138,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // bundled manifest carries its name, line and pack URL, and SetAddonEnabled is one more
 // export of the generated App.js; the section that shows it loads on demand. Measured
 // 98.23 KB.
-const BUDGET_KB = 98.3
+// 98.4 on 2026-11-11: the chip beside Play that names the pack version the next Play brings
+// when the installed pack is behind its source. It is part of the action bar, which the first
+// paint shows. Measured 98.38 KB, from 98.28 KB on main.
+const BUDGET_KB = 98.4
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

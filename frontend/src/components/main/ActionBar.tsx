@@ -16,7 +16,7 @@ import {
   playLabel,
 } from '../../lib/manifest'
 import { installLine } from '../../lib/prismInstall'
-import { packVersion } from '../../lib/packState'
+import { packBehind, packVersion } from '../../lib/packState'
 import { packHost, packSourceLine } from '../../lib/packSource'
 import { serverLine } from '../../lib/serverLine'
 import { gameLine } from '../../lib/gameLine'
@@ -78,6 +78,8 @@ interface Props {
   onCheckServer: () => void
 }
 
+const UPDATE_LABEL = (v: string | null) => (v ? `Update ${v}` : 'Update')
+
 const WORKING = ['downloading', 'unpacking', 'verifying']
 
 /** Keeps the state line's second row when it has nothing to say, so the block stays two lines. */
@@ -120,6 +122,8 @@ const CONFIRM_MS = 5000
  * pre-launch step, #71), so there is no update step: Play always reads Play,
  * and a chapter without a server names the pack version the next Play syncs
  * to, the same whether the installed pack is in step or behind its source.
+ * When the installed pack is behind its source, a chip beside Play names the
+ * version that Play brings ("Update 1.0.15"), read live from the source.
  *
  * While the chapter's game is starting, running or closing (#44) its own line
  * sits beside Play, right after the hand-over to Prism (on a compact panel,
@@ -263,6 +267,11 @@ export function ActionBar({
   }
 
   const panel = layout === 'panel'
+  // The installed pack is behind its source, so the next Play updates it: a
+  // chip beside Play names the version it brings. Not while a game is starting
+  // or running, nor when Install or Reinstall stands in Play's place.
+  const behind = packBehind(packState) && !beside && !needsInstall && !foreign
+  const updateLabel = UPDATE_LABEL(packVersion(packState, chapter.pack.version))
   // A compact panel's foot has no room beside Play, so the game's rows take
   // the status line's place there and the foot keeps its two rows.
   if (panel && beside) {
@@ -295,6 +304,11 @@ export function ActionBar({
           <Icon icon={Play} size="sm" className="fill-current" />
           <span>{playLabel(chapter, joinServer)}</span>
         </Button>
+      )}
+      {behind && (
+        <span className="border-accent-edge bg-accent-wash text-accent rounded-pill font-ui inline-flex h-6 shrink-0 items-center border px-2.5 text-xs font-medium">
+          {updateLabel}
+        </span>
       )}
       {beside && !panel && (
         <div className="flex max-w-sm min-w-0 flex-col gap-0.5">
