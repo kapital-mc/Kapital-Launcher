@@ -274,13 +274,13 @@
          it follows a release the way the Download button does. The build
          replaces the placeholder below and drops the popup with no GitHub
          link. Features, Fixes and Other changes only: documentation and
-         maintenance change nothing a player runs. 60% of the viewport tall,
-         never under 24rem while the screen has room, and it scrolls. -->
+         maintenance change nothing a player runs. The same size as the code
+         signing policy popup below, and it scrolls. -->
     <div
       id="changelog"
       popover
       aria-labelledby="changelog-title"
-      class="bg-sunken text-fg border-line-strong m-auto max-h-[max(60dvh,min(calc(100dvh-2rem),24rem))] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain border-3 p-0 shadow-2xl backdrop:scrim-wash"
+      class="bg-sunken text-fg border-line-strong m-auto h-[min(calc(100dvh-2rem),45rem)] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain border-3 p-0 shadow-2xl backdrop:scrim-wash"
     >
       <div class="bg-sunken border-line sticky top-0 z-10 flex items-start justify-between gap-4 border-b px-8 pt-8 pb-5">
         <div class="flex flex-col gap-2">
@@ -312,12 +312,13 @@
          the attribution sentence, the two roles and the privacy sentence are
          theirs to word; keep them as they are. The same text is in the
          README and in .github/release-body.md. A popup opened from the footer,
-         with no script. -->
+         with no script. 45rem is this text's own height at full width; the
+         changelog popup above has the same size, so change the two together. -->
     <div
       id="signing"
       popover
       aria-labelledby="signing-title"
-      class="bg-sunken text-fg border-line-strong m-auto max-h-[calc(100dvh-2rem)] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain border-3 p-0 shadow-2xl backdrop:scrim-wash"
+      class="bg-sunken text-fg border-line-strong m-auto h-[min(calc(100dvh-2rem),45rem)] w-[min(calc(100vw-2rem),36rem)] overflow-y-auto overscroll-contain border-3 p-0 shadow-2xl backdrop:scrim-wash"
     >
       <div class="bg-sunken border-line sticky top-0 z-10 flex items-start justify-between gap-4 border-b px-8 pt-8 pb-5">
         <div class="flex flex-col gap-2">
