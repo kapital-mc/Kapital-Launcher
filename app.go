@@ -44,6 +44,7 @@ type App struct {
 	panoramas      *services.PanoramaService
 	mojang         *services.MojangService
 	games          *services.GameTracker
+	plays          *services.PlayLedger
 	splash         *services.SplashCard
 	live           *services.LiveLog
 	terrain        *terrainDownloads
@@ -156,6 +157,7 @@ func NewApp(dataDir string, manifest []byte, dist fs.FS) (*App, error) {
 		wiki:           services.NewWikiService(dataDir, m.Wiki.BaseURL).ForChapters(m.Chapters),
 		panoramas:      services.NewPanoramaService(dataDir),
 		mojang:         services.NewMojangService(dataDir),
+		plays:          services.NewPlayLedger(dataDir),
 		openFolder:     services.OpenFolder,
 		frontendErrors: services.NewFrontendErrorLog(),
 		showInPrism: func(engine models.EngineInfo, instanceID, root string) error {

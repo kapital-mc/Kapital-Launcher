@@ -87,12 +87,27 @@ redacts the lines and emits `log:live` (`EventLiveLog`) in events of at most
 64 KiB. A shrunk or replaced file, told by its first 128 bytes, emits a reset.
 One follower at a time, under the app's run context.
 
-The play time (`playtime.go`, `app_playtime.go`, `GetPlayTime`, issue 192, ADR-2
-eleventh amendment) reads two keys of each installed chapter's `instance.cfg`,
-`totalTimePlayed` (seconds) and `lastLaunchTime` (milliseconds since the epoch),
-through `scanINIKeys`, for the account page. The instances are the disk's own
-report, as `chapterInstance` resolves them; a chapter that is not installed is
-left out, and nothing else of the file is read or logged. With Play offline on,
+The play time (`playtime.go`, `playlog.go`, `playledger.go`, `app_playtime.go`,
+`GetPlayTime`, issue 192 and 341, ADR-2 eleventh and twenty-third amendments) is
+the time the game's logs show in a world, for the account page. `measurePlay`
+reads a log for marker lines: a server join (`Connecting to <host>, <port>`, then
+`Loaded N advancements` on the render thread), singleplayer starting, the ways of
+leaving (`Stopping server`, `Stopping!`, a disconnect reason, Distant Horizons'
+`Client on ClientOnly mode disconnecting`, the only line a normal leave from a
+server writes), a Flashback replay (dropped), and the player's own
+`[System] [CHAT] <name> is now AFK` and `is no longer AFK` from Frangfurd
+Essentials, with the 5 idle minutes before the first left out as well. A log's
+time is read as a time of day, since the date is in the player's language and
+Fabric's lines have none. The game starts a new log at midnight while it runs, so
+a log whose first line is not from the `main` thread carries on from the one
+before it, in the order of the file times. `PlayLedger` keeps each finished
+archive's result in `playtime.json` in the app data dir, keyed by name and size,
+so an archive is unpacked once and a deleted one keeps its time; `latest.log` is
+measured fresh on each call. A line is matched and dropped; the ledger holds
+numbers and file names. `lastLaunchTime` (milliseconds since the epoch) is still
+Prism's, one key of `instance.cfg` through `scanINIKeys`; the instances are the
+disk's own report, as `chapterInstance` resolves them, and a chapter that is not
+installed is left out. With Play offline on,
 `LaunchArgs` passes `--offline <name>` instead of `--profile`, the name held to
 `CheckOfflineName` (Minecraft's rule) at launch and at save.
 

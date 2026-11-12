@@ -1,5 +1,5 @@
 /**
- * Prism's play time as the account page words it (issue 192). Pure helpers: Go reads the two
+ * Play time as the account page words it (issues 192 and 341). Pure helpers: Go works out the two
  * numbers (`GetPlayTime`), and these turn them into the strings and shares the page shows.
  */
 import type { PlayTime } from '../types'

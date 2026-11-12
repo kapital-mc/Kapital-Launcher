@@ -463,7 +463,7 @@ export interface ChapterMods {
   running: boolean
 }
 
-/** What Prism has counted for one installed chapter (issue 192): seconds played, and the last start. */
+/** One installed chapter's seconds in a world with AFK left out (issue 341), and its last start. */
 export interface PlayTime {
   chapterId: string
   totalSeconds: number
