@@ -19,6 +19,15 @@ Two static pages, separate from the Kapitel Kapital wiki, under one header
 
 Neither touches storage, and each makes one request, to the site's own
 `/api/status`.
+
+Both pages open with motion (`src/intro.css`): the header fades in, the logo,
+the Download button and the window rise in turn, the backdrop opens square
+by square from dark at mosaic.js's delays, and the floating cards rise as it
+does; the status page's heading and chapters rise the same way. On the home
+page the hero is at least the viewport's height, and the Features and
+Download sections rise only once scrolled into view (`src/reveal.js`, an
+IntersectionObserver; without it nothing is hidden). Reduced motion turns all
+of it off.
 The decision record is `docs/adr/0009-download-site.md`.
 
 ## Where the look comes from

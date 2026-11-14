@@ -24,8 +24,8 @@
   <body class="bg-sunken flex min-h-dvh flex-col select-none">
     <!-- The site's header: the app icon, Home and the
          status page. The same header is in index.html. -->
-    <header class="relative z-30">
-      <div class="mx-auto flex max-w-300 items-center justify-between gap-4 px-4 py-4 md:px-10 md:py-5">
+    <header class="intro-fade relative z-30">
+      <div class="mx-auto flex h-16 max-w-300 items-center justify-between gap-4 px-4 md:h-19 md:px-10">
         <a href="/" class="inline-flex shrink-0">
           <img src="/favicon.svg" alt="Kapital Launcher" width="32" height="32" class="size-8" />
         </a>
@@ -47,12 +47,12 @@
       </div>
 
       <div class="relative z-10 flex w-full max-w-200 flex-col gap-4">
-        <h1 class="font-pixel m-0 mb-2 text-2xl leading-tight font-bold uppercase">Server status</h1>
+        <h1 class="intro-rise font-pixel m-0 mb-2 text-2xl leading-tight font-bold uppercase">Server status</h1>
 
         <!-- Each chapter opens and closes on a checkbox, with no script, the
              way the download popup's Prism section does. Frangfurd is open on
              load; its summary is filled in by src/status-page.js. -->
-        <section data-chapter="frangfurd" aria-labelledby="frangfurd-title" class="group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
+        <section data-chapter="frangfurd" aria-labelledby="frangfurd-title" class="intro-rise intro-step-1 group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
           <input type="checkbox" id="frangfurd-open" class="peer sr-only" checked />
           <label
             for="frangfurd-open"
@@ -125,7 +125,7 @@
             </div>
           </div>
         </section>
-        <section data-chapter="lichdenstein" aria-labelledby="lichdenstein-title" class="group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
+        <section data-chapter="lichdenstein" aria-labelledby="lichdenstein-title" class="intro-rise intro-step-2 group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
           <input type="checkbox" id="lichdenstein-open" class="peer sr-only" />
           <label
             for="lichdenstein-open"
@@ -161,7 +161,7 @@
             </div>
           </div>
         </section>
-        <section data-chapter="luxemburg" aria-labelledby="luxemburg-title" class="group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
+        <section data-chapter="luxemburg" aria-labelledby="luxemburg-title" class="intro-rise intro-step-3 group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
           <input type="checkbox" id="luxemburg-open" class="peer sr-only" />
           <label
             for="luxemburg-open"
@@ -198,7 +198,7 @@
           </div>
         </section>
 
-        <p data-checked class="text-fg-faint m-0 mt-2 font-mono text-xs"></p>
+        <p data-checked class="intro-rise intro-step-4 text-fg-faint m-0 mt-2 font-mono text-xs"></p>
       </div>
     </main>
 
