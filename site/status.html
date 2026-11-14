@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-chapter="frangfurd" data-showcase="frangfurd">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Server status · Kapital Launcher</title>
+    <meta name="description" content="Frangfurd's servers, map, terrain download and pack." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/src/status.css" />
+    <script type="module" src="/src/status-page.js"></script>
+  </head>
+  <!--
+    The server status page, served at /status. One script,
+    src/status-page.js, asks the site's own /api/status (functions/api/status.js)
+    on load and every 30 s while the page is in view, and fills in each row's
+    state (data-up on the row) and the summary. Without it every row says
+    Checking. The addresses, the map link and the pack version are filled in
+    at build time from data/launcher.json (vite.config.js); the backdrop is the
+    home page's, on Frangfurd (data-showcase, src/showcase.css).
+  -->
+  <body class="bg-sunken flex min-h-dvh flex-col">
+    <!-- The site's header: the app icon home, and the page's sections, the
+         status page and GitHub. The same header is in index.html. -->
+    <header class="relative z-30">
+      <div class="mx-auto flex max-w-300 items-center justify-between gap-4 px-4 py-4 md:px-10 md:py-5">
+        <a href="/" class="inline-flex shrink-0">
+          <img src="/favicon.svg" alt="Kapital Launcher" width="32" height="32" class="size-8" />
+        </a>
+        <nav aria-label="Site" class="font-pixel flex items-center gap-4 text-xs uppercase sm:gap-7 sm:text-sm">
+          <a href="/#features" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">Features</a>
+          <!--release:start-->
+          <a href="/#download" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">Download</a>
+          <!--release:end-->
+          <a href="/status" aria-current="page" class="text-fg hover:text-fg duration-fast ease-standard no-underline transition-[color]">Status</a>
+          <a data-link="github" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="relative flex min-w-0 grow flex-col items-center overflow-hidden px-4 pt-8 pb-16 md:px-10 md:pt-14 md:pb-24">
+      <div
+        class="showcase-backdrop pointer-events-none absolute overflow-hidden top-28 left-1/2 md:top-34 h-180 w-screen -translate-x-1/2"
+        aria-hidden="true"
+      >
+        <div class="showcase-art"><!--mosaic:art--></div>
+        <div class="showcase-tint absolute inset-0"></div>
+        <div class="showcase-pixels"><!--mosaic:pixels--></div>
+      </div>
+
+      <div class="relative z-10 flex w-full max-w-200 flex-col gap-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <h1 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Server status</h1>
+          <p data-summary class="group bg-sunken border-line-strong font-pixel m-0 inline-flex items-center gap-2.5 border-3 px-4 py-2.5 text-sm whitespace-nowrap uppercase">
+            <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-summary-text>Checking</span>
+          </p>
+        </div>
+
+        <section aria-labelledby="frangfurd-title" class="bg-sunken border-accent border-3">
+          <div class="border-line flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b px-5 pt-5 pb-4">
+            <h2 id="frangfurd-title" class="m-0">
+              <img src="../frontend/src/assets/titles/frangfurd.png" alt="Frangfurd" class="block h-auto w-60 max-w-full" />
+            </h2>
+            <span class="text-accent font-pixel text-sm tracking-label uppercase">03 · 2500 – present</span>
+          </div>
+          <ul class="divide-line m-0 list-none divide-y p-0">
+          <li data-service="global" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span class="font-semibold">Global</span>
+              <span class="text-fg-faint font-mono break-all text-xs">%ADDRESS_FRANGFURD_GLOBAL%</span>
+            </span>
+            <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+              <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+            </span>
+          </li>
+          <li data-service="germany" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span class="font-semibold">Germany</span>
+              <span class="text-fg-faint font-mono break-all text-xs">%ADDRESS_FRANGFURD_GERMANY%</span>
+            </span>
+            <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+              <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+            </span>
+          </li>
+          <li data-service="map" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span class="font-semibold"><a href="%MAP_FRANGFURD%" class="text-fg hover:text-accent duration-fast ease-standard no-underline transition-[color]">World map ↗</a></span>
+              <span class="text-fg-faint  text-xs">BlueMap</span>
+            </span>
+            <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+              <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+            </span>
+          </li>
+          <li data-service="terrain" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span class="font-semibold">Terrain download</span>
+              <span data-detail class="text-fg-faint  text-xs">Distant Horizons</span>
+            </span>
+            <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+              <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+            </span>
+          </li>
+          <li data-service="pack" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span class="font-semibold">Pack</span>
+              <span data-detail class="text-fg-faint  text-xs"><span data-pack-version>%PACK_FRANGFURD_VERSION%</span> · %PACK_FRANGFURD_MODS% mods · %PACK_FRANGFURD_LOADER% %PACK_FRANGFURD_MINECRAFT%</span>
+            </span>
+            <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+              <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+            </span>
+          </li>
+          </ul>
+        </section>
+
+        <section aria-label="Other chapters" class="bg-sunken border-line-strong border-3">
+          <ul class="divide-line m-0 list-none divide-y p-0">
+          <li data-up="offline" class="group flex items-center justify-between gap-6 px-5 py-4">
+            <span class="flex items-center gap-3 font-semibold">
+              <img src="../frontend/src/assets/icons/luxemburg.png" alt="" class="size-5.5 object-contain" />Luxemburg
+            </span>
+            <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+              <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span>Offline
+            </span>
+          </li>
+          <li data-up="offline" class="group flex items-center justify-between gap-6 px-5 py-4">
+            <span class="flex items-center gap-3 font-semibold">
+              <img src="../frontend/src/assets/icons/lichdenstein.png" alt="" class="size-5.5 object-contain" />Lichdenstein
+            </span>
+            <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+              <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span>Offline
+            </span>
+          </li>
+          </ul>
+        </section>
+
+        <p data-checked class="text-fg-faint m-0 font-mono text-xs"></p>
+      </div>
+    </main>
+
+    <footer class="border-line text-fg-faint border-t text-sm">
+      <div class="mx-auto flex max-w-300 flex-wrap items-center gap-x-7 gap-y-3 px-4 py-6 md:px-10">
+        <a href="/" class="text-fg-muted hover:text-fg duration-fast ease-standard text-sm no-underline transition-[color]">Kapital Launcher</a>
+        <a data-link="github" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-sm no-underline transition-[color]">GitHub</a>
+        <p class="m-0 grow basis-80 md:text-right">
+          Not an official Minecraft product. Not approved by or associated with
+          Mojang or Microsoft.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

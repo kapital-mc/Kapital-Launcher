@@ -104,6 +104,34 @@ function changelog(base, xml) {
   return { html: renderChangelog(releases, base), releases }
 }
 
+// Facts from data/launcher.json, so the pages cannot fall behind the
+// manifest: each chapter's pack (%PACK_<ID>_VERSION%, _MODS, _LOADER,
+// _MINECRAFT), its map (%MAP_<ID>%) and its server addresses
+// (%ADDRESS_<ID>_<LABEL>%). Frangfurd's pack version is replaced again by the
+// live pack's once /api/status answers (src/cards.js, src/status-page.js).
+function manifestFacts() {
+  const manifest = JSON.parse(readFileSync(new URL('../data/launcher.json', import.meta.url), 'utf8'))
+  const facts = {}
+  for (const { id, pack, map, server } of manifest.chapters) {
+    const key = id.toUpperCase()
+    facts[`PACK_${key}_VERSION`] = pack.version
+    facts[`PACK_${key}_MODS`] = pack.mods
+    facts[`PACK_${key}_LOADER`] = pack.loader
+    facts[`PACK_${key}_MINECRAFT`] = pack.minecraft
+    if (map) facts[`MAP_${key}`] = map
+    for (const { label, address } of server.addresses) facts[`ADDRESS_${key}_${label.toUpperCase()}`] = address
+  }
+  return facts
+}
+
+function fillManifest(html) {
+  const facts = manifestFacts()
+  return html.replace(/%((?:PACK|MAP|ADDRESS)(?:_[A-Z]+)+)%/g, (match, key) => {
+    if (!(key in facts)) throw new Error(`site: ${match} names nothing in data/launcher.json`)
+    return escapeAttr(String(facts[key])).replaceAll('<', '&lt;')
+  })
+}
+
 async function readLinks() {
   const links = JSON.parse(readFileSync(new URL('./links.json', import.meta.url), 'utf8'))
   const all = { github: links.github }
@@ -180,6 +208,8 @@ function fillRelease(html, release) {
 const CHANGELOG_BLOCK = /[ \t]*<!--changelog:start-->[\s\S]*?<!--changelog:end-->[ \t]*\r?\n?/g
 
 function fillChangelog(html, body) {
+  // The status page has no changelog popup.
+  if (!html.includes('<!--changelog:start-->')) return html
   if (body === null) return html.replace(CHANGELOG_BLOCK, '')
   if (!html.includes('<!--changelog-->')) throw new Error('site: index.html has no <!--changelog--> placeholder')
   return html
@@ -190,7 +220,7 @@ function fillChangelog(html, body) {
 
 function fillLinks(html, links) {
   const seen = new Set()
-  const out = fillRelease(fillChangelog(html, links.changelog), links.release)
+  const out = fillRelease(fillChangelog(fillManifest(html), links.changelog), links.release)
     .replace(/<a\s+data-link="(\w+)"([^>]*)>([\s\S]*?)<\/a\s*>/g, (_, key, attrs, body) => {
       if (key === 'release' || !(key in links)) {
         throw new Error(`site: index.html links "${key}", links.json has no such key`)
@@ -264,7 +294,8 @@ function mosaic() {
         let out = html
         for (const [marker, render] of Object.entries(MOSAIC)) {
           const count = out.split(marker).length - 1
-          // The banner is in the download popup, which a build with no release leaves out.
+          // The banner is in the download popup, which a build with no release
+          // and the status page leave out.
           if (count === 0 && marker.startsWith('<!--mosaic:banner')) continue
           if (count !== 1) throw new Error(`site: index.html has ${count} ${marker}, expected one`)
           out = out.replace(marker, render)
@@ -323,6 +354,15 @@ function stylesheetFirst() {
 export default defineConfig(async () => ({
   plugins: [tailwindcss(), await links(), mosaic(), stylesheetFirst()],
   build: {
+    // Two pages: the home page and the server status page, served by
+    // Cloudflare Pages at / and /status. Each has its own script, and the two
+    // share no module, so each stays one file with no imports.
+    rolldownOptions: {
+      input: {
+        index: new URL('./index.html', import.meta.url).pathname,
+        status: new URL('./status.html', import.meta.url).pathname,
+      },
+    },
     // The script runs as a classic script (stylesheetFirst above), and the page
     // has no module to preload, so the module preload polyfill has no work.
     modulePreload: { polyfill: false },

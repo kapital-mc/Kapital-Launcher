@@ -1,16 +1,30 @@
-// The server status the download page shows, worked out on Cloudflare by
-// functions/status.js: the Java Edition Server List Ping, as the launcher's
-// backend/services/ping.go does it, kept here without Cloudflare's socket so
-// `pnpm test` can cover it.
+// The server status the download site shows, worked out on Cloudflare by
+// functions/api/status.js: the Java Edition Server List Ping, as the
+// launcher's backend/services/ping.go does it, and the checks of the services
+// around Frangfurd. Kept here without Cloudflare's socket so `pnpm test` can
+// cover it.
 //
-// Only Frangfurd is asked, at the Germany address of data/launcher.json (its
-// playit.gg tunnel); Luxemburg and Lichdenstein are offline and are never
-// asked. The handshake asks with protocol 0, one byte, which the Frangfurd
-// server answers (ping.go has the history). Nothing the server says is
-// passed on but whether it answered and its player counts, as numbers.
+// Only Frangfurd is asked: its two playit.gg addresses, its BlueMap, its
+// Distant Horizons terrain download and its pack, each as data/launcher.json
+// writes it (status.test.js holds them to it). Luxemburg and Lichdenstein are
+// offline and are never asked. The handshake asks with protocol 0, one byte,
+// which the Frangfurd server answers (ping.go has the history). Nothing a
+// service says is passed on but whether it answered, the player counts as
+// numbers, the pack's version and the terrain snapshot's date, each checked.
 
-// The chapter asked and the address asked, as data/launcher.json writes it.
-export const LIVE = { chapter: 'frangfurd', label: 'Germany', address: 'rails-enjoyed.tun.ply.gg' }
+// The Tailscale address is left out: it is a private address that Cloudflare
+// cannot reach.
+export const SERVERS = [
+  { id: 'global', chapter: 'frangfurd', label: 'Global', address: 'female-specified.gl.joinmc.link' },
+  { id: 'germany', chapter: 'frangfurd', label: 'Germany', address: 'rails-enjoyed.tun.ply.gg' },
+]
+// The manifest's own values, as for the addresses above.
+// aislop-ignore-next-line ai-slop/hardcoded-url -- the manifest's map, held to it by status.test.js
+export const MAP = 'http://spiral-reminders.tun.ply.gg:1111'
+export const TERRAIN = 'https://dh.frangfurd.click/dh/latest.json'
+// aislop-ignore-next-line ai-slop/hardcoded-url -- the manifest's pack, held to it by status.test.js
+export const PACK = 'https://kapital-packs.alessandrogekeler.workers.dev/frangfurd/pack.toml'
+
 export const DEFAULT_PORT = 25565
 // The longest status response read, as in ping.go: a favicon is about 10 KB.
 export const MAX_RESPONSE = 1 << 20
@@ -86,11 +100,61 @@ export function srvTarget(dns) {
   return { host, port }
 }
 
-// The body /status answers with: every chapter, the live one as asked.
-export function body(live) {
+// The request line of an HTTP/1.1 GET for a URL's root, for a service the
+// function reaches over a plain socket (the map, on its own port).
+export function httpRequest(url) {
+  const { host } = new URL(url)
+  return new TextEncoder().encode(
+    `GET / HTTP/1.1\r\nHost: ${host}\r\nUser-Agent: kapital-launcher-site\r\nConnection: close\r\n\r\n`,
+  )
+}
+
+// The status code of an HTTP response once its first line has arrived, else
+// null. Anything that is not an HTTP status line is refused.
+export function httpStatus(bytes) {
+  const head = new TextDecoder().decode(bytes.subarray(0, 64))
+  const end = head.indexOf('\r\n')
+  if (end === -1) {
+    if (bytes.length >= 64) throw new Error('not an HTTP response')
+    return null
+  }
+  const match = /^HTTP\/1\.[01] (\d{3})/.exec(head.slice(0, end))
+  if (!match) throw new Error('not an HTTP response')
+  return Number(match[1])
+}
+
+// Whether an HTTP status says the service is there.
+export const answered = (status) => Number.isInteger(status) && status >= 200 && status < 400
+
+// The version a packwiz pack.toml names, or null.
+export function packVersion(toml) {
+  const match = /^version\s*=\s*"([^"\n]*)"/m.exec(typeof toml === 'string' ? toml : '')
+  return match && /^[0-9A-Za-z.+-]{1,32}$/.test(match[1]) ? match[1] : null
+}
+
+// The day the terrain snapshot was written, from its latest.json, or null.
+export function snapshotDate(json) {
+  const created = json?.createdAt
+  if (typeof created !== 'string' || !/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(created)) return null
+  const date = new Date(created)
+  return Number.isNaN(date.getTime()) ? null : created.slice(0, 10)
+}
+
+// The body /api/status answers with. Each chapter is online when one of its
+// addresses answered, with that address's counts, for the home page's server
+// card; the rest is for the status page.
+export function body({ servers = {}, map = null, terrain = null, pack = null, checked = new Date() } = {}) {
+  const off = { online: false }
+  const each = Object.fromEntries(SERVERS.map((s) => [s.id, servers[s.id] ?? off]))
+  const live = Object.values(each).find((s) => s.online) ?? off
   return {
-    luxemburg: { online: false },
-    lichdenstein: { online: false },
-    [LIVE.chapter]: live ?? { online: false },
+    checked: checked.toISOString(),
+    luxemburg: off,
+    lichdenstein: off,
+    frangfurd: live,
+    servers: each,
+    map: map ?? off,
+    terrain: terrain ?? off,
+    pack: pack ?? off,
   }
 }

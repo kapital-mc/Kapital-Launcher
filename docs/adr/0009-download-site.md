@@ -318,3 +318,33 @@ download easy and looks good, at most two screens tall. What changed:
   the Apple logo on a website without a licence, and Microsoft's logos only
   under its brand guidelines, so the systems are named in words.
 
+
+## Amendment, 2026-11-14: three sections and a status page
+
+The author asked for the page in three sections, hero, features and
+download, and for a separate server status page, keeping the pixel window.
+
+- **A header** with the app icon home and Features, Download, Status and
+  GitHub. The decision of 2026-10-22 kept nothing above the logo; a second
+  page needs a way between the two.
+- **The hero is unchanged**: logo, Download button, the window and its two
+  cards. The pack card's facts are now filled in from `data/launcher.json`
+  at build time, after the hand-written copy had fallen eight versions
+  behind, and Frangfurd's version is replaced by the published pack's once
+  the status answer arrives.
+- **Features** are six tiles of facts, a title and one line each, in the
+  logo's rose, so the cycling chapter accent does not recolour them.
+- **Download** shows both installers and the Prism instance zips in the
+  open. The Download button above still opens the popup for the visitor's
+  system.
+- **A status page at `/status`**, a second page of the same build
+  (`status.html`). The author chose the site's own endpoint over a public
+  API or a Cron Worker with uptime history. The function moved to
+  `/api/status`, since a static page and a function cannot share a path, and
+  now also asks Frangfurd's Global address, its BlueMap (plain HTTP over a
+  socket, its port being its own), the Distant Horizons terrain download and
+  the pack host, each with the same 4 s limit and one 30 s cache. The
+  Tailscale address is left out: Cloudflare cannot reach a tailnet. It holds
+  no history and keeps no storage.
+- **Not solved here:** visitors whose network throttles Cloudflare reach
+  neither page, the status page included, since both are on Pages.
