@@ -44,21 +44,17 @@
     The page is dark whatever the visitor's preference (data-theme on the
     root): the artwork and the window are drawn for the dark palette.
   -->
-  <body class="bg-sunken flex min-h-dvh flex-col">
-    <!-- The site's header: the app icon home, and the page's sections, the
-         status page and GitHub. The same header is in status.html. -->
+  <body class="bg-sunken flex min-h-dvh flex-col select-none">
+    <!-- The site's header: the app icon, Home and the
+         status page. The same header is in status.html. -->
     <header class="relative z-30">
       <div class="mx-auto flex max-w-300 items-center justify-between gap-4 px-4 py-4 md:px-10 md:py-5">
         <a href="/" class="inline-flex shrink-0">
           <img src="/favicon.svg" alt="Kapital Launcher" width="32" height="32" class="size-8" />
         </a>
         <nav aria-label="Site" class="font-pixel flex items-center gap-4 text-xs uppercase sm:gap-7 sm:text-sm">
-          <a href="/#features" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">Features</a>
-          <!--release:start-->
-          <a href="/#download" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">Download</a>
-          <!--release:end-->
+          <a href="/" aria-current="page" class="text-fg hover:text-fg duration-fast ease-standard no-underline transition-[color]">Home</a>
           <a href="/status" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">Status</a>
-          <a data-link="github" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">GitHub</a>
         </nav>
       </div>
     </header>
@@ -283,43 +279,43 @@
             <li class="border-line-strong bg-sunken flex items-start gap-4 border-3 p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5 pt-0.5">
-                <h3 class="font-pixel m-0 text-md font-normal uppercase">Three chapters</h3>
-                <span class="text-fg-muted text-sm leading-normal">Luxemburg · Lichdenstein · Frangfurd</span>
-              </span>
-            </li>
-            <li class="border-line-strong bg-sunken flex items-start gap-4 border-3 p-5">
-              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg></span>
-              <span class="flex min-w-0 flex-col gap-1.5 pt-0.5">
-                <h3 class="font-pixel m-0 text-md font-normal uppercase">Prism Launcher</h3>
-                <span class="text-fg-muted text-sm leading-normal">Sign-in, Java and mod loaders</span>
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">All chapters</h3>
+                <span class="text-fg-muted text-sm leading-normal">Download and manage modpacks</span>
               </span>
             </li>
             <li class="border-line-strong bg-sunken flex items-start gap-4 border-3 p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5 pt-0.5">
                 <h3 class="font-pixel m-0 text-md font-normal uppercase">Pack sync</h3>
-                <span class="text-fg-muted text-sm leading-normal">On every Play</span>
+                <span class="text-fg-muted text-sm leading-normal">Updates automatically on Play</span>
               </span>
             </li>
             <li class="border-line-strong bg-sunken flex items-start gap-4 border-3 p-5">
-              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" /></svg></span>
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><rect width="20" height="8" x="2" y="2" rx="2" ry="2" /><rect width="20" height="8" x="2" y="14" rx="2" ry="2" /><line x1="6" x2="6.01" y1="6" y2="6" /><line x1="6" x2="6.01" y1="18" y2="18" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5 pt-0.5">
-                <h3 class="font-pixel m-0 text-md font-normal uppercase">Server status</h3>
-                <span class="text-fg-muted text-sm leading-normal">Players online, per chapter</span>
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">Server info</h3>
+                <span class="text-fg-muted text-sm leading-normal">Status, players and map</span>
               </span>
             </li>
             <li class="border-line-strong bg-sunken flex items-start gap-4 border-3 p-5">
-              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><circle cx="15" cy="12" r="3" /><rect width="20" height="14" x="2" y="5" rx="7" /></svg></span>
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5 pt-0.5">
-                <h3 class="font-pixel m-0 text-md font-normal uppercase">Mod switches</h3>
-                <span class="text-fg-muted text-sm leading-normal">Distant Horizons · Iris · Camera Tools</span>
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">Addons</h3>
+                <span class="text-fg-muted text-sm leading-normal">Camera tools and game features</span>
               </span>
             </li>
             <li class="border-line-strong bg-sunken flex items-start gap-4 border-3 p-5">
-              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg></span>
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5 pt-0.5">
-                <h3 class="font-pixel m-0 text-md font-normal uppercase">Updates</h3>
-                <span class="text-fg-muted text-sm leading-normal">In the app · signed</span>
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">Client improvements</h3>
+                <span class="text-fg-muted text-sm leading-normal">Custom fixes and optimizations</span>
+              </span>
+            </li>
+            <li class="border-line-strong bg-sunken flex items-start gap-4 border-3 p-5">
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg></span>
+              <span class="flex min-w-0 flex-col gap-1.5 pt-0.5">
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">In-app updates</h3>
+                <span class="text-fg-muted text-sm leading-normal">Launcher updates automatically</span>
               </span>
             </li>
           </ul>
@@ -327,42 +323,33 @@
       </section>
 
       <!--release:start-->
-      <!-- Both installers and the Prism instance zips, in the open. The
-           visitor's system has the rose outline (data-os, src/detect.js).
-           Filled in by vite.config.js like the popup below. -->
-      <section id="download" class="border-line scroll-mt-4 border-t px-4 py-14 md:px-10 md:py-20">
+      <!-- The systems the launcher runs on, and the same Download button as
+           the hero, opening the download popup for the visitor's system. -->
+      <section class="border-line border-t px-4 py-14 md:px-10 md:py-20">
         <div class="mx-auto flex max-w-280 flex-col gap-8 md:gap-10">
-          <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-            <h2 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Download</h2>
-            <a href="%NOTES_URL%" class="text-fg-muted hover:text-fg duration-fast ease-standard font-pixel text-sm uppercase no-underline transition-[color]"><span class="sr-only">Release notes for </span>%TAG% ↗</a>
+          <h2 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Download</h2>
+          <div class="border-line-strong bg-sunken flex flex-col gap-8 border-3 p-6 md:flex-row md:items-center md:justify-between md:p-8">
+            <dl class="m-0 grid grid-cols-[auto_1fr] items-baseline gap-x-8 gap-y-3">
+              <dt class="text-fg-faint font-pixel text-xs uppercase">Windows</dt>
+              <dd class="m-0">Windows 11 · 64-bit</dd>
+              <dt class="text-fg-faint font-pixel text-xs uppercase">macOS</dt>
+              <dd class="m-0">macOS 12 or later · Intel and Apple silicon</dd>
+            </dl>
+            <div class="flex flex-col items-center gap-3.5">
+                <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+                  Download for Windows
+                </button>
+                <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+                  Download for macOS
+                </button>
+                <div class="flex items-center gap-3.5 font-pixel text-sm">
+                  <span class="text-fg-faint">%TAG%</span>
+                  <span class="bg-line-strong h-3.5 w-px" aria-hidden="true"></span>
+                  <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="windows" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">macOS</button>
+                  <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="macos" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">Windows</button>
+                </div>
+              </div>
           </div>
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div class="border-logo-gradient-top in-data-[os=macos]:border-line-strong bg-sunken duration-slow ease-standard flex flex-col justify-between gap-6 border-3 p-5 transition-[border-color] md:p-6">
-              <span class="flex flex-col gap-1">
-                <span class="text-lg font-semibold">Windows</span>
-                <span class="text-fg-faint text-sm">Windows 11 · 64-bit</span>
-              </span>
-              <a href="%WINDOWS_URL%" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-13 items-center justify-center gap-3 border-3 px-6 font-pixel text-md uppercase no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Download<span class="sr-only"> for Windows</span></a>
-            </div>
-            <div class="border-line-strong in-data-[os=macos]:border-logo-gradient-top bg-sunken duration-slow ease-standard flex flex-col justify-between gap-6 border-3 p-5 transition-[border-color] md:p-6">
-              <span class="flex flex-col gap-1">
-                <span class="text-lg font-semibold">macOS</span>
-                <span class="text-fg-faint text-sm">macOS 12 or later · Intel and Apple silicon</span>
-              </span>
-              <a href="%MACOS_URL%" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-13 items-center justify-center gap-3 border-3 px-6 font-pixel text-md uppercase no-underline transition-[filter] hover:brightness-(--effect-hover-brightness)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Download<span class="sr-only"> for macOS</span></a>
-            </div>
-          </div>
-          <!--prism:start-->
-          <div class="flex flex-col gap-3">
-            <h3 class="text-fg-faint font-pixel m-0 text-xs font-normal uppercase">Prism Launcher instances</h3>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <a href="%PRISM_LUXEMBURG_URL%" data-chapter="luxemburg" class="border-accent hover:bg-hover text-fg duration-fast ease-standard inline-flex min-h-11 items-center gap-2 border-2 px-2.5 py-1.5 text-sm font-semibold no-underline transition-[background-color]"><img src="../frontend/src/assets/icons/luxemburg.png" alt="" class="size-5.5 object-contain" />Luxemburg</a>
-                <a href="%PRISM_LICHDENSTEIN_URL%" data-chapter="lichdenstein" class="border-accent hover:bg-hover text-fg duration-fast ease-standard inline-flex min-h-11 items-center gap-2 border-2 px-2.5 py-1.5 text-sm font-semibold no-underline transition-[background-color]"><img src="../frontend/src/assets/icons/lichdenstein.png" alt="" class="size-5.5 object-contain" />Lichdenstein</a>
-                <a href="%PRISM_FRANGFURD_URL%" data-chapter="frangfurd" class="border-accent hover:bg-hover text-fg duration-fast ease-standard inline-flex min-h-11 items-center gap-2 border-2 px-2.5 py-1.5 text-sm font-semibold no-underline transition-[background-color]"><img src="../frontend/src/assets/icons/frangfurd.png" alt="" class="size-5.5 object-contain" />Frangfurd</a>
-            </div>
-            <p class="text-fg-faint m-0 text-xs leading-normal">In Prism, choose Add Instance, then Import.</p>
-          </div>
-          <!--prism:end-->
         </div>
       </section>
       <!--release:end-->

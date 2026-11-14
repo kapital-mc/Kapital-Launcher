@@ -17,3 +17,11 @@
 
 /* The popups' opening and closing, on the same tokens. */
 @import "./popup.css";
+
+/* The scrollbar's room is kept on every page, so the header stays put between
+   the home page, which always scrolls, and a status page that may not. */
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+}

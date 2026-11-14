@@ -1,18 +1,21 @@
 # Download site
 
 Two static pages, separate from the Kapitel Kapital wiki, under one header
-(the app icon, Features, Download, Status, GitHub):
+(the app icon, Home, Status):
 
 - `/` (`index.html`) in three sections. The hero: the launcher's name, the
   Download button for the visitor's system with the version and the other
   system under it, and the launcher window with the three chapters as a strip
   of panels in front of a backdrop of the open chapter's picture. Features:
-  six tiles, a title and one line of facts each. Download: both installers
-  and the Prism instance zips. The footer holds Changelog, GitHub and Code
-  signing policy.
-- `/status` (`status.html`): Frangfurd's two addresses, map, terrain
-  download and pack, each online or offline, and the other two chapters, over
-  the same backdrop on Frangfurd. See *The status page* below.
+  six tiles, a title and one line of facts each. Download: the systems the
+  launcher runs on and the same Download button, which opens the popup (the
+  Prism instance zips are only in the popup). The footer holds Changelog,
+  GitHub and Code signing policy.
+- `/status` (`status.html`): each chapter as a section that opens and
+  closes. Frangfurd's two addresses, map, terrain download and pack, each
+  online or offline; Luxemburg and Lichdenstein retired, with their
+  downloads marked unavailable. Over the same backdrop on Frangfurd. See *The
+  status page* below.
 
 Neither touches storage, and each makes one request, to the site's own
 `/api/status`.
@@ -228,10 +231,15 @@ more, so an inline script would be blocked.
 ## The status page
 
 `status.html`, served by Pages at `/status`, is a second page of the same
-build (`build.rolldownOptions.input` in `vite.config.js`). It lists
-Frangfurd's services in one card and the other two chapters, always offline,
-in a second, over the home page's backdrop on Frangfurd (`data-showcase` on
-the root, `src/showcase.css`).
+build (`build.rolldownOptions.input` in `vite.config.js`). Each chapter is a
+section whose header (title, era, state, chevron) is the label of a hidden
+checkbox, so opening one needs no script. Frangfurd starts open with its
+services; Lichdenstein (server and world, 17 GB) and Luxemburg (world,
+25 GB) say the server is retired and show their downloads as Unavailable.
+All of it over the home page's backdrop on Frangfurd (`data-showcase` on the
+root, `src/showcase.css`). Both pages keep the scrollbar's room
+(`scrollbar-gutter` in `src/style.css`), so the header does not move between
+them.
 
 | Row | What `/api/status` asks | Online when |
 |---|---|---|
