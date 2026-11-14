@@ -105,13 +105,14 @@ function changelog(base, xml) {
 }
 
 // Facts from data/launcher.json, so the pages cannot fall behind the
-// manifest: each chapter's pack (%PACK_<ID>_VERSION%, _MODS, _LOADER,
-// _MINECRAFT), its map (%MAP_<ID>%) and its server addresses
-// (%ADDRESS_<ID>_<LABEL>%). Frangfurd's pack version is replaced again by the
-// live pack's once /api/status answers (src/cards.js, src/status-page.js).
+// manifest: the wiki's address (%WIKI%), and each chapter's pack
+// (%PACK_<ID>_VERSION%, _MODS, _LOADER, _MINECRAFT), its map (%MAP_<ID>%) and
+// its server addresses (%ADDRESS_<ID>_<LABEL>%). Frangfurd's pack version is
+// replaced again by the live pack's once /api/status answers (src/cards.js,
+// src/status-page.js).
 function manifestFacts() {
   const manifest = JSON.parse(readFileSync(new URL('../data/launcher.json', import.meta.url), 'utf8'))
-  const facts = {}
+  const facts = { WIKI: manifest.wiki.baseUrl }
   for (const { id, pack, map, server } of manifest.chapters) {
     const key = id.toUpperCase()
     facts[`PACK_${key}_VERSION`] = pack.version
@@ -126,7 +127,7 @@ function manifestFacts() {
 
 function fillManifest(html) {
   const facts = manifestFacts()
-  return html.replace(/%((?:PACK|MAP|ADDRESS)(?:_[A-Z]+)+)%/g, (match, key) => {
+  return html.replace(/%((?:PACK|MAP|ADDRESS)(?:_[A-Z]+)+|WIKI)%/g, (match, key) => {
     if (!(key in facts)) throw new Error(`site: ${match} names nothing in data/launcher.json`)
     return escapeAttr(String(facts[key])).replaceAll('<', '&lt;')
   })
@@ -275,6 +276,28 @@ async function links() {
   }
 }
 
+// The footer and its popups are written once, in index.html, between
+// <!--shared:start--> and <!--shared:end-->. Every other page has <!--shared-->
+// where they go, so the two pages cannot drift apart. It runs before links()
+// so the copy gets the same links and changelog.
+const SHARED = /<!--shared:start-->([\s\S]*?)<!--shared:end-->/
+
+function shared() {
+  return {
+    name: 'kapital:shared',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        if (SHARED.test(html)) return html.replace(SHARED, (_, block) => block)
+        if (!html.includes('<!--shared-->')) return html
+        const home = readFileSync(new URL('./index.html', import.meta.url), 'utf8').match(SHARED)
+        if (!home) throw new Error('site: index.html has no <!--shared:start--> block')
+        return html.replace('<!--shared-->', () => home[1])
+      },
+    },
+  }
+}
+
 // The squares of the chapter backdrop and the download popup's banner
 // (mosaic.js), written in where index.html marks them. Each marker is
 // expected exactly once.
@@ -352,7 +375,7 @@ function stylesheetFirst() {
 }
 
 export default defineConfig(async () => ({
-  plugins: [tailwindcss(), await links(), mosaic(), stylesheetFirst()],
+  plugins: [tailwindcss(), shared(), await links(), mosaic(), stylesheetFirst()],
   build: {
     // Two pages: the home page and the server status page, served by
     // Cloudflare Pages at / and /status. Each has its own script, and the two

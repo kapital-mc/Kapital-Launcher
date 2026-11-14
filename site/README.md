@@ -9,8 +9,9 @@ Two static pages, separate from the Kapitel Kapital wiki, under one header
   of panels in front of a backdrop of the open chapter's picture. Features:
   six tiles, a title and one line of facts each. Download: the systems the
   launcher runs on and the same Download button, which opens the popup (the
-  Prism instance zips are only in the popup). The footer holds Changelog,
-  GitHub and Code signing policy.
+  Prism instance zips are only in the popup). The footer holds Wiki,
+  Changelog, GitHub and Code signing policy, and the build copies it and its
+  popups into `/status` (`<!--shared-->`), so both pages have the same one.
 - `/status` (`status.html`): each chapter as a section that opens and
   closes. Frangfurd's two addresses, map, terrain download and pack, each
   online or offline; Luxemburg and Lichdenstein retired, with their

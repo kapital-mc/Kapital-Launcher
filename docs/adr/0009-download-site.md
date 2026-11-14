@@ -326,7 +326,9 @@ download, and for a separate server status page, keeping the pixel window.
 
 - **A header** with the app icon, Home and Status. The decision of
   2026-10-22 kept nothing above the logo; a second page needs a way between
-  the two. GitHub stays in the footer only.
+  the two. GitHub stays in the footer only. The footer, with a Wiki link
+  added, is written once in `index.html` and copied into the status page by
+  the build, so the two cannot differ.
 - **The hero is unchanged**: logo, Download button, the window and its two
   cards. The pack card's facts are now filled in from `data/launcher.json`
   at build time, after the hand-written copy had fallen eight versions
