@@ -8,18 +8,23 @@ paths:
 `site/README.md` covers the page, its links and the Cloudflare setup, and
 `docs/adr/0009-download-site.md` records why it is built this way. The rules:
 
-- **Four small scripts, bundled into one, with no storage and one request,
-  to the site's own `/status`.**
+- **Two pages, `index.html` and `status.html`, each with one script file,
+  with no storage and one request, to the site's own `/api/status`.**
   `src/detect.js` picks the visitor's system (data-os on the root, for the
   Download button and the link under it, and the download popup's radio);
   `src/popup.js` starts the popups' opening fade after their first frame and
   plays the closing before it hides them; `src/cycle.js` opens the next
   chapter every `duration.cycle`; `src/cards.js` scrambles the floating
   cards' text (and the popup's Download word) through block characters and
-  fills in the server card from `/status`, the one Pages Function
-  (`functions/status.js`, whose ping is `status.js`, tested). It pings only
-  the manifest's Frangfurd Germany address and passes on nothing but whether
-  it answered and two counts. Vite bundles them into one file, and
+  fills in the server card from `/api/status`, the one Pages Function
+  (`functions/api/status.js`, whose parsing is `status.js`, tested). It asks
+  only Frangfurd's two playit addresses, map, terrain download and pack, as
+  the manifest names them, and passes on nothing but whether each answered,
+  two counts, the pack's version and the snapshot's day.
+  `src/status-page.js` is the status page's script and asks the same
+  endpoint every 30 s while the page is in view. The two pages share no
+  module (the status page imports the stylesheet through `src/status.css`
+  for that reason), so each script stays one file with no imports. Vite bundles them into one file, and
   the build places it after the stylesheet as a classic script, so the parser
   waits for the stylesheet and no browser paints the page unstyled
   (`stylesheetFirst` in `vite.config.js`); keep it free of imports, exports and
@@ -52,6 +57,10 @@ paths:
   `<!--mosaic:banner-->` with
   empty spans; `src/showcase.css` places, paints and times them. The grid
   sizes are in both files: change them together. `pnpm test` covers it.
+- **Manifest facts are filled in at build time**: `%PACK_<ID>_…%`,
+  `%MAP_<ID>%` and `%ADDRESS_<ID>_<LABEL>%` in either page come from
+  `data/launcher.json` (`fillManifest` in `vite.config.js`); never write them
+  by hand.
 - **Links are data.** `links.json` holds `release` (a tag, or `null`) and
   GitHub; the page has no Wiki button since 2026-10-06. Never write a URL for the
   buttons or the popup's downloads into `index.html`; the build derives the

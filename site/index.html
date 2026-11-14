@@ -17,13 +17,16 @@
     <script type="module" src="/src/popup.js"></script>
     <script type="module" src="/src/cycle.js"></script>
     <script type="module" src="/src/cards.js"></script>
+    <script type="module" src="/src/reveal.js"></script>
   </head>
   <!--
-    One page and four small scripts: src/detect.js picks the OS for the
+    The home page, in three sections (the hero, features, download), and
+    five small scripts: src/detect.js picks the OS for the
     Download button and the download popup, src/popup.js opens and closes the
     popups with motion, src/cycle.js opens the next chapter every few seconds
     and src/cards.js scrambles the cards' text into the new chapter's and
-    fills in the server card from the site's own /status.
+    fills in the server card from the site's own /api/status. The same
+    build makes status.html, the server status page.
     Vite bundles them into one file, and the build makes
     it a classic script after the stylesheet, so the body is not parsed, and
     cannot be painted unstyled, until the stylesheet has loaded
@@ -42,220 +45,323 @@
     The page is dark whatever the visitor's preference (data-theme on the
     root): the artwork and the window are drawn for the dark palette.
   -->
-  <body class="bg-sunken flex min-h-dvh flex-col">
-    <main
-      class="relative flex min-w-0 grow flex-col items-center overflow-hidden px-4 pt-12 pb-16 md:px-10 md:pt-24 md:pb-26"
-    >
-      <div class="relative z-10 flex flex-col items-center gap-6.5 text-center">
-        <!-- The logo is the heading: the author's one-line artwork, shown at
-             its own pixel size. The alt text is the heading's text. -->
-        <h1 class="m-0">
-          <img
-            src="../frontend/src/assets/brand/kapital-launcher-logo.png"
-            alt="Kapital Launcher"
-            width="560"
-            height="41"
-            class="block h-auto w-140 max-w-full"
-          />
-        </h1>
-
-        <!--release:start-->
-        <!-- One Download button per system, shown by data-os on the root
-             (src/detect.js; Windows without it). Under it the release and the
-             other system, which opens the same popup with that system picked. -->
-        <div class="flex flex-col items-center gap-3.5">
-          <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
-            Download for Windows
-          </button>
-          <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
-            Download for macOS
-          </button>
-          <div class="flex items-center gap-3.5 font-pixel text-sm">
-            <span class="text-fg-faint">%TAG%</span>
-            <span class="bg-line-strong h-3.5 w-px" aria-hidden="true"></span>
-            <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="windows" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">macOS</button>
-            <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="macos" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">Windows</button>
-          </div>
-        </div>
-        <!--release:end-->
-        <span
-          data-link-fallback="release"
-          class="bg-logo-gradient-top text-sunken inline-flex h-14 cursor-default items-center border-3 border-logo-gradient-top px-7.5 font-pixel text-md tracking-control uppercase opacity-50"
-          >Download · coming soon</span
-        >
+  <body class="bg-sunken flex min-h-dvh flex-col select-none">
+    <!-- The site's header: the app icon, Home and the
+         status page. The same header is in status.html. -->
+    <header class="intro-fade relative z-30">
+      <div class="mx-auto flex h-16 max-w-300 items-center justify-between gap-4 px-4 md:h-19 md:px-10">
+        <a href="/" class="inline-flex shrink-0">
+          <img src="/favicon.svg" alt="Kapital Launcher" width="32" height="32" class="size-8" />
+        </a>
+        <nav aria-label="Site" class="font-pixel flex items-center gap-4 text-xs uppercase sm:gap-7 sm:text-sm">
+          <a href="/" aria-current="page" class="text-fg hover:text-fg duration-fast ease-standard no-underline transition-[color]">Home</a>
+          <a href="/status" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">Status</a>
+        </nav>
       </div>
+    </header>
 
-      <div class="relative mt-12 w-full min-w-0 max-w-280">
-        <!-- The backdrop: the open chapter's picture through a grid of dark
-             squares, as wide as the page, from the window's top edge down.
-             mosaic.js writes the squares; src/showcase.css paints them. -->
-        <div
-          class="showcase-backdrop pointer-events-none absolute overflow-hidden top-0 left-1/2 h-180 w-screen -translate-x-1/2"
-          aria-hidden="true"
-        >
-          <div class="showcase-art"><!--mosaic:art--></div>
-          <div class="showcase-tint absolute inset-0"></div>
-          <div class="showcase-pixels"><!--mosaic:pixels--></div>
+    <main class="flex min-w-0 grow flex-col">
+      <section
+        class="relative flex min-h-[calc(100dvh-var(--spacing)*16)] min-w-0 flex-col items-center justify-center overflow-hidden px-4 pt-8 pb-16 md:min-h-[calc(100dvh-var(--spacing)*19)] md:px-10 md:pt-16 md:pb-44"
+      >
+        <div class="relative z-10 flex flex-col items-center gap-6.5 text-center">
+          <!-- The logo is the heading: the author's one-line artwork, shown at
+               its own pixel size. The alt text is the heading's text. -->
+          <h1 class="intro-rise m-0">
+            <img
+              src="../frontend/src/assets/brand/kapital-launcher-logo.png"
+              alt="Kapital Launcher"
+              width="560"
+              height="41"
+              class="block h-auto w-140 max-w-full"
+            />
+          </h1>
+
+          <!--release:start-->
+          <!-- One Download button per system, shown by data-os on the root
+               (src/detect.js; Windows without it). Under it the release and the
+               other system, which opens the same popup with that system picked. -->
+          <div class="intro-rise intro-step-1 flex flex-col items-center gap-3.5">
+            <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+              Download for Windows
+            </button>
+            <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+              Download for macOS
+            </button>
+            <div class="flex items-center gap-3.5 font-pixel text-sm">
+              <span class="text-fg-faint">%TAG%</span>
+              <span class="bg-line-strong h-3.5 w-px" aria-hidden="true"></span>
+              <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="windows" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">macOS</button>
+              <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="macos" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">Windows</button>
+            </div>
+          </div>
+          <!--release:end-->
+          <span
+            data-link-fallback="release"
+            class="intro-rise intro-step-1 bg-logo-gradient-top text-sunken inline-flex h-14 cursor-default items-center border-3 border-logo-gradient-top px-7.5 font-pixel text-md tracking-control uppercase opacity-50"
+            >Download · coming soon</span
+          >
         </div>
 
-        <!-- The open chapter's pack, from data/launcher.json, on the left. -->
-        <div
-          class="showcase-card border-accent bg-sunken duration-slow ease-standard absolute top-21 -left-12 z-20 hidden w-60 border-3 transition-[border-color] lg:grid"
-          aria-hidden="true"
-        >
-            <div data-for="luxemburg" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
-              <div class="flex items-center gap-2">
-                <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
-                <span class="text-fg-soft font-pixel text-sm">1.5.0</span>
-              </div>
-              <div class="text-base font-semibold whitespace-nowrap">202 mods · Forge 1.19.2</div>
-            </div>
-            <div data-for="lichdenstein" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
-              <div class="flex items-center gap-2">
-                <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
-                <span class="text-fg-soft font-pixel text-sm">1.0.0</span>
-              </div>
-              <div class="text-base font-semibold whitespace-nowrap">37 mods · Fabric 1.20.6</div>
-            </div>
-            <div data-for="frangfurd" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
-              <div class="flex items-center gap-2">
-                <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
-                <span class="text-fg-soft font-pixel text-sm">1.0.6</span>
-              </div>
-              <div class="text-base font-semibold whitespace-nowrap">98 mods · NeoForge 1.21.1</div>
-            </div>
-        </div>
-
-        <!-- The open chapter's server, on the right: Frangfurd's from /status
-             (src/cards.js), the other two offline. -->
-        <div
-          class="showcase-card border-fg bg-sunken absolute top-21 -right-10 z-20 hidden border-3 px-4 py-3 text-sm lg:grid"
-          aria-hidden="true"
-        >
-            <span data-for="luxemburg" class="showcase-fade flex items-center gap-2.5">
-              <span class="showcase-state size-2.5"></span>
-              <span class="font-pixel whitespace-nowrap uppercase">Server offline</span>
-            </span>
-            <span data-for="lichdenstein" class="showcase-fade flex items-center gap-2.5">
-              <span class="showcase-state size-2.5"></span>
-              <span class="font-pixel whitespace-nowrap uppercase">Server offline</span>
-            </span>
-            <span data-for="frangfurd" class="showcase-fade flex items-center gap-2.5">
-              <span class="showcase-state size-2.5"></span>
-              <span data-status class="font-pixel whitespace-nowrap uppercase">Server</span>
-            </span>
-        </div>
-
-        <figure
-          class="bg-canvas border-line-strong relative z-10 m-0 flex w-full flex-col overflow-hidden rounded-lg border shadow-2xl select-none"
-        >
-          <!-- The header bar: shell/HeaderBar.tsx and HeaderTools.tsx, as
-               Windows draws them. A picture: nothing in it is a control. -->
+        <div class="relative mt-12 w-full min-w-0 max-w-280">
+          <!-- The backdrop: the open chapter's picture through a grid of dark
+               squares, as wide as the page, from the window's top edge down.
+               mosaic.js writes the squares; src/showcase.css paints them. -->
           <div
-            class="bg-sunken border-line flex h-(--layout-titlebar) shrink-0 items-center justify-between border-b"
+            class="showcase-backdrop pointer-events-none absolute overflow-hidden top-0 left-1/2 md:-top-8 h-180 w-screen -translate-x-1/2"
             aria-hidden="true"
           >
-            <div class="flex h-full items-center pl-4">
-              <div class="flex items-center gap-1">
-                <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M9 3v18" /><path d="m16 15-3-3 3-3" /></svg></span>
-                <div class="bg-line mx-1.5 h-4 w-px"></div>
-                <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" /><circle cx="12" cy="12" r="3" /></svg></span>
-                <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /></svg></span>
-                <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 5v16" /><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></svg></span>
-              </div>
-            </div>
-            <div class="ml-1 flex h-full">
-              <span class="text-fg-muted flex h-full w-11.5 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M5 12h14" /></svg></span>
-              <span class="text-fg-muted flex h-full w-11.5 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" /></svg></span>
-              <span class="text-fg-muted flex h-full w-11.5 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></span>
-            </div>
+            <div class="showcase-art"><!--mosaic:art--></div>
+            <div class="showcase-tint absolute inset-0"></div>
+            <div class="showcase-pixels"><!--mosaic:pixels--></div>
           </div>
 
-          <!-- The chapters: a radio group whose labels are the panels. -->
-          <fieldset class="showcase-strip bg-sunken m-0 flex min-w-0 flex-wrap gap-1 border-0 p-1">
-            <legend class="sr-only">Chapter</legend>
-              <div class="showcase-panel relative min-w-0" data-chapter="luxemburg">
-                <input type="radio" name="chapter" id="chapter-luxemburg" value="luxemburg" class="sr-only" />
-                <label
-                  for="chapter-luxemburg"
-                  class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
-                >
-                  <img
-                    src="../frontend/src/assets/screenshots/luxemburg.webp"
-                    alt=""
-                    class="showcase-panel-art absolute inset-0 size-full object-cover"
-                  />
-                  <span
-                    class="to-sunken/85 absolute inset-0 bg-linear-to-b from-transparent from-30%"
-                    aria-hidden="true"
-                  ></span>
-                  <span class="absolute right-5.5 bottom-5.5 left-5.5 flex flex-col gap-3">
-                    <span class="text-accent font-pixel text-sm tracking-label uppercase">01 · 1200 – 2300</span>
-                    <img
-                      src="../frontend/src/assets/titles/luxemburg.png"
-                      alt="Luxemburg"
-                      class="showcase-panel-title block h-auto max-w-full"
-                    />
-                  </span>
-                </label>
+          <!-- The open chapter's pack, from data/launcher.json, on the left. -->
+          <div
+            class="showcase-card intro-rise intro-step-6 border-accent bg-sunken duration-slow ease-standard absolute top-21 -left-12 z-20 hidden w-60 border-3 transition-[border-color] lg:grid"
+            aria-hidden="true"
+          >
+              <div data-for="luxemburg" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
+                  <span class="text-fg-soft font-pixel text-sm">%PACK_LUXEMBURG_VERSION%</span>
+                </div>
+                <div class="text-base font-semibold whitespace-nowrap">%PACK_LUXEMBURG_MODS% mods · %PACK_LUXEMBURG_LOADER% %PACK_LUXEMBURG_MINECRAFT%</div>
               </div>
-              <div class="showcase-panel relative min-w-0" data-chapter="lichdenstein">
-                <input type="radio" name="chapter" id="chapter-lichdenstein" value="lichdenstein" class="sr-only" />
-                <label
-                  for="chapter-lichdenstein"
-                  class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
-                >
-                  <img
-                    src="../frontend/src/assets/screenshots/lichdenstein.webp"
-                    alt=""
-                    class="showcase-panel-art absolute inset-0 size-full object-cover"
-                  />
-                  <span
-                    class="to-sunken/85 absolute inset-0 bg-linear-to-b from-transparent from-30%"
-                    aria-hidden="true"
-                  ></span>
-                  <span class="absolute right-5.5 bottom-5.5 left-5.5 flex flex-col gap-3">
-                    <span class="text-accent font-pixel text-sm tracking-label uppercase">02 · 2300 – 2500</span>
-                    <img
-                      src="../frontend/src/assets/titles/lichdenstein.png"
-                      alt="Lichdenstein"
-                      class="showcase-panel-title block h-auto max-w-full"
-                    />
-                  </span>
-                </label>
+              <div data-for="lichdenstein" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
+                  <span class="text-fg-soft font-pixel text-sm">%PACK_LICHDENSTEIN_VERSION%</span>
+                </div>
+                <div class="text-base font-semibold whitespace-nowrap">%PACK_LICHDENSTEIN_MODS% mods · %PACK_LICHDENSTEIN_LOADER% %PACK_LICHDENSTEIN_MINECRAFT%</div>
               </div>
-              <div class="showcase-panel relative min-w-0" data-chapter="frangfurd">
-                <input type="radio" name="chapter" id="chapter-frangfurd" value="frangfurd" checked class="sr-only" />
-                <label
-                  for="chapter-frangfurd"
-                  class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
-                >
-                  <img
-                    src="../frontend/src/assets/screenshots/frangfurd.webp"
-                    alt=""
-                    class="showcase-panel-art absolute inset-0 size-full object-cover"
-                  />
-                  <span
-                    class="to-sunken/85 absolute inset-0 bg-linear-to-b from-transparent from-30%"
-                    aria-hidden="true"
-                  ></span>
-                  <span class="absolute right-5.5 bottom-5.5 left-5.5 flex flex-col gap-3">
-                    <span class="text-accent font-pixel text-sm tracking-label uppercase">03 · 2500 – present</span>
-                    <img
-                      src="../frontend/src/assets/titles/frangfurd.png"
-                      alt="Frangfurd"
-                      class="showcase-panel-title block h-auto max-w-full"
-                    />
-                  </span>
-                </label>
+              <div data-for="frangfurd" class="showcase-fade flex flex-col gap-1 px-3.5 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="bg-accent text-sunken font-pixel duration-slow ease-standard px-1.5 text-2xs uppercase transition-[background-color]">Pack</span>
+                  <span data-pack-version class="text-fg-soft font-pixel text-sm">%PACK_FRANGFURD_VERSION%</span>
+                </div>
+                <div class="text-base font-semibold whitespace-nowrap">%PACK_FRANGFURD_MODS% mods · %PACK_FRANGFURD_LOADER% %PACK_FRANGFURD_MINECRAFT%</div>
               </div>
-          </fieldset>
-        </figure>
-      </div>
+          </div>
+
+          <!-- The open chapter's server, on the right: Frangfurd's from /api/status
+               (src/cards.js), the other two offline. -->
+          <div
+            class="showcase-card intro-rise intro-step-6 border-fg bg-sunken absolute top-21 -right-10 z-20 hidden border-3 px-4 py-3 text-sm lg:grid"
+            aria-hidden="true"
+          >
+              <span data-for="luxemburg" class="showcase-fade flex items-center gap-2.5">
+                <span class="showcase-state size-2.5"></span>
+                <span class="font-pixel whitespace-nowrap uppercase">Server offline</span>
+              </span>
+              <span data-for="lichdenstein" class="showcase-fade flex items-center gap-2.5">
+                <span class="showcase-state size-2.5"></span>
+                <span class="font-pixel whitespace-nowrap uppercase">Server offline</span>
+              </span>
+              <span data-for="frangfurd" class="showcase-fade flex items-center gap-2.5">
+                <span class="showcase-state size-2.5"></span>
+                <span data-status class="font-pixel whitespace-nowrap uppercase">Server</span>
+              </span>
+          </div>
+
+          <figure
+            class="intro-rise intro-step-2 bg-canvas border-line-strong relative z-10 m-0 flex w-full flex-col overflow-hidden rounded-lg border shadow-2xl select-none"
+          >
+            <!-- The header bar: shell/HeaderBar.tsx and HeaderTools.tsx, as
+                 Windows draws them. A picture: nothing in it is a control. -->
+            <div
+              class="bg-sunken border-line flex h-(--layout-titlebar) shrink-0 items-center justify-between border-b"
+              aria-hidden="true"
+            >
+              <div class="flex h-full items-center pl-4">
+                <div class="flex items-center gap-1">
+                  <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M9 3v18" /><path d="m16 15-3-3 3-3" /></svg></span>
+                  <div class="bg-line mx-1.5 h-4 w-px"></div>
+                  <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" /><circle cx="12" cy="12" r="3" /></svg></span>
+                  <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /></svg></span>
+                  <span class="text-fg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 5v16" /><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></svg></span>
+                </div>
+              </div>
+              <div class="ml-1 flex h-full">
+                <span class="text-fg-muted flex h-full w-11.5 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M5 12h14" /></svg></span>
+                <span class="text-fg-muted flex h-full w-11.5 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" /></svg></span>
+                <span class="text-fg-muted flex h-full w-11.5 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></span>
+              </div>
+            </div>
+
+            <!-- The chapters: a radio group whose labels are the panels. -->
+            <fieldset class="showcase-strip bg-sunken m-0 flex min-w-0 flex-wrap gap-1 border-0 p-1">
+              <legend class="sr-only">Chapter</legend>
+                <div class="showcase-panel relative min-w-0" data-chapter="luxemburg">
+                  <input type="radio" name="chapter" id="chapter-luxemburg" value="luxemburg" class="sr-only" />
+                  <label
+                    for="chapter-luxemburg"
+                    class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
+                  >
+                    <img
+                      src="../frontend/src/assets/screenshots/luxemburg.webp"
+                      alt=""
+                      class="showcase-panel-art absolute inset-0 size-full object-cover"
+                    />
+                    <span
+                      class="to-sunken/85 absolute inset-0 bg-linear-to-b from-transparent from-30%"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="absolute right-5.5 bottom-5.5 left-5.5 flex flex-col gap-3">
+                      <span class="text-accent font-pixel text-sm tracking-label uppercase">01 · 1200 – 2300</span>
+                      <img
+                        src="../frontend/src/assets/titles/luxemburg.png"
+                        alt="Luxemburg"
+                        class="showcase-panel-title block h-auto max-w-full"
+                      />
+                    </span>
+                  </label>
+                </div>
+                <div class="showcase-panel relative min-w-0" data-chapter="lichdenstein">
+                  <input type="radio" name="chapter" id="chapter-lichdenstein" value="lichdenstein" class="sr-only" />
+                  <label
+                    for="chapter-lichdenstein"
+                    class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
+                  >
+                    <img
+                      src="../frontend/src/assets/screenshots/lichdenstein.webp"
+                      alt=""
+                      class="showcase-panel-art absolute inset-0 size-full object-cover"
+                    />
+                    <span
+                      class="to-sunken/85 absolute inset-0 bg-linear-to-b from-transparent from-30%"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="absolute right-5.5 bottom-5.5 left-5.5 flex flex-col gap-3">
+                      <span class="text-accent font-pixel text-sm tracking-label uppercase">02 · 2300 – 2500</span>
+                      <img
+                        src="../frontend/src/assets/titles/lichdenstein.png"
+                        alt="Lichdenstein"
+                        class="showcase-panel-title block h-auto max-w-full"
+                      />
+                    </span>
+                  </label>
+                </div>
+                <div class="showcase-panel relative min-w-0" data-chapter="frangfurd">
+                  <input type="radio" name="chapter" id="chapter-frangfurd" value="frangfurd" checked class="sr-only" />
+                  <label
+                    for="chapter-frangfurd"
+                    class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
+                  >
+                    <img
+                      src="../frontend/src/assets/screenshots/frangfurd.webp"
+                      alt=""
+                      class="showcase-panel-art absolute inset-0 size-full object-cover"
+                    />
+                    <span
+                      class="to-sunken/85 absolute inset-0 bg-linear-to-b from-transparent from-30%"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="absolute right-5.5 bottom-5.5 left-5.5 flex flex-col gap-3">
+                      <span class="text-accent font-pixel text-sm tracking-label uppercase">03 · 2500 – present</span>
+                      <img
+                        src="../frontend/src/assets/titles/frangfurd.png"
+                        alt="Frangfurd"
+                        class="showcase-panel-title block h-auto max-w-full"
+                      />
+                    </span>
+                  </label>
+                </div>
+            </fieldset>
+          </figure>
+        </div>
+      </section>
+
+      <!-- What the launcher does, as facts. -->
+      <section id="features" class="border-line scroll-mt-4 border-t px-4 py-14 md:px-10 md:py-20">
+        <div data-reveal class="mx-auto flex max-w-280 flex-col gap-8 md:gap-10">
+          <h2 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Features</h2>
+          <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg></span>
+              <span class="flex min-w-0 flex-col gap-1.5">
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">All chapters</h3>
+                <span class="text-fg-muted text-sm leading-normal">Download and manage modpacks</span>
+              </span>
+            </li>
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg></span>
+              <span class="flex min-w-0 flex-col gap-1.5">
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">Pack sync</h3>
+                <span class="text-fg-muted text-sm leading-normal">Updates automatically on Play</span>
+              </span>
+            </li>
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><rect width="20" height="8" x="2" y="2" rx="2" ry="2" /><rect width="20" height="8" x="2" y="14" rx="2" ry="2" /><line x1="6" x2="6.01" y1="6" y2="6" /><line x1="6" x2="6.01" y1="18" y2="18" /></svg></span>
+              <span class="flex min-w-0 flex-col gap-1.5">
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">Server info</h3>
+                <span class="text-fg-muted text-sm leading-normal">Status, players and map</span>
+              </span>
+            </li>
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z" /></svg></span>
+              <span class="flex min-w-0 flex-col gap-1.5">
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">Addons</h3>
+                <span class="text-fg-muted text-sm leading-normal">Camera tools and game features</span>
+              </span>
+            </li>
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg></span>
+              <span class="flex min-w-0 flex-col gap-1.5">
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">Client improvements</h3>
+                <span class="text-fg-muted text-sm leading-normal">Custom fixes and optimizations</span>
+              </span>
+            </li>
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+              <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg></span>
+              <span class="flex min-w-0 flex-col gap-1.5">
+                <h3 class="font-pixel m-0 text-md font-normal uppercase">In-app updates</h3>
+                <span class="text-fg-muted text-sm leading-normal">Launcher updates automatically</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!--release:start-->
+      <!-- The systems the launcher runs on, and the same Download button as
+           the hero, opening the download popup for the visitor's system. -->
+      <section class="border-line border-t px-4 py-14 md:px-10 md:py-20">
+        <div data-reveal class="mx-auto flex max-w-280 flex-col gap-8 md:gap-10">
+          <h2 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Download</h2>
+          <div class="reveal-item border-line-strong bg-sunken flex flex-col gap-8 border-3 p-6 md:flex-row md:items-center md:justify-between md:p-8">
+            <dl class="m-0 grid grid-cols-[auto_1fr] items-baseline gap-x-8 gap-y-3">
+              <dt class="text-fg-faint font-pixel text-xs uppercase">Windows</dt>
+              <dd class="m-0">Windows 11 · 64-bit</dd>
+              <dt class="text-fg-faint font-pixel text-xs uppercase">macOS</dt>
+              <dd class="m-0">macOS 12 or later · Intel and Apple silicon</dd>
+            </dl>
+            <div class="flex flex-col items-center gap-3.5">
+                <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+                  Download for Windows
+                </button>
+                <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+                  Download for macOS
+                </button>
+                <div class="flex items-center gap-3.5 font-pixel text-sm">
+                  <span class="text-fg-faint">%TAG%</span>
+                  <span class="bg-line-strong h-3.5 w-px" aria-hidden="true"></span>
+                  <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="windows" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">macOS</button>
+                  <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="macos" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">Windows</button>
+                </div>
+              </div>
+          </div>
+        </div>
+      </section>
+      <!--release:end-->
     </main>
 
+    <!-- The footer and its two popups. status.html shows the same: the build
+         copies this block into it (shared() in vite.config.js). -->
+    <!--shared:start-->
     <footer class="border-line text-fg-faint border-t text-sm">
       <div class="mx-auto flex max-w-300 flex-wrap items-center gap-x-7 gap-y-3 px-4 py-6 md:px-10">
+        <a href="%WIKI%" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-sm no-underline transition-[color]">Wiki</a>
         <!--changelog:start-->
         <button type="button" popovertarget="changelog" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-sm no-underline transition-[color]">Changelog</button>
         <!--changelog:end-->
@@ -408,6 +514,7 @@
         </p>
       </div>
     </div>
+    <!--shared:end-->
 
     <!--release:start-->
     <!-- The download popup: the browser's own popover, opened by the Download

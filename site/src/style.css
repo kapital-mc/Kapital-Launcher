@@ -17,3 +17,15 @@
 
 /* The popups' opening and closing, on the same tokens. */
 @import "./popup.css";
+
+/* The landing motion: the hero on load, the sections below as they scroll
+   into view (src/reveal.js). */
+@import "./intro.css";
+
+/* The scrollbar's room is kept on every page, so the header stays put between
+   the home page, which always scrolls, and a status page that may not. */
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+}

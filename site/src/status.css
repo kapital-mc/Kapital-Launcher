@@ -1,0 +1,5 @@
+/* The status page's stylesheet: the home page's, imported rather than linked
+   from both pages. Two pages linking one stylesheet make the build share a
+   module between their scripts, which a classic script cannot import
+   (stylesheetFirst in vite.config.js). */
+@import "./style.css";

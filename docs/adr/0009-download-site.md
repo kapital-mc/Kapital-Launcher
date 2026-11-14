@@ -318,3 +318,38 @@ download easy and looks good, at most two screens tall. What changed:
   the Apple logo on a website without a licence, and Microsoft's logos only
   under its brand guidelines, so the systems are named in words.
 
+
+## Amendment, 2026-11-14: three sections and a status page
+
+The author asked for the page in three sections, hero, features and
+download, and for a separate server status page, keeping the pixel window.
+
+- **A header** with the app icon, Home and Status. The decision of
+  2026-10-22 kept nothing above the logo; a second page needs a way between
+  the two. GitHub stays in the footer only. The footer, with a Wiki link
+  added, is written once in `index.html` and copied into the status page by
+  the build, so the two cannot differ.
+- **The hero is unchanged**: logo, Download button, the window and its two
+  cards. The pack card's facts are now filled in from `data/launcher.json`
+  at build time, after the hand-written copy had fallen eight versions
+  behind, and Frangfurd's version is replaced by the published pack's once
+  the status answer arrives.
+- **Features** are six tiles of facts, a title and one line each, in the
+  logo's rose, so the cycling chapter accent does not recolour them.
+- **Download** lists the systems the launcher runs on beside the same
+  Download button, which opens the popup. The Prism instance zips stay in the
+  popup only, as the author asked.
+- **A status page at `/status`**, a second page of the same build
+  (`status.html`). The author chose the site's own endpoint over a public
+  API or a Cron Worker with uptime history. The function moved to
+  `/api/status`, since a static page and a function cannot share a path, and
+  now also asks Frangfurd's Global address, its BlueMap (plain HTTP over a
+  socket, its port being its own), the Distant Horizons terrain download and
+  the pack host, each with the same 4 s limit and one 30 s cache. The
+  Tailscale address is left out: Cloudflare cannot reach a tailnet, and the
+  author declined asking the Tailscale API instead. It holds no history and
+  keeps no storage. Each chapter is a section that opens and closes;
+  Luxemburg and Lichdenstein are marked retired, with their world (and, for
+  Lichdenstein, server) downloads shown as unavailable.
+- **Not solved here:** visitors whose network throttles Cloudflare reach
+  neither page, the status page included, since both are on Pages.
