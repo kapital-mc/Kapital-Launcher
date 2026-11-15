@@ -22,6 +22,11 @@ const StorageSection = lazy(() =>
   import('./StorageSection').then((m) => ({ default: m.StorageSection })),
 )
 
+// Reinstall and Uninstall sit at the foot of the page, with the sections that load later.
+const InstanceSection = lazy(() =>
+  import('./InstanceSection').then((m) => ({ default: m.InstanceSection })),
+)
+
 // Only a chapter with a local pack has anything to switch, so the section loads
 // when the panel asks for it and stays out of the launcher's bundle budget
 // (scripts/check-bundle-size.mjs), as the run report does.
@@ -55,7 +60,7 @@ const sameSettings = (a: ChapterSettings, b: ChapterSettings) =>
  * saved by Go in the launcher's settings and applied by the pre-launch sync. Storage follows:
  * the instance on disk by kind, with a delete for terrain, the world map, screenshots and logs. A chapter
  * with a local pack also gets the pack source section, which switches its instance between the
- * published pack and that one.
+ * published pack and that one. The Instance section closes the page: Reinstall and Uninstall.
  */
 export function ChapterSettingsPanel({ chapter, onClose }: Props) {
   const installed = useEngineStore(selectInstalled(chapter.id))
@@ -225,6 +230,7 @@ export function ChapterSettingsPanel({ chapter, onClose }: Props) {
           <ModsSection chapter={chapter} />
           <StorageSection chapter={chapter} />
           <PackSourceSection chapter={chapter} />
+          <InstanceSection chapter={chapter} />
         </Suspense>
       )}
     </Page>
