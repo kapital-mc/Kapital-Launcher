@@ -148,4 +148,6 @@ export function StopGame(arg1:string):Promise<models.GameState>;
 
 export function StopLiveLog(arg1:string):Promise<void>;
 
+export function UninstallChapter(arg1:string):Promise<models.InstanceReport>;
+
 export function WatchLiveLog(arg1:string):Promise<models.RunLogText>;

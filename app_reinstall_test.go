@@ -61,22 +61,6 @@ func TestReinstallChapterRefusesBeforeMovingAnything(t *testing.T) {
 	_, err = app.ReinstallChapter("frangfurd")
 	check("a chapter not installed", "not installed", err)
 
-	// The launcher's own instance has a pack URL: it is never stashed.
-	own := filepath.Join(dir, "kapital-frangfurd")
-	if err := os.MkdirAll(own, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(own, "instance.cfg"), []byte("[General]\n"+commandLine(publishedPackURL(t, app))+"\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	_, err = app.ReinstallChapter("frangfurd")
-	if err == nil || !strings.Contains(err.Error(), "already set up") {
-		t.Errorf("the launcher's own instance: got %v", err)
-	}
-	if err := os.RemoveAll(own); err != nil {
-		t.Fatal(err)
-	}
-
 	unhost(app, "lichdenstein")
 	_, err = app.ReinstallChapter("lichdenstein")
 	check("no hosted pack", "no hosted pack", err)
@@ -85,6 +69,94 @@ func TestReinstallChapterRefusesBeforeMovingAnything(t *testing.T) {
 	app.engine = models.EngineInfo{}
 	_, err = app.ReinstallChapter("lichdenstein")
 	check("no Prism", "", err)
+}
+
+// ownApp is an app with Prism found and Frangfurd installed by the launcher,
+// syncing from line's pack, with a world and an options.txt; it returns the app
+// and the instances folder.
+func ownApp(t *testing.T, line string, overrides map[string]string) (*App, string) {
+	t.Helper()
+	app, cfg := packApp(t, line, overrides)
+	inst := filepath.Dir(cfg)
+	for name, content := range map[string]string{
+		"minecraft/saves/World/level.dat": "world",
+		"minecraft/options.txt":           "renderDistance=64",
+	} {
+		path := filepath.Join(inst, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return app, filepath.Dir(inst)
+}
+
+// The launcher's own instance is reset from the pack it syncs from now: a
+// local pack's install that cannot fetch puts the whole old folder back.
+func TestReinstallOwnInstancePutsItBackWhenTheInstallFails(t *testing.T) {
+	const local = "http://127.0.0.1:9/pack.toml"
+	app, dir := ownApp(t, commandLine(local), map[string]string{"frangfurd": local})
+	_, err := app.ReinstallChapter("frangfurd")
+	if err == nil || !strings.Contains(err.Error(), "fetch pack.toml") {
+		t.Fatalf("expected the install to fail at the fetch of the local pack, got %v", err)
+	}
+	if got := folders(t, dir); len(got) != 1 || got[0] != "kapital-frangfurd" {
+		t.Fatalf("the old instance is not back: %v", got)
+	}
+	for _, name := range []string{"saves/World/level.dat", "options.txt"} {
+		if _, err := os.Stat(filepath.Join(dir, "kapital-frangfurd", "minecraft", filepath.FromSlash(name))); err != nil {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+}
+
+func TestReinstallAndUninstallRefuseDuringATerrainDownload(t *testing.T) {
+	app, dir := ownApp(t, commandLine("https://example.invalid/pack.toml"), nil)
+	app.terrain.mu.Lock()
+	app.terrain.chapter, app.terrain.cancel = "frangfurd", func() {}
+	app.terrain.mu.Unlock()
+	if _, err := app.ReinstallChapter("frangfurd"); err == nil || !strings.Contains(err.Error(), "terrain download") {
+		t.Errorf("reinstall: %v", err)
+	}
+	if _, err := app.UninstallChapter("frangfurd"); err == nil || !strings.Contains(err.Error(), "terrain download") {
+		t.Errorf("uninstall: %v", err)
+	}
+	if got := folders(t, dir); len(got) != 1 {
+		t.Fatalf("the instances folder changed: %v", got)
+	}
+}
+
+func TestUninstallChapterRemovesTheWholeInstance(t *testing.T) {
+	app, dir := ownApp(t, commandLine("https://example.invalid/pack.toml"), nil)
+	if _, err := app.UninstallChapter("atlantis"); err == nil {
+		t.Error("an unknown chapter was not refused")
+	}
+	if _, err := app.UninstallChapter("lichdenstein"); err == nil || !strings.Contains(err.Error(), "not installed") {
+		t.Errorf("a chapter not installed: %v", err)
+	}
+	report, err := app.UninstallChapter("frangfurd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Present["frangfurd"] {
+		t.Error("the report still has Frangfurd installed")
+	}
+	if got := folders(t, dir); len(got) != 0 {
+		t.Fatalf("left in the instances folder: %v", got)
+	}
+}
+
+func TestUninstallChapterRefusesWithoutPrism(t *testing.T) {
+	app, dir := ownApp(t, commandLine("https://example.invalid/pack.toml"), nil)
+	app.engine = models.EngineInfo{}
+	if _, err := app.UninstallChapter("frangfurd"); err == nil {
+		t.Fatal("no Prism was not refused")
+	}
+	if got := folders(t, dir); len(got) != 1 {
+		t.Fatalf("the instances folder changed: %v", got)
+	}
 }
 
 func TestReinstallChapterPutsTheOldInstanceBackWhenTheInstallFails(t *testing.T) {

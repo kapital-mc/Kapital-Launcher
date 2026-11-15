@@ -36,6 +36,7 @@ describe('useEngineStore', () => {
     vi.mocked(App.LaunchChapter).mockReset()
     vi.mocked(App.InstallChapter).mockReset()
     vi.mocked(App.ReinstallChapter).mockReset()
+    vi.mocked(App.UninstallChapter).mockReset()
     vi.mocked(App.SetPackSource).mockReset()
     vi.mocked(App.GetPackStates).mockReset()
     vi.mocked(App.GetChangelogs).mockReset()
@@ -113,6 +114,47 @@ describe('useEngineStore', () => {
     expect(s.installing).toBeNull()
     expect(s.instances).toBe(before)
     expect(s.reinstalled).toEqual({ lichdenstein: stash })
+  })
+
+  it('resets the launcher’s own instance with no notice, and rethrows inline', async () => {
+    const report = {
+      root: 'C:/Prism',
+      dir: 'C:/Prism/instances',
+      present: { frangfurd: true },
+      packUrl: { frangfurd: 'https://example.com/frangfurd/pack.toml' },
+    }
+    vi.mocked(App.ReinstallChapter).mockResolvedValue(
+      models.ReinstallResult.createFrom({ instances: report, stash: '' }),
+    )
+    await useEngineStore.getState().reinstallChapter('frangfurd', true)
+    expect(useEngineStore.getState().reinstalled).toEqual({})
+    expect(useEngineStore.getState().installedNow).toBe('frangfurd')
+
+    vi.mocked(App.ReinstallChapter).mockRejectedValue('Prism is open; close it first')
+    await expect(useEngineStore.getState().reinstallChapter('frangfurd', true)).rejects.toBe(
+      'Prism is open; close it first',
+    )
+    const s = useEngineStore.getState()
+    expect(s.error).toBeNull()
+    expect(s.installing).toBeNull()
+  })
+
+  it('uninstalls a chapter, keeps an earlier stash’s notice, and rethrows a refusal', async () => {
+    useEngineStore.setState({ reinstalled: { frangfurd: 'kapital-frangfurd-stashed-2026-10-11' } })
+    const report = { root: 'C:/Prism', dir: 'C:/Prism/instances', present: {}, packUrl: {} }
+    vi.mocked(App.UninstallChapter).mockResolvedValue(report as never)
+    await useEngineStore.getState().uninstallChapter('frangfurd')
+    expect(App.UninstallChapter).toHaveBeenCalledWith('frangfurd')
+    let s = useEngineStore.getState()
+    expect(s.instances).toBe(report)
+    expect(s.reinstalled).toEqual({ frangfurd: 'kapital-frangfurd-stashed-2026-10-11' })
+
+    vi.mocked(App.UninstallChapter).mockRejectedValue('Frangfurd is starting or running')
+    await expect(useEngineStore.getState().uninstallChapter('frangfurd')).rejects.toBe(
+      'Frangfurd is starting or running',
+    )
+    s = useEngineStore.getState()
+    expect(s.instances).toBe(report)
   })
 
   it('opens the backed-up instance through Go, and records a refusal for the corner', async () => {

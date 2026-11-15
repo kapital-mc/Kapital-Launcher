@@ -294,6 +294,10 @@ export function StopLiveLog(arg1) {
   return window['go']['main']['App']['StopLiveLog'](arg1);
 }
 
+export function UninstallChapter(arg1) {
+  return window['go']['main']['App']['UninstallChapter'](arg1);
+}
+
 export function WatchLiveLog(arg1) {
   return window['go']['main']['App']['WatchLiveLog'](arg1);
 }

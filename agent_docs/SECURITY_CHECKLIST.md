@@ -28,7 +28,8 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetWhatsNewChangelog` | nothing | when the player opens it, one GET (8 s, no redirect followed, 256 KiB) of the download site's fixed `changelog.json`, sending nothing but the request; tags and dates held to their shapes, sections to the site's three, lines cut to 300 characters and rendered as text | S4.12 |
 | `InstallPrism` | nothing | download, verify and unpack Prism's official build | S4.5 |
 | `InstallChapter` | a chapter id | the manifest's instance and pack URL: one instance folder written into the Prism root | S3.3, S4.6 |
-| `ReinstallChapter` | a chapter id | for an installed chapter whose instance has no pack URL of the launcher's: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. Refused for the launcher's own instance, under a preview, while the game is active or running, or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
+| `ReinstallChapter` | a chapter id | for an installed chapter: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. For the launcher's own instance (one with its pack URL), then renames of the fixed kept paths from the stash into the new folder and the two play time keys into its `instance.cfg`, then the stash removed as `UninstallChapter` removes a folder. Refused under a preview, while the game is active or running, a terrain download runs or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S3.14, S4.6 |
+| `UninstallChapter` | a chapter id | that chapter's instance folder renamed aside, its `instance.cfg` removed, then the folder removed, all through an `os.Root` on the instances folder; refused as `ReinstallChapter` is | S3.3, S3.9, S3.14 |
 | `ShowStashedInstance` | a chapter id | Prism started with `[--dir <root>] --show <stash>`, where the stash is the folder name Go recorded at that chapter's last `ReinstallChapter` in this app run, never the caller's, and only while `<instances>/<stash>/instance.cfg` exists; the started Prism is not followed | S3.1, S3.2, S3.3 |
 | `LaunchChapter`, `OpenChapterWiki`, `GetServerStatus` | a chapter id | the manifest's instance, URL or address for it; before a launch, the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, only from the launcher's earlier template; before a launch, a close request to an idle Prism of the engine's executable, never an end | S3.3, S3.7, S3.9, S4.6, S6.1 |
 | `SetPackSource` | a chapter id and `published` or `dev` | the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, between the manifest's pack URL and the loopback override from settings, only from the launcher's own template; refused while the game is active or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
@@ -645,6 +646,28 @@ cannot make links), `TestClearStorageWithoutAGameFolder`,
 Probe: a terrain name of `..`, `../mods`, `..\mods` or `C:`; a kind of
 `minimap` or `mods`; `xaero/world-map` as a link to the home folder; a
 delete while Distant Horizons holds its database open.
+
+**S3.14 Reinstall and Uninstall move or remove only the chapter's own instance folder.**
+Holds when: `ReinstallChapter` and `UninstallChapter` (ADR-2 twenty-third amendment) take a
+chapter id, resolved through the manifest and the disk's own instance report (S3.3), never a
+path. The folder names they touch are the manifest's instance id, the stash name built from it
+and the removal name built from it, each held to `prismInstanceID`. Every rename and removal
+goes through an `os.Root` on the instances folder, so a path that leaves it is refused.
+`RemoveInstance` refuses a link or a file in the folder's place and removes `instance.cfg`
+before the rest. `CarryOver` moves only the fixed `keptEntries`, skips one the stash lacks and
+stops at one the new instance already has, so nothing is put over a file. Neither reads
+Prism's accounts or anything in Essential's folder: `essential` is moved whole, unopened.
+Refused under a preview, while the game is active or the log says it runs, while a terrain
+download runs and while a Prism is open.
+Verify: `TestResetKeepsThePlayersFilesAndDropsThePacks`,
+`TestCarryOverNeverPutsAnythingOverAFile`, `TestCarryOverRefusesAPathForAName`,
+`TestCarryOverMovesALinkAsALink` (skipped on Windows),
+`TestRemoveInstanceRemovesTheWholeFolder`, `TestRemoveInstanceRefuses`,
+`TestReinstallOwnInstancePutsItBackWhenTheInstallFails`,
+`TestReinstallAndUninstallRefuseDuringATerrainDownload`,
+`TestUninstallChapterRemovesTheWholeInstance`, `TestUninstallChapterRefusesWithoutPrism`.
+Probe: an instance id of `..`; `saves` as a link to the home folder (moved as the link, the
+target untouched); an uninstall while Prism has the instance open (refused).
 
 ## S4. Downloads (milestone 4)
 

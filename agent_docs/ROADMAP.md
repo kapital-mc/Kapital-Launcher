@@ -149,6 +149,11 @@ What is left:
       at first), each with its folder, and a delete for Distant Horizons
       terrain per server, an unfinished terrain download, the world map,
       screenshots and logs; no size limit, since Distant Horizons has none (ADR-2 twentieth amendment, 2026-10-21)
+- [x] Reinstall and Uninstall in a chapter's settings: Reinstall puts the
+      instance back to a fresh copy of the pack, keeping worlds, screenshots,
+      schematics, Distant Horizons terrain, maps, replays and the server list;
+      Uninstall removes the instance from Prism (ADR-2 twenty-third amendment,
+      2026-11-15)
 - [x] Compact launcher: the three chapters as panels side by side, from a
       right-click on the sidebar button or a window too small for the full
       layout, with a morph between the two (ADR-15, 2026-10-23)
