@@ -1,0 +1,69 @@
+/* The landing motion. On load the hero comes in: the header fades, the logo,
+   the Download button and the launcher window rise in turn, the backdrop
+   opens square by square from dark (each square at its mosaic.js delay,
+   stretched), and the two floating cards rise while it does. The status page
+   uses the same steps for its heading and chapters, over the same mosaic.
+   Below the hero, a section's heading and tiles rise once it scrolls into
+   view: src/reveal.js marks the root with data-reveal-ready and the section with
+   data-shown. Without the script nothing below the hero is hidden; with
+   reduced motion nothing moves at all. Every value is a token: the steps are
+   sixths of the drift duration. */
+
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--spacing) * 6);
+  }
+}
+@keyframes intro-fade {
+  from {
+    opacity: 0;
+  }
+}
+/* A square starts dark and opens at its delay, at once, like the chapter
+   switch: only the start is held (backwards), so the switch's transitions
+   keep working afterwards. */
+@keyframes intro-mosaic {
+  from {
+    background-color: var(--color-sunken);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .intro-fade {
+    animation: intro-fade var(--duration-drift) var(--ease-out) both;
+  }
+  .intro-rise {
+    animation: intro-rise var(--duration-drift) var(--ease-out) both;
+    animation-delay: var(--intro-delay, 0ms);
+  }
+  .intro-step-1 { --intro-delay: calc(var(--duration-drift) * 1 / 6); }
+  .intro-step-2 { --intro-delay: calc(var(--duration-drift) * 2 / 6); }
+  .intro-step-3 { --intro-delay: calc(var(--duration-drift) * 3 / 6); }
+  .intro-step-4 { --intro-delay: calc(var(--duration-drift) * 4 / 6); }
+  .intro-step-6 { --intro-delay: var(--duration-drift); }
+
+  .showcase-pixels > span {
+    animation: intro-mosaic 1ms step-end backwards;
+    animation-delay: calc(var(--duration-drift) * 2 / 6 + var(--showcase-delay) * 3);
+  }
+
+  /* Below the hero: hidden until the section is in view, then each heading
+     and tile rises, the tiles one step after another. */
+  [data-reveal] :is(h2, li, .reveal-item) {
+    transition:
+      opacity var(--duration-drift) var(--ease-out),
+      translate var(--duration-drift) var(--ease-out);
+  }
+  :root[data-reveal-ready] [data-reveal]:not([data-shown]) :is(h2, li, .reveal-item) {
+    opacity: 0;
+    translate: 0 calc(var(--spacing) * 8);
+  }
+  [data-reveal] .reveal-item,
+  [data-reveal] li:nth-child(1) { transition-delay: calc(var(--duration-drift) * 1 / 6); }
+  [data-reveal] li:nth-child(2) { transition-delay: calc(var(--duration-drift) * 2 / 6); }
+  [data-reveal] li:nth-child(3) { transition-delay: calc(var(--duration-drift) * 3 / 6); }
+  [data-reveal] li:nth-child(4) { transition-delay: calc(var(--duration-drift) * 4 / 6); }
+  [data-reveal] li:nth-child(5) { transition-delay: calc(var(--duration-drift) * 5 / 6); }
+  [data-reveal] li:nth-child(6) { transition-delay: var(--duration-drift); }
+}

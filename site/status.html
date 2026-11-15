@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-chapter="frangfurd" data-showcase="frangfurd">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Server status · Kapital Launcher</title>
+    <meta name="description" content="Frangfurd's servers, map, terrain download and pack." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/src/status.css" />
+    <script type="module" src="/src/status-page.js"></script>
+    <script type="module" src="/src/popup.js?page=status"></script>
+  </head>
+  <!--
+    The server status page, served at /status. Its script,
+    src/status-page.js, asks the site's own /api/status (functions/api/status.js)
+    on load and every 30 s while the page is in view, and fills in each row's
+    state (data-up on the row) and the summary. Without it every row says
+    Checking. The addresses, the map link and the pack version are filled in
+    at build time from data/launcher.json (vite.config.js); the backdrop is the
+    home page's, on Frangfurd (data-showcase, src/showcase.css). The footer
+    and its popups are the home page's too, copied in at build time, with
+    src/popup.js to open them (imported under its own id so the two pages
+    still share no module).
+  -->
+  <body class="bg-sunken flex min-h-dvh flex-col select-none">
+    <!-- The site's header: the app icon, Home and the
+         status page. The same header is in index.html. -->
+    <header class="intro-fade relative z-30">
+      <div class="mx-auto flex h-16 max-w-300 items-center justify-between gap-4 px-4 md:h-19 md:px-10">
+        <a href="/" class="inline-flex shrink-0">
+          <img src="/favicon.svg" alt="Kapital Launcher" width="32" height="32" class="size-8" />
+        </a>
+        <nav aria-label="Site" class="font-pixel flex items-center gap-4 text-xs uppercase sm:gap-7 sm:text-sm">
+          <a href="/" class="text-fg-muted hover:text-fg duration-fast ease-standard no-underline transition-[color]">Home</a>
+          <a href="/status" aria-current="page" class="text-fg hover:text-fg duration-fast ease-standard no-underline transition-[color]">Status</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="relative flex min-w-0 grow flex-col items-center overflow-hidden px-4 pt-8 pb-16 md:px-10 md:pt-14 md:pb-24">
+      <div
+        class="showcase-backdrop pointer-events-none absolute overflow-hidden top-28 left-1/2 md:top-34 h-180 w-screen -translate-x-1/2"
+        aria-hidden="true"
+      >
+        <div class="showcase-art"><!--mosaic:art--></div>
+        <div class="showcase-tint absolute inset-0"></div>
+        <div class="showcase-pixels"><!--mosaic:pixels--></div>
+      </div>
+
+      <div class="relative z-10 flex w-full max-w-200 flex-col gap-4">
+        <h1 class="intro-rise font-pixel m-0 mb-2 text-2xl leading-tight font-bold uppercase">Server status</h1>
+
+        <!-- Each chapter opens and closes on a checkbox, with no script, the
+             way the download popup's Prism section does. Frangfurd is open on
+             load; its summary is filled in by src/status-page.js. -->
+        <section data-chapter="frangfurd" aria-labelledby="frangfurd-title" class="intro-rise intro-step-1 group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
+          <input type="checkbox" id="frangfurd-open" class="peer sr-only" checked />
+          <label
+            for="frangfurd-open"
+            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+          >
+            <span class="flex flex-wrap items-center gap-x-5 gap-y-1">
+              <h2 id="frangfurd-title" class="m-0">
+                <img src="../frontend/src/assets/titles/frangfurd.png" alt="Frangfurd" class="block h-auto w-48 max-w-full" />
+              </h2>
+              <span class="text-accent font-pixel text-xs tracking-label uppercase">03 · 2500 – present</span>
+            </span>
+            <span class="flex items-center gap-4">
+              <span data-summary class="group font-pixel inline-flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-summary-text>Checking</span>
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-fg-muted size-(--layout-icon-sm) shrink-0 duration-slow ease-glide transition-transform group-has-checked/ch:rotate-180 motion-reduce:transition-none" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </span>
+          </label>
+          <div
+            class="duration-slow ease-glide invisible grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity,visibility] peer-checked:visible peer-checked:grid-rows-[1fr] peer-checked:opacity-100 motion-reduce:transition-none"
+          >
+            <div class="border-line min-h-0 overflow-hidden border-t">
+                    <ul class="divide-line m-0 list-none divide-y p-0">
+                <li data-service="global" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="font-semibold">Global</span>
+                    <span class="text-fg-faint font-mono break-all text-xs select-all">%ADDRESS_FRANGFURD_GLOBAL%</span>
+                  </span>
+                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                    <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+                  </span>
+                </li>
+                <li data-service="germany" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="font-semibold">Germany</span>
+                    <span class="text-fg-faint font-mono break-all text-xs select-all">%ADDRESS_FRANGFURD_GERMANY%</span>
+                  </span>
+                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                    <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+                  </span>
+                </li>
+                <li data-service="map" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="font-semibold"><a href="%MAP_FRANGFURD%" class="text-fg hover:text-accent duration-fast ease-standard no-underline transition-[color]">World map ↗</a></span>
+                    <span class="text-fg-faint  text-xs">BlueMap</span>
+                  </span>
+                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                    <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+                  </span>
+                </li>
+                <li data-service="terrain" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="font-semibold">Terrain download</span>
+                    <span data-detail class="text-fg-faint  text-xs">Distant Horizons</span>
+                  </span>
+                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                    <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+                  </span>
+                </li>
+                <li data-service="pack" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="font-semibold">Pack</span>
+                    <span data-detail class="text-fg-faint  text-xs"><span data-pack-version>%PACK_FRANGFURD_VERSION%</span> · %PACK_FRANGFURD_MODS% mods · %PACK_FRANGFURD_LOADER% %PACK_FRANGFURD_MINECRAFT%</span>
+                  </span>
+                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                    <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
+                  </span>
+                </li>
+                </ul>
+            </div>
+          </div>
+        </section>
+        <section data-chapter="lichdenstein" aria-labelledby="lichdenstein-title" class="intro-rise intro-step-2 group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
+          <input type="checkbox" id="lichdenstein-open" class="peer sr-only" />
+          <label
+            for="lichdenstein-open"
+            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+          >
+            <span class="flex flex-wrap items-center gap-x-5 gap-y-1">
+              <h2 id="lichdenstein-title" class="m-0">
+                <img src="../frontend/src/assets/titles/lichdenstein.png" alt="Lichdenstein" class="block h-auto w-48 max-w-full" />
+              </h2>
+              <span class="text-accent font-pixel text-xs tracking-label uppercase">02 · 2300 – 2500</span>
+            </span>
+            <span class="flex items-center gap-4">
+              <span data-up="offline" class="group font-pixel inline-flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span>Retired
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-fg-muted size-(--layout-icon-sm) shrink-0 duration-slow ease-glide transition-transform group-has-checked/ch:rotate-180 motion-reduce:transition-none" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </span>
+          </label>
+          <div
+            class="duration-slow ease-glide invisible grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity,visibility] peer-checked:visible peer-checked:grid-rows-[1fr] peer-checked:opacity-100 motion-reduce:transition-none"
+          >
+            <div class="border-line min-h-0 overflow-hidden border-t">
+              <ul class="divide-line m-0 list-none divide-y p-0">
+                <li class="font-pixel px-5 pt-4 pb-3 text-sm uppercase">Server retired</li>
+                <li class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4">
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-semibold">Server and world</span>
+                    <span class="text-fg-faint text-xs">17 GB</span>
+                  </span>
+                  <button type="button" disabled class="bg-logo-gradient-top text-sunken border-logo-gradient-top font-pixel inline-flex h-11 cursor-not-allowed items-center gap-2.5 border-3 px-4 text-sm uppercase opacity-50"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Unavailable</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section data-chapter="luxemburg" aria-labelledby="luxemburg-title" class="intro-rise intro-step-3 group/ch bg-sunken border-line-strong has-checked:border-accent duration-slow ease-standard border-3 transition-[border-color]">
+          <input type="checkbox" id="luxemburg-open" class="peer sr-only" />
+          <label
+            for="luxemburg-open"
+            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+          >
+            <span class="flex flex-wrap items-center gap-x-5 gap-y-1">
+              <h2 id="luxemburg-title" class="m-0">
+                <img src="../frontend/src/assets/titles/luxemburg.png" alt="Luxemburg" class="block h-auto w-48 max-w-full" />
+              </h2>
+              <span class="text-accent font-pixel text-xs tracking-label uppercase">01 · 1200 – 2300</span>
+            </span>
+            <span class="flex items-center gap-4">
+              <span data-up="offline" class="group font-pixel inline-flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span>Retired
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-fg-muted size-(--layout-icon-sm) shrink-0 duration-slow ease-glide transition-transform group-has-checked/ch:rotate-180 motion-reduce:transition-none" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </span>
+          </label>
+          <div
+            class="duration-slow ease-glide invisible grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity,visibility] peer-checked:visible peer-checked:grid-rows-[1fr] peer-checked:opacity-100 motion-reduce:transition-none"
+          >
+            <div class="border-line min-h-0 overflow-hidden border-t">
+              <ul class="divide-line m-0 list-none divide-y p-0">
+                <li class="font-pixel px-5 pt-4 pb-3 text-sm uppercase">Server retired</li>
+                <li class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4">
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-semibold">World</span>
+                    <span class="text-fg-faint text-xs">25 GB</span>
+                  </span>
+                  <button type="button" disabled class="bg-logo-gradient-top text-sunken border-logo-gradient-top font-pixel inline-flex h-11 cursor-not-allowed items-center gap-2.5 border-3 px-4 text-sm uppercase opacity-50"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Unavailable</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <p data-checked class="intro-rise intro-step-4 text-fg-faint m-0 mt-2 font-mono text-xs"></p>
+      </div>
+    </main>
+
+    <!-- The home page's footer and its popups, copied in by the build. -->
+    <!--shared-->
+  </body>
+</html>

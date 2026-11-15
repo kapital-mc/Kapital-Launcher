@@ -6,7 +6,8 @@
    that follows the open chapter reads it with :has() on the root. That sets
    the accent (the pack card, the tint), the picture of the backdrop and of the
    download popup's banner, which of the floating cards shows, and which panel
-   is wide. */
+   is wide. The status page has no strip: data-showcase on its root names the
+   chapter its backdrop shows. */
 
 :root:has(#chapter-luxemburg:checked) {
   --accent: var(--chapter-luxemburg);
@@ -27,7 +28,8 @@
   --showcase-banner-tint: var(--effect-banner-tint-lichdenstein);
   --showcase-state: var(--color-danger);
 }
-:root:has(#chapter-frangfurd:checked) {
+:root:has(#chapter-frangfurd:checked),
+:root[data-showcase='frangfurd'] {
   --accent: var(--chapter-frangfurd);
   --showcase-art: url('../../frontend/src/assets/screenshots/frangfurd.webp');
   --showcase-ratio: 1.7758;
@@ -181,7 +183,8 @@
 }
 :root:has(#chapter-luxemburg:checked) .showcase-pixels > [data-m~='01'],
 :root:has(#chapter-lichdenstein:checked) .showcase-pixels > [data-m~='02'],
-:root:has(#chapter-frangfurd:checked) .showcase-pixels > [data-m~='03'] {
+:root:has(#chapter-frangfurd:checked) .showcase-pixels > [data-m~='03'],
+:root[data-showcase='frangfurd'] .showcase-pixels > [data-m~='03'] {
   background-color: var(--color-sunken);
   /* A square goes dark at the moment its picture changes: faded in, it let
      the new picture show through for the length of the fade. A square that
