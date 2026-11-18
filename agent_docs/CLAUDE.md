@@ -26,8 +26,8 @@ Same shape as Konnekt, deliberately (docs/adr/0001-app-framework.md).
   redaction. Each service ships with tests.
 - `site/` is the static download page (ADR-9). It imports the app's tokens,
   fonts and images from `frontend/`, and its links live in `site/links.json`.
-- `frontend/src/`: `components/` (view), `stores/` (one Zustand store per domain:
-  chapters, engine, settings), `lib/` (pure helpers), `types/` (the data shapes).
+- `frontend/src/`: `components/` (view), `stores/` (one Zustand store per
+  domain), `lib/` (pure helpers), `types/` (the data shapes).
 
 ## Rules
 
@@ -40,7 +40,7 @@ Same shape as Konnekt, deliberately (docs/adr/0001-app-framework.md).
 - **Every value that reaches Prism is validated first**: instance id, server
   `host[:port]`, profile name, root path. `LaunchArgs` (and `ShowArgs`, which
   shares its checks) is the one place, tested.
-- **One Zustand store per domain** (chapters, engine, settings, servers, game). Reads
+- **One Zustand store per domain**, one file each in `frontend/src/stores/`. Reads
   degrade without a bridge (`lib/ipc.ts`), writes revert and rethrow when a real
   backend rejects. Server status arrives as `server:status` events from Go's
   ticker and a game's phases as `game:state` events; nothing in the frontend

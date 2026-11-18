@@ -3,7 +3,7 @@ import type { Chapter } from '../../types'
 import { errMsg } from '../../lib/ipc'
 import { formatBytes } from '../../lib/bytes'
 import { Folder, RotateCw, Trash2 } from '../../lib/icons'
-import { useEngineStore } from '../../stores/useEngineStore'
+import { selectInstancePack, useEngineStore } from '../../stores/useEngineStore'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
 import { useModStore } from '../../stores/useModStore'
 import { useStorageStore } from '../../stores/useStorageStore'
@@ -18,6 +18,8 @@ import { Spinner } from '../ui/Spinner'
 /** What Reinstall carries into the new instance, as services.keptEntries lists it. */
 export const KEPT =
   'Worlds, screenshots, schematics, Distant Horizons terrain, maps, replays, server list.'
+/** What Reinstall does with an instance the launcher did not set up: Go moves it aside whole. */
+export const KEPT_WHOLE = 'The whole instance, backed up in Prism.'
 /** What Reinstall leaves behind for the next Play's sync to fetch fresh. */
 export const RESET = 'Mods, configs, shader packs, resource packs, game options.'
 
@@ -40,6 +42,7 @@ export function InstanceSection({ chapter }: Props) {
   const uninstall = useEngineStore((s) => s.uninstallChapter)
   const loadSettings = useEngineStore((s) => s.loadChapterSettings)
   const installing = useEngineStore((s) => s.installing !== null)
+  const own = !!useEngineStore(selectInstancePack(chapter.id))
   const size = useStorageStore((s) => s.byChapter[chapter.id]?.totalBytes)
   const playing = useGameStore((s) => isActive(selectGame(chapter.id)(s)?.phase))
   const [asking, setAsking] = useState<Action | null>(null)
@@ -101,12 +104,14 @@ export function InstanceSection({ chapter }: Props) {
           <dl className="m-0 flex flex-col gap-2 leading-normal">
             <div>
               <dt className="text-fg font-medium">Kept</dt>
-              <dd className="text-fg-soft m-0">{KEPT}</dd>
+              <dd className="text-fg-soft m-0">{own ? KEPT : KEPT_WHOLE}</dd>
             </div>
-            <div>
-              <dt className="text-fg font-medium">Reset</dt>
-              <dd className="text-fg-soft m-0">{RESET}</dd>
-            </div>
+            {own && (
+              <div>
+                <dt className="text-fg font-medium">Reset</dt>
+                <dd className="text-fg-soft m-0">{RESET}</dd>
+              </div>
+            )}
           </dl>
           <Choice
             label="Reinstall"

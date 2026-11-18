@@ -205,3 +205,54 @@ func TestShowStashedInstanceOpensOnlyTheRecordedStash(t *testing.T) {
 		t.Fatalf("shown %v", shown)
 	}
 }
+
+// A carry-over that fails is a finished reinstall: the answer names the stash,
+// which still has its instance.cfg, and ShowStashedInstance can open it.
+func TestReinstallRecordsTheStashWhenTheCarryOverFails(t *testing.T) {
+	app, dir := handMadeApp(t, nil)
+	const stash = "kapital-lichdenstein-stashed-2026-10-11"
+	if err := os.Rename(filepath.Join(dir, "kapital-lichdenstein"), filepath.Join(dir, stash)); err != nil {
+		t.Fatal(err)
+	}
+	// The new instance already has the entry the carry would move.
+	for _, path := range []string{
+		filepath.Join(dir, stash, "minecraft", "saves", "World", "level.dat"),
+		filepath.Join(dir, "kapital-lichdenstein", "minecraft", "saves", "Other", "level.dat"),
+	} {
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("world"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(dir, "kapital-lichdenstein", "instance.cfg"), []byte("[General]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	chapter, ok := app.chapter("lichdenstein")
+	if !ok {
+		t.Fatal("no chapter")
+	}
+	var shown []string
+	app.showInPrism = func(_ models.EngineInfo, id, _ string) error {
+		shown = append(shown, id)
+		return nil
+	}
+
+	res, err := app.finishReinstall(chapter, dir, stash, true)
+	if err != nil {
+		t.Fatalf("a failed carry over is not an error: %v", err)
+	}
+	if res.Stash != stash {
+		t.Fatalf("stash %q, want %q", res.Stash, stash)
+	}
+	if got := app.stashes["lichdenstein"]; got != stash {
+		t.Fatalf("recorded %q", got)
+	}
+	if err := app.ShowStashedInstance("lichdenstein"); err != nil {
+		t.Fatal(err)
+	}
+	if len(shown) != 1 || shown[0] != stash {
+		t.Fatalf("shown %v", shown)
+	}
+}

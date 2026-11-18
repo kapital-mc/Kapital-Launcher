@@ -9,7 +9,7 @@ request.
 
 **Go:** prefer the standard library. This app runs on the user's machine and
 spawns a process on their behalf, so every dependency is something trusted with
-that. Today there is exactly one.
+that. Today there are three, listed below.
 
 **npm:** prefer what is already in the tree. Anything heavy or rarely used is
 lazy-loaded with `React.lazy`, and `pnpm check-bundle` holds the entry chunk to
@@ -27,8 +27,7 @@ package.
 | Module | Rationale |
 |---|---|
 | `github.com/wailsapp/wails/v2` | The app shell: Go to WebView bridge, binding generation. Pinned by hand, not bumped by Dependabot: a minor changes the generated bindings and the webview it links against. |
-| `github.com/wailsapp/go-webview2` | The second WebView2 window for the loading card (`backend/splashhost`, #97): Wails runs one window, and the card is a borderless window of its own. Windows only. It is the module Wails itself links, pinned at the version Wails pins (v1.0.22) and bumped only with Wails, so the card and the launcher run the same WebView2 binding. |
-
+| `github.com/wailsapp/go-webview2` | The second WebView2 window for the loading card (`backend/splashhost`, #97): Wails runs one window, and the card is a borderless window of its own. Windows only. It is the module Wails itself links, bumped only with Wails, so the card and the launcher run the same WebView2 binding. `go.mod` has v1.0.23, which Go's module resolution also gives Wails v2.16.0 (it requires v1.0.22). |
 | `golang.org/x/sys` | `windows.WinVerifyTrustEx`, Windows' own Authenticode check for the managed Prism's executable (ADR-11), called directly so no shell or external tool is involved. Already in the build through Wails; now direct. |
 
 Everything else in `go.mod` is `// indirect`, pulled in by Wails.

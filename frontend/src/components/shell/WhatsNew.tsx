@@ -93,7 +93,7 @@ export function WhatsNew() {
   )
 }
 
-/** One change: its name in front, with its line, or the small changes it groups, under it. */
+/** One change: its title, alone or with a line, a list of the small changes it groups, or both under it. */
 function Highlight({ highlight: h }: { highlight: WhatsNewHighlight }) {
   return (
     <li className="flex gap-3">

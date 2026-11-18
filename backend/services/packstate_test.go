@@ -175,3 +175,22 @@ func TestScanPackIndex(t *testing.T) {
 		}
 	}
 }
+
+// An index the scanner stops on (a line past its 64 KiB token limit) is an
+// error, and no count is kept for it.
+func TestPackModsRefusesAnIndexTheScannerStopsOn(t *testing.T) {
+	h, c := newFakePackHost(t)
+	index := "[[files]]\nfile = \"mods/a.jar\"\nhash = \"" + strings.Repeat("x", 70*1024) + "\"\n"
+	sum := sha256.Sum256([]byte(index))
+	h.jarBody["/frangfurd/index.toml"] = []byte(index)
+	h.packTOML = strings.Replace(frangfurdPackTOML,
+		"1f4a4b7ecc45b042703aafc870ba190e0f24e471a3e6c428d13e7cae51421ee0", hex.EncodeToString(sum[:]), 1)
+	packURL := h.srv.URL + "/frangfurd/pack.toml"
+	n, err := c.packMods(context.Background(), packURL, c.checkPackURL, []byte(h.packTOML))
+	if err == nil || !strings.Contains(err.Error(), "index.toml") {
+		t.Fatalf("got %d, %v", n, err)
+	}
+	if len(c.modCounts) != 0 {
+		t.Fatalf("a failed count was cached: %v", c.modCounts)
+	}
+}

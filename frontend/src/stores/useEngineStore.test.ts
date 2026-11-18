@@ -76,6 +76,7 @@ describe('useEngineStore', () => {
       present: { frangfurd: false },
     })
     useEngineStore.setState({ instances: before })
+    vi.mocked(App.GetInstances).mockResolvedValue(before)
     vi.mocked(App.InstallChapter).mockRejectedValue('frangfurd has no hosted pack to install')
     await useEngineStore.getState().installChapter('frangfurd')
     const s = useEngineStore.getState()
@@ -107,6 +108,7 @@ describe('useEngineStore', () => {
     expect(s.reinstalled).toEqual({ lichdenstein: stash })
 
     const before = s.instances
+    vi.mocked(App.GetInstances).mockResolvedValue(before as never)
     vi.mocked(App.ReinstallChapter).mockRejectedValue('Prism is open; close it first')
     await useEngineStore.getState().reinstallChapter('lichdenstein')
     s = useEngineStore.getState()
@@ -149,12 +151,49 @@ describe('useEngineStore', () => {
     expect(s.instances).toBe(report)
     expect(s.reinstalled).toEqual({ frangfurd: 'kapital-frangfurd-stashed-2026-10-11' })
 
+    vi.mocked(App.GetInstances).mockResolvedValue(report as never)
     vi.mocked(App.UninstallChapter).mockRejectedValue('Frangfurd is starting or running')
     await expect(useEngineStore.getState().uninstallChapter('frangfurd')).rejects.toBe(
       'Frangfurd is starting or running',
     )
     s = useEngineStore.getState()
     expect(s.instances).toBe(report)
+  })
+
+  it('reads the pack states again after an install, reinstall or uninstall succeeds', async () => {
+    const report = { root: 'C:/Prism', dir: 'C:/Prism/instances', present: { frangfurd: true } }
+    vi.mocked(App.InstallChapter).mockResolvedValue(report as never)
+    vi.mocked(App.ReinstallChapter).mockResolvedValue({ instances: report, stash: '' } as never)
+    vi.mocked(App.UninstallChapter).mockResolvedValue(report as never)
+    vi.mocked(App.GetPackStates).mockResolvedValue([])
+    vi.mocked(App.GetChangelogs).mockResolvedValue([])
+    for (const act of [
+      () => useEngineStore.getState().installChapter('frangfurd'),
+      () => useEngineStore.getState().reinstallChapter('frangfurd'),
+      () => useEngineStore.getState().uninstallChapter('frangfurd'),
+    ]) {
+      vi.mocked(App.GetPackStates).mockClear()
+      await act()
+      expect(App.GetPackStates).toHaveBeenCalledTimes(1)
+    }
+  })
+
+  it('reads the instances again after a reinstall or uninstall is rejected', async () => {
+    const onDisk = { root: 'C:/Prism', dir: 'C:/Prism/instances', present: {} }
+    vi.mocked(App.GetInstances).mockResolvedValue(onDisk as never)
+    vi.mocked(App.GetPackStates).mockResolvedValue([])
+    vi.mocked(App.GetChangelogs).mockResolvedValue([])
+    vi.mocked(App.ReinstallChapter).mockRejectedValue('install failed')
+    await useEngineStore.getState().reinstallChapter('frangfurd')
+    expect(App.GetInstances).toHaveBeenCalledTimes(1)
+    expect(useEngineStore.getState().instances).toEqual(onDisk)
+    expect(useEngineStore.getState().error).toBe('install failed')
+
+    useEngineStore.setState({ instances: null })
+    vi.mocked(App.UninstallChapter).mockRejectedValue('half way')
+    await expect(useEngineStore.getState().uninstallChapter('frangfurd')).rejects.toBe('half way')
+    expect(App.GetInstances).toHaveBeenCalledTimes(2)
+    expect(useEngineStore.getState().instances).toEqual(onDisk)
   })
 
   it('opens the backed-up instance through Go, and records a refusal for the corner', async () => {

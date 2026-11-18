@@ -53,19 +53,31 @@ func (a *App) ReinstallChapter(chapterID string) (models.ReinstallResult, error)
 		slog.Info("instance put back", "chapter", chapterID)
 		return models.ReinstallResult{}, err
 	}
+	return a.finishReinstall(chapter, report.Dir, stashed, own)
+}
+
+// finishReinstall answers a reinstall whose new instance is installed. For the
+// launcher's own instance it resets, which clears the stash when the carry
+// succeeds; a carry that fails keeps the stash, which still holds its
+// instance.cfg and what was not moved. A stash still there is recorded for
+// ShowStashedInstance and named in the answer.
+func (a *App) finishReinstall(chapter models.Chapter, instancesDir, stashed string, own bool) (models.ReinstallResult, error) {
 	if own {
-		if err := a.finishReset(chapter, report.Dir, stashed); err != nil {
+		kept, err := a.finishReset(chapter, instancesDir, stashed)
+		if err != nil {
 			return models.ReinstallResult{}, err
 		}
-		stashed = ""
+		if !kept {
+			stashed = ""
+		}
 	}
-	slog.Info("reinstalled", "chapter", chapterID, "instance", chapter.Instance.ID, "stash", stashed, "local pack", override != "")
+	slog.Info("reinstalled", "chapter", chapter.ID, "instance", chapter.Instance.ID, "stash", stashed)
 	if stashed != "" {
 		a.seenMu.Lock()
 		if a.stashes == nil {
 			a.stashes = map[string]string{}
 		}
-		a.stashes[chapterID] = stashed
+		a.stashes[chapter.ID] = stashed
 		a.seenMu.Unlock()
 	}
 	instances, err := a.GetInstances()
@@ -138,19 +150,21 @@ func (a *App) instanceWriteTarget(chapterID string) (models.Chapter, models.Inst
 }
 
 // finishReset moves what Reinstall keeps from the stash into the new instance
-// and removes the rest of the stash.
-func (a *App) finishReset(chapter models.Chapter, instancesDir, stashed string) error {
+// and removes the rest of the stash. It answers true when the carry failed and
+// the stash is kept as an instance in Prism; an error is a stash that lost its
+// instance.cfg to a removal that failed.
+func (a *App) finishReset(chapter models.Chapter, instancesDir, stashed string) (bool, error) {
 	moved, err := services.CarryOver(instancesDir, stashed, chapter.Instance.ID)
 	if err != nil {
 		slog.Error("reinstall carry over", "chapter", chapter.ID, "stash", stashed, "moved", moved, "error", err)
-		return fmt.Errorf("%s was reinstalled, but %w; the old instance is kept in Prism as %s", chapter.Name, err, stashed)
+		return true, nil
 	}
 	if err := services.RemoveInstance(instancesDir, stashed, time.Now()); err != nil {
 		slog.Error("reinstall remove old instance", "chapter", chapter.ID, "stash", stashed, "error", err)
-		return fmt.Errorf("%s was reinstalled, but the old files were not all removed: %w", chapter.Name, err)
+		return false, fmt.Errorf("%s was reinstalled, but the old files were not all removed: %w", chapter.Name, err)
 	}
 	slog.Info("instance reset", "chapter", chapter.ID, "kept", moved)
-	return nil
+	return false, nil
 }
 
 // UninstallChapter removes the chapter's whole instance folder from Prism's

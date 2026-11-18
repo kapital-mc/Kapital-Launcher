@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { UpdateInfo } from '../types'
 import type { LauncherUpdateProgress } from '../types/update'
-import { errMsg, readOr } from '../lib/ipc'
+import { errMsg, hasWailsBridge, readOr } from '../lib/ipc'
 import {
   CancelUpdateDownload,
   DownloadUpdate,
@@ -123,6 +123,7 @@ export const useUpdateStore = create<UpdateStore>((set, get) => ({
 
   // One listener for the app's lifetime, held by the header, which is always on screen.
   listen: () => {
+    if (!hasWailsBridge()) return () => undefined
     EventsOn(EVENT_LAUNCHER_UPDATE, (p: LauncherUpdateProgress) => get().receive(p))
     return () => EventsOff(EVENT_LAUNCHER_UPDATE)
   },
