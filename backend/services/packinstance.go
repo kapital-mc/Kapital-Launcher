@@ -84,6 +84,10 @@ type InstanceCreator struct {
 	client *http.Client
 	// checkPackURL is checkURL in the app; tests swap it for a local server.
 	checkPackURL func(field, raw string) error
+	// countsMu guards modCounts, each pack index's mod count by its hash
+	// (packindex.go).
+	countsMu  sync.Mutex
+	modCounts map[string]int
 	// syncCopy gives the path of the launcher's sync copy for the pre-launch
 	// command (SyncCopy.Path); nil, or "" back, writes the packwiz command
 	// instead (preLaunchCommand).

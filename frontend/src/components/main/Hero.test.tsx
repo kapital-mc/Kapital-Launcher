@@ -9,13 +9,15 @@ const chapter = BUNDLED_MANIFEST.chapters[2]!
 const noop = () => undefined
 
 function hero(pack: Partial<typeof chapter.pack>, version: string | null = '1.0.1') {
+  const merged = { ...chapter.pack, ...pack }
   return render(
     <Hero
-      chapter={{ ...chapter, pack: { ...chapter.pack, ...pack } }}
+      chapter={{ ...chapter, pack: merged }}
       onOpenSettings={noop}
       onOpenLogs={noop}
       onOpenMap={noop}
       version={version}
+      mods={merged.mods ?? null}
     />,
   )
 }
@@ -34,6 +36,7 @@ describe('Hero tools', () => {
         onOpenLogs={onOpenLogs}
         onOpenMap={onOpenMap}
         version="1.0.1"
+        mods={chapter.pack.mods ?? null}
       />,
     )
     // One group: square cells, the group's frame rounds the outer corners.
@@ -104,6 +107,7 @@ describe('Hero panorama (issue 195)', () => {
         onOpenLogs={noop}
         onOpenMap={noop}
         version="1.0.1"
+        mods={chapter.pack.mods ?? null}
       />,
     )
 

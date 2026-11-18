@@ -823,6 +823,7 @@ export namespace models {
 	    checked: boolean;
 	    upToDate: boolean;
 	    version: string;
+	    mods: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new PackState(source);
@@ -835,6 +836,7 @@ export namespace models {
 	        this.checked = source["checked"];
 	        this.upToDate = source["upToDate"];
 	        this.version = source["version"];
+	        this.mods = source["mods"];
 	    }
 	}
 	export class Panorama {

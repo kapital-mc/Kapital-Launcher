@@ -88,7 +88,7 @@ redacts the lines and emits `log:live` (`EventLiveLog`) in events of at most
 One follower at a time, under the app's run context.
 
 The play time (`playtime.go`, `playlog.go`, `playledger.go`, `app_playtime.go`,
-`GetPlayTime`, issue 192 and 341, ADR-2 eleventh and twenty-third amendments) is
+`GetPlayTime`, issue 192 and 341, ADR-2 eleventh and twenty-fourth amendments) is
 the time the game's logs show in a world, for the account page. `measurePlay`
 reads a log for marker lines: a server join (`Connecting to <host>, <port>`, then
 `Loaded N advancements` on the render thread), singleplayer starting, the ways of

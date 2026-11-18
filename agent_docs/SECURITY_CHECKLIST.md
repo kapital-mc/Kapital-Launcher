@@ -18,7 +18,7 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetSettings` | nothing | the settings file | S1.2 |
 | `RefreshEngine` | nothing | detection: runs the resolved Prism with `--version` | S3.1 |
 | `GetInstances` | nothing | the two reads in a Prism root, and the size walk of each present instance folder | S1.1 |
-| `GetPackStates` | nothing | one value of each instance's `packwiz.json`, and one bounded GET of each chapter's `pack.toml` on its allowlisted or loopback source | S1.1, S4.3 |
+| `GetPackStates` | nothing | one value of each instance's `packwiz.json`, one bounded GET of each chapter's `pack.toml` on its allowlisted or loopback source, installed or not, and of the `index.toml` beside it when its hash is new in this run (S4.7a) | S1.1, S4.3 |
 | `GetChangelogs` | nothing | one bounded GET of each chapter's `changelog.json`, beside the `pack.toml` of the source `GetPackStates` uses (the instance's own pack URL, the loopback override or the manifest's), held to that source's URL rule, redirects included; the answer is parsed strictly and shown as plain text | S4.3, S4.7 |
 | `GetPrismRelease` | nothing | one bounded GET to Prism's fixed release URL | S4.5 |
 | `GetUpdate` | nothing | once a start, one GET (8 s, no redirect followed, 4 KiB) of the download site's fixed `version.json`, sending nothing but the request; only a tag of the release shape is read from it, and a dev build makes no request | S4.3, S4.9 |
@@ -28,7 +28,8 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetWhatsNewChangelog` | nothing | when the player opens it, one GET (8 s, no redirect followed, 256 KiB) of the download site's fixed `changelog.json`, sending nothing but the request; tags and dates held to their shapes, sections to the site's three, lines cut to 300 characters and rendered as text | S4.12 |
 | `InstallPrism` | nothing | download, verify and unpack Prism's official build | S4.5 |
 | `InstallChapter` | a chapter id | the manifest's instance and pack URL: one instance folder written into the Prism root | S3.3, S4.6 |
-| `ReinstallChapter` | a chapter id | for an installed chapter whose instance has no pack URL of the launcher's: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. Refused for the launcher's own instance, under a preview, while the game is active or running, or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
+| `ReinstallChapter` | a chapter id | for an installed chapter: one rename of that instance folder to `<id>-stashed-<day>` in the same instances folder, then `InstallChapter`'s write; a failed install renames it back. For the launcher's own instance (one with its pack URL), then renames of the fixed kept paths from the stash into the new folder and the two play time keys into its `instance.cfg`, then the stash removed as `UninstallChapter` removes a folder. Refused under a preview, while the game is active or running, a terrain download runs or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S3.14, S4.6 |
+| `UninstallChapter` | a chapter id | that chapter's instance folder renamed aside, its `instance.cfg` removed, then the folder removed, all through an `os.Root` on the instances folder; refused as `ReinstallChapter` is | S3.3, S3.9, S3.14 |
 | `ShowStashedInstance` | a chapter id | Prism started with `[--dir <root>] --show <stash>`, where the stash is the folder name Go recorded at that chapter's last `ReinstallChapter` in this app run, never the caller's, and only while `<instances>/<stash>/instance.cfg` exists; the started Prism is not followed | S3.1, S3.2, S3.3 |
 | `LaunchChapter`, `OpenChapterWiki`, `GetServerStatus` | a chapter id | the manifest's instance, URL or address for it; before a launch, the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, only from the launcher's earlier template; before a launch, a close request to an idle Prism of the engine's executable, never an end | S3.3, S3.7, S3.9, S4.6, S6.1 |
 | `SetPackSource` | a chapter id and `published` or `dev` | the one `PreLaunchCommand` key of the chapter's own `instance.cfg`, between the manifest's pack URL and the loopback override from settings, only from the launcher's own template; refused while the game is active or a Prism is open (the launcher's own is closed first) | S3.3, S3.9, S4.6 |
@@ -45,7 +46,7 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetPanoramas` | nothing | per manifest chapter whose instance is present: the names in its game folder's `resourcepacks/`, then six files at one fixed path inside the first entry (a folder or `.zip`, name containing "resource") that holds them, each under 4 MiB, decoded as a PNG, square and of one size, and copied into the app data dir's `panorama/` and served at `/panorama/`; a zip's central directory only; nothing is written to the instance | S1.1 |
 | `OpenWikiPage` | a URL | the system browser, only for a URL `GetWikiPages` returned | S3.3 |
 | `GetChapterSettings` | a chapter id | four keys of the chapter's own `instance.cfg` | S1.1, S3.3 |
-| `GetPlayTime` | nothing | two keys, `totalTimePlayed` and `lastLaunchTime`, of the own `instance.cfg` of each installed manifest chapter, through `scanINIKeys`; each chapter's `logs/latest.log` and `logs/*.log.gz`, listed and read through an `os.Root` for marker lines; numbers and file names written to `playtime.json` in the app data dir; no line is kept or logged | S1.1, S3.3, S3.14 |
+| `GetPlayTime` | nothing | two keys, `totalTimePlayed` and `lastLaunchTime`, of the own `instance.cfg` of each installed manifest chapter, through `scanINIKeys`; each chapter's `logs/latest.log` and `logs/*.log.gz`, listed and read through an `os.Root` for marker lines; numbers and file names written to `playtime.json` in the app data dir; no line is kept or logged | S1.1, S3.3, S3.15 |
 | `SaveChapterSettings` | a chapter id and a `ChapterSettings` | five keys rewritten in the chapter's own `instance.cfg`, held to the preset list, the machine's memory and, for the player's own Java arguments, `ValidateJVMArgs` (issue 191); refused while the game runs or a Prism is open (the launcher's own is closed first) | S3.2, S3.3, S3.9, S4.6 |
 | `GetRunLogs` | a chapter id | the names, times and sizes of `logs/latest.log`, `logs/*.log.gz` and `crash-reports/*.txt` in that chapter's instance game folder, listed through an `os.Root`; no file is opened | S3.3, S3.10 |
 | `ReadRunLog` | a chapter id, a kind (`log` or `crash`), a base name the listing produces and a byte offset | one chunk (at most 256 KiB, from a whole line) of one such file in that game folder, unpacked if `.log.gz` up to 256 MiB, redacted before it leaves Go; nothing written | S3.3, S3.10, S7.5 |
@@ -646,8 +647,30 @@ Probe: a terrain name of `..`, `../mods`, `..\mods` or `C:`; a kind of
 `minimap` or `mods`; `xaero/world-map` as a link to the home folder; a
 delete while Distant Horizons holds its database open.
 
-**S3.14 The play time reads a chapter's own game logs for marker lines, and keeps numbers.**
-Holds when: `GetPlayTime` (issue 341, ADR-2 twenty-third amendment) takes no
+**S3.14 Reinstall and Uninstall move or remove only the chapter's own instance folder.**
+Holds when: `ReinstallChapter` and `UninstallChapter` (ADR-2 twenty-third amendment) take a
+chapter id, resolved through the manifest and the disk's own instance report (S3.3), never a
+path. The folder names they touch are the manifest's instance id, the stash name built from it
+and the removal name built from it, each held to `prismInstanceID`. Every rename and removal
+goes through an `os.Root` on the instances folder, so a path that leaves it is refused.
+`RemoveInstance` refuses a link or a file in the folder's place and removes `instance.cfg`
+before the rest. `CarryOver` moves only the fixed `keptEntries`, skips one the stash lacks and
+stops at one the new instance already has, so nothing is put over a file. Neither reads
+Prism's accounts or anything in Essential's folder: `essential` is moved whole, unopened.
+Refused under a preview, while the game is active or the log says it runs, while a terrain
+download runs and while a Prism is open.
+Verify: `TestResetKeepsThePlayersFilesAndDropsThePacks`,
+`TestCarryOverNeverPutsAnythingOverAFile`, `TestCarryOverRefusesAPathForAName`,
+`TestCarryOverMovesALinkAsALink` (skipped on Windows),
+`TestRemoveInstanceRemovesTheWholeFolder`, `TestRemoveInstanceRefuses`,
+`TestReinstallOwnInstancePutsItBackWhenTheInstallFails`,
+`TestReinstallAndUninstallRefuseDuringATerrainDownload`,
+`TestUninstallChapterRemovesTheWholeInstance`, `TestUninstallChapterRefusesWithoutPrism`.
+Probe: an instance id of `..`; `saves` as a link to the home folder (moved as the link, the
+target untouched); an uninstall while Prism has the instance open (refused).
+
+**S3.15 The play time reads a chapter's own game logs for marker lines, and keeps numbers.**
+Holds when: `GetPlayTime` (issue 341, ADR-2 twenty-fourth amendment) takes no
 argument and reaches only the instances the manifest and the disk's report name
 (S3.3). `PlayLedger.Count` lists `logs/` through `listRunFiles`, so the one name
 test (`validRunLogName`) and its regular-file check apply and a link is not
@@ -792,6 +815,21 @@ pack.toml, a local pack serve, the concurrency bound) and
 Probe: a changelog 65 KiB long; `"entries"` holding a `<script>` line, a
 right-to-left override or an ANSI escape; `changelog.json` redirecting to
 another host; a pack URL `.../pack.toml?x=../..`.
+
+**S4.7a A pack's mod count is read from its own index, and only counted.**
+Holds when: the index's name comes from `pack.toml`'s `[index]` table and is a
+plain `.toml` name beside it (no `/`, no `..`), with a SHA-256 hash in 64 hex
+digits, else nothing is fetched (`scanPackIndex`); the URL is the vetted pack
+URL with its last segment replaced (`siblingURL`, the changelog's rule) and is
+checked against the pack's rule again; `fetchFile` reads it with a 1 MiB bound;
+the bytes must hash to what `pack.toml` names or the count is dropped; and the
+only thing kept is the number of `file = "mods/<name>"` entries, per index hash,
+at most 32 hashes. Nothing in the index is opened, run or fetched.
+Verify: `packstate_test.go` (`TestScanPackIndex`,
+`TestPackStateCountsTheIndexMods`: the count, one read per hash, a hash
+mismatch).
+Probe: `[index] file = "../../secrets.toml"`; an index 2 MiB long; an index
+whose hash does not match; `hash-format = "md5"`.
 
 **S4.8 The player's profile is asked of three Mojang hosts, with the name and then the UUID, and only a face is kept.**
 Holds when: (a) `GetPlayerProfile` checks the name against

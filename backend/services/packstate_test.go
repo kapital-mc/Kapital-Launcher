@@ -43,9 +43,9 @@ func TestPackStateComparesTheSyncedHashWithTheSource(t *testing.T) {
 	current := hex.EncodeToString(sum[:])
 	ctx := context.Background()
 
-	// Not installed: nothing to compare, nothing fetched.
+	// Not installed: nothing to compare, but the source's version is read.
 	report := models.InstanceReport{Dir: instances, Present: map[string]bool{}, PackURL: map[string]string{}}
-	if got := c.PackState(ctx, chapter, report, ""); got.Installed || got.Checked {
+	if got := c.PackState(ctx, chapter, report, ""); got.Installed || !got.Checked || got.UpToDate || got.Version != "1.0.0" {
 		t.Fatalf("%+v", got)
 	}
 
@@ -107,5 +107,71 @@ func TestInstalledPackHashReadsOnlyASHA256Record(t *testing.T) {
 	}
 	if _, ok := installedPackHash(dir); ok {
 		t.Fatal("another hash type cannot be compared")
+	}
+}
+
+func TestPackStateCountsTheIndexMods(t *testing.T) {
+	h, c := newFakePackHost(t)
+	index := `hash-format = "sha256"
+
+[[files]]
+file = "config/a.toml"
+hash = "x"
+
+[[files]]
+file = "mods/create.pw.toml"
+hash = "x"
+metafile = true
+
+[[files]]
+file = "mods/frangfurd_menu-0.5.0.jar"
+hash = "x"
+
+[[files]]
+file = "mods/.connector/cache.json"
+hash = "x"
+`
+	sum := sha256.Sum256([]byte(index))
+	h.jarBody["/frangfurd/index.toml"] = []byte(index)
+	h.packTOML = strings.Replace(frangfurdPackTOML,
+		"1f4a4b7ecc45b042703aafc870ba190e0f24e471a3e6c428d13e7cae51421ee0", hex.EncodeToString(sum[:]), 1)
+	chapter := frangfurdChapter(h.srv.URL + "/frangfurd/pack.toml")
+	report := models.InstanceReport{Present: map[string]bool{}, PackURL: map[string]string{}}
+	ctx := context.Background()
+
+	if got := c.PackState(ctx, chapter, report, ""); got.Mods != 2 {
+		t.Fatalf("%+v", got)
+	}
+	// The same index hash is counted once.
+	if got := c.PackState(ctx, chapter, report, ""); got.Mods != 2 || h.jarGets.Load() != 1 {
+		t.Fatalf("%+v, %d index reads", got, h.jarGets.Load())
+	}
+
+	// An index that does not match its hash is not counted; the version still is.
+	h.jarBody["/frangfurd/index.toml"] = []byte(index + "\n")
+	h.packTOML = strings.Replace(h.packTOML, `version = "1.0.0"`, `version = "1.0.1"`, 1)
+	h.packTOML = strings.Replace(h.packTOML, hex.EncodeToString(sum[:]), strings.Repeat("0", 64), 1)
+	if got := c.PackState(ctx, chapter, report, ""); !got.Checked || got.Mods != 0 || got.Version != "1.0.1" {
+		t.Fatalf("%+v", got)
+	}
+}
+
+func TestScanPackIndex(t *testing.T) {
+	hash := strings.Repeat("ab", 32)
+	ok := "[index]\nfile = \"index.toml\"\nhash-format = \"sha256\"\nhash = \"" + hash + "\"\n"
+	if ref, err := scanPackIndex([]byte(ok)); err != nil || ref != (packIndexRef{file: "index.toml", hash: hash}) {
+		t.Fatalf("%+v %v", ref, err)
+	}
+	for _, bad := range []string{
+		strings.Replace(ok, "index.toml", "../index.toml", 1),
+		strings.Replace(ok, "index.toml", "sub/index.toml", 1),
+		strings.Replace(ok, "index.toml", "index.json", 1),
+		strings.Replace(ok, "sha256", "md5", 1),
+		strings.Replace(ok, hash, "abc", 1),
+		strings.Replace(ok, "[index]", "[other]", 1),
+	} {
+		if ref, err := scanPackIndex([]byte(bad)); err == nil {
+			t.Errorf("%q: %+v, want a refusal", bad, ref)
+		}
 	}
 }

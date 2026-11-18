@@ -10,7 +10,7 @@ import {
 import type { Chapter, PackChangelog, PackState, WikiPage } from '../../types'
 import { Maximize2 } from '../../lib/icons'
 import { factValue, sizeValue, unsetLabel } from '../../lib/manifest'
-import { versionValue } from '../../lib/packState'
+import { packMods, versionValue } from '../../lib/packState'
 import { Dialog } from '../ui/Dialog'
 import { Drift } from '../ui/Drift'
 import { FactList } from '../ui/Fact'
@@ -226,7 +226,7 @@ export function Panels({
     { label: 'Version', value: versionValue(packState), unset },
     { label: 'Loader', value: visuals ? 'Client visuals' : factValue(pack.loader), plain: visuals },
     { label: 'Minecraft', value: factValue(pack.minecraft) },
-    { label: 'Mods', value: factValue(pack.mods) },
+    { label: 'Mods', value: factValue(packMods(packState, pack.mods)) },
     { label: 'Size', value: sizeValue(sizeBytes), unset },
   ]
 

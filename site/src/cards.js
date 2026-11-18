@@ -11,10 +11,12 @@
 // reduced motion, the versions cross-fade instead.
 //
 // It also fills in the server card. Frangfurd's server is asked through the
-// site's own /status (functions/status.js), once on load and again when
-// Frangfurd opens after the answer is older than the function's cache; the
-// answer sets data-server on the root, for the card's square, and the card's
-// text. Without an answer the card stays at "Server".
+// site's own /api/status (functions/api/status.js), once on load and again
+// when Frangfurd opens after the answer is older than the function's cache;
+// the answer sets data-server on the root, for the card's square, and the
+// card's text. Without an answer the card stays at "Server". The same answer
+// carries the published pack's version, which replaces the manifest's in
+// Frangfurd's pack card.
 //
 // Like detect.js it runs as part of one classic script, so nothing is
 // declared at the top level.
@@ -138,15 +140,26 @@ document.addEventListener(
     const liveNode = live && textOf(live)[0]
     const liveChapter = live?.closest('[data-for]')?.dataset.for
     let answered = 0
-    // functions/status.js caches its answer for 30 s, so asking sooner gets the same one.
+    // The pack card's version, which the live pack replaces.
+    const pack = document.querySelector('[data-pack-version]')
+    const packNode = pack && textOf(pack)[0]
+    // functions/api/status.js caches its answer for 30 s, so asking sooner gets the same one.
     const FRESH = 30_000
 
     const ask = async () => {
       answered = Date.now()
       try {
-        const response = await fetch('/status', { headers: { accept: 'application/json' } })
+        const response = await fetch('/api/status', { headers: { accept: 'application/json' } })
         if (!response.ok) return
-        const status = (await response.json())?.[liveChapter]
+        const answer = await response.json()
+        const version = answer?.pack?.version
+        if (packNode && typeof version === 'string' && /^[0-9A-Za-z.+-]{1,32}$/.test(version)) {
+          const before = textShown(packNode)
+          finals.set(packNode, version)
+          if (open === pack.closest('[data-for]')?.dataset.for) scramble(packNode, before, version)
+          else draw(packNode, [version])
+        }
+        const status = answer?.[liveChapter]
         if (typeof status?.online !== 'boolean') return
         const counts = Number.isInteger(status.players) && Number.isInteger(status.max)
         const text = status.online

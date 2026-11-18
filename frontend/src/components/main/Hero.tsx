@@ -32,6 +32,8 @@ interface Props {
   onOpenMap: () => void
   /** The pack's version, as the pack line names it (issue 162); null when nobody knows it yet. */
   version: string | null
+  /** The pack's mod count, from the pack source when read; null when nobody knows it yet. */
+  mods: number | null
 }
 
 /**
@@ -50,6 +52,7 @@ export function Hero({
   onOpenLogs,
   onOpenMap,
   version,
+  mods: modCount,
 }: Props) {
   // The slide's picture once it has loaded, the chapter's own until then: the
   // drift to a new picture starts only when that picture can be drawn.
@@ -61,7 +64,7 @@ export function Hero({
   // A fact nobody has settled has no chip: a placeholder in brackets is for the
   // author, not the player.
   const spec = knownFacts(chapter.pack.loader, chapter.pack.minecraft)
-  const mods = knownFacts(chapter.pack.mods)
+  const mods = knownFacts(modCount)
 
   // It takes all the height the card has spare, so a taller window grows the
   // picture and keeps Play and the panels at the card's foot.

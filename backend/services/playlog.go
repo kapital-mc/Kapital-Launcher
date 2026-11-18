@@ -11,7 +11,7 @@ import (
 )
 
 // The play time on the account page is the time a game log shows in a world
-// (issue 341, ADR-2's twenty-third amendment). A log is read a line at a time
+// (issue 341, ADR-2's twenty-fourth amendment). A log is read a line at a time
 // for the markers below and for nothing else: a line is matched and dropped,
 // and what comes out is a number of seconds.
 //

@@ -17,6 +17,15 @@ export const packVersion = (
 ): string | null => (state?.checked && state.version ? state.version : (manifest ?? null))
 
 /**
+ * The pack's mod count: the one the pack source's index lists, else the
+ * manifest's when the source is unread.
+ */
+export const packMods = (
+  state: PackState | undefined,
+  manifest: number | null | undefined,
+): number | null => (state?.checked && state.mods > 0 ? state.mods : (manifest ?? null))
+
+/**
  * The Version row: the version when the installed pack is the source's,
  * "older than X" when it is behind, the placeholder when nothing is known.
  */
@@ -25,3 +34,10 @@ export function versionValue(state: PackState | undefined): string {
   const version = state.version || PLACEHOLDER
   return state.upToDate ? version : `older than ${version}`
 }
+
+/**
+ * Whether the installed pack is behind its source, so the next Play updates
+ * it: installed, checked and not the source's. Unknown is not behind.
+ */
+export const packBehind = (state: PackState | undefined): boolean =>
+  !!state && state.installed && state.checked && !state.upToDate

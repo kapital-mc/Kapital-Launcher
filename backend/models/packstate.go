@@ -5,7 +5,9 @@ package models
 // last synced; the launcher fetches the current pack.toml and compares.
 type PackState struct {
 	ChapterID string `json:"chapterId"`
-	// Installed is whether the instance has synced a pack at all.
+	// Installed is whether the instance has synced a pack at all. The source
+	// is read either way, so a chapter not installed yet still has its
+	// version and mod count.
 	Installed bool `json:"installed"`
 	// Checked is whether the source's pack.toml could be read; false leaves
 	// UpToDate and Version meaningless, and the panel shows the placeholder.
@@ -14,4 +16,6 @@ type PackState struct {
 	UpToDate bool `json:"upToDate"`
 	// Version is the source's pack version, "" when it names none.
 	Version string `json:"version"`
+	// Mods is how many mods the source's index lists, 0 when it was not read.
+	Mods int `json:"mods"`
 }

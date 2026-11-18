@@ -158,3 +158,16 @@ address, and only the whole of
 schema and `services.ValidateManifest` both hold it, and anything else
 refuses the manifest whole. It is a page to open, like the wiki's, and runs
 nothing.
+
+## Amendment, 2026-11-10: the version and mod count come from the pack
+
+A pack is released several times a week and a launcher far less often, so a
+`pack.version` or `pack.mods` that had to match the pack meant a launcher
+release per pack release. Both now come from the pack the chapter syncs from,
+for every chapter, installed or not: the version from `pack.toml`, the mod
+count from the `index.toml` it names (each entry directly under `mods/`),
+fetched only when its hash is new in this run and refused unless it matches.
+The manifest's two fields stay, in the schema and the Go and TypeScript shapes,
+as the **fallback** for a source that cannot be read, like the changelog's.
+`pack.minecraft` and `pack.loader` are unchanged: Install still refuses a pack
+that disagrees with them.

@@ -329,6 +329,8 @@ export interface PackState {
   checked: boolean
   upToDate: boolean
   version: string
+  /** How many mods the source's index lists, 0 when it was not read. */
+  mods: number
 }
 
 /**

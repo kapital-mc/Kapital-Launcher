@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { ElementType, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import type { ElementType, PointerEvent as ReactPointerEvent, ReactNode, RefObject } from 'react'
 import { smoothWheel } from '../../lib/smoothWheel'
 
 interface Props {
@@ -8,6 +8,11 @@ interface Props {
   as?: ElementType
   /** Classes for the scrolling element; the wrapper only positions the thumb. */
   className?: string
+  /**
+   * An ancestor whose wheel scrolls this element too: a settings page, whose nav sits over the
+   * scroller rather than in it (SettingsLayout).
+   */
+  wheelArea?: RefObject<HTMLElement | null>
   'aria-label'?: string
 }
 
@@ -21,7 +26,7 @@ const MIN_THUMB = 32
  * the element's own scrolling and drags it back. The keys and touch still
  * scroll the element itself; the wheel glides (`lib/smoothWheel`).
  */
-export function Scrollable({ children, as: Tag = 'div', className, ...rest }: Props) {
+export function Scrollable({ children, as: Tag = 'div', className, wheelArea, ...rest }: Props) {
   const ref = useRef<HTMLElement>(null)
   const [thumb, setThumb] = useState<{ top: number; height: number } | null>(null)
 
@@ -55,7 +60,10 @@ export function Scrollable({ children, as: Tag = 'div', className, ...rest }: Pr
     }
   }, [measure])
 
-  useEffect(() => (ref.current ? smoothWheel(ref.current) : undefined), [])
+  useEffect(() => {
+    const el = ref.current
+    return el ? smoothWheel(el, wheelArea?.current ?? el) : undefined
+  }, [wheelArea])
 
   // Dragging the thumb scrolls the element by the same proportion.
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {

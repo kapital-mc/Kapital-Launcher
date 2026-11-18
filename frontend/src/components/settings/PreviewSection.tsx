@@ -4,9 +4,8 @@ import type { PreviewSituation } from '../../types'
 import type { ChapterPageSpec } from '../../lib/usePages'
 import { useChapterStore } from '../../stores/useChapterStore'
 import { usePreviewStore } from '../../stores/usePreviewStore'
-import { useSettingsStore } from '../../stores/useSettingsStore'
 import { errMsg } from '../../lib/ipc'
-import { ErrorLine, Hint } from '../ui/Notes'
+import { ErrorLine } from '../ui/Notes'
 import { Segmented } from '../ui/Segmented'
 import { TextLink } from '../ui/TextLink'
 
@@ -39,7 +38,6 @@ export function PreviewSection({ onStarted }: Props) {
   const load = usePreviewStore((s) => s.load)
   const start = usePreviewStore((s) => s.start)
   const clear = usePreviewStore((s) => s.clear)
-  const splashOn = useSettingsStore((s) => s.settings.loadingSplashOn)
   // The chapter the instance previews are for; the open one until another is picked.
   const [picked, setPicked] = useState<string | null>(null)
   const chapterId = picked ?? selectedId
@@ -87,11 +85,6 @@ export function PreviewSection({ onStarted }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Hint>
-        Shows a screen that a run only has when something goes wrong, so it can be looked at. A
-        preview is made up: it writes nothing, starts nothing and reaches no network, and a real
-        launch ends it.
-      </Hint>
       <PreviewGroup name="Launcher">
         <Links>{scoped('launcher')}</Links>
       </PreviewGroup>
@@ -105,12 +98,6 @@ export function PreviewSection({ onStarted }: Props) {
           options={chapters.map((c) => ({ value: c.id, label: c.name }))}
           onChange={setPicked}
         />
-        {splashOn === false && (
-          <Hint>
-            The loading splash is off here, so previews that have a card show the bar and the notice
-            only.
-          </Hint>
-        )}
         <Links>{scoped('chapter')}</Links>
       </PreviewGroup>
       <div className="flex flex-wrap items-center gap-3">

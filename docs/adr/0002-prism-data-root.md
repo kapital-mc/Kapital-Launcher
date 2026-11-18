@@ -809,7 +809,55 @@ API to run on NeoForge; the four jars are about 220 MB, Flashback's alone
   Connector is a beta (2.0.0-beta.17) and had not been started with the
   Frangfurd pack when this shipped.
 
-## Twenty-third amendment, 2026-11-08
+## Twenty-third amendment, 2026-11-15
+
+The author asked for Reinstall and Uninstall in the launcher: Reinstall for when
+the game will not start after a setting went wrong, putting the instance back to
+the pack's defaults while keeping what is large or the player's own, Distant
+Horizons terrain above all; Uninstall to take the whole instance out of Prism.
+
+- **Reinstall resets the launcher's own instance too.** `ReinstallChapter`
+  (the fourteenth amendment) no longer refuses an instance with the launcher's
+  pack URL. It stashes the folder as before and installs from the source the
+  instance syncs from now: the local pack when its command names the override in
+  settings, otherwise the published one. A failed install puts the folder back.
+- **What is kept is a fixed list, and nothing written by the pack is on it.**
+  `services.CarryOver` renames, through an `os.Root` on the instances folder,
+  these from the stash into the new instance: under the game folder `saves`,
+  `screenshots`, `schematics`, `Distant_Horizons_server_data`, `xaero`,
+  `flashback` (replays), `servers.dat` and `essential` (Essential's own account
+  data, which the launcher never reads), and at the instance's top level the
+  unfinished terrain download `kapital-dh-download`. A `.minecraft` game folder
+  is read as well as `minecraft`. The play time keys of `instance.cfg`
+  (`totalTimePlayed`, `lastLaunchTime`) are written into the new one; memory and
+  Java arguments are not, since they are settings. A path the new instance
+  already has stops the carry: nothing is put over a file.
+- **The rest is removed.** Mods, `config`, `options.txt` (key bindings with it),
+  shader and resource packs, caches, logs and the sync's records go with the
+  stash, and the next Play syncs the pack whole, which is the same download a new
+  player makes. Keeping the mods folder was rejected: a jar the pack never listed
+  is exactly what a reset should drop, and packwiz-installer only removes jars
+  its own record lists.
+- **A carry that stops half way keeps the stash.** The error names it; Prism
+  lists it, and what was not yet moved is still in it.
+- **The launcher's settings for the chapter stay**: mod switches, add-ons, the
+  server choice. They are visible and switchable in the chapter's settings, and
+  the next sync applies them to the new instance.
+- **Uninstall removes the whole folder, worlds and terrain included.**
+  `UninstallChapter` renames it to `<id>-removing-<n>`, removes its
+  `instance.cfg` so Prism stops listing it, then removes the rest
+  (`services.RemoveInstance`). A removal that stops half way names the folder it
+  left. The launcher's settings for the chapter stay, so Install brings the same
+  choices back.
+- **Both refuse what a rename of the folder refuses**: a preview, an active or
+  running game, no Prism, a chapter not installed, a terrain download under way
+  and an open Prism (the launcher's own is closed first).
+- **The page.** An Instance section closes the chapter's settings: the folder
+  name and its size, Reinstall and Uninstall. Each asks in a popup; Reinstall's
+  lists what is kept and what is reset, Uninstall's says the files go for good,
+  worlds included.
+
+## Twenty-fourth amendment, 2026-11-08
 
 Play time counts time in a world, not time the game was open (issue 341). The
 account page showed Prism's `totalTimePlayed`, which runs from launch to exit:
@@ -851,4 +899,4 @@ Frangfurd instance that was 71.9 h against 46.9 h in a world with AFK left out.
   archive's name does not follow the runs.
 - **Limits of the reading.** Only regular files the logs page's listing would
   show are opened, through an `os.Root`, unpacked up to the same 256 MiB. See
-  SECURITY_CHECKLIST S3.14.
+  SECURITY_CHECKLIST S3.15.

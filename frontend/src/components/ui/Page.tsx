@@ -83,13 +83,7 @@ export function Page({
     <section aria-label={label} className={CARD}>
       <PageHeader title={title} onBack={onBack} actions={actions} eyebrow={eyebrow} />
       {settings ? (
-        <Scrollable>
-          <div className="px-7 pt-7 pb-14">
-            <Reveal ready={ready}>
-              <SettingsLayout>{children}</SettingsLayout>
-            </Reveal>
-          </div>
-        </Scrollable>
+        <SettingsLayout ready={ready}>{children}</SettingsLayout>
       ) : fill ? (
         <div className="flex min-h-0 grow flex-col p-7">
           <Reveal ready={ready} className="flex min-h-0 grow flex-col gap-3">

@@ -9,7 +9,7 @@ import {
 import { useSettingsStore } from '../../stores/useSettingsStore'
 import { OpenChapterWiki, OpenWikiPage } from '../../../wailsjs/go/main/App'
 import { errMsg } from '../../lib/ipc'
-import { packVersion } from '../../lib/packState'
+import { packMods, packVersion } from '../../lib/packState'
 import { heroArtOf } from '../../lib/heroArt'
 import { useOpenMap } from '../../lib/useOpenMap'
 import { Hero } from './Hero'
@@ -61,6 +61,7 @@ export function ChapterView({ chapter, onOpenSettings, onOpenLogs, onOpenMap }: 
         onOpenLogs={() => onOpenLogs(chapter.id)}
         onOpenMap={openMap}
         version={packVersion(packState, chapter.pack.version)}
+        mods={packMods(packState, chapter.pack.mods)}
       />
       <ChapterActions chapter={chapter} />
       <Panels

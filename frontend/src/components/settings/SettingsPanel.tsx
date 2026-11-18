@@ -27,7 +27,6 @@ import { Code, FolderOpen, Palette, Triangle } from '../../lib/icons'
 import { ChoosePrismExecutable, ChoosePrismRoot } from '../../../wailsjs/go/main/App'
 import { AboutSection } from './AboutSection'
 import { Button } from '../ui/Button'
-import { Hint } from '../ui/Notes'
 import { Icon } from '../ui/Icon'
 import { Page } from '../ui/Page'
 import { SubSection } from '../ui/Section'
@@ -264,11 +263,6 @@ function DeveloperSection({
 }) {
   return (
     <SettingsSection title="Developer" icon={Code} collapsible>
-      <Hint>
-        A chapter can be installed from a packwiz serve running on this machine instead of its
-        published pack. Loopback addresses only; the field is empty for a normal install. An
-        installed chapter is switched between its packs in its own settings (the pen in the hero).
-      </Hint>
       <SettingsCard>
         {chapters.map((c) => (
           <TextField

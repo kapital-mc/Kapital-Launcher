@@ -1,12 +1,34 @@
 # Download site
 
-One static page: the launcher's name, the Download button for the visitor's
-system with the version and the other system under it, and the launcher window
-with the three chapters as a strip of panels in front of a backdrop of the
-open chapter's picture. The footer holds Changelog, GitHub and Code signing
-policy. It is separate from the Kapitel Kapital wiki and runs two small
-scripts, bundled into one file: one picks the operating system, one closes
-the popups with motion. Neither touches the network or storage.
+Two static pages, separate from the Kapitel Kapital wiki, under one header
+(the app icon, Home, Status):
+
+- `/` (`index.html`) in three sections. The hero: the launcher's name, the
+  Download button for the visitor's system with the version and the other
+  system under it, and the launcher window with the three chapters as a strip
+  of panels in front of a backdrop of the open chapter's picture. Features:
+  six tiles, a title and one line of facts each. Download: the systems the
+  launcher runs on and the same Download button, which opens the popup (the
+  Prism instance zips are only in the popup). The footer holds Wiki,
+  Changelog, GitHub and Code signing policy, and the build copies it and its
+  popups into `/status` (`<!--shared-->`), so both pages have the same one.
+- `/status` (`status.html`): each chapter as a section that opens and
+  closes. Frangfurd's two addresses, map, terrain download and pack, each
+  online or offline; Luxemburg and Lichdenstein retired, with their
+  downloads marked unavailable. Over the same backdrop on Frangfurd. See *The
+  status page* below.
+
+Neither touches storage, and each makes one request, to the site's own
+`/api/status`.
+
+Both pages open with motion (`src/intro.css`): the header fades in, the logo,
+the Download button and the window rise in turn, the backdrop opens square
+by square from dark at mosaic.js's delays, and the floating cards rise as it
+does; the status page's heading and chapters rise the same way. On the home
+page the hero is at least the viewport's height, and the Features and
+Download sections rise only once scrolled into view (`src/reveal.js`, an
+IntersectionObserver; without it nothing is hidden). Reduced motion turns all
+of it off.
 The decision record is `docs/adr/0009-download-site.md`.
 
 ## Where the look comes from
@@ -160,18 +182,20 @@ the slow duration, as the backdrop's squares do. Their colours (the accent,
 the server's square) come from the root and fade there. Without the script, or
 under reduced motion, the versions cross-fade.
 
-### The server card and /status
+### The server card and /api/status
 
 The right-hand card is the open chapter's server. Luxemburg and Lichdenstein
-are offline and say so. Frangfurd's comes from `/status`, a Cloudflare Pages
-Function (`functions/status.js`, routed by its file name from the root
-directory `site`): it pings the Germany address of `data/launcher.json` (the
-playit.gg tunnel, through its `_minecraft._tcp` SRV record over DNS over
-HTTPS) with the launcher's Server List Ping, at most 4 s, and answers with
-whether it answered and its player counts. The answer is cached for 30 s, so
-the server is asked at most that often per Cloudflare location. The ping
-itself is `status.js`, which `pnpm test` covers without Cloudflare;
-`status.test.js` also holds the address to the manifest's. `src/cards.js`
+are offline and say so. Frangfurd's comes from `/api/status`, a Cloudflare
+Pages Function (`functions/api/status.js`, routed by its path from the root
+directory `site`): it pings the Global and Germany addresses of
+`data/launcher.json` (the playit.gg tunnels, through their `_minecraft._tcp`
+SRV records over DNS over HTTPS) with the launcher's Server List Ping, and
+checks the map, the terrain download and the pack (see *The status page*),
+each at most 4 s, and answers with whether each answered and the player
+counts. The answer is cached for 30 s, so
+the server is asked at most that often per Cloudflare location. The parsing
+is `status.js`, which `pnpm test` covers without Cloudflare;
+`status.test.js` also holds every address and URL asked to the manifest's. `src/cards.js`
 asks on load and when Frangfurd opens after 30 s, and sets `data-server` on
 the root. Until it answers, or without the script or the function (`pnpm
 preview` has none), the card says Server. The CSP allows `connect-src
@@ -214,6 +238,37 @@ motion off.
 The CSP in `public/_headers` allows it with `script-src 'self'` and nothing
 more, so an inline script would be blocked.
 
+## The status page
+
+`status.html`, served by Pages at `/status`, is a second page of the same
+build (`build.rolldownOptions.input` in `vite.config.js`). Each chapter is a
+section whose header (title, era, state, chevron) is the label of a hidden
+checkbox, so opening one needs no script. Frangfurd starts open with its
+services; Lichdenstein (server and world, 17 GB) and Luxemburg (world,
+25 GB) say the server is retired and show their downloads as Unavailable.
+All of it over the home page's backdrop on Frangfurd (`data-showcase` on the
+root, `src/showcase.css`). Both pages keep the scrollbar's room
+(`scrollbar-gutter` in `src/style.css`), so the header does not move between
+them.
+
+| Row | What `/api/status` asks | Online when |
+|---|---|---|
+| Global, Germany | Server List Ping to the manifest's address | it answers; the counts follow |
+| World map | `GET /` to the manifest's `map`, over a plain socket (its port is its own, and `fetch()` keeps to 80 under an older compatibility date) | the status line is 2xx or 3xx |
+| Terrain download | the manifest's `dhSnapshot` | it answers 2xx; its `createdAt` day is shown |
+| Pack | the manifest's `packwiz` for Frangfurd | it answers 2xx; its `version` replaces the manifest's |
+
+The Tailscale address is left out: Cloudflare cannot reach a tailnet. There
+is no history: each answer is the state of the last 30 s. The addresses, the
+map link and the pack facts are written into the page at build time from the
+manifest (`fillManifest`), so the page and the function name the same
+things. `src/status-page.js` asks on load, every 30 s while the page is in
+view and when it comes back into view, sets `data-up` on each row and the
+summary, and writes every value as text. Without it each row says Checking.
+The page links its stylesheet through `src/status.css`, which only imports
+`src/style.css`: two pages linking the one file made the build share a
+module between their scripts, which a classic script cannot import.
+
 ## The changelog
 
 "Changelog", in the footer, opens a popup with each release's changes,
@@ -255,7 +310,7 @@ together.
 pnpm install
 pnpm build      # dist/
 pnpm preview    # build, then serve dist/ locally
-pnpm test       # the changelog parser, against test/fixtures/, and mosaic.js
+pnpm test       # the changelog parser, against test/fixtures/, mosaic.js and status.js
 ```
 
 There is no `vite` dev server script on purpose: the page's fonts and images

@@ -32,6 +32,7 @@ import {
   SetPackSource,
   ShowInstanceInPrism,
   ShowStashedInstance,
+  UninstallChapter,
 } from '../../wailsjs/go/main/App'
 import { EventsOff, EventsOn } from '../../wailsjs/runtime/runtime'
 
@@ -98,10 +99,14 @@ interface EngineStore {
   launch: (chapterId: string) => Promise<void>
   installChapter: (chapterId: string) => Promise<void>
   /**
-   * Replaces an instance the launcher did not set up (issue 244): Go moves the
-   * old folder aside as a stashed copy and installs, as Install does.
+   * Puts the chapter's instance back to a fresh copy of its pack. One the launcher did not set up
+   * (issue 244) is moved aside as a stashed copy, named for the corner's notice; the launcher's own
+   * keeps the player's files and loses the rest (ADR-2, twenty-third amendment). `inline` rethrows
+   * a refusal for the settings page to show, in place of the corner's error.
    */
-  reinstallChapter: (chapterId: string) => Promise<void>
+  reinstallChapter: (chapterId: string, inline?: boolean) => Promise<void>
+  /** Removes the chapter's whole instance; a refusal is rethrown for the settings page. */
+  uninstallChapter: (chapterId: string) => Promise<void>
   /** Opens the old instance the chapter's Reinstall backed up, in Prism; a refusal is the corner's error. */
   showStash: (chapterId: string) => Promise<void>
   /**
@@ -123,12 +128,14 @@ async function writeInstance(
   set: (partial: Partial<EngineStore>) => void,
   chapterId: string,
   write: (chapterId: string) => Promise<InstanceReport>,
+  inline = false,
 ) {
   set({ installing: chapterId, installedNow: null, error: null })
   try {
     const instances = await write(chapterId)
     set({ instances, installedNow: instances.present[chapterId] ? chapterId : null })
   } catch (e) {
+    if (inline) throw e
     set({ error: errMsg(e) })
   } finally {
     set({ installing: null })
@@ -293,13 +300,23 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   installChapter: (chapterId) => writeInstance(set, chapterId, InstallChapter),
 
   // The same write with the old folder moved aside first; Go puts it back when
-  // the install fails.
-  reinstallChapter: (chapterId) =>
-    writeInstance(set, chapterId, async (id) => {
-      const { instances, stash } = await ReinstallChapter(id)
-      set({ reinstalled: { ...get().reinstalled, [id]: stash } })
-      return instances
-    }),
+  // the install fails. Only a stash Go kept has a notice.
+  reinstallChapter: (chapterId, inline) =>
+    writeInstance(
+      set,
+      chapterId,
+      async (id) => {
+        const { instances, stash } = await ReinstallChapter(id)
+        if (stash) set({ reinstalled: { ...get().reinstalled, [id]: stash } })
+        return instances
+      },
+      inline,
+    ),
+
+  // A rethrow for the settings page; a stash from an earlier Reinstall is a folder of its own and stays.
+  uninstallChapter: async (chapterId) => {
+    set({ instances: await UninstallChapter(chapterId), installedNow: null })
+  },
 
   // Go opens the stash it recorded; the chapter id is all that crosses.
   showStash: async (chapterId) => {
