@@ -7,9 +7,10 @@ import { useEngineStore } from '../../stores/useEngineStore'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 
 /**
- * Play time on the account page (issue 192): what Prism has counted for each installed chapter
- * and the total across them. Prism's own numbers, read from each instance by Go when the page
- * opens and when the window regains focus (the game may have run in between), never on a timer.
+ * Play time on the account page (issues 192 and 341): the time in a world for each installed
+ * chapter, AFK left out, and the total across them. Go counts it from each instance's game logs
+ * when the page opens and when the window regains focus (the game may have run in between), never
+ * on a timer.
  */
 export function PlayTimeSection() {
   const chapters = useChapterStore((s) => s.manifest.chapters)

@@ -9,14 +9,14 @@ import (
 )
 
 // GetPlayTime returns, for each manifest chapter whose instance is installed,
-// the play time Prism has counted in its instance.cfg (issue 192, ADR-2's
-// eleventh amendment): `totalTimePlayed` and `lastLaunchTime`, and nothing else
-// of the file. The instances are the disk's own report, as chapterInstance
-// resolves them, and the paths are built from the manifest's instance ids, so
-// nothing the caller sends names a file. A chapter that is not installed is
-// left out; one whose file cannot be read is left out as well and logged by
-// chapter only. Read when the account page opens or the window regains focus,
-// never on a timer.
+// the seconds its game logs show in a world with AFK left out (issue 341,
+// ADR-2's twenty-third amendment) and Prism's `lastLaunchTime` (issue 192,
+// eleventh amendment). The instances are the disk's own report, as
+// chapterInstance resolves them, and the paths are built from the manifest's
+// instance ids, so nothing the caller sends names a file. A chapter that is not
+// installed is left out; one that cannot be read is left out as well and logged
+// by chapter only. Read when the account page opens or the window regains
+// focus, never on a timer.
 func (a *App) GetPlayTime() ([]models.PlayTime, error) {
 	report, err := a.realInstances()
 	if err != nil {
@@ -27,10 +27,15 @@ func (a *App) GetPlayTime() ([]models.PlayTime, error) {
 		if !report.Present[chapter.ID] {
 			continue
 		}
-		cfg := filepath.Join(report.Dir, chapter.Instance.ID, "instance.cfg")
-		t, err := services.ReadPlayTime(cfg, chapter.ID)
+		instance := filepath.Join(report.Dir, chapter.Instance.ID)
+		t, err := services.ReadPlayTime(filepath.Join(instance, "instance.cfg"), chapter.ID)
 		if err != nil {
 			slog.Warn("play time not read", "chapter", chapter.ID, "error", err)
+			continue
+		}
+		t.TotalSeconds, err = a.plays.Count(chapter.ID, instance)
+		if err != nil {
+			slog.Warn("play time not counted", "chapter", chapter.ID, "error", err)
 			continue
 		}
 		times = append(times, t)
