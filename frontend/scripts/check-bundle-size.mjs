@@ -143,7 +143,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // paint shows. Measured 98.38 KB, from 98.28 KB on main.
 // 98.5 the same day: the hero's mod count comes from the pack source, with the manifest's as
 // the fallback (lib/packState's packMods, ADR-4's 2026-11-10 amendment). Measured 98.42 KB.
-const BUDGET_KB = 98.5
+// 98.6 on 2026-11-18 (#359, #360, #317): install, reinstall and uninstall read the pack
+// states again after Go answers and the instances again after Go refuses, and the update
+// store's listener checks for a bridge. All three are in the first paint. Measured 98.501 KB.
+const BUDGET_KB = 98.6
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)
