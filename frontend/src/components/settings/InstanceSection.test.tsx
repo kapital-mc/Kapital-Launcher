@@ -6,7 +6,7 @@ import { useEngineStore } from '../../stores/useEngineStore'
 import { useGameStore } from '../../stores/useGameStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { BUNDLED_MANIFEST } from '../../lib/manifest'
-import { InstanceSection, KEPT, RESET } from './InstanceSection'
+import { InstanceSection, KEPT, KEPT_WHOLE, RESET } from './InstanceSection'
 
 vi.mock('../../../wailsjs/go/main/App')
 
@@ -57,11 +57,22 @@ describe('InstanceSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reinstall' }))
     expect(within(dialog()).getByText(KEPT)).toBeInTheDocument()
     expect(within(dialog()).getByText(RESET)).toBeInTheDocument()
+    expect(within(dialog()).queryByText(KEPT_WHOLE)).not.toBeInTheDocument()
     expect(App.ReinstallChapter).not.toHaveBeenCalled()
     fireEvent.click(within(dialog()).getByRole('button', { name: 'Reinstall' }))
     await screen.findByRole('button', { name: 'Reinstalled' })
     expect(App.ReinstallChapter).toHaveBeenCalledWith('frangfurd')
     expect(App.GetChapterStorage).toHaveBeenCalledWith('frangfurd')
+  })
+
+  it('names one whole backed-up instance when the launcher did not set it up', () => {
+    useEngineStore.setState({ instances: { ...report, packUrl: {} } })
+    render(<InstanceSection chapter={frangfurd} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Reinstall' }))
+    expect(within(dialog()).getByText(KEPT_WHOLE)).toBeInTheDocument()
+    expect(within(dialog()).queryByText(KEPT)).not.toBeInTheDocument()
+    expect(within(dialog()).queryByText('Reset')).not.toBeInTheDocument()
+    expect(within(dialog()).queryByText(RESET)).not.toBeInTheDocument()
   })
 
   it('cancels without a call, and shows Go’s refusal of an uninstall under the card', async () => {

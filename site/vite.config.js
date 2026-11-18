@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import { parseChangelog, renderChangelog } from './changelog.js'
@@ -382,8 +383,8 @@ export default defineConfig(async () => ({
     // share no module, so each stays one file with no imports.
     rolldownOptions: {
       input: {
-        index: new URL('./index.html', import.meta.url).pathname,
-        status: new URL('./status.html', import.meta.url).pathname,
+        index: fileURLToPath(new URL('./index.html', import.meta.url)),
+        status: fileURLToPath(new URL('./status.html', import.meta.url)),
       },
     },
     // The script runs as a classic script (stylesheetFirst above), and the page

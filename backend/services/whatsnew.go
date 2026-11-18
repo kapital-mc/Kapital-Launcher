@@ -99,6 +99,9 @@ func checkHighlight(h models.WhatsNewHighlight) error {
 	if err := checkCopy(title, title, maxHighlightTitle); err != nil {
 		return err
 	}
+	if h.Text != "" && text == "" {
+		return fmt.Errorf("%q has an empty text", title)
+	}
 	if text != "" {
 		if err := checkCopy(title, text, maxHighlightText); err != nil {
 			return err

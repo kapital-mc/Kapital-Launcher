@@ -42,7 +42,7 @@ A bare `catch {}` that swallows a rejection is the thing to refuse in review.
 
 ## Events
 
-Seven: `server:status`, a `models.ServerStatus` emitted by
+Eight: `server:status`, a `models.ServerStatus` emitted by
 `StatusService.Run`'s ticker and by `GetServerStatus`; `prism:install`, a
 `models.PrismInstallProgress` per step while `InstallPrism` runs, heard by the
 engine store (`EVENT_PRISM_INSTALL`), the install's outcome still coming from
@@ -65,7 +65,11 @@ section, the download's outcome still coming from the promise; and
 each change Go sees while it watches after an install, Connect or Open
 Tailscale (it carries the chapters whose server Tailscale reaches), and a `models.TailscaleInstallProgress` per step and per MiB while
 `InstallTailscale` runs, both heard by the Tailscale store
-(`EVENT_TAILSCALE_STATE`, `EVENT_TAILSCALE_INSTALL`) from the same section.
+(`EVENT_TAILSCALE_STATE`, `EVENT_TAILSCALE_INSTALL`) from the same section; and
+`launcher:update`, a `models.LauncherUpdateProgress` per step while the
+launcher's own update downloads (`services.EventLauncherUpdate`), heard by the
+update store (`EVENT_LAUNCHER_UPDATE`) for the app's lifetime from the header's
+`UpdateNotice`.
 
 The loading card (#97) is a second page in a window of its own and has no Wails
 bridge: it is not on this list. What it can ask Go for is its four actions,

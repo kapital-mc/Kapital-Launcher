@@ -84,7 +84,9 @@ func scanPackIndex(raw []byte) (packIndexRef, error) {
 
 // countIndexMods counts index.toml's entries directly under mods/: one
 // `file = "mods/<name>"` line each. A file in a folder under mods/ is not a mod.
-func countIndexMods(raw []byte) int {
+// A scan that stops early (a line past the scanner's token limit) is an error,
+// not a partial count.
+func countIndexMods(raw []byte) (int, error) {
 	n := 0
 	sc := bufio.NewScanner(bytes.NewReader(raw))
 	for sc.Scan() {
@@ -100,7 +102,10 @@ func countIndexMods(raw []byte) int {
 			n++
 		}
 	}
-	return n
+	if err := sc.Err(); err != nil {
+		return 0, err
+	}
+	return n, nil
 }
 
 // siblingURL is a file beside a pack.toml: the same URL with its last path
@@ -149,7 +154,10 @@ func (c *InstanceCreator) packMods(ctx context.Context, packURL string, check fu
 	if hex.EncodeToString(sum[:]) != ref.hash {
 		return 0, errors.New("index.toml does not match the hash pack.toml names")
 	}
-	n = countIndexMods(raw)
+	n, err = countIndexMods(raw)
+	if err != nil {
+		return 0, fmt.Errorf("index.toml: %w", err)
+	}
 	c.countsMu.Lock()
 	if c.modCounts == nil || len(c.modCounts) >= maxModCounts {
 		c.modCounts = map[string]int{}

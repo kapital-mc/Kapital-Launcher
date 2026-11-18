@@ -40,8 +40,8 @@ type LauncherUpdateProgress struct {
 
 // WhatsNewHighlight is one change a release puts in front of the player,
 // written by hand for the release (data/whatsnew.json), not taken from the
-// pull requests: a short name with a line about it, or with a list of small
-// changes it groups ("Bug fixes", "UI improvements"), or both.
+// pull requests: a title alone ("UI and bug fixes"), or a title with a line
+// about it, with a list of small changes it groups, or with both.
 type WhatsNewHighlight struct {
 	Title string   `json:"title"`
 	Text  string   `json:"text,omitempty"`

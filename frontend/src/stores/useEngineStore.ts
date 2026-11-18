@@ -126,6 +126,7 @@ interface EngineStore {
  */
 async function writeInstance(
   set: (partial: Partial<EngineStore>) => void,
+  get: () => EngineStore,
   chapterId: string,
   write: (chapterId: string) => Promise<InstanceReport>,
   inline = false,
@@ -134,7 +135,10 @@ async function writeInstance(
   try {
     const instances = await write(chapterId)
     set({ instances, installedNow: instances.present[chapterId] ? chapterId : null })
+    await get().loadPackStates()
   } catch (e) {
+    // A refusal can come after the disk changed: read it as it is.
+    await get().loadInstances()
     if (inline) throw e
     set({ error: errMsg(e) })
   } finally {
@@ -297,13 +301,14 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
   },
 
   // A write like launch.
-  installChapter: (chapterId) => writeInstance(set, chapterId, InstallChapter),
+  installChapter: (chapterId) => writeInstance(set, get, chapterId, InstallChapter),
 
   // The same write with the old folder moved aside first; Go puts it back when
   // the install fails. Only a stash Go kept has a notice.
   reinstallChapter: (chapterId, inline) =>
     writeInstance(
       set,
+      get,
       chapterId,
       async (id) => {
         const { instances, stash } = await ReinstallChapter(id)
@@ -315,7 +320,15 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
 
   // A rethrow for the settings page; a stash from an earlier Reinstall is a folder of its own and stays.
   uninstallChapter: async (chapterId) => {
-    set({ instances: await UninstallChapter(chapterId), installedNow: null })
+    try {
+      const instances = await UninstallChapter(chapterId)
+      set({ instances, installedNow: null })
+      await get().loadPackStates()
+    } catch (e) {
+      // A half-way failure may already have removed the folder: read the disk as it is.
+      await get().loadInstances()
+      throw e
+    }
   },
 
   // Go opens the stash it recorded; the chapter id is all that crosses.

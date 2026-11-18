@@ -54,6 +54,7 @@ func TestParseWhatsNewRefusesTheFileWhole(t *testing.T) {
 		"too long":      `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":"` + long + `"}]}]}`,
 		"em dash":       `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":"This — that"}]}]}`,
 		"highlight key": `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":"B","icon":"x"}]}]}`,
+		"blank text":    `{"releases":[{"version":"v1.0.0","highlights":[{"title":"A","text":" "}]}]}`,
 		"empty item":    `{"releases":[{"version":"v1.0.0","highlights":[{"title":"Fixes","items":["A fix",""]}]}]}`,
 		"item em dash":  `{"releases":[{"version":"v1.0.0","highlights":[{"title":"Fixes","items":["This — that"]}]}]}`,
 	}
