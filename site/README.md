@@ -90,8 +90,9 @@ a blur reads across the squares' edges, which then show seams mid-swap. The pict
 `src/showcase.css` beside their URLs. Reduced motion swaps every square at
 once.
 
-Narrower than 1024px the two cards are left out; narrower than 768px the
-panels stack.
+Narrower than 1024px the two cards are left out. The window is laid out at
+its full width and zoomed down to the width there is (`.showcase-window`), so
+a phone shows the same landscape window, smaller.
 
 A change to the header bar the window copies, or to the manifest's chapter
 facts, is a change to this page in the same pull request.

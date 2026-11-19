@@ -60,15 +60,15 @@
           <input type="checkbox" id="frangfurd-open" class="peer sr-only" checked />
           <label
             for="frangfurd-open"
-            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-5"
           >
-            <span class="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <span class="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-5">
               <h2 id="frangfurd-title" class="m-0">
-                <img src="../frontend/src/assets/titles/frangfurd.png" alt="Frangfurd" class="block h-auto w-48 max-w-full" />
+                <img src="../frontend/src/assets/titles/frangfurd.png" alt="Frangfurd" class="block h-auto w-36 max-w-full sm:w-48" />
               </h2>
-              <span class="text-accent font-pixel text-xs tracking-label uppercase">03 · 2500 – present</span>
+              <span class="text-accent font-pixel text-xs tracking-label whitespace-nowrap uppercase">03 · 2500 – present</span>
             </span>
-            <span class="flex items-center gap-4">
+            <span class="flex shrink-0 items-center gap-3 sm:gap-4">
               <span data-summary class="group font-pixel inline-flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
                 <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-summary-text>Checking</span>
               </span>
@@ -80,48 +80,48 @@
           >
             <div class="border-line min-h-0 overflow-hidden border-t">
                     <ul class="divide-line m-0 list-none divide-y p-0">
-                <li data-service="global" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
-                  <span class="flex min-w-0 flex-col gap-0.5">
-                    <span class="font-semibold">Global</span>
-                    <span class="text-fg-faint font-mono break-all text-xs select-all">%ADDRESS_FRANGFURD_GLOBAL%</span>
+                <li data-service="global" class="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-4 sm:flex sm:justify-between sm:gap-6 sm:px-5">
+                  <span class="contents sm:flex sm:min-w-0 sm:flex-col sm:gap-0.5">
+                    <span class="truncate font-semibold">Global</span>
+                    <span class="text-fg-faint col-span-2 truncate font-mono text-xs select-all">%ADDRESS_FRANGFURD_GLOBAL%</span>
                   </span>
-                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                  <span class="font-pixel col-start-2 row-start-1 flex shrink-0 items-center gap-2.5 text-xs whitespace-nowrap uppercase sm:text-sm">
                     <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
                   </span>
                 </li>
-                <li data-service="germany" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
-                  <span class="flex min-w-0 flex-col gap-0.5">
-                    <span class="font-semibold">Germany</span>
-                    <span class="text-fg-faint font-mono break-all text-xs select-all">%ADDRESS_FRANGFURD_GERMANY%</span>
+                <li data-service="germany" class="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-4 sm:flex sm:justify-between sm:gap-6 sm:px-5">
+                  <span class="contents sm:flex sm:min-w-0 sm:flex-col sm:gap-0.5">
+                    <span class="truncate font-semibold">Germany</span>
+                    <span class="text-fg-faint col-span-2 truncate font-mono text-xs select-all">%ADDRESS_FRANGFURD_GERMANY%</span>
                   </span>
-                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                  <span class="font-pixel col-start-2 row-start-1 flex shrink-0 items-center gap-2.5 text-xs whitespace-nowrap uppercase sm:text-sm">
                     <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
                   </span>
                 </li>
-                <li data-service="map" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
-                  <span class="flex min-w-0 flex-col gap-0.5">
-                    <span class="font-semibold"><a href="%MAP_FRANGFURD%" class="text-fg hover:text-accent duration-fast ease-standard no-underline transition-[color]">World map ↗</a></span>
-                    <span class="text-fg-faint  text-xs">BlueMap</span>
+                <li data-service="map" class="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-4 sm:flex sm:justify-between sm:gap-6 sm:px-5">
+                  <span class="contents sm:flex sm:min-w-0 sm:flex-col sm:gap-0.5">
+                    <span class="truncate font-semibold"><a href="%MAP_FRANGFURD%" class="text-fg hover:text-accent duration-fast ease-standard no-underline transition-[color]">World map ↗</a></span>
+                    <span class="text-fg-faint col-span-2 truncate text-xs">BlueMap</span>
                   </span>
-                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                  <span class="font-pixel col-start-2 row-start-1 flex shrink-0 items-center gap-2.5 text-xs whitespace-nowrap uppercase sm:text-sm">
                     <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
                   </span>
                 </li>
-                <li data-service="terrain" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
-                  <span class="flex min-w-0 flex-col gap-0.5">
-                    <span class="font-semibold">Terrain download</span>
-                    <span data-detail class="text-fg-faint  text-xs">Distant Horizons</span>
+                <li data-service="terrain" class="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-4 sm:flex sm:justify-between sm:gap-6 sm:px-5">
+                  <span class="contents sm:flex sm:min-w-0 sm:flex-col sm:gap-0.5">
+                    <span class="truncate font-semibold">Terrain download</span>
+                    <span data-detail class="text-fg-faint col-span-2 truncate text-xs">Distant Horizons</span>
                   </span>
-                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                  <span class="font-pixel col-start-2 row-start-1 flex shrink-0 items-center gap-2.5 text-xs whitespace-nowrap uppercase sm:text-sm">
                     <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
                   </span>
                 </li>
-                <li data-service="pack" class="group flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
-                  <span class="flex min-w-0 flex-col gap-0.5">
-                    <span class="font-semibold">Pack</span>
-                    <span data-detail class="text-fg-faint  text-xs"><span data-pack-version>%PACK_FRANGFURD_VERSION%</span> · %PACK_FRANGFURD_MODS% mods · %PACK_FRANGFURD_LOADER% %PACK_FRANGFURD_MINECRAFT%</span>
+                <li data-service="pack" class="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-4 sm:flex sm:justify-between sm:gap-6 sm:px-5">
+                  <span class="contents sm:flex sm:min-w-0 sm:flex-col sm:gap-0.5">
+                    <span class="truncate font-semibold">Pack</span>
+                    <span data-detail class="text-fg-faint col-span-2 truncate text-xs"><span data-pack-version>%PACK_FRANGFURD_VERSION%</span> · %PACK_FRANGFURD_MODS% mods · %PACK_FRANGFURD_LOADER% %PACK_FRANGFURD_MINECRAFT%</span>
                   </span>
-                  <span class="font-pixel flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
+                  <span class="font-pixel col-start-2 row-start-1 flex shrink-0 items-center gap-2.5 text-xs whitespace-nowrap uppercase sm:text-sm">
                     <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span><span data-state>Checking</span>
                   </span>
                 </li>
@@ -133,15 +133,15 @@
           <input type="checkbox" id="lichdenstein-open" class="peer sr-only" />
           <label
             for="lichdenstein-open"
-            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-5"
           >
-            <span class="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <span class="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-5">
               <h2 id="lichdenstein-title" class="m-0">
-                <img src="../frontend/src/assets/titles/lichdenstein.png" alt="Lichdenstein" class="block h-auto w-48 max-w-full" />
+                <img src="../frontend/src/assets/titles/lichdenstein.png" alt="Lichdenstein" class="block h-auto w-36 max-w-full sm:w-48" />
               </h2>
-              <span class="text-accent font-pixel text-xs tracking-label uppercase">02 · 2300 – 2500</span>
+              <span class="text-accent font-pixel text-xs tracking-label whitespace-nowrap uppercase">02 · 2300 – 2500</span>
             </span>
-            <span class="flex items-center gap-4">
+            <span class="flex shrink-0 items-center gap-3 sm:gap-4">
               <span data-up="offline" class="group font-pixel inline-flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
                 <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span>Retired
               </span>
@@ -153,13 +153,13 @@
           >
             <div class="border-line min-h-0 overflow-hidden border-t">
               <ul class="divide-line m-0 list-none divide-y p-0">
-                <li class="font-pixel px-5 pt-4 pb-3 text-sm uppercase">Server retired</li>
-                <li class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4">
-                  <span class="flex flex-col gap-0.5">
-                    <span class="font-semibold">Server and world</span>
+                <li class="font-pixel px-4 pt-4 pb-3 text-sm uppercase sm:px-5">Server retired</li>
+                <li class="flex items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-5">
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="truncate font-semibold">Server and world</span>
                     <span class="text-fg-faint text-xs">17 GB</span>
                   </span>
-                  <button type="button" disabled class="bg-logo-gradient-top text-sunken border-logo-gradient-top font-pixel inline-flex h-11 cursor-not-allowed items-center gap-2.5 border-3 px-4 text-sm uppercase opacity-50"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Unavailable</button>
+                  <button type="button" disabled class="bg-logo-gradient-top text-sunken border-logo-gradient-top font-pixel inline-flex h-11 shrink-0 cursor-not-allowed items-center gap-2.5 border-3 px-4 text-sm uppercase opacity-50"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Unavailable</button>
                 </li>
               </ul>
             </div>
@@ -169,15 +169,15 @@
           <input type="checkbox" id="luxemburg-open" class="peer sr-only" />
           <label
             for="luxemburg-open"
-            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+            class="peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-fg peer-focus-visible:-outline-offset-(--focus-ring-width) flex cursor-pointer items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-5"
           >
-            <span class="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <span class="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-5">
               <h2 id="luxemburg-title" class="m-0">
-                <img src="../frontend/src/assets/titles/luxemburg.png" alt="Luxemburg" class="block h-auto w-48 max-w-full" />
+                <img src="../frontend/src/assets/titles/luxemburg.png" alt="Luxemburg" class="block h-auto w-36 max-w-full sm:w-48" />
               </h2>
-              <span class="text-accent font-pixel text-xs tracking-label uppercase">01 · 1200 – 2300</span>
+              <span class="text-accent font-pixel text-xs tracking-label whitespace-nowrap uppercase">01 · 1200 – 2300</span>
             </span>
-            <span class="flex items-center gap-4">
+            <span class="flex shrink-0 items-center gap-3 sm:gap-4">
               <span data-up="offline" class="group font-pixel inline-flex items-center gap-2.5 text-sm whitespace-nowrap uppercase">
                 <span class="bg-fg-faint group-data-[up=online]:bg-success group-data-[up=partial]:bg-warning group-data-[up=offline]:bg-danger duration-slow ease-standard size-2.5 shrink-0 transition-[background-color]"></span>Retired
               </span>
@@ -189,13 +189,13 @@
           >
             <div class="border-line min-h-0 overflow-hidden border-t">
               <ul class="divide-line m-0 list-none divide-y p-0">
-                <li class="font-pixel px-5 pt-4 pb-3 text-sm uppercase">Server retired</li>
-                <li class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4">
-                  <span class="flex flex-col gap-0.5">
-                    <span class="font-semibold">World</span>
+                <li class="font-pixel px-4 pt-4 pb-3 text-sm uppercase sm:px-5">Server retired</li>
+                <li class="flex items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-5">
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="truncate font-semibold">World</span>
                     <span class="text-fg-faint text-xs">25 GB</span>
                   </span>
-                  <button type="button" disabled class="bg-logo-gradient-top text-sunken border-logo-gradient-top font-pixel inline-flex h-11 cursor-not-allowed items-center gap-2.5 border-3 px-4 text-sm uppercase opacity-50"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Unavailable</button>
+                  <button type="button" disabled class="bg-logo-gradient-top text-sunken border-logo-gradient-top font-pixel inline-flex h-11 shrink-0 cursor-not-allowed items-center gap-2.5 border-3 px-4 text-sm uppercase opacity-50"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-sm) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>Unavailable</button>
                 </li>
               </ul>
             </div>

@@ -100,9 +100,25 @@
   opacity: 0;
 }
 
+/* The launcher window is laid out at its full width, the hero's widest, and
+   zoomed down to the width there is, so a phone shows the same landscape
+   window smaller. The scale is the frame's width over the window's, a plain
+   number through tan(atan2()), and is never above 1. The hero (@container)
+   is the width it is measured against. */
+@property --showcase-scale {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+.showcase-frame {
+  --showcase-scale: min(1, tan(atan2(100cqw, calc(var(--spacing) * 280))));
+}
+.showcase-window {
+  zoom: var(--showcase-scale);
+}
+
 /* The strip: the open chapter's panel takes most of the width, its picture
-   at full strength and its title larger; the others are dimmed. Below the
-   tablet width the panels stack. */
+   at full strength and its title larger; the others are dimmed. */
 .showcase-panel {
   flex: 1 1 calc(var(--spacing) * 50);
   transition: flex-grow var(--duration-slow) var(--ease-standard);
