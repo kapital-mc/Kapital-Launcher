@@ -62,7 +62,7 @@
 
     <main class="flex min-w-0 grow flex-col">
       <section
-        class="relative flex min-h-[calc(100dvh-var(--spacing)*16)] min-w-0 flex-col items-center justify-center overflow-hidden px-4 pt-8 pb-16 md:min-h-[calc(100dvh-var(--spacing)*19)] md:px-10 md:pt-16 md:pb-44"
+        class="relative flex min-w-0 flex-col items-center justify-center overflow-hidden px-4 pt-8 pb-16 md:min-h-[calc(100dvh-var(--spacing)*19)] md:px-10 md:pt-16 md:pb-44"
       >
         <div class="relative z-10 flex flex-col items-center gap-6.5 text-center">
           <!-- The logo is the heading: the author's one-line artwork, shown at
@@ -82,10 +82,10 @@
                (src/detect.js; Windows without it). Under it the release and the
                other system, which opens the same popup with that system picked. -->
           <div class="intro-rise intro-step-1 flex flex-col items-center gap-3.5">
-            <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+            <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-5 font-pixel text-md tracking-control whitespace-nowrap uppercase sm:px-7.5 transition-[filter] hover:brightness-(--effect-hover-brightness)">
               Download for Windows
             </button>
-            <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+            <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-5 font-pixel text-md tracking-control whitespace-nowrap uppercase sm:px-7.5 transition-[filter] hover:brightness-(--effect-hover-brightness)">
               Download for macOS
             </button>
             <div class="flex items-center gap-3.5 font-pixel text-sm">
@@ -103,12 +103,12 @@
           >
         </div>
 
-        <div class="relative mt-12 w-full min-w-0 max-w-280">
+        <div class="showcase-frame relative mt-12 w-full min-w-0 max-w-280">
           <!-- The backdrop: the open chapter's picture through a grid of dark
                squares, as wide as the page, from the window's top edge down.
                mosaic.js writes the squares; src/showcase.css paints them. -->
           <div
-            class="showcase-backdrop pointer-events-none absolute overflow-hidden top-0 left-1/2 md:-top-8 h-180 w-screen -translate-x-1/2"
+            class="showcase-backdrop pointer-events-none absolute overflow-hidden top-0 left-1/2 md:-top-8 h-[50vw] md:h-180 w-screen -translate-x-1/2"
             aria-hidden="true"
           >
             <div class="showcase-art"><!--mosaic:art--></div>
@@ -165,7 +165,7 @@
           </div>
 
           <figure
-            class="intro-rise intro-step-2 bg-canvas border-line-strong relative z-10 m-0 flex w-full flex-col overflow-hidden rounded-lg border shadow-2xl select-none"
+            class="showcase-window intro-rise intro-step-2 bg-canvas border-line-strong relative z-10 m-0 flex w-full flex-col overflow-hidden rounded-lg border shadow-2xl select-none"
           >
             <!-- The header bar: shell/HeaderBar.tsx and HeaderTools.tsx, as
                  Windows draws them. A picture: nothing in it is a control. -->
@@ -190,13 +190,13 @@
             </div>
 
             <!-- The chapters: a radio group whose labels are the panels. -->
-            <fieldset class="showcase-strip bg-sunken m-0 flex min-w-0 flex-wrap gap-1 border-0 p-1">
+            <fieldset class="showcase-strip bg-sunken m-0 flex min-w-0 gap-1 border-0 p-1">
               <legend class="sr-only">Chapter</legend>
                 <div class="showcase-panel relative min-w-0" data-chapter="luxemburg">
                   <input type="radio" name="chapter" id="chapter-luxemburg" value="luxemburg" class="sr-only" />
                   <label
                     for="chapter-luxemburg"
-                    class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
+                    class="bg-sunken relative flex min-h-115 cursor-pointer overflow-hidden rounded-md"
                   >
                     <img
                       src="../frontend/src/assets/screenshots/luxemburg.webp"
@@ -221,7 +221,7 @@
                   <input type="radio" name="chapter" id="chapter-lichdenstein" value="lichdenstein" class="sr-only" />
                   <label
                     for="chapter-lichdenstein"
-                    class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
+                    class="bg-sunken relative flex min-h-115 cursor-pointer overflow-hidden rounded-md"
                   >
                     <img
                       src="../frontend/src/assets/screenshots/lichdenstein.webp"
@@ -246,7 +246,7 @@
                   <input type="radio" name="chapter" id="chapter-frangfurd" value="frangfurd" checked class="sr-only" />
                   <label
                     for="chapter-frangfurd"
-                    class="bg-sunken relative flex min-h-60 cursor-pointer overflow-hidden rounded-md md:min-h-115"
+                    class="bg-sunken relative flex min-h-115 cursor-pointer overflow-hidden rounded-md"
                   >
                     <img
                       src="../frontend/src/assets/screenshots/frangfurd.webp"
@@ -276,43 +276,43 @@
       <section id="features" class="border-line scroll-mt-4 border-t px-4 py-14 md:px-10 md:py-20">
         <div data-reveal class="mx-auto flex max-w-280 flex-col gap-8 md:gap-10">
           <h2 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Features</h2>
-          <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
-            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+          <ul class="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-4 sm:p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5">
                 <h3 class="font-pixel m-0 text-md font-normal uppercase">All chapters</h3>
                 <span class="text-fg-muted text-sm leading-normal">Download and manage modpacks</span>
               </span>
             </li>
-            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-4 sm:p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5">
                 <h3 class="font-pixel m-0 text-md font-normal uppercase">Pack sync</h3>
                 <span class="text-fg-muted text-sm leading-normal">Updates automatically on Play</span>
               </span>
             </li>
-            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-4 sm:p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><rect width="20" height="8" x="2" y="2" rx="2" ry="2" /><rect width="20" height="8" x="2" y="14" rx="2" ry="2" /><line x1="6" x2="6.01" y1="6" y2="6" /><line x1="6" x2="6.01" y1="18" y2="18" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5">
                 <h3 class="font-pixel m-0 text-md font-normal uppercase">Server info</h3>
                 <span class="text-fg-muted text-sm leading-normal">Status, players and map</span>
               </span>
             </li>
-            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-4 sm:p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5">
                 <h3 class="font-pixel m-0 text-md font-normal uppercase">Addons</h3>
                 <span class="text-fg-muted text-sm leading-normal">Camera tools and game features</span>
               </span>
             </li>
-            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-4 sm:p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5">
                 <h3 class="font-pixel m-0 text-md font-normal uppercase">Client improvements</h3>
                 <span class="text-fg-muted text-sm leading-normal">Custom fixes and optimizations</span>
               </span>
             </li>
-            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-5">
+            <li class="border-line-strong bg-sunken flex items-center gap-4 border-3 p-4 sm:p-5">
               <span class="bg-logo-gradient-top text-sunken inline-flex size-10 shrink-0 items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-(--layout-icon-md) shrink-0" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg></span>
               <span class="flex min-w-0 flex-col gap-1.5">
                 <h3 class="font-pixel m-0 text-md font-normal uppercase">In-app updates</h3>
@@ -329,21 +329,26 @@
       <section class="border-line border-t px-4 py-14 md:px-10 md:py-20">
         <div data-reveal class="mx-auto flex max-w-280 flex-col gap-8 md:gap-10">
           <h2 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Download</h2>
-          <div class="reveal-item border-line-strong bg-sunken flex flex-col gap-8 border-3 p-6 md:flex-row md:items-center md:justify-between md:p-8">
-            <dl class="m-0 grid grid-cols-[auto_1fr] items-baseline gap-x-8 gap-y-3">
-              <dt class="text-fg-faint font-pixel text-xs uppercase">Windows</dt>
-              <dd class="m-0">Windows 11 · 64-bit</dd>
-              <dt class="text-fg-faint font-pixel text-xs uppercase">macOS</dt>
-              <dd class="m-0">macOS 12 or later · Intel and Apple silicon</dd>
+          <div class="reveal-item border-line-strong bg-sunken flex flex-col gap-8 border-3 p-5 sm:p-6 md:p-8 lg:flex-row lg:items-center lg:justify-between">
+            <!-- On a phone each system's name sits over its line. -->
+            <dl class="m-0 flex flex-col gap-4 sm:grid sm:grid-cols-[auto_1fr] sm:items-baseline sm:gap-x-8 sm:gap-y-3">
+              <div class="flex flex-col gap-1 sm:contents">
+                <dt class="text-fg-faint font-pixel text-xs uppercase">Windows</dt>
+                <dd class="m-0">Windows 11 · 64-bit</dd>
+              </div>
+              <div class="flex flex-col gap-1 sm:contents">
+                <dt class="text-fg-faint font-pixel text-xs uppercase">macOS</dt>
+                <dd class="m-0">macOS 12 or later · Intel and Apple silicon</dd>
+              </div>
             </dl>
-            <div class="flex flex-col items-center gap-3.5">
-                <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+            <div class="flex flex-col items-stretch gap-3.5 sm:items-center">
+                <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center justify-center gap-3 border-3 px-5 font-pixel text-md tracking-control whitespace-nowrap uppercase sm:px-7.5 transition-[filter] hover:brightness-(--effect-hover-brightness)">
                   Download for Windows
                 </button>
-                <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center gap-3 border-3 px-7.5 font-pixel text-md tracking-control uppercase transition-[filter] hover:brightness-(--effect-hover-brightness)">
+                <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center justify-center gap-3 border-3 px-5 font-pixel text-md tracking-control whitespace-nowrap uppercase sm:px-7.5 transition-[filter] hover:brightness-(--effect-hover-brightness)">
                   Download for macOS
                 </button>
-                <div class="flex items-center gap-3.5 font-pixel text-sm">
+                <div class="flex items-center justify-center gap-3.5 font-pixel text-sm">
                   <span class="text-fg-faint">%TAG%</span>
                   <span class="bg-line-strong h-3.5 w-px" aria-hidden="true"></span>
                   <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="windows" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">macOS</button>
@@ -360,16 +365,17 @@
          copies this block into it (shared() in vite.config.js). -->
     <!--shared:start-->
     <footer class="border-line text-fg-faint border-t text-sm">
-      <div class="mx-auto flex max-w-300 flex-wrap items-center gap-x-7 gap-y-3 px-4 py-6 md:px-10">
+      <div class="mx-auto flex max-w-300 flex-wrap items-center gap-x-5 gap-y-3 px-4 py-6 sm:gap-x-7 md:px-10">
         <a href="%WIKI%" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-sm no-underline transition-[color]">Wiki</a>
         <!--changelog:start-->
         <button type="button" popovertarget="changelog" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-sm no-underline transition-[color]">Changelog</button>
         <!--changelog:end-->
         <a data-link="github" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-sm no-underline transition-[color]">GitHub</a>
         <button type="button" popovertarget="signing" class="text-fg-muted hover:text-fg duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-sm no-underline transition-[color]">Code signing policy</button>
-        <p class="m-0 grow basis-80 md:text-right">
-          Not an official Minecraft product. Not approved by or associated with
-          Mojang or Microsoft.
+        <!-- One sentence per line on a phone. -->
+        <p class="m-0 grow basis-80 text-xs sm:text-sm md:text-right">
+          <span class="block md:inline">Not an official Minecraft product.</span>
+          <span class="block md:inline">Not approved by or associated with Mojang or Microsoft.</span>
         </p>
       </div>
     </footer>
@@ -393,7 +399,7 @@
           <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
             Kapital Launcher
           </p>
-          <h2 id="changelog-title" class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">
+          <h2 id="changelog-title" class="font-pixel m-0 text-lg leading-tight font-bold whitespace-nowrap uppercase sm:text-2xl">
             Changelog
           </h2>
         </div>
@@ -431,7 +437,7 @@
           <p class="text-fg-muted m-0 font-mono text-xs tracking-eyebrow uppercase">
             Kapital Launcher
           </p>
-          <h2 id="signing-title" class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">
+          <h2 id="signing-title" class="font-pixel m-0 text-lg leading-tight font-bold whitespace-nowrap uppercase sm:text-2xl">
             Code signing policy
           </h2>
         </div>
@@ -548,7 +554,7 @@
       </div>
 
       <div class="group/dl flex flex-col gap-4.5 px-6 pt-5.5 pb-6">
-        <h2 id="download-title" class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">
+        <h2 id="download-title" class="font-pixel m-0 text-lg leading-tight font-bold whitespace-nowrap uppercase sm:text-2xl">
           Get Kapital Launcher
         </h2>
 

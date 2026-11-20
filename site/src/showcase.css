@@ -100,9 +100,26 @@
   opacity: 0;
 }
 
+/* The launcher window scales with the width there is, so a phone shows the
+   same landscape window, smaller. The frame is a container, and inside the
+   window one spacing step is a 280th of its width (4px at the full 1120px);
+   the few tokens the window draws with that are not spacing steps follow
+   it, each its full-width value counted in steps. Plain calc() with
+   container units: a computed zoom is not applied by Safari. */
+.showcase-frame {
+  container-type: inline-size;
+}
+.showcase-window {
+  --spacing: calc(100cqw / 280);
+  --text-sm: calc(var(--spacing) * 3.25);
+  --radius-md: calc(var(--spacing) * 2);
+  --radius-lg: calc(var(--spacing) * 2.5);
+  --layout-titlebar: calc(var(--spacing) * 10);
+  --layout-icon-sm: calc(var(--spacing) * 4);
+}
+
 /* The strip: the open chapter's panel takes most of the width, its picture
-   at full strength and its title larger; the others are dimmed. Below the
-   tablet width the panels stack. */
+   at full strength and its title larger; the others are dimmed. */
 .showcase-panel {
   flex: 1 1 calc(var(--spacing) * 50);
   transition: flex-grow var(--duration-slow) var(--ease-standard);
