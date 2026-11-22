@@ -126,6 +126,9 @@ export async function onRequestGet({ request: incoming, waitUntil }) {
       'content-type': 'application/json; charset=utf-8',
       'cache-control': `public, max-age=${MAX_AGE}`,
       'x-content-type-options': 'nosniff',
+      // The wiki's community page reads Frangfurd's state for its status dot.
+      // Public, read-only and sent without cookies, so any origin may read it.
+      'access-control-allow-origin': '*',
     },
   })
   if (cache) waitUntil(cache.put(key, response.clone()))

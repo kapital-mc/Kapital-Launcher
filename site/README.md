@@ -200,7 +200,9 @@ is `status.js`, which `pnpm test` covers without Cloudflare;
 asks on load and when Frangfurd opens after 30 s, and sets `data-server` on
 the root. Until it answers, or without the script or the function (`pnpm
 preview` has none), the card says Server. The CSP allows `connect-src
-'self'` for it and nothing else.
+'self'` for it and nothing else. The answer carries
+`access-control-allow-origin: *`, so the wiki's community page can read
+Frangfurd's state for the dot beside its Status page button.
 
 `src/detect.js` is bundled with `src/popup.js`, `src/cycle.js` and
 `src/cards.js` into the page's one script file, emitted by Vite under `assets/`. The build turns its tag into a classic script placed after the
