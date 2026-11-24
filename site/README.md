@@ -3,15 +3,15 @@
 Two static pages, separate from the Kapitel Kapital wiki, under one header
 (the app icon, Home, Status):
 
-- `/` (`index.html`) in three sections. The hero: the launcher's name, the
+- `/` (`index.html`) in two sections. The hero: the launcher's name, the
   Download button for the visitor's system with the version and the other
   system under it, and the launcher window with the three chapters as a strip
   of panels in front of a backdrop of the open chapter's picture. Features:
-  six tiles, a title and one line of facts each. Download: the systems the
-  launcher runs on and the same Download button, which opens the popup (the
-  Prism instance zips are only in the popup). The footer holds Wiki,
-  Changelog, GitHub and Code signing policy, and the build copies it and its
-  popups into `/status` (`<!--shared-->`), so both pages have the same one.
+  six tiles, a title and one line of facts each. The Download button opens
+  the popup, which names the systems and holds the Prism instance zips.
+  The footer holds Wiki, Changelog, GitHub and Code signing policy, and the
+  build copies it and its popups into `/status` (`<!--shared-->`), so both
+  pages have the same one.
 - `/status` (`status.html`): each chapter as a section that opens and
   closes. Frangfurd's two addresses, map, terrain download and pack, each
   online or offline; Luxemburg and Lichdenstein retired, with their
@@ -25,8 +25,8 @@ Both pages open with motion (`src/intro.css`): the header fades in, the logo,
 the Download button and the window rise in turn, the backdrop opens square
 by square from dark at mosaic.js's delays, and the floating cards rise as it
 does; the status page's heading and chapters rise the same way. On the home
-page the hero is at least the viewport's height, and the Features and
-Download sections rise only once scrolled into view (`src/reveal.js`, an
+page the hero is at least the viewport's height, and the Features section
+rises only once scrolled into view (`src/reveal.js`, an
 IntersectionObserver; without it nothing is hidden). Reduced motion turns all
 of it off.
 The decision record is `docs/adr/0009-download-site.md`.

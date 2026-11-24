@@ -20,7 +20,7 @@
     <script type="module" src="/src/reveal.js"></script>
   </head>
   <!--
-    The home page, in three sections (the hero, features, download), and
+    The home page, in two sections (the hero and features), and
     five small scripts: src/detect.js picks the OS for the
     Download button and the download popup, src/popup.js opens and closes the
     popups with motion, src/cycle.js opens the next chapter every few seconds
@@ -322,43 +322,6 @@
           </ul>
         </div>
       </section>
-
-      <!--release:start-->
-      <!-- The systems the launcher runs on, and the same Download button as
-           the hero, opening the download popup for the visitor's system. -->
-      <section class="border-line border-t px-4 py-14 md:px-10 md:py-20">
-        <div data-reveal class="mx-auto flex max-w-280 flex-col gap-8 md:gap-10">
-          <h2 class="font-pixel m-0 text-2xl leading-tight font-bold uppercase">Download</h2>
-          <div class="reveal-item border-line-strong bg-sunken flex flex-col gap-8 border-3 p-5 sm:p-6 md:p-8 lg:flex-row lg:items-center lg:justify-between">
-            <!-- On a phone each system's name sits over its line. -->
-            <dl class="m-0 flex flex-col gap-4 sm:grid sm:grid-cols-[auto_1fr] sm:items-baseline sm:gap-x-8 sm:gap-y-3">
-              <div class="flex flex-col gap-1 sm:contents">
-                <dt class="text-fg-faint font-pixel text-xs uppercase">Windows</dt>
-                <dd class="m-0">Windows 11 · 64-bit</dd>
-              </div>
-              <div class="flex flex-col gap-1 sm:contents">
-                <dt class="text-fg-faint font-pixel text-xs uppercase">macOS</dt>
-                <dd class="m-0">macOS 12 or later · Intel and Apple silicon</dd>
-              </div>
-            </dl>
-            <div class="flex flex-col items-stretch gap-3.5 sm:items-center">
-                <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="windows" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center justify-center gap-3 border-3 px-5 font-pixel text-md tracking-control whitespace-nowrap uppercase sm:px-7.5 transition-[filter] hover:brightness-(--effect-hover-brightness)">
-                  Download for Windows
-                </button>
-                <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="macos" class="bg-logo-gradient-top text-sunken border-logo-gradient-top duration-fast ease-standard inline-flex h-14 cursor-pointer items-center justify-center gap-3 border-3 px-5 font-pixel text-md tracking-control whitespace-nowrap uppercase sm:px-7.5 transition-[filter] hover:brightness-(--effect-hover-brightness)">
-                  Download for macOS
-                </button>
-                <div class="flex items-center justify-center gap-3.5 font-pixel text-sm">
-                  <span class="text-fg-faint">%TAG%</span>
-                  <span class="bg-line-strong h-3.5 w-px" aria-hidden="true"></span>
-                  <button type="button" popovertarget="download" data-os-pick="macos" data-when-os="windows" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">macOS</button>
-                  <button type="button" popovertarget="download" data-os-pick="windows" data-when-os="macos" class="text-fg-soft hover:text-fg decoration-line-strong duration-fast ease-standard cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline underline-offset-4 transition-[color]">Windows</button>
-                </div>
-              </div>
-          </div>
-        </div>
-      </section>
-      <!--release:end-->
     </main>
 
     <!-- The footer and its two popups. status.html shows the same: the build

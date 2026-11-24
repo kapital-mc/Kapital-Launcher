@@ -50,16 +50,15 @@
 
   /* Below the hero: hidden until the section is in view, then each heading
      and tile rises, the tiles one step after another. */
-  [data-reveal] :is(h2, li, .reveal-item) {
+  [data-reveal] :is(h2, li) {
     transition:
       opacity var(--duration-drift) var(--ease-out),
       translate var(--duration-drift) var(--ease-out);
   }
-  :root[data-reveal-ready] [data-reveal]:not([data-shown]) :is(h2, li, .reveal-item) {
+  :root[data-reveal-ready] [data-reveal]:not([data-shown]) :is(h2, li) {
     opacity: 0;
     translate: 0 calc(var(--spacing) * 8);
   }
-  [data-reveal] .reveal-item,
   [data-reveal] li:nth-child(1) { transition-delay: calc(var(--duration-drift) * 1 / 6); }
   [data-reveal] li:nth-child(2) { transition-delay: calc(var(--duration-drift) * 2 / 6); }
   [data-reveal] li:nth-child(3) { transition-delay: calc(var(--duration-drift) * 3 / 6); }
