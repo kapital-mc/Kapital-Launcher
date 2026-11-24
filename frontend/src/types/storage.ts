@@ -53,3 +53,22 @@ export interface ChapterStorage {
   /** The tracker or the game log says the game runs; the log half is a guess, shown as a hint. */
   running: boolean
 }
+
+/** One game setting the Instance section can reset, from GetGameSettings. */
+export interface GameSettingsItem {
+  /** What ResetGameSetting takes back. */
+  id: string
+  name: string
+  /** Its files on disk now, relative to the game folder; none after a reset until the next Play. */
+  files: string[]
+  /** options.txt's key binding lines, for the key bindings item. */
+  keys: number
+}
+
+/** The game settings a chapter's instance can reset, in the page's order. */
+export interface ChapterGameSettings {
+  chapterId: string
+  items: GameSettingsItem[]
+  /** The tracker or the game log says the game runs; a reset is refused while it does. */
+  running: boolean
+}
