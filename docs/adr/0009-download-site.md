@@ -353,3 +353,9 @@ download, and for a separate server status page, keeping the pixel window.
   Lichdenstein, server) downloads shown as unavailable.
 - **Not solved here:** visitors whose network throttles Cloudflare reach
   neither page, the status page included, since both are on Pages.
+
+## Amendment, 2026-11-24: no Download section
+
+The author asked for the Download section at the foot of the home page to go.
+The hero's Download button is the page's only one. The supported systems it
+listed are named in the download popup, as before 2026-11-14.
