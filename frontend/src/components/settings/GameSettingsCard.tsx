@@ -84,6 +84,9 @@ export function GameSettingsCard({ chapter }: Props) {
   return (
     <>
       <SettingsCard label="Game settings">
+        {/* Colour and background only: once the rows open the card's divider gives this line a
+            border, and a border colour transition would start it from the text colour, a light
+            line that fades. */}
         <button
           type="button"
           aria-expanded={open}
@@ -91,7 +94,7 @@ export function GameSettingsCard({ chapter }: Props) {
             setConfirming(null)
             setOpen((o) => !o)
           }}
-          className="text-fg-soft hover:text-fg hover:bg-hover duration-fast ease-standard flex w-full items-center gap-2 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg"
+          className="text-fg-soft hover:text-fg hover:bg-hover duration-fast ease-standard flex w-full items-center gap-2 text-left text-sm transition-[color,background-color] first:rounded-t-lg last:rounded-b-lg"
         >
           <Icon
             icon={ChevronRight}
