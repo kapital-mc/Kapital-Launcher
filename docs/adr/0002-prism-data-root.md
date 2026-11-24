@@ -938,5 +938,7 @@ below only.
   log says it runs: the game writes `options.txt` and most of these files as it
   closes, which would put the old settings back.
 - **The page.** A card at the top of the Instance section, above Reinstall and
-  Uninstall: one row per item, its name, one fact (the file, the number of
-  files or key bindings, or Default when nothing is left) and a reset button.
+  Uninstall, folded behind one "Reset game settings" line and closed at first:
+  one row per item, its name, one fact (the file, the number of files or key
+  bindings, or Default when nothing is left) and a reset button. The Pack
+  source section, shown with a local pack, moves below Instance and is last.

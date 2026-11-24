@@ -36,6 +36,8 @@ const full = view([
 
 const resetButton = (name: string) => screen.getByTitle(`Reset ${name}`)
 
+const unfold = () => fireEvent.click(screen.getByRole('button', { name: 'Reset game settings' }))
+
 describe('GameSettingsCard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -54,8 +56,21 @@ describe('GameSettingsCard', () => {
     Reflect.deleteProperty(window, 'go')
   })
 
+  it('starts folded, and opens and folds on its line', () => {
+    render(<GameSettingsCard chapter={frangfurd} />)
+    const line = screen.getByRole('button', { name: 'Reset game settings' })
+    expect(line).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('Game options')).not.toBeInTheDocument()
+    fireEvent.click(line)
+    expect(line).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Game options')).toBeInTheDocument()
+    fireEvent.click(line)
+    expect(screen.queryByText('Game options')).not.toBeInTheDocument()
+  })
+
   it('lists each setting with one fact, and Default for one with nothing left', () => {
     render(<GameSettingsCard chapter={frangfurd} />)
+    unfold()
     expect(screen.getByText('options.txt')).toBeInTheDocument()
     expect(screen.getByText('102 bindings')).toBeInTheDocument()
     expect(screen.getByText('2 files')).toHaveAttribute(
@@ -71,6 +86,7 @@ describe('GameSettingsCard', () => {
     const after = view([item('options', 'Game options', [])])
     vi.mocked(App.ResetGameSetting).mockResolvedValue(after as never)
     render(<GameSettingsCard chapter={frangfurd} />)
+    unfold()
     fireEvent.click(resetButton('Game options'))
     expect(App.ResetGameSetting).not.toHaveBeenCalled()
     fireEvent.click(screen.getAllByRole('button', { name: 'Cancel' })[0]!)
@@ -85,6 +101,7 @@ describe('GameSettingsCard', () => {
   it('shows Go’s refusal under the card', async () => {
     vi.mocked(App.ResetGameSetting).mockRejectedValue('Frangfurd is starting or running')
     render(<GameSettingsCard chapter={frangfurd} />)
+    unfold()
     fireEvent.click(resetButton('Key bindings'))
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
     expect(await screen.findByText('Frangfurd is starting or running')).toBeInTheDocument()
@@ -97,6 +114,7 @@ describe('GameSettingsCard', () => {
       },
     })
     render(<GameSettingsCard chapter={frangfurd} />)
+    unfold()
     expect(resetButton('Game options')).toBeDisabled()
     expect(resetButton('Key bindings')).toBeDisabled()
   })
