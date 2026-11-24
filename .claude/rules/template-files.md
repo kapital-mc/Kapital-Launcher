@@ -8,14 +8,31 @@ paths:
   - ".github/workflows/**"
   - ".github/scripts/release-notes.py"
   - ".github/scripts/changelog-section.py"
+  - ".claude/rules/writing.md"
+  - ".claude/rules/simplicity.md"
+  - ".claude/rules/typography.md"
+  - ".claude/rules/template-files.md"
+  - ".claude/rules/working.md"
+  - ".claude/rules/copy.md"
 ---
 
 # Files that come from AllesSandro
 
-These paths are **locked**: sandrogekeler/AllesSandro owns them and every
-template update re-applies them. Change the template, tag a release there, and
-let the update PR bring the change here. Do not edit `.copier-answers.yml` by
-hand: Copier uses it to compute the next update.
+This repo was created from sandrogekeler/AllesSandro and is kept in step with it
+by Renovate (`.copier-answers.yml` records the version). Two kinds of file:
+
+- **Locked** (re-applied on every template update): `.claude/suite-*.py`,
+  `.github/workflows/{codeql,scorecard,pr-labelled,labels,template-guard,issue-priority}.yml`
+  (CodeQL and Scorecard only on a public repo) and the optional `aislop.yml`,
+  `claude.yml`, `.aislop/base.yml`, `.github/scripts/changelog-section.py`,
+  `.github/scripts/release-notes.py`,
+  `.claude/rules/{template-files,working,writing,copy,simplicity,typography}.md`. A local
+  edit is kept but shows up as a merge conflict on the next template update.
+- **Seeded** (created once, owned by this repo): everything else.
+
+Locked paths are owned by sandrogekeler/AllesSandro. Change the template, tag a
+release there, and let the update PR bring the change here. Do not edit
+`.copier-answers.yml` by hand: Copier uses it to compute the next update.
 
 ## A template-update PR has conflict markers
 
