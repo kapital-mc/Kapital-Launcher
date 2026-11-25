@@ -46,6 +46,8 @@ export function GetDHSnapshot(arg1:string):Promise<models.DHSnapshotInfo>;
 
 export function GetEngine():Promise<models.EngineInfo>;
 
+export function GetGameSettings(arg1:string):Promise<models.ChapterGameSettings>;
+
 export function GetGameStates():Promise<Array<models.GameState>>;
 
 export function GetInstances():Promise<models.InstanceReport>;
@@ -123,6 +125,8 @@ export function ReadRunLog(arg1:string,arg2:string,arg3:string,arg4:number):Prom
 export function RefreshEngine():Promise<models.EngineInfo>;
 
 export function ReinstallChapter(arg1:string):Promise<models.ReinstallResult>;
+
+export function ResetGameSetting(arg1:string,arg2:string):Promise<models.ChapterGameSettings>;
 
 export function RestartToUpdate():Promise<void>;
 

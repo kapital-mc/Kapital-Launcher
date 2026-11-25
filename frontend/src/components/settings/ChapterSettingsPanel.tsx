@@ -58,9 +58,10 @@ const sameSettings = (a: ChapterSettings, b: ChapterSettings) =>
  * and the switch for joining it on Play, both saved in the launcher's settings.
  * Mods (issue 156) come after: the chapter's quick switches and an advanced list of every mod,
  * saved by Go in the launcher's settings and applied by the pre-launch sync. Storage follows:
- * the instance on disk by kind, with a delete for terrain, the world map, screenshots and logs. A chapter
- * with a local pack also gets the pack source section, which switches its instance between the
- * published pack and that one. The Instance section closes the page: Reinstall and Uninstall.
+ * the instance on disk by kind, with a delete for terrain, the world map, screenshots and logs.
+ * The Instance section follows: the game settings reset one at a time, then Reinstall and
+ * Uninstall. A chapter with a local pack also gets the pack source section, last, which switches
+ * its instance between the published pack and that one.
  */
 export function ChapterSettingsPanel({ chapter, onClose }: Props) {
   const installed = useEngineStore(selectInstalled(chapter.id))
@@ -229,8 +230,8 @@ export function ChapterSettingsPanel({ chapter, onClose }: Props) {
         >
           <ModsSection chapter={chapter} />
           <StorageSection chapter={chapter} />
-          <PackSourceSection chapter={chapter} />
           <InstanceSection chapter={chapter} />
+          <PackSourceSection chapter={chapter} />
         </Suspense>
       )}
     </Page>
