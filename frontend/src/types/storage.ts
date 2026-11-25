@@ -2,29 +2,31 @@
 
 /**
  * A kind of storage in an instance. Terrain, the unfinished terrain download, the world map, the
- * saves, the screenshots and the logs can be deleted; the minimap, mods and the rest are only
- * shown. Every kind's folder can be opened.
+ * server map, the saves, the replays, the screenshots and the logs can be deleted; the minimap,
+ * mods and the rest are only shown. Every kind's folder can be opened.
  */
 export type StorageKind =
   | 'terrain'
   | 'terrainDownload'
   | 'worldMap'
   | 'minimap'
+  | 'serverMap'
   | 'saves'
+  | 'replays'
   | 'screenshots'
   | 'logs'
   | 'mods'
   | 'other'
 
 /**
- * One kind of storage in an instance; for terrain, one server's Distant Horizons folder, and for
- * saves, one world.
+ * One kind of storage in an instance; for terrain, one server's Distant Horizons folder, for
+ * saves, one world, and for replays, one recording.
  */
 export interface StorageItem {
   kind: StorageKind | string
   /**
    * The server's folder for terrain, what ClearChapterStorage takes back, the world's folder for a
-   * save; '' otherwise.
+   * save, the file for a replay; '' otherwise.
    */
   name: string
   /** The server's name as Distant Horizons wrote it, decoded, for terrain; '' otherwise. */

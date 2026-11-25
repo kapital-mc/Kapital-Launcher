@@ -164,6 +164,9 @@ What is left:
 - [x] Storage deletes ask once more in a popup, with an "Ask before deleting"
       switch in the settings; worlds deletable and shown with their icons
       (ADR-2 twenty-first amendment, 2026-10-22)
+- [x] Storage section splits Flashback replays (one row per replay) and the
+      Frangfurd menu's server map out of "Everything else", each with a delete
+      (ADR-2 twenty-sixth amendment, 2026-11-25)
 - [x] Play time on the account page counts time in a world from the game's
       logs, with AFK left out where the server announces it (issue 341, ADR-2
       twenty-fourth amendment, 2026-11-08)

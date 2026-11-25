@@ -942,3 +942,27 @@ below only.
   one row per item, its name, one fact (the file, the number of files or key
   bindings, or Default when nothing is left) and a reset button. The Pack
   source section, shown with a local pack, moves below Instance and is last.
+
+## Twenty-sixth amendment, 2026-11-25
+
+The author's Frangfurd instance showed 2.0 GB as "Everything else", a row with
+no delete. Measured on his Windows instance: 1.4 GB Flashback replays (nine
+recordings, 28 MB to 597 MB each), 202 MB Sinytra Connector's remapped copy of
+Flashback, 184 MB Essential's folder, 137 MB the Frangfurd menu's map tiles, and
+under 100 MB of resource packs, config and the rest.
+
+- **Replays.** Each entry under `<game folder>/flashback/replays/` is one row of
+  a Replays group, largest first, as a world is under Saves. A delete removes
+  that one entry, a regular file (Flashback writes a `.zip`) or a folder, never
+  a link, and asks once more in the popup with "Don't ask me again" offered.
+  The row's folder button opens the replays folder. Flashback's own
+  `editor_states` stays in the rest.
+- **The server map.** `<game folder>/frangfurd_menu/map` is the Frangfurd menu
+  mod's copy of the relayed map, one folder per server, trimmed by the mod to
+  256 MiB each and fetched again from the server when gone. It is a row of the
+  maps group, now titled Maps, and deletes without the popup, as the logs do.
+- **Still without a delete.** Connector's `.cache` (rebuilt at the next start
+  while Camera Tools is on), Essential's folder (may hold account data, S1.1),
+  `config`, options and the packs stay in the rest (their settings files reset
+  from the Instance section, twenty-fifth amendment). Reinstall (twenty-third
+  amendment) still keeps `flashback`. See SECURITY_CHECKLIST S3.13.

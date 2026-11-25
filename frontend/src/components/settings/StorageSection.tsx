@@ -38,11 +38,12 @@ interface Props {
 
 /**
  * What the chapter's instance holds on disk: a bar split by colour, then the same groups as rows.
- * Distant Horizons (each server's terrain, an unfinished download), Xaero's maps (the world map,
- * the minimap) and the saves (one row per world) are headings over their own rows, folded until
- * the player opens one; screenshots, logs, mods and the rest are one row each. Every row opens its
- * folder, and terrain, the download, the world map, screenshots and logs can be deleted (a save
- * never is): the trash button grows into Confirm in place. Go measures, opens and deletes, and refuses a delete while the game runs (Distant Horizons
+ * Distant Horizons (each server's terrain, an unfinished download), the maps (Xaero's world map and
+ * minimap, the Frangfurd menu's server map), the saves (one row per world) and the replays (one row
+ * per Flashback recording) are headings over their own rows, folded until the player opens one;
+ * screenshots, logs, mods and the rest are one row each. Every row opens its folder, and terrain,
+ * the download, the world map, the server map, a save, a replay, screenshots and logs can be
+ * deleted: the trash button grows into Confirm in place. Go measures, opens and deletes, and refuses a delete while the game runs (Distant Horizons
  * holds its database open) or a terrain download runs. Only the tracker's answer (`playing`)
  * disables the deletes; `running` is the log's guess, shown as a hint. The view is read again when
  * the game ends and when the window regains focus, and the World data card is read again after
@@ -110,7 +111,7 @@ export function StorageSection({ chapter }: Props) {
       setError(errMsg(e))
     }
   }
-  // Worlds, terrain, maps and screenshots ask once more in a popup. "Don't ask me again" there
+  // Worlds, terrain, the world map, replays and screenshots ask once more in a popup. "Don't ask me again" there
   // stops it for all but the worlds.
   const confirm = (item: StorageItem, title: string) => {
     if (!asksTwice(item) || (skipAsk && !alwaysAsks(item))) {
