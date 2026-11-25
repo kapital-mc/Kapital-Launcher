@@ -108,6 +108,25 @@ func TestImportAndExportContraptions(t *testing.T) {
 	}
 }
 
+func TestExportContraptionsZipAsksWhereAndCountsTheFiles(t *testing.T) {
+	app, _ := contraptionApp(t)
+	dest := filepath.Join(t.TempDir(), "all.zip")
+	app.pickSaveFile = func(_, name string) (string, error) {
+		if !strings.HasSuffix(name, "contraptions.zip") {
+			t.Errorf("suggested %q", name)
+		}
+		return dest, nil
+	}
+	picks := []models.ContraptionRef{{Kind: models.ContraptionToolgun, File: "Bus.excraft"}}
+	if n, err := app.ExportContraptionsZip("frangfurd", picks); n != 1 || err != nil {
+		t.Fatalf("exported %d, %v", n, err)
+	}
+	app.pickSaveFile = func(string, string) (string, error) { return "", nil }
+	if n, err := app.ExportContraptionsZip("frangfurd", picks); n != 0 || err != nil {
+		t.Errorf("a cancelled export: %d, %v", n, err)
+	}
+}
+
 func TestOpenContraptionFolderMakesIt(t *testing.T) {
 	app, game := contraptionApp(t)
 	var opened string

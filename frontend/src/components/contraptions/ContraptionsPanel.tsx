@@ -4,7 +4,7 @@ import { selectInstalled, useEngineStore } from '../../stores/useEngineStore'
 import { useContraptionStore } from '../../stores/useContraptionStore'
 import { CONTRAPTION_KINDS, contraptionDetail, contraptionKey } from '../../lib/contraptions'
 import { errMsg } from '../../lib/ipc'
-import { Download, FolderOpen } from '../../lib/icons'
+import { Download, FolderOpen, Upload } from '../../lib/icons'
 import { Button } from '../ui/Button'
 import { Grow } from '../ui/Grow'
 import { Icon } from '../ui/Icon'
@@ -13,6 +13,7 @@ import { Page } from '../ui/Page'
 import { SettingsCard } from '../ui/SettingsLayout'
 import { DeleteConfirm } from '../settings/DeleteConfirm'
 import { ContraptionRow } from './ContraptionRow'
+import { ExportDialog } from './ExportDialog'
 
 interface Props {
   chapter: Chapter
@@ -22,7 +23,7 @@ interface Props {
 /**
  * A chapter's saved contraptions: the Tool Gun's blueprints and Create's schematics in its game
  * folder, each kind in a card, newest first. A row opens to rename, export or delete its file;
- * Import copies files in. Go reads and writes every file (app_contraptions.go); the list is read
+ * Import copies files in, Export zips the files the player ticks. Go reads and writes every file (app_contraptions.go); the list is read
  * when the page opens and after each change, and emptied when it closes.
  */
 export function ContraptionsPanel({ chapter, onClose }: Props) {
@@ -37,6 +38,7 @@ export function ContraptionsPanel({ chapter, onClose }: Props) {
   const [renameError, setRenameError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [asking, setAsking] = useState<Contraption | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     if (installed) void load(chapter.id)
@@ -141,13 +143,19 @@ export function ContraptionsPanel({ chapter, onClose }: Props) {
       title="Contraptions"
       onBack={onClose}
       actions={
-        <Button
-          onClick={() => void run(() => store().importFiles(chapter.id))}
-          disabled={installed !== true || busy !== null}
-        >
-          <Icon icon={Download} size="sm" />
-          <span>Import</span>
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => void run(() => store().importFiles(chapter.id))}
+            disabled={installed !== true || busy !== null}
+          >
+            <Icon icon={Download} size="sm" />
+            <span>Import</span>
+          </Button>
+          <Button onClick={() => setExporting(true)} disabled={!list?.length || busy !== null}>
+            <Icon icon={Upload} size="sm" />
+            <span>Export</span>
+          </Button>
+        </div>
       }
     >
       <div className="flex flex-col gap-8">
@@ -156,6 +164,16 @@ export function ContraptionsPanel({ chapter, onClose }: Props) {
         </Grow>
         {body}
       </div>
+      {exporting && list && (
+        <ExportDialog
+          list={list}
+          onExport={(picks) => {
+            setExporting(false)
+            void run(() => store().exportZip(chapter.id, picks))
+          }}
+          onCancel={() => setExporting(false)}
+        />
+      )}
       {asking && (
         <DeleteConfirm
           facts={`${asking.name} · ${contraptionDetail(asking)}`}

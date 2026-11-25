@@ -119,6 +119,31 @@ func (a *App) ExportContraption(chapterID, kind, file string) (bool, error) {
 	return true, nil
 }
 
+// ExportContraptionsZip writes the picked contraptions of a chapter into one
+// zip where the player picks, and returns how many files went in; 0 when the
+// dialog was cancelled.
+func (a *App) ExportContraptionsZip(chapterID string, picks []models.ContraptionRef) (int, error) {
+	chapter, game, err := a.contraptionGame(chapterID)
+	if err != nil {
+		return 0, err
+	}
+	if game == "" {
+		return 0, fmt.Errorf("%s has no game folder yet", chapter.Name)
+	}
+	name := fmt.Sprintf("%s contraptions.zip", chapter.Name)
+	dest, err := a.contraptionSaveFile(fmt.Sprintf("Export %s", name), name)
+	if err != nil || dest == "" {
+		return 0, err
+	}
+	n, err := services.ExportContraptionsZip(game, picks, dest)
+	if err != nil {
+		slog.Warn("export contraptions", "chapter", chapter.ID, "error", err)
+		return 0, a.storageError(chapter, err)
+	}
+	slog.Info("contraptions exported", "chapter", chapter.ID, "count", n)
+	return n, nil
+}
+
 // OpenContraptionFolder shows a kind's folder in the file manager, made first
 // when the game has not made it yet.
 func (a *App) OpenContraptionFolder(chapterID, kind string) error {

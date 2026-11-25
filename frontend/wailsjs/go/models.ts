@@ -712,6 +712,20 @@ export namespace models {
 		    return a;
 		}
 	}
+	export class ContraptionRef {
+	    kind: string;
+	    file: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContraptionRef(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.file = source["file"];
+	    }
+	}
 	export class DHSnapshotInfo {
 	    chapterId: string;
 	    available: boolean;

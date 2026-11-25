@@ -4,6 +4,7 @@ import { errMsg, hasWailsBridge } from '../lib/ipc'
 import { contraptionKey } from '../lib/contraptions'
 import {
   DeleteContraption,
+  ExportContraptionsZip,
   ExportContraption,
   ImportContraptions,
   ListContraptions,
@@ -26,7 +27,7 @@ interface ContraptionStore {
   list: Contraption[] | null
   unavailable: boolean
   listError: string | null
-  /** The row a change is in flight for (contraptionKey), or 'import'. */
+  /** The row a change is in flight for (contraptionKey), or 'import' or 'export'. */
   busy: string | null
   load: (chapterId: string) => Promise<void>
   /** Renames a file; rejects with Go's reason. */
@@ -37,6 +38,8 @@ interface ContraptionStore {
   importFiles: (chapterId: string) => Promise<number>
   /** Opens the save dialog and copies the file there; resolves to false when cancelled. */
   exportFile: (chapterId: string, c: Contraption) => Promise<boolean>
+  /** Opens the save dialog and zips the picked files there; resolves to how many went in, 0 when cancelled. */
+  exportZip: (chapterId: string, picks: readonly Contraption[]) => Promise<number>
   openFolder: (chapterId: string, kind: string) => Promise<void>
   clear: () => void
 }
@@ -101,6 +104,19 @@ export const useContraptionStore = create<ContraptionStore>((set, get) => {
     exportFile: async (chapterId, c) => {
       if (!hasWailsBridge()) return false
       return ExportContraption(chapterId, c.kind, c.file)
+    },
+
+    exportZip: async (chapterId, picks) => {
+      if (!hasWailsBridge()) return 0
+      set({ busy: 'export' })
+      try {
+        return await ExportContraptionsZip(
+          chapterId,
+          picks.map((c) => ({ kind: c.kind, file: c.file })),
+        )
+      } finally {
+        set({ busy: null })
+      }
     },
 
     openFolder: async (chapterId, kind) => {

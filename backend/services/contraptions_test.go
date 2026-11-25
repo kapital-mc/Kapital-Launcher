@@ -257,3 +257,60 @@ func TestCleanContraptionName(t *testing.T) {
 		}
 	}
 }
+
+func TestExportContraptionsZipHoldsThePicksInTheirFolders(t *testing.T) {
+	game := t.TempDir()
+	bus, bridge := toolgunFixture(t), schematicFixture(t)
+	writeContraption(t, game, "enxv_aeronautics_structures/Bus.excraft", bus, time.Now())
+	writeContraption(t, game, "enxv_aeronautics_structures/Left.excraft", bus, time.Now())
+	writeContraption(t, game, "schematics/bridge.nbt", bridge, time.Now())
+	dest := filepath.Join(t.TempDir(), "all.zip")
+	picks := []models.ContraptionRef{
+		{Kind: models.ContraptionSchematic, File: "bridge.nbt"},
+		{Kind: models.ContraptionToolgun, File: "Bus.excraft"},
+		{Kind: models.ContraptionToolgun, File: "Bus.excraft"},
+	}
+	n, err := ExportContraptionsZip(game, picks, dest)
+	if err != nil || n != 2 {
+		t.Fatalf("exported %d, %v", n, err)
+	}
+	data, err := os.ReadFile(dest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := readZip(t, data)
+	if len(got) != 2 || !bytes.Equal(got["enxv_aeronautics_structures/Bus.excraft"], bus) ||
+		!bytes.Equal(got["schematics/bridge.nbt"], bridge) {
+		t.Errorf("zip holds %d files", len(got))
+	}
+}
+
+func TestExportContraptionsZipRefusesABadPick(t *testing.T) {
+	game := t.TempDir()
+	writeContraption(t, game, "schematics/bridge.nbt", schematicFixture(t), time.Now())
+	outside := filepath.Join(t.TempDir(), "keep.nbt")
+	if err := os.WriteFile(outside, []byte("keep"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	bad := [][]models.ContraptionRef{
+		nil,
+		{{Kind: models.ContraptionSchematic, File: "../../keep.nbt"}},
+		{{Kind: "world", File: "bridge.nbt"}},
+		{{Kind: models.ContraptionSchematic, File: "bridge.nbt"}, {Kind: models.ContraptionSchematic, File: "gone.nbt"}},
+	}
+	if runtime.GOOS != "windows" {
+		if err := os.Symlink(outside, filepath.Join(game, schematicsDir, "link.nbt")); err != nil {
+			t.Fatal(err)
+		}
+		bad = append(bad, []models.ContraptionRef{{Kind: models.ContraptionSchematic, File: "link.nbt"}})
+	}
+	for i, picks := range bad {
+		dest := filepath.Join(t.TempDir(), "all.zip")
+		if _, err := ExportContraptionsZip(game, picks, dest); err == nil {
+			t.Errorf("pick %d exported", i)
+		}
+		if _, err := os.Stat(dest); !os.IsNotExist(err) {
+			t.Errorf("pick %d left a zip behind", i)
+		}
+	}
+}

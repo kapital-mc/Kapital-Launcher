@@ -142,7 +142,8 @@ describe('ContraptionsPanel', () => {
     vi.mocked(Bindings.OpenContraptionFolder).mockResolvedValue()
     panel()
     fireEvent.click(await screen.findByRole('button', { name: /^Bus/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Export' }))
+    const toolgun = screen.getByRole('region', { name: 'Tool Gun' })
+    fireEvent.click(within(toolgun).getByRole('button', { name: 'Export' }))
     await waitFor(() =>
       expect(Bindings.ExportContraption).toHaveBeenCalledExactlyOnceWith(
         'frangfurd',
@@ -159,10 +160,35 @@ describe('ContraptionsPanel', () => {
     )
   })
 
+  it('exports the ticked files into one zip', async () => {
+    vi.mocked(Bindings.ExportContraptionsZip).mockResolvedValue(1)
+    panel()
+    await screen.findByRole('region', { name: 'Tool Gun' })
+    fireEvent.click(screen.getByRole('button', { name: 'Export' }))
+    const dialog = screen.getByRole('dialog', { name: 'Export contraptions' })
+    expect(within(dialog).getByText('2 of 2 files')).toBeInTheDocument()
+    // A kind's files fold open, each ticked; clearing one leaves the kind's box mixed.
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Tool Gun files' }))
+    fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Bus' }))
+    expect(within(dialog).getByRole('checkbox', { name: 'Tool Gun' })).not.toBeChecked()
+    // Clearing the schematics leaves nothing to export.
+    fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Schematics' }))
+    expect(within(dialog).getByRole('button', { name: 'Export' })).toBeDisabled()
+    fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Schematics' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Export' }))
+    await waitFor(() =>
+      expect(Bindings.ExportContraptionsZip).toHaveBeenCalledExactlyOnceWith('frangfurd', [
+        { kind: 'schematic', file: 'bridge.nbt' },
+      ]),
+    )
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
   it('says so when there are none, and when the file cannot be read', async () => {
     vi.mocked(Bindings.ListContraptions).mockResolvedValue([] as never)
     panel()
     expect(await screen.findByText('No saved contraptions.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled()
     cleanup()
     useContraptionStore.getState().clear()
     vi.mocked(Bindings.ListContraptions).mockResolvedValue([{ ...bus, unread: true }] as never)

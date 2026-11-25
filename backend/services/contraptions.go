@@ -1,6 +1,7 @@
 package services
 
 import (
+	"archive/zip"
 	"errors"
 	"fmt"
 	"io"
@@ -240,6 +241,104 @@ func ExportContraption(gameDir, kind, file, dest string) error {
 		return err
 	}
 	return out.Close()
+}
+
+// ExportContraptionsZip writes the picked files into one zip at dest, a path
+// the player chose in the save dialog, each kind in a folder named as in the
+// game folder so the zip unpacks into one. A pick is checked as a file name
+// from the listing is, before anything is written; a bad pick, or a file that
+// is gone or not a regular file, fails the whole zip.
+// The files are gzip already, so they are stored, not deflated.
+func ExportContraptionsZip(gameDir string, picks []models.ContraptionRef, dest string) (int, error) {
+	if len(picks) == 0 || len(picks) > 2*maxContraptions {
+		return 0, fmt.Errorf("%d contraptions picked", len(picks))
+	}
+	for _, p := range picks {
+		_, ext, err := contraptionFolder(p.Kind)
+		if err == nil {
+			err = contraptionFile(p.File, ext)
+		}
+		if err != nil {
+			return 0, err
+		}
+	}
+	out, err := os.Create(dest)
+	if err != nil {
+		return 0, err
+	}
+	zw := zip.NewWriter(out)
+	n, err := zipContraptions(gameDir, picks, zw)
+	if err == nil {
+		err = zw.Close()
+	}
+	if cerr := out.Close(); err == nil {
+		err = cerr
+	}
+	if err != nil {
+		os.Remove(dest) //nolint:errcheck // best effort: a half zip is worse than none
+		return 0, err
+	}
+	return n, nil
+}
+
+func zipContraptions(gameDir string, picks []models.ContraptionRef, zw *zip.Writer) (int, error) {
+	n := 0
+	for _, k := range contraptionKinds {
+		var files []string
+		seen := map[string]bool{}
+		for _, p := range picks {
+			if p.Kind == k.kind && !seen[p.File] {
+				seen[p.File] = true
+				files = append(files, p.File)
+			}
+		}
+		if len(files) == 0 {
+			continue
+		}
+		added, err := zipKind(gameDir, k, files, zw)
+		n += added
+		if err != nil {
+			return n, err
+		}
+	}
+	return n, nil
+}
+
+// zipKind adds one kind's picked files, already checked, under "<dir>/" in
+// the zip.
+func zipKind(gameDir string, k contraptionKind, files []string, zw *zip.Writer) (int, error) {
+	root, err := os.OpenRoot(filepath.Join(gameDir, k.dir))
+	if err != nil {
+		return 0, err
+	}
+	defer root.Close() //nolint:errcheck // read only, nothing to flush
+	for i, file := range files {
+		if err := zipFile(root, k.dir, file, zw); err != nil {
+			return i, err
+		}
+	}
+	return len(files), nil
+}
+
+func zipFile(root *os.Root, dir, file string, zw *zip.Writer) error {
+	info, err := root.Lstat(file)
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() || info.Size() > maxContraptionFile {
+		return fmt.Errorf("%s is not a file of at most 64 MB", file)
+	}
+	src, err := root.Open(file)
+	if err != nil {
+		return err
+	}
+	defer src.Close() //nolint:errcheck // read only, nothing to flush
+	w, err := zw.CreateHeader(&zip.FileHeader{Name: dir + "/" + file, Method: zip.Store, Modified: info.ModTime()})
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(w, io.LimitReader(src, maxContraptionFile))
+	return err
 }
 
 // ImportContraption copies a file the player picked into its kind's folder,

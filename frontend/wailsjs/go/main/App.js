@@ -66,6 +66,10 @@ export function ExportContraption(arg1, arg2, arg3) {
   return window['go']['main']['App']['ExportContraption'](arg1, arg2, arg3);
 }
 
+export function ExportContraptionsZip(arg1, arg2) {
+  return window['go']['main']['App']['ExportContraptionsZip'](arg1, arg2);
+}
+
 export function GetAppVersion() {
   return window['go']['main']['App']['GetAppVersion']();
 }

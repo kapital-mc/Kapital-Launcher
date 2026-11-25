@@ -737,14 +737,17 @@ regular file, so a link is never followed or removed. A new name follows the
 Tool Gun's rule (letters, digits, spaces, `_`, `-`, at most 64 characters).
 Import reads only files the player picked in the system dialog, regular, at
 most 64 MiB, gzipped NBT of the kind's shape, and writes with `O_EXCL` under a
-cleaned, numbered name, so it never replaces a file. Export writes only to the
-path the save dialog returned. NBT is parsed with bounded reads (64 MiB
+cleaned, numbered name, so it never replaces a file. Export, of one file or a
+zip of picks (`ExportContraptionsZip`, each pick a kind and a file name checked
+as above before anything is written), writes only to the path the save dialog
+returned, and a failed zip is removed. NBT is parsed with bounded reads (64 MiB
 unpacked, the reader's own depth and length checks), nothing in a file names a
 path, and no file is written inside. Writes are refused under a preview. Errors
 pass the redactor before they reach the page.
 Verify: `TestDeleteContraptionRemovesOnlyARegularFile` (its link half skipped
 on Windows), `TestRenameContraption`, `TestContraptionNameFollowsTheToolGunsRule`,
-`TestImportContraptionChecksAndNumbers`, `TestContraptionWritesAreRefusedUnderAPreview`,
+`TestImportContraptionChecksAndNumbers`, `TestExportContraptionsZipRefusesABadPick`,
+`TestContraptionWritesAreRefusedUnderAPreview`,
 `TestContraptionsOfAChapterThatIsNotThere`.
 Probe: a file name of `../../keep.nbt` or `Bus.excraft/..`; `schematics/link.nbt`
 as a link to a file outside (refused, the target untouched); an import of a

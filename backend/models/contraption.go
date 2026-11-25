@@ -38,3 +38,9 @@ type MaterialCount struct {
 	ID    string `json:"id"`
 	Count int64  `json:"count"`
 }
+
+// ContraptionRef names one saved file, as the page passes a pick back.
+type ContraptionRef struct {
+	Kind string `json:"kind"`
+	File string `json:"file"`
+}

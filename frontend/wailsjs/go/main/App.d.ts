@@ -34,6 +34,8 @@ export function DownloadUpdate():Promise<void>;
 
 export function ExportContraption(arg1:string,arg2:string,arg3:string):Promise<boolean>;
 
+export function ExportContraptionsZip(arg1:string,arg2:Array<models.ContraptionRef>):Promise<number>;
+
 export function GetAppVersion():Promise<string>;
 
 export function GetCachedPlayerProfile(arg1:string):Promise<models.PlayerProfile>;

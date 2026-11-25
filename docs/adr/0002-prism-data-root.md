@@ -996,7 +996,11 @@ and stays so: the launcher manages its files and never writes inside one.
 - **Import** copies picked `.excraft` and `.nbt` files in, the kind told by the
   extension, each read whole and checked as that kind first. Its name is cleaned
   to the rule above and numbered ("Bus 2") when taken, so nothing is replaced.
-- **Export** copies one file to where the save dialog points.
+- **Export** copies one file to where the save dialog points. The page's
+  Export button opens a popup with a box per kind and, folded under each, a box
+  per file, all ticked at first; the ticked files go into one zip, each kind in
+  a folder named as in the game folder (`enxv_aeronautics_structures/`,
+  `schematics/`), so the zip unpacks into a game folder as it is.
 - **When.** Writes are refused under a developer preview. They are allowed
   while the game runs: the Tool Gun reads the folder when its list opens.
 - **Reinstall keeps the blueprints.** `enxv_aeronautics_structures` joins the
