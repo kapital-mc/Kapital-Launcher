@@ -170,6 +170,10 @@
           "pattern": "^https?://([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+tun\\.ply\\.gg:[1-9][0-9]{0,4}/?$",
           "description": "The chapter's BlueMap web map (issue 161). The one URL a manifest may give as http, and only on a playit tunnel (*.tun.ply.gg) with an explicit port; no user info, query or fragment. The launcher opens it in the system browser, frames it in a page and checks that it answers, nothing more. Optional: a chapter with no map leaves it out."
         },
+        "contraptions": {
+          "type": "boolean",
+          "description": "Whether the chapter has a Contraptions page: the Tool Gun's saved contraptions and Create's schematics in its game folder, listed and managed by the launcher as files. Optional: a chapter without Create leaves it out."
+        },
         "wiki": {
           "type": "object",
           "required": ["title", "line", "path"],

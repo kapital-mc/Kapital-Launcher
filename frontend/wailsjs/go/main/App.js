@@ -50,12 +50,20 @@ export function CopyRedactedLog() {
   return window['go']['main']['App']['CopyRedactedLog']();
 }
 
+export function DeleteContraption(arg1, arg2, arg3) {
+  return window['go']['main']['App']['DeleteContraption'](arg1, arg2, arg3);
+}
+
 export function DownloadDHSnapshot(arg1, arg2) {
   return window['go']['main']['App']['DownloadDHSnapshot'](arg1, arg2);
 }
 
 export function DownloadUpdate() {
   return window['go']['main']['App']['DownloadUpdate']();
+}
+
+export function ExportContraption(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ExportContraption'](arg1, arg2, arg3);
 }
 
 export function GetAppVersion() {
@@ -178,6 +186,10 @@ export function GetWindowChrome() {
   return window['go']['main']['App']['GetWindowChrome']();
 }
 
+export function ImportContraptions(arg1) {
+  return window['go']['main']['App']['ImportContraptions'](arg1);
+}
+
 export function InstallChapter(arg1) {
   return window['go']['main']['App']['InstallChapter'](arg1);
 }
@@ -198,6 +210,10 @@ export function LeaveSplash() {
   return window['go']['main']['App']['LeaveSplash']();
 }
 
+export function ListContraptions(arg1) {
+  return window['go']['main']['App']['ListContraptions'](arg1);
+}
+
 export function LogFrontendError(arg1, arg2, arg3) {
   return window['go']['main']['App']['LogFrontendError'](arg1, arg2, arg3);
 }
@@ -208,6 +224,10 @@ export function MarkWhatsNewSeen() {
 
 export function OpenChapterWiki(arg1) {
   return window['go']['main']['App']['OpenChapterWiki'](arg1);
+}
+
+export function OpenContraptionFolder(arg1, arg2) {
+  return window['go']['main']['App']['OpenContraptionFolder'](arg1, arg2);
 }
 
 export function OpenExternal(arg1) {
@@ -244,6 +264,10 @@ export function RefreshEngine() {
 
 export function ReinstallChapter(arg1) {
   return window['go']['main']['App']['ReinstallChapter'](arg1);
+}
+
+export function RenameContraption(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['RenameContraption'](arg1, arg2, arg3, arg4);
 }
 
 export function RestartToUpdate() {

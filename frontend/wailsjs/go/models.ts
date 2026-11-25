@@ -592,6 +592,72 @@ export namespace models {
 		    return a;
 		}
 	}
+	export class MaterialCount {
+	    id: string;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new MaterialCount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.count = source["count"];
+	    }
+	}
+	export class Contraption {
+	    kind: string;
+	    file: string;
+	    name: string;
+	    bytes: number;
+	    modified: number;
+	    blocks: number;
+	    blockTypes: number;
+	    subLevels: number;
+	    size?: number[];
+	    materials: MaterialCount[];
+	    items: MaterialCount[];
+	    unread: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Contraption(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.file = source["file"];
+	        this.name = source["name"];
+	        this.bytes = source["bytes"];
+	        this.modified = source["modified"];
+	        this.blocks = source["blocks"];
+	        this.blockTypes = source["blockTypes"];
+	        this.subLevels = source["subLevels"];
+	        this.size = source["size"];
+	        this.materials = this.convertValues(source["materials"], MaterialCount);
+	        this.items = this.convertValues(source["items"], MaterialCount);
+	        this.unread = source["unread"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class DHSnapshotInfo {
 	    chapterId: string;
 	    available: boolean;
@@ -759,6 +825,7 @@ export namespace models {
 	        this.reason = source["reason"];
 	    }
 	}
+	
 	
 	
 	

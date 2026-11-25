@@ -15,6 +15,7 @@ export type { LucideIcon } from 'lucide-react'
 export {
   ArrowDown,
   ArrowLeft,
+  Blocks,
   BookOpen,
   Check,
   ChevronRight,
@@ -54,6 +55,7 @@ export {
   Trash2,
   Triangle,
   TriangleAlert,
+  Upload,
   UserRound,
   X,
 } from 'lucide-react'

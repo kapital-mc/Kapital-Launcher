@@ -33,7 +33,9 @@ type keptEntry struct {
 var keptEntries = []keptEntry{
 	{path: savesDir},
 	{path: screenshotsDir},
-	{path: "schematics"},
+	{path: schematicsDir},
+	// The Tool Gun's saved contraptions (create_aeronautics_toolgun).
+	{path: toolgunDir},
 	{path: dhServerData},
 	{path: xaeroFolder},
 	{path: "flashback"},

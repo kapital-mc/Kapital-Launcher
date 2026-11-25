@@ -16,6 +16,7 @@ function hero(pack: Partial<typeof chapter.pack>, version: string | null = '1.0.
       onOpenSettings={noop}
       onOpenLogs={noop}
       onOpenMap={noop}
+      onOpenContraptions={noop}
       version={version}
       mods={merged.mods ?? null}
     />,
@@ -25,16 +26,18 @@ function hero(pack: Partial<typeof chapter.pack>, version: string | null = '1.0.
 describe('Hero tools', () => {
   afterEach(cleanup)
 
-  it('has the settings pen, the logs console and the map, each doing its own thing', () => {
+  it('has the settings pen, the logs console, the map and the contraptions, each doing its own thing', () => {
     const onOpenMap = vi.fn()
     const onOpenSettings = vi.fn()
     const onOpenLogs = vi.fn()
+    const onOpenContraptions = vi.fn()
     render(
       <Hero
         chapter={chapter}
         onOpenSettings={onOpenSettings}
         onOpenLogs={onOpenLogs}
         onOpenMap={onOpenMap}
+        onOpenContraptions={onOpenContraptions}
         version="1.0.1"
         mods={chapter.pack.mods ?? null}
       />,
@@ -58,7 +61,24 @@ describe('Hero tools', () => {
       1, 1, 1,
     ])
     expect(screen.queryByRole('button', { name: 'Read the history on the wiki' })).toBeNull()
-    expect(group.querySelectorAll('button')).toHaveLength(3)
+    fireEvent.click(screen.getByRole('button', { name: `Contraptions of ${chapter.name}` }))
+    expect(onOpenContraptions).toHaveBeenCalledTimes(1)
+    expect(group.querySelectorAll('button')).toHaveLength(4)
+  })
+
+  it('has no contraptions button for a chapter whose pack has none', () => {
+    render(
+      <Hero
+        chapter={{ ...chapter, contraptions: false }}
+        onOpenSettings={noop}
+        onOpenLogs={noop}
+        onOpenMap={noop}
+        onOpenContraptions={noop}
+        version="1.0.1"
+        mods={null}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: `Contraptions of ${chapter.name}` })).toBeNull()
   })
 })
 
@@ -106,6 +126,7 @@ describe('Hero panorama (issue 195)', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
         version="1.0.1"
         mods={chapter.pack.mods ?? null}
       />,

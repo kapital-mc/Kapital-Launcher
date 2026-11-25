@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { usePageSlot } from './usePageSlot'
 
-/** A page over a chapter: its own settings, its logs, its map, or the report of its latest run. */
+/** A page over a chapter: its own settings, its logs, its map, its contraptions, or the report of its latest run. */
 export interface ChapterPageSpec {
-  kind: 'settings' | 'logs' | 'map' | 'report'
+  kind: 'settings' | 'logs' | 'map' | 'contraptions' | 'report'
   chapterId: string
 }
 
@@ -84,5 +84,6 @@ export function usePages(selectedId: string, select: (chapterId: string) => void
     openChapterSettings: showPage('settings'),
     openLogs: showPage('logs'),
     openMap: showPage('map'),
+    openContraptions: showPage('contraptions'),
   }
 }

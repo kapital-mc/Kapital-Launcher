@@ -11,6 +11,7 @@ interface Props {
   onOpenSettings: (chapterId: string) => void
   onOpenLogs: (chapterId: string) => void
   onOpenMap: (chapterId: string) => void
+  onOpenContraptions: (chapterId: string) => void
   /** Whether a page covers the chapter, which leaves the view beneath it inert. */
   covered?: boolean
   /** The pages laid over the card, each a `PageLayer`. */
@@ -49,6 +50,7 @@ export function ChapterStage({
   onOpenSettings,
   onOpenLogs,
   onOpenMap,
+  onOpenContraptions,
   covered = false,
   children,
 }: Props) {
@@ -83,6 +85,7 @@ export function ChapterStage({
           onOpenSettings={onOpenSettings}
           onOpenLogs={onOpenLogs}
           onOpenMap={onOpenMap}
+          onOpenContraptions={onOpenContraptions}
         />
       </div>
       {outgoing && (
@@ -98,6 +101,7 @@ export function ChapterStage({
             onOpenSettings={onOpenSettings}
             onOpenLogs={onOpenLogs}
             onOpenMap={onOpenMap}
+            onOpenContraptions={onOpenContraptions}
           />
         </div>
       )}

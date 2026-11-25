@@ -47,6 +47,7 @@ func TestResetKeepsThePlayersFilesAndDropsThePacks(t *testing.T) {
 		"minecraft/saves/World/level.dat":                              "world",
 		"minecraft/screenshots/a.png":                                  "png",
 		"minecraft/schematics/bridge.nbt":                              "nbt",
+		"minecraft/enxv_aeronautics_structures/Bus.excraft":            "excraft",
 		"minecraft/Distant_Horizons_server_data/1_frangfurd/dh.sqlite": "terrain",
 		"minecraft/xaero/minimap/waypoints.txt":                        "wp",
 		"minecraft/flashback/replays/r.zip":                            "replay",
@@ -62,7 +63,7 @@ func TestResetKeepsThePlayersFilesAndDropsThePacks(t *testing.T) {
 		t.Fatal(err)
 	}
 	moved, err := CarryOver(dir, stashed, "kapital-frangfurd")
-	if err != nil || moved != 9 {
+	if err != nil || moved != 10 {
 		t.Fatalf("moved %d, %v", moved, err)
 	}
 	if err := RemoveInstance(dir, stashed, time.Now()); err != nil {
@@ -74,6 +75,7 @@ func TestResetKeepsThePlayersFilesAndDropsThePacks(t *testing.T) {
 		"minecraft/saves/World/level.dat",
 		"minecraft/screenshots/a.png",
 		"minecraft/schematics/bridge.nbt",
+		"minecraft/enxv_aeronautics_structures/Bus.excraft",
 		"minecraft/Distant_Horizons_server_data/1_frangfurd/dh.sqlite",
 		"minecraft/xaero/minimap/waypoints.txt",
 		"minecraft/flashback/replays/r.zip",

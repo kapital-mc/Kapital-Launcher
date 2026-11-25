@@ -26,6 +26,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('Luxemburg')
@@ -41,6 +42,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     rerender(
@@ -50,6 +52,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     // A chapter further down: the content moves up, so the new card comes
@@ -69,6 +72,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     expect(leaving()).toHaveClass('card-out-down')
@@ -85,6 +89,7 @@ describe('ChapterStage', () => {
           onOpenSettings={noop}
           onOpenLogs={noop}
           onOpenMap={noop}
+          onOpenContraptions={noop}
         />,
       )
       rerender(
@@ -94,6 +99,7 @@ describe('ChapterStage', () => {
           onOpenSettings={noop}
           onOpenLogs={noop}
           onOpenMap={noop}
+          onOpenContraptions={noop}
         />,
       )
       expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('Frangfurd')
@@ -112,6 +118,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       >
         <section aria-label="A page">Page</section>
       </ChapterStage>,
@@ -126,6 +133,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
         covered
       >
         <section aria-label="A page">Page</section>
@@ -145,6 +153,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     expect(card()).not.toHaveAttribute('inert')
@@ -159,6 +168,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     rerender(
@@ -168,6 +178,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     rerender(
@@ -177,6 +188,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     expect(document.querySelectorAll('[inert]').length).toBe(1)

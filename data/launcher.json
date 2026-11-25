@@ -83,6 +83,7 @@
       "kind": "Modpack · modern creative expansion",
       "blurb": "A modern creative expansion with new tools, visual improvements and alternative automations.",
       "state": "development",
+      "contraptions": true,
       "instance": {
         "id": "kapital-frangfurd"
       },

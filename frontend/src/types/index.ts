@@ -10,6 +10,7 @@
 // every type is still imported from here.
 export * from './game'
 export * from './storage'
+export * from './contraptions'
 
 export type ChapterState = 'released' | 'development' | 'planned'
 export type Theme = 'dark' | 'light' | 'system'
@@ -36,6 +37,8 @@ export interface Chapter {
   changelog: ChangelogEntry[]
   /** The chapter's BlueMap web map (issue 161): http or https on a playit tunnel, with a port. Absent when it has none. */
   map?: string
+  /** Whether the chapter has a Contraptions page: its Tool Gun saves and Create schematics. */
+  contraptions?: boolean
 }
 
 /** What one reachability check of a chapter's map found (issue 161). */

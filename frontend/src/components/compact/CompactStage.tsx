@@ -10,6 +10,7 @@ interface Props {
   onOpenSettings: (chapterId: string) => void
   onOpenLogs: (chapterId: string) => void
   onOpenMap: (chapterId: string) => void
+  onOpenContraptions: (chapterId: string) => void
   /** Whether the layout is the one shown. Hidden, it stays laid out, so the morph can measure it. */
   shown: boolean
   /** Whether it takes input: shown, with no morph running. */
@@ -35,6 +36,7 @@ export function CompactStage({
   onOpenSettings,
   onOpenLogs,
   onOpenMap,
+  onOpenContraptions,
   shown,
   live,
   covered = false,
@@ -68,6 +70,7 @@ export function CompactStage({
             onOpenSettings={onOpenSettings}
             onOpenLogs={onOpenLogs}
             onOpenMap={onOpenMap}
+            onOpenContraptions={onOpenContraptions}
           />
         ))}
       </div>
