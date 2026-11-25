@@ -28,7 +28,7 @@ export function useMenu<M extends HTMLElement = HTMLDivElement>() {
 
   const close = () => {
     setOpen(false)
-    wrap.current?.querySelector<HTMLButtonElement>('button')?.focus()
+    wrap.current?.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]')?.focus()
   }
   const onKeyDown = (e: KeyboardEvent<M>) => {
     if (e.key === 'Escape') {

@@ -340,22 +340,6 @@
   inherits: false;
   initial-value: 0px;
 }
-/* A menu column under a rounded group (the chapter tools' ⋯): it reaches up behind the group by
-   the group's corner radius, and the mask shows only the part outside that corner, so the column
-   seems to come from behind the group with no gap at the round. Its parent sits that much higher. */
-@utility tuck-under {
-  padding-top: var(--radius-md);
-  mask-image:
-    linear-gradient(black, black),
-    radial-gradient(circle at 0 0, transparent var(--radius-md), black var(--radius-md));
-  mask-size:
-    100% 100%,
-    var(--radius-md) var(--radius-md);
-  mask-position:
-    0 var(--radius-md),
-    100% 0;
-  mask-repeat: no-repeat;
-}
 @utility fade-end {
   mask-image: linear-gradient(
     to right,

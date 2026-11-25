@@ -68,6 +68,10 @@ describe('Hero tools', () => {
     expect(more).toHaveAttribute('aria-expanded', 'false')
     expect(screen.getByRole('menu', { hidden: true }).closest('[inert]')).not.toBeNull()
     expect(screen.queryByRole('button', { name: 'Read the history on the wiki' })).toBeNull()
+    // Escape gives the focus back to the ⋯, not the first tool.
+    fireEvent.click(more)
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' })
+    expect(more).toHaveFocus()
     fireEvent.click(more)
     fireEvent.click(screen.getByRole('menuitem', { name: `Contraptions of ${chapter.name}` }))
     expect(onOpenContraptions).toHaveBeenCalledTimes(1)
