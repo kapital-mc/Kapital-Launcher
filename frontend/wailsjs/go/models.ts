@@ -354,6 +354,7 @@ export namespace models {
 	    wiki: WikiTeaser;
 	    changelog: ChangelogEntry[];
 	    map?: string;
+	    contraptions?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Chapter(source);
@@ -374,6 +375,59 @@ export namespace models {
 	        this.wiki = this.convertValues(source["wiki"], WikiTeaser);
 	        this.changelog = this.convertValues(source["changelog"], ChangelogEntry);
 	        this.map = source["map"];
+	        this.contraptions = source["contraptions"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GameSettingsItem {
+	    id: string;
+	    name: string;
+	    files: string[];
+	    keys: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GameSettingsItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.files = source["files"];
+	        this.keys = source["keys"];
+	    }
+	}
+	export class ChapterGameSettings {
+	    chapterId: string;
+	    items: GameSettingsItem[];
+	    running: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ChapterGameSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.chapterId = source["chapterId"];
+	        this.items = this.convertValues(source["items"], GameSettingsItem);
+	        this.running = source["running"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -712,6 +766,7 @@ export namespace models {
 	        this.source = source["source"];
 	    }
 	}
+	
 	export class GameState {
 	    chapterId: string;
 	    phase: string;

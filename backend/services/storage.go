@@ -21,9 +21,10 @@ import (
 // entries, and of the files only each world's icon.png: links are not followed,
 // and the walk stops at maxSizeWalkEntries. Every kind has fixed folders (storageTargets), built
 // here from the kind and, for terrain and saves, a plain folder name. Deleting removes
-// those of the six deletable kinds through an os.Root on the instance folder,
-// and only a real directory: a link or a file in its place is refused untouched.
-// Opening shows the first of them that is a real directory.
+// those of the eight deletable kinds through an os.Root on the instance folder,
+// and only a real directory (or, for a replay, a regular file): a link in its
+// place is refused untouched. Opening shows the first of them that is a real
+// directory, for a replay the replays folder.
 
 const (
 	xaeroWorldMap  = "world-map"
@@ -33,6 +34,10 @@ const (
 	logsDir        = "logs"
 	crashDir       = "crash-reports"
 	modsDir        = "mods"
+	flashbackDir   = "flashback"
+	replaysDir     = "replays"
+	menuDir        = "frangfurd_menu"
+	menuMapDir     = "map"
 	savesDir       = "saves"
 	worldIcon      = "icon.png"
 	// maxWorldIcon bounds the icon read. The game writes a 64x64 PNG, a few KiB.
@@ -40,12 +45,15 @@ const (
 )
 
 // storageOrder is the order the kinds after terrain are listed in. Saves, one
-// item per world, are listed largest first in their place.
+// item per world, and replays, one per recording, are listed largest first in
+// their place.
 var storageOrder = []string{
 	models.StorageTerrainDownload,
 	models.StorageWorldMap,
 	models.StorageMinimap,
+	models.StorageServerMap,
 	models.StorageSaves,
+	models.StorageReplays,
 	models.StorageScreenshots,
 	models.StorageLogs,
 	models.StorageMods,
@@ -112,7 +120,8 @@ func MeasureStorage(instanceDir string) (models.ChapterStorage, error) {
 }
 
 // storageKind files a path inside the instance, split into its segments, under
-// a kind and, for terrain, the server's folder, for saves, the world's. game is the game folder's name,
+// a kind and, for terrain, the server's folder, for saves, the world's, for
+// replays, the recording's entry under flashback/replays. game is the game folder's name,
 // "" when the instance has none yet.
 func storageKind(game string, parts []string) (kind, name string) {
 	if len(parts) > 1 && parts[0] == dhStaging {
@@ -137,6 +146,14 @@ func storageKind(game string, parts []string) (kind, name string) {
 		if len(parts) > 3 {
 			return models.StorageSaves, parts[2]
 		}
+	case flashbackDir:
+		if len(parts) > 3 && parts[2] == replaysDir {
+			return models.StorageReplays, parts[3]
+		}
+	case menuDir:
+		if len(parts) > 3 && parts[2] == menuMapDir {
+			return models.StorageServerMap, ""
+		}
 	case screenshotsDir:
 		return models.StorageScreenshots, ""
 	case logsDir, crashDir:
@@ -148,11 +165,11 @@ func storageKind(game string, parts []string) (kind, name string) {
 }
 
 // sortStorage lists terrain largest first, then the other kinds in
-// storageOrder, with saves largest first in their place.
+// storageOrder, with saves and replays largest first in their place.
 func sortStorage(sums map[string]*models.StorageItem) []models.StorageItem {
 	items := byKind(sums, models.StorageTerrain)
 	for _, kind := range storageOrder {
-		if kind == models.StorageSaves {
+		if kind == models.StorageSaves || kind == models.StorageReplays {
 			items = append(items, byKind(sums, kind)...)
 		} else if it := sums[kind+"/"]; it != nil {
 			items = append(items, *it)
@@ -219,8 +236,8 @@ func terrainLabel(folder string) string {
 	return folder
 }
 
-// validFolderName is the shape of a server or world folder name ClearStorage
-// and StorageFolder take: one plain path segment.
+// validFolderName is the shape of a server or world folder name, or a replay's
+// file name, that ClearStorage and StorageFolder take: one plain path segment.
 func validFolderName(name string) bool {
 	return name != "" && len(name) <= 255 && name != "." && name != ".." &&
 		!strings.ContainsAny(name, "/\\:\x00")
@@ -233,7 +250,9 @@ var deletable = map[string]bool{
 	models.StorageTerrain:         true,
 	models.StorageTerrainDownload: true,
 	models.StorageWorldMap:        true,
+	models.StorageServerMap:       true,
 	models.StorageSaves:           true,
+	models.StorageReplays:         true,
 	models.StorageScreenshots:     true,
 	models.StorageLogs:            true,
 }
@@ -262,6 +281,13 @@ func storageTargets(game, kind, name string) ([]string, error) {
 			return nil, fmt.Errorf("%q is not a world folder", name)
 		}
 		return []string{filepath.Join(game, savesDir, name)}, nil
+	case models.StorageReplays:
+		if !validFolderName(name) {
+			return nil, fmt.Errorf("%q is not a replay", name)
+		}
+		return []string{filepath.Join(game, flashbackDir, replaysDir, name)}, nil
+	case models.StorageServerMap:
+		return []string{filepath.Join(game, menuDir, menuMapDir)}, nil
 	case models.StorageWorldMap:
 		return []string{filepath.Join(game, xaeroFolder, xaeroWorldMap)}, nil
 	case models.StorageMinimap:
@@ -288,9 +314,10 @@ func gameFolderName(instanceDir string) string {
 
 // ClearStorage deletes one kind of an instance's storage: one server's terrain
 // (name is its folder), the unfinished terrain download, the Xaero world map,
-// one world (name is its folder under saves), the screenshots, or the logs and
-// crash reports. The caller has made sure the
-// game is closed and no terrain download runs. A folder that is not there is
+// the Frangfurd menu's server map, one world (name is its folder under saves),
+// one replay (name is its file or folder under flashback/replays), the
+// screenshots, or the logs and crash reports. The caller has made sure the
+// game is closed and no terrain download runs. A target that is not there is
 // nothing to delete.
 func ClearStorage(instanceDir, kind, name string) error {
 	if !deletable[kind] {
@@ -313,7 +340,7 @@ func ClearStorage(instanceDir, kind, name string) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
+		if !info.IsDir() && (kind != models.StorageReplays || !info.Mode().IsRegular()) {
 			return fmt.Errorf("%s is not a folder; left as it is", filepath.ToSlash(target))
 		}
 		if err := root.RemoveAll(target); err != nil {
@@ -325,11 +352,15 @@ func ClearStorage(instanceDir, kind, name string) error {
 
 // StorageFolder is the folder a kind of an instance's storage is in, to show in
 // the file manager: the first of its targets that is a real directory inside
-// the instance folder. A kind with none yet is an error.
+// the instance folder, for a replay the replays folder it is in. A kind with
+// none yet is an error.
 func StorageFolder(instanceDir, kind, name string) (string, error) {
 	targets, err := storageTargets(gameFolderName(instanceDir), kind, name)
 	if err != nil {
 		return "", err
+	}
+	if kind == models.StorageReplays {
+		targets = []string{filepath.Dir(targets[0])}
 	}
 	root, err := os.OpenRoot(instanceDir)
 	if err != nil {

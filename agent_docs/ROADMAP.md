@@ -154,12 +154,19 @@ What is left:
       schematics, Distant Horizons terrain, maps, replays and the server list;
       Uninstall removes the instance from Prism (ADR-2 twenty-third amendment,
       2026-11-15)
+- [x] Game settings reset one at a time above Reinstall: game options, key
+      bindings, video, Iris or Oculus, shader settings, Distant Horizons,
+      Flywheel, Create and Sable; the next Play puts the pack's copy back
+      (ADR-2 twenty-fifth amendment, 2026-11-24)
 - [x] Compact launcher: the three chapters as panels side by side, from a
       right-click on the sidebar button or a window too small for the full
       layout, with a morph between the two (ADR-15, 2026-10-23)
 - [x] Storage deletes ask once more in a popup, with an "Ask before deleting"
       switch in the settings; worlds deletable and shown with their icons
       (ADR-2 twenty-first amendment, 2026-10-22)
+- [x] Storage section splits Flashback replays (one row per replay) and the
+      Frangfurd menu's server map out of "Everything else", each with a delete
+      (ADR-2 twenty-sixth amendment, 2026-11-25)
 - [x] Play time on the account page counts time in a world from the game's
       logs, with AFK left out where the server announces it (issue 341, ADR-2
       twenty-fourth amendment, 2026-11-08)

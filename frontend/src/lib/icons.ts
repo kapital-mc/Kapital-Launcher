@@ -47,6 +47,7 @@ export {
   Plus,
   Puzzle,
   RefreshCw,
+  RotateCcw,
   RotateCw,
   Server,
   Settings,

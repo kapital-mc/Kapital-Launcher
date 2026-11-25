@@ -98,6 +98,10 @@ export function GetEngine() {
   return window['go']['main']['App']['GetEngine']();
 }
 
+export function GetGameSettings(arg1) {
+  return window['go']['main']['App']['GetGameSettings'](arg1);
+}
+
 export function GetGameStates() {
   return window['go']['main']['App']['GetGameStates']();
 }
@@ -268,6 +272,10 @@ export function ReinstallChapter(arg1) {
 
 export function RenameContraption(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['RenameContraption'](arg1, arg2, arg3, arg4);
+}
+
+export function ResetGameSetting(arg1, arg2) {
+  return window['go']['main']['App']['ResetGameSetting'](arg1, arg2);
 }
 
 export function RestartToUpdate() {

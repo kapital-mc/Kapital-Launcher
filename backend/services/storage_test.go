@@ -43,6 +43,10 @@ const (
 	stModJar    = "minecraft/mods/Jade-1.21.1-NeoForge-15.1.jar"
 	stOptions   = "minecraft/options.txt"
 	stStaged    = "kapital-dh-download/ff@minecraft@@overworld.sqlite"
+	stReplay    = "minecraft/flashback/replays/2026-10-28T01_51_15.zip"
+	stReplayB   = "minecraft/flashback/replays/firefly.zip"
+	stEditor    = "minecraft/flashback/editor_states/a.json"
+	stMenuMap   = "minecraft/frangfurd_menu/map/76a8812b58a580fe/maps/frangfurd/tiles/0.png"
 	stCfg       = "instance.cfg"
 )
 
@@ -55,8 +59,10 @@ func sumLen(names ...string) int64 {
 }
 
 func TestMeasureStorageSortsAnInstanceByKind(t *testing.T) {
-	dir := storageInstance(t, stOverworld, stNether, stOldServer, stMap, stWaypoints, stTestWorld,
-		stWorld, stWorldDat, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg)
+	all := []string{stOverworld, stNether, stOldServer, stMap, stWaypoints, stTestWorld, stWorld,
+		stWorldDat, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg, stReplay,
+		stReplayB, stEditor, stMenuMap}
+	dir := storageInstance(t, all...)
 	got, err := MeasureStorage(dir)
 	if err != nil {
 		t.Fatal(err)
@@ -80,18 +86,23 @@ func TestMeasureStorageSortsAnInstanceByKind(t *testing.T) {
 		{models.StorageWorldMap, "", "", sumLen(stMap), 1},
 		// The minimap's stWaypoints are not the world map: they are the player's own.
 		{models.StorageMinimap, "", "", sumLen(stWaypoints), 1},
+		{models.StorageServerMap, "", "", sumLen(stMenuMap), 1},
 		// One row per world, largest first.
 		{models.StorageSaves, "Convert", "", sumLen(stWorld, stWorldDat), 2},
 		{models.StorageSaves, "Test", "", sumLen(stTestWorld), 1},
+		// One row per replay, largest first.
+		{models.StorageReplays, "2026-10-28T01_51_15.zip", "", sumLen(stReplay), 1},
+		{models.StorageReplays, "firefly.zip", "", sumLen(stReplayB), 1},
 		{models.StorageScreenshots, "", "", sumLen(stShot), 1},
 		{models.StorageLogs, "", "", sumLen(stLatestLog, stCrash), 2},
 		{models.StorageMods, "", "", sumLen(stModJar), 1},
-		{models.StorageOther, "", "", sumLen(stOptions, stCfg), 2},
+		// Flashback's editor states are not a replay.
+		{models.StorageOther, "", "", sumLen(stOptions, stCfg, stEditor), 3},
 	}
 	if !reflect.DeepEqual(rows, want) {
 		t.Fatalf("got  %+v\nwant %+v", rows, want)
 	}
-	if got.TotalBytes != sumLen(stOverworld, stNether, stOldServer, stMap, stWaypoints, stTestWorld, stWorld, stWorldDat, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg) {
+	if got.TotalBytes != sumLen(all...) {
 		t.Errorf("total %d", got.TotalBytes)
 	}
 	if got.FreeBytes <= 0 || got.Partial {
@@ -131,7 +142,7 @@ func TestMeasureStorageDoesNotFollowLinks(t *testing.T) {
 }
 
 func TestClearStorageDeletesOnlyItsOwnFolder(t *testing.T) {
-	all := []string{stOverworld, stNether, stOldServer, stMap, stWaypoints, stWorld, stWorldDat, stTestWorld, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg}
+	all := []string{stOverworld, stNether, stOldServer, stMap, stWaypoints, stWorld, stWorldDat, stTestWorld, stShot, stLatestLog, stCrash, stModJar, stOptions, stStaged, stCfg, stReplay, stReplayB, stEditor, stMenuMap}
 	cases := []struct {
 		kind, name string
 		gone       []string
@@ -140,7 +151,9 @@ func TestClearStorageDeletesOnlyItsOwnFolder(t *testing.T) {
 		{models.StorageTerrain, "1790374988_frangfurd", []string{stOverworld, stNether}},
 		{models.StorageTerrainDownload, "", []string{stStaged}},
 		{models.StorageWorldMap, "", []string{stMap}},
+		{models.StorageServerMap, "", []string{stMenuMap}},
 		{models.StorageSaves, "Convert", []string{stWorld, stWorldDat}},
+		{models.StorageReplays, "firefly.zip", []string{stReplayB}},
 		{models.StorageScreenshots, "", []string{stShot}},
 		{models.StorageLogs, "", []string{stLatestLog, stCrash}},
 	}
@@ -177,6 +190,10 @@ func TestClearStorageRefusesAnythingElse(t *testing.T) {
 		{models.StorageSaves, ""},
 		{models.StorageSaves, ".."},
 		{models.StorageSaves, "../mods"},
+		{models.StorageReplays, ""},
+		{models.StorageReplays, ".."},
+		{models.StorageReplays, "../../mods"},
+		{models.StorageReplays, `..\editor_states`},
 		{models.StorageTerrain, ""},
 		{models.StorageTerrain, ".."},
 		{models.StorageTerrain, "../mods"},
@@ -254,8 +271,20 @@ func TestClearStorageLeavesALinkOrFileInPlace(t *testing.T) {
 	if err := ClearStorage(dir, models.StorageLogs, ""); err == nil || !strings.Contains(err.Error(), "not a folder") {
 		t.Fatalf("a file named logs: %v", err)
 	}
-	if err := os.Symlink(outside, filepath.Join(dir, "minecraft", "Distant_Horizons_server_data")); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "minecraft", "flashback", "replays"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(outside, "keep.txt"), filepath.Join(dir, "minecraft", "flashback", "replays", "a.zip")); err != nil {
 		t.Skip("no symlinks here:", err)
+	}
+	if err := ClearStorage(dir, models.StorageReplays, "a.zip"); err == nil {
+		t.Fatal("deleted a linked replay")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "keep.txt")); err != nil {
+		t.Fatalf("the file outside went: %v", err)
+	}
+	if err := os.Symlink(outside, filepath.Join(dir, "minecraft", "Distant_Horizons_server_data")); err != nil {
+		t.Fatal(err)
 	}
 	if err := os.Mkdir(filepath.Join(outside, "server"), 0o755); err != nil {
 		t.Fatal(err)
@@ -279,14 +308,17 @@ func TestClearStorageWithoutAGameFolder(t *testing.T) {
 }
 
 func TestStorageFolderIsTheKindsOwnFolder(t *testing.T) {
-	dir := storageInstance(t, stOverworld, stMap, stWaypoints, stWorld, stShot, stCrash, stModJar, stOptions, stStaged, stCfg)
+	dir := storageInstance(t, stOverworld, stMap, stWaypoints, stWorld, stShot, stCrash, stModJar, stOptions, stStaged, stCfg, stReplay, stMenuMap)
 	game := filepath.Join(dir, "minecraft")
 	for _, c := range []struct{ kind, name, want string }{
 		{models.StorageTerrain, "1790374988_frangfurd", filepath.Join(game, "Distant_Horizons_server_data", "1790374988_frangfurd")},
 		{models.StorageTerrainDownload, "", filepath.Join(dir, "kapital-dh-download")},
 		{models.StorageWorldMap, "", filepath.Join(game, "xaero", "world-map")},
 		{models.StorageMinimap, "", filepath.Join(game, "xaero", "minimap")},
+		{models.StorageServerMap, "", filepath.Join(game, "frangfurd_menu", "map")},
 		{models.StorageSaves, "Convert", filepath.Join(game, "saves", "Convert")},
+		// A replay is a file: its folder is the replays folder.
+		{models.StorageReplays, "2026-10-28T01_51_15.zip", filepath.Join(game, "flashback", "replays")},
 		{models.StorageScreenshots, "", filepath.Join(game, "screenshots")},
 		// No logs folder yet: the crash reports are where the rest is.
 		{models.StorageLogs, "", filepath.Join(game, "crash-reports")},
@@ -305,6 +337,7 @@ func TestStorageFolderIsTheKindsOwnFolder(t *testing.T) {
 		{models.StorageSaves, ""},
 		{models.StorageSaves, "../mods"},
 		{models.StorageSaves, "Test"},
+		{models.StorageReplays, "../../mods"},
 	} {
 		if got, err := StorageFolder(dir, c.kind, c.name); err == nil {
 			t.Errorf("%s %q: opened %q", c.kind, c.name, got)
