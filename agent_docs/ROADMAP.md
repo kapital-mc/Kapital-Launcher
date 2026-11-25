@@ -154,6 +154,10 @@ What is left:
       schematics, Distant Horizons terrain, maps, replays and the server list;
       Uninstall removes the instance from Prism (ADR-2 twenty-third amendment,
       2026-11-15)
+- [x] Game settings reset one at a time above Reinstall: game options, key
+      bindings, video, Iris or Oculus, shader settings, Distant Horizons,
+      Flywheel, Create and Sable; the next Play puts the pack's copy back
+      (ADR-2 twenty-fifth amendment, 2026-11-24)
 - [x] Compact launcher: the three chapters as panels side by side, from a
       right-click on the sidebar button or a window too small for the full
       layout, with a morph between the two (ADR-15, 2026-10-23)

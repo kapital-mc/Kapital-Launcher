@@ -21,6 +21,7 @@ import { useSettingsStore } from '../../stores/useSettingsStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { useTerrainStore } from '../../stores/useTerrainStore'
 import { Button } from '../ui/Button'
+import { ConfirmButton } from '../ui/ConfirmButton'
 import { Fold } from '../ui/Fold'
 import { Grow } from '../ui/Grow'
 import { Icon } from '../ui/Icon'
@@ -332,11 +333,13 @@ function Row({
                 Cancel
               </Button>
             </Fold>
-            <DeleteButton
-              title={title}
+            <ConfirmButton
+              icon={Trash2}
+              action="Delete"
+              title={`Delete ${title}`}
               confirming={confirming}
               disabled={busy}
-              onDelete={onDelete}
+              onStart={onDelete}
               onConfirm={onConfirm}
             />
           </>
@@ -349,40 +352,6 @@ function Row({
         />
       </div>
     </div>
-  )
-}
-
-interface DeleteProps {
-  title: string
-  confirming: boolean
-  disabled: boolean
-  onDelete: () => void
-  onConfirm: () => void
-}
-
-/**
- * An outlined trash button the size of the folder button beside it. Pressed, it grows to the right
- * of its glyph into Confirm while Cancel folds in before it, and a second press deletes. The second
- * click of a double click is not a confirmation.
- */
-function DeleteButton({ title, confirming, disabled, onDelete, onConfirm }: DeleteProps) {
-  return (
-    <button
-      type="button"
-      aria-label={confirming ? 'Confirm' : 'Delete'}
-      title={confirming ? undefined : `Delete ${title}`}
-      disabled={disabled}
-      onClick={(e) => {
-        if (!confirming) onDelete()
-        else if (e.detail <= 1) onConfirm()
-      }}
-      className={`${confirming ? 'text-fg' : 'text-fg-muted'} border-line-strong hover:bg-hover enabled:hover:text-fg duration-fast ease-standard inline-flex h-8 items-center rounded-md border px-1.75 text-sm font-semibold transition-colors disabled:opacity-50 motion-reduce:transition-none`}
-    >
-      <Icon icon={Trash2} size="sm" />
-      <Fold open={confirming} axis="x">
-        <span className="pl-1.5 whitespace-nowrap">Confirm</span>
-      </Fold>
-    </button>
   )
 }
 

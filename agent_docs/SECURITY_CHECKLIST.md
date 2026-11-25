@@ -65,6 +65,8 @@ summed). A different count is new surface to classify: add the method to this ta
 | `GetChapterStorage` | a chapter id | the directory entries of that chapter's instance folder, walked once without following a link and capped like the size walk, summed by kind, and the disk's free space; nothing opened or written | S3.3, S3.13 |
 | `ClearChapterStorage` | a chapter id, a kind and, for `terrain`, a server folder name, for `saves`, a world folder name, for `replays`, a replay file name | one fixed folder removed: that server's folder under `<game folder>/Distant_Horizons_server_data/`, `<instance>/kapital-dh-download/`, `<game folder>/xaero/world-map`, `<game folder>/frangfurd_menu/map`, that world under `<game folder>/saves/`, `<game folder>/screenshots`, or `<game folder>/logs` and `crash-reports`; or that replay's file or folder under `<game folder>/flashback/replays/`; through an `os.Root`; refused for any other kind or a name that is not a plain folder name, under a preview, while the game runs, and for terrain while a terrain download runs | S3.3, S3.13 |
 | `OpenStorageFolder` | a chapter id, a kind and, for `terrain`, a server folder name, for `saves`, a world folder name, for `replays`, a replay file name | the first of that kind's fixed folders (the same `ClearChapterStorage` removes, plus `xaero/minimap`, one world under `saves`, `flashback/replays` for a replay, `mods` and the game folder) that is a real directory inside the instance, opened in the file manager like the instance folder; nothing written | S3.3, S3.6, S3.13 |
+| `GetGameSettings` | a chapter id | through an `os.Root` on that chapter's instance folder: whether each file of the fixed list (`services.gameSettings`) is a regular file, the names in `shaderpacks/`, `options.txt` (at most 1 MiB, counted for `key_` lines) and the keys of `packwiz.json` (at most 8 MiB); nothing written | S3.3, S3.16 |
+| `ResetGameSetting` | a chapter id and an item id of that list | the item's regular files under the game folder removed, or for key bindings `options.txt` written again without its `key_` lines (a new file renamed over it), through an `os.Root`; refused for any other id, a link or folder in a file's place, under a preview and while the game runs | S3.3, S3.16 |
 | `GetPreviewSituations` | nothing | the fixed list of developer previews, in memory | none |
 | `StartPreview`, `ClearPreviews` | a chapter id and a situation name, which must be one of the fixed list (`services.PreviewSituations`) | state and copy only: a synthetic `game:state`, the real loading card with a made-up report, synthetic pack, instance, engine and release answers, and a made-up Prism install that never reaches the installer. No file, process, URL or network request; a real launch, game event or write to the chapter ends the preview | S3.3, S3.8, S4.5 |
 
@@ -695,6 +697,32 @@ same`), `TestMeasurePlaySkipsALineLongerThanItsBuffer`.
 Probe: `logs/2026-01-01-1.log.gz` as a link to a file outside the game folder; a
 gzip that unpacks past the cap; a player named so that a chat line reads as their
 announcement.
+
+**S3.16 A game setting reset removes only files of a fixed list, and only when the game is closed.**
+Holds when: `GetGameSettings` and `ResetGameSetting` (ADR-2 twenty-fifth
+amendment) take a chapter id, resolved through the manifest and the disk's own
+instance report (S3.3), and an item id of `services.gameSettings`, never a
+path; any other id is refused. Every path is built in Go from that list under
+the game folder and reached through an `os.Root` on the instance folder, so a
+path that leaves it is refused, and `Lstat`ed first: a missing file is skipped,
+a link or a folder is an error and left in place. Shader settings are the
+regular files named `*.txt` directly in `shaderpacks/`, listed through the same
+root. The key bindings reset reads `options.txt` only as a regular file of at
+most 1 MiB and writes the rest of it to `options.txt.kapital-reset` beside it
+(`O_EXCL`), renamed over the original, so a failure leaves the old file whole.
+Of `packwiz.json` only its `cachedFiles` keys are read, to decide what is
+listed; nothing is fetched. Refused under a preview and while the tracker or
+the log says the game runs. Saves, mods, Essential's folder and every other
+config have no reset. Errors pass the redactor before they reach the page.
+Verify: `TestResetGameSettingRefusesAnythingElse`,
+`TestResetGameSettingDeletesTheItemsFilesOnly`,
+`TestResetGameSettingTakesOutOnlyTheKeyLines`,
+`TestResetGameSettingLeavesALinkOrFolderInPlace` (its link half skipped on
+Windows), `TestListGameSettingsKeepsAnItemTheSyncInstalled`,
+`TestResetGameSettingIsRefusedWhileTheGameRunsOrUnderAPreview`.
+Probe: an id of `../options` or `config/iris.properties`; `config/iris.properties`
+as a link to a file outside the instance (refused, the target untouched);
+`options.txt` as a link (refused); a reset while the game is open.
 
 ## S4. Downloads (milestone 4)
 

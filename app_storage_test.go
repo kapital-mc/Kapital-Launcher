@@ -186,3 +186,62 @@ func TestOpenStorageFolderOpensOnlyThatFolder(t *testing.T) {
 		t.Fatal("an unknown chapter was opened")
 	}
 }
+
+func TestGameSettingsListAndResetThroughTheApp(t *testing.T) {
+	app, _, game := storageApp(t)
+	for name, body := range map[string]string{
+		"options.txt":                 "fov:0.5\nkey_key.attack:key.mouse.left\n",
+		"config/DistantHorizons.toml": "[client]\n",
+	} {
+		p := filepath.Join(game, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := app.GetGameSettings("frangfurd")
+	if err != nil || got.ChapterID != "frangfurd" || got.Running || len(got.Items) != 3 {
+		t.Fatalf("%v %+v", err, got)
+	}
+	got, err = app.ResetGameSetting("frangfurd", "distantHorizons")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(game, "config", "DistantHorizons.toml")); !os.IsNotExist(err) {
+		t.Fatalf("the file is still there: %v", err)
+	}
+	if ids := len(got.Items); ids != 2 {
+		t.Fatalf("read again: %+v", got.Items)
+	}
+	if _, err := app.ResetGameSetting("frangfurd", "mods"); err == nil {
+		t.Fatal("an item not on the list was reset")
+	}
+	if _, err := app.ResetGameSetting("atlantis", "options"); err == nil || !strings.Contains(err.Error(), "no chapter") {
+		t.Fatalf("got %v", err)
+	}
+}
+
+func TestResetGameSettingIsRefusedWhileTheGameRunsOrUnderAPreview(t *testing.T) {
+	app, cfg, game := storageApp(t)
+	opts := filepath.Join(game, "options.txt")
+	if err := os.WriteFile(opts, []byte("fov:0.5\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	touchGameLog(t, cfg, 0)
+	if _, err := app.ResetGameSetting("frangfurd", "options"); err == nil || err.Error() != guessRefusal {
+		t.Fatalf("got %v", err)
+	}
+	if got, err := app.GetGameSettings("frangfurd"); err != nil || !got.Running {
+		t.Fatalf("the page is told: %v %+v", err, got)
+	}
+	touchGameLog(t, cfg, 2*time.Minute)
+	mustStart(t, app, "frangfurd", services.PreviewNotInstalled)
+	if _, err := app.ResetGameSetting("frangfurd", "options"); err == nil || !strings.Contains(err.Error(), "preview") {
+		t.Fatalf("got %v", err)
+	}
+	if _, err := os.Stat(opts); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -5,6 +5,7 @@ import { formatBytes } from '../../lib/bytes'
 import { Folder, RotateCw, Trash2 } from '../../lib/icons'
 import { selectInstancePack, useEngineStore } from '../../stores/useEngineStore'
 import { isActive, selectGame, useGameStore } from '../../stores/useGameStore'
+import { useGameSettingsStore } from '../../stores/useGameSettingsStore'
 import { useModStore } from '../../stores/useModStore'
 import { useStorageStore } from '../../stores/useStorageStore'
 import { Button } from '../ui/Button'
@@ -14,6 +15,7 @@ import { Icon } from '../ui/Icon'
 import { ErrorLine } from '../ui/Notes'
 import { SettingsCard, SettingsSection } from '../ui/SettingsLayout'
 import { Spinner } from '../ui/Spinner'
+import { GameSettingsCard } from './GameSettingsCard'
 
 /** What Reinstall carries into the new instance, as services.keptEntries lists it. */
 export const KEPT =
@@ -30,12 +32,13 @@ interface Props {
 }
 
 /**
- * The chapter's instance as a whole (ADR-2, twenty-third amendment): Reinstall puts it back to a
+ * The chapter's instance: its game settings, each reset on its own (GameSettingsCard, ADR-2's
+ * twenty-fifth amendment), then the instance as a whole (the twenty-third amendment): Reinstall puts it back to a
  * fresh copy of the pack, keeping the player's own files, and Uninstall removes it from Prism,
  * worlds and all. Each asks first in a popup that names what goes. Go refuses both while the game
  * runs, a terrain download runs or Prism is open, and says why; only the tracker's answer
- * (`playing`) disables the buttons here, and the Storage section above already says to close the game. After a reinstall the memory, mods and storage shown
- * were the old instance's, so all three are read again.
+ * (`playing`) disables the buttons here, and the Storage section above already says to close the game. After a reinstall the memory, mods, storage and game
+ * settings shown were the old instance's, so all four are read again.
  */
 export function InstanceSection({ chapter }: Props) {
   const reinstall = useEngineStore((s) => s.reinstallChapter)
@@ -65,6 +68,7 @@ export function InstanceSection({ chapter }: Props) {
       void loadSettings(chapter.id)
       void useModStore.getState().load(chapter.id)
       void useStorageStore.getState().load(chapter.id)
+      void useGameSettingsStore.getState().load(chapter.id)
     } catch (e) {
       setError(errMsg(e))
     } finally {
@@ -76,6 +80,7 @@ export function InstanceSection({ chapter }: Props) {
   const id = chapter.instance.id
   return (
     <SettingsSection title="Instance" icon={Folder}>
+      <GameSettingsCard chapter={chapter} />
       <SettingsCard>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="flex min-w-0 flex-col gap-1">

@@ -901,6 +901,48 @@ Frangfurd instance that was 71.9 h against 46.9 h in a world with AFK left out.
   show are opened, through an `os.Root`, unpacked up to the same 256 MiB. See
   SECURITY_CHECKLIST S3.15.
 
+## Twenty-fifth amendment, 2026-11-24
+
+The author asked to reset single game settings from the launcher: the game's
+options, the shader and video settings, Distant Horizons and any other client
+setting worth putting back, without the whole Reinstall. This reverses the
+twentieth amendment's "options and `config` have no delete" for the files
+below only.
+
+- **What can be reset.** A fixed list in Go (`services.gameSettings`), each
+  item one or more files under the game folder: Game options (`options.txt`),
+  Key bindings (its `key_` lines), Video settings (Sodium's and Sodium Extra's,
+  Embeddium's, Embeddium++'s and Rubidium Extra's option files), Iris
+  (`config/iris.properties`), Oculus (`config/oculus.properties`), Shader
+  settings (every `shaderpacks/*.txt`, the file Iris and Oculus keep beside
+  each pack), Distant Horizons (`config/DistantHorizons.toml`), Flywheel, Create
+  and Sable (their `-client.toml`). The page and the manifest never name a
+  file. An item is listed when one of its files is in the game folder or
+  packwiz-installer's record lists one, so each chapter shows what its pack
+  and mods use, and an item just reset stays on the page.
+- **A reset deletes.** The item's files are removed, and the next Play's sync
+  puts back the pack's own copy of each file the pack ships: packwiz-installer
+  invalidates a file its record lists that is missing and downloads it again,
+  before it decides the pack is up to date (`UpdateManager.kt:130-159`,
+  v0.5.14), `preserve` files such as `options.txt` included, since `preserve`
+  only spares a file that exists. A file the pack does not ship is written
+  again by its mod with the mod's defaults.
+- **Key bindings edit options.txt.** Only the lines that start with `key_` are
+  taken out; every other line is kept byte for byte, and the file is written
+  beside the old one and renamed over it. The game then uses each key's
+  default, which Default Options (in all three packs) sets from the pack's
+  `config/defaultoptions/keybindings.txt` (`KeyMappingAccessor.setDefaultKey`
+  in defaultoptions-neoforge 21.1.8). Without Default Options it is vanilla's.
+- **When.** After the player confirms the row, in place, as a storage delete
+  is. Refused under a developer preview and while the game is active or the
+  log says it runs: the game writes `options.txt` and most of these files as it
+  closes, which would put the old settings back.
+- **The page.** A card at the top of the Instance section, above Reinstall and
+  Uninstall, folded behind one "Reset game settings" line and closed at first:
+  one row per item, its name, one fact (the file, the number of files or key
+  bindings, or Default when nothing is left) and a reset button. The Pack
+  source section, shown with a local pack, moves below Instance and is last.
+
 ## Twenty-sixth amendment, 2026-11-25
 
 The author's Frangfurd instance showed 2.0 GB as "Everything else", a row with
@@ -921,5 +963,6 @@ under 100 MB of resource packs, config and the rest.
   maps group, now titled Maps, and deletes without the popup, as the logs do.
 - **Still without a delete.** Connector's `.cache` (rebuilt at the next start
   while Camera Tools is on), Essential's folder (may hold account data, S1.1),
-  `config`, options and the packs stay in the rest. Reinstall (twenty-third
+  `config`, options and the packs stay in the rest (their settings files reset
+  from the Instance section, twenty-fifth amendment). Reinstall (twenty-third
   amendment) still keeps `flashback`. See SECURITY_CHECKLIST S3.13.

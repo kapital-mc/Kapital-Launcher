@@ -90,6 +90,10 @@ export function GetEngine() {
   return window['go']['main']['App']['GetEngine']();
 }
 
+export function GetGameSettings(arg1) {
+  return window['go']['main']['App']['GetGameSettings'](arg1);
+}
+
 export function GetGameStates() {
   return window['go']['main']['App']['GetGameStates']();
 }
@@ -244,6 +248,10 @@ export function RefreshEngine() {
 
 export function ReinstallChapter(arg1) {
   return window['go']['main']['App']['ReinstallChapter'](arg1);
+}
+
+export function ResetGameSetting(arg1, arg2) {
+  return window['go']['main']['App']['ResetGameSetting'](arg1, arg2);
 }
 
 export function RestartToUpdate() {
