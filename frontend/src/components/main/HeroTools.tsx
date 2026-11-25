@@ -63,10 +63,10 @@ export function HeroTools({
       {onOpenContraptions && (
         // Not ui/Fold: its clip reaches 4px past the content for focus rings, which would
         // leave a sliver of the column showing under the ⋯ while folded. This one unrolls the
-        // column straight down from the cell's bottom edge, solid from the first frame.
+        // column from behind the group's rounded corner (tuck-under), solid from the first frame.
         <span
           inert={!menu.open}
-          className={`duration-slow ease-glide absolute top-full right-0 grid transition-[grid-template-rows] motion-reduce:transition-none ${menu.open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+          className={`duration-slow ease-glide absolute top-[calc(100%-var(--radius-md))] right-0 grid transition-[grid-template-rows] motion-reduce:transition-none ${menu.open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
         >
           <span className="min-h-0 overflow-hidden rounded-b-md">
             <span
@@ -75,7 +75,7 @@ export function HeroTools({
               role="menu"
               aria-label={`More for ${name}`}
               onKeyDown={menu.onKeyDown}
-              className="bg-sunken/85 flex flex-col backdrop-blur-sm"
+              className="bg-sunken/70 tuck-under flex flex-col backdrop-blur-sm"
             >
               <IconButton
                 grouped

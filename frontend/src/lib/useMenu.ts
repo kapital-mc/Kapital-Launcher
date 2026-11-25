@@ -14,7 +14,11 @@ export function useMenu<M extends HTMLElement = HTMLDivElement>() {
 
   useEffect(() => {
     if (!open) return
-    menu.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus()
+    // Without preventScroll the browser scrolls a folded menu's clip to show the item, and the
+    // column slides instead of unrolling.
+    menu.current
+      ?.querySelector<HTMLButtonElement>('[role="menuitem"]')
+      ?.focus({ preventScroll: true })
     const onDown = (e: PointerEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false)
     }
