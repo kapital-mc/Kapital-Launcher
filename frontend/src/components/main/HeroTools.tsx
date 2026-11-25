@@ -1,6 +1,5 @@
 import { Ellipsis, MapIcon, Pencil, Plane, SquareTerminal } from '../../lib/icons'
 import { useMenu } from '../../lib/useMenu'
-import { Fold } from '../ui/Fold'
 import { IconButton } from '../ui/IconButton'
 
 interface Props {
@@ -23,7 +22,8 @@ interface Props {
  * cell's hover fills it edge to edge, with no gap between cells, and only the
  * group's outer corners round. Where the pack has saved contraptions, the map
  * and the contraptions fold down under a ⋯ cell as a column of the same cells
- * on a darker wash.
+ * on a darker wash, joined to it: while open, the group's corner over the
+ * column goes square and its other corners stay round.
  */
 export function HeroTools({
   name,
@@ -44,7 +44,7 @@ export function HeroTools({
       <div
         role="group"
         aria-label={`${name} tools`}
-        className="bg-sunken/55 flex overflow-hidden rounded-md backdrop-blur-sm"
+        className={`bg-sunken/55 flex overflow-hidden rounded-md backdrop-blur-sm ${menu.open ? 'rounded-br-none' : ''}`}
       >
         <IconButton grouped icon={Pencil} title={`${name} settings`} onClick={onOpenSettings} />
         <IconButton grouped icon={SquareTerminal} title={`Logs for ${name}`} onClick={onOpenLogs} />
@@ -61,31 +61,39 @@ export function HeroTools({
         )}
       </div>
       {onOpenContraptions && (
-        <Fold open={menu.open} axis="y" className="absolute top-full right-0 mt-1">
-          <span
-            ref={menu.menu}
-            id={menu.id}
-            role="menu"
-            aria-label={`More for ${name}`}
-            onKeyDown={menu.onKeyDown}
-            className="bg-sunken/85 flex flex-col overflow-hidden rounded-md backdrop-blur-sm"
-          >
-            <IconButton
-              grouped
-              role="menuitem"
-              icon={MapIcon}
-              title={`Map of ${name}`}
-              onClick={pick(onOpenMap)}
-            />
-            <IconButton
-              grouped
-              role="menuitem"
-              icon={Plane}
-              title={`Contraptions of ${name}`}
-              onClick={pick(onOpenContraptions)}
-            />
+        // Not ui/Fold: its clip reaches 4px past the content for focus rings, which would
+        // leave a sliver of the column showing under the ⋯ while folded. This one unrolls the
+        // column straight down from the cell's bottom edge, solid from the first frame.
+        <span
+          inert={!menu.open}
+          className={`duration-slow ease-glide absolute top-full right-0 grid transition-[grid-template-rows] motion-reduce:transition-none ${menu.open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+        >
+          <span className="min-h-0 overflow-hidden rounded-b-md">
+            <span
+              ref={menu.menu}
+              id={menu.id}
+              role="menu"
+              aria-label={`More for ${name}`}
+              onKeyDown={menu.onKeyDown}
+              className="bg-sunken/85 flex flex-col backdrop-blur-sm"
+            >
+              <IconButton
+                grouped
+                role="menuitem"
+                icon={MapIcon}
+                title={`Map of ${name}`}
+                onClick={pick(onOpenMap)}
+              />
+              <IconButton
+                grouped
+                role="menuitem"
+                icon={Plane}
+                title={`Contraptions of ${name}`}
+                onClick={pick(onOpenContraptions)}
+              />
+            </span>
           </span>
-        </Fold>
+        </span>
       )}
     </div>
   )
