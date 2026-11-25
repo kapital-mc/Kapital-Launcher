@@ -2,14 +2,14 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 
 /**
- * A small menu under its button: the header's sidebar button and the chapter tools' ⋯. Its first
+ * A menu under its button: the header's sidebar button's and the chapter tools' ⋯ column. Its first
  * item takes the focus when it opens; Escape closes it and gives the focus back to the button, Tab
- * or a press outside it closes it.
+ * or a press outside it closes it. `M` is the menu's element: a span where it sits in a `Fold`.
  */
-export function useMenu() {
+export function useMenu<M extends HTMLElement = HTMLDivElement>() {
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
-  const menu = useRef<HTMLDivElement>(null)
+  const menu = useRef<M>(null)
   const id = useId()
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function useMenu() {
     setOpen(false)
     wrap.current?.querySelector<HTMLButtonElement>('button')?.focus()
   }
-  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (e: KeyboardEvent<M>) => {
     if (e.key === 'Escape') {
       // The menu closes, not a page.
       e.stopPropagation()

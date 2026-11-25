@@ -60,15 +60,16 @@ describe('Hero tools', () => {
     expect(group.querySelectorAll('button')).toHaveLength(3)
     fireEvent.click(more)
     expect(more).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByRole('menuitem', { name: 'Map' })).toHaveFocus()
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Map' }))
+    expect(screen.getByRole('menuitem', { name: `Map of ${chapter.name}` })).toHaveFocus()
+    fireEvent.click(screen.getByRole('menuitem', { name: `Map of ${chapter.name}` }))
     expect([onOpenMap, onOpenSettings, onOpenLogs].map((f) => f.mock.calls.length)).toEqual([
       1, 1, 1,
     ])
-    expect(screen.queryByRole('menu')).toBeNull()
+    expect(more).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('menu', { hidden: true }).closest('[inert]')).not.toBeNull()
     expect(screen.queryByRole('button', { name: 'Read the history on the wiki' })).toBeNull()
     fireEvent.click(more)
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Contraptions' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: `Contraptions of ${chapter.name}` }))
     expect(onOpenContraptions).toHaveBeenCalledTimes(1)
   })
 

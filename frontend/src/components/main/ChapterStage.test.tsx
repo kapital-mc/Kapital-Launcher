@@ -9,8 +9,9 @@ const chapters = BUNDLED_MANIFEST.chapters
 const noop = () => undefined
 const [luxemburg, lichdenstein, frangfurd] = [chapters[0]!, chapters[1]!, chapters[2]!]
 
-/** The card that is leaving, or null once its animation has ended. */
-const leaving = () => document.querySelector<HTMLElement>('[inert]')
+/** The card that is leaving, or null once its animation has ended. A folded menu is inert too. */
+const LEAVING = 'div[inert][aria-hidden]'
+const leaving = () => document.querySelector<HTMLElement>(LEAVING)
 /** jsdom has no AnimationEvent, so React listens for the prefixed name there. */
 const endAnimation = (el: HTMLElement) =>
   fireEvent(el, new Event('webkitAnimationEnd', { bubbles: true }))
@@ -191,7 +192,7 @@ describe('ChapterStage', () => {
         onOpenContraptions={noop}
       />,
     )
-    expect(document.querySelectorAll('[inert]').length).toBe(1)
+    expect(document.querySelectorAll(LEAVING).length).toBe(1)
     expect(leaving()).toHaveTextContent('Play Lichdenstein')
     expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('Frangfurd')
   })

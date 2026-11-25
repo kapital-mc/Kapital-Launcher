@@ -35,7 +35,7 @@
   }
   .select-text,
   textarea,
-  input:not([type='range']) {
+  input:not([type='range'], [type='checkbox'], [type='radio']) {
     cursor: text;
   }
   button {

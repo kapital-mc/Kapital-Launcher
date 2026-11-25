@@ -92,7 +92,7 @@ function withLichdensteinAt(address: string) {
 /** Frangfurd has saved contraptions, so its map is in the tools' ⋯ menu. */
 function openFrangfurdMap() {
   fireEvent.click(screen.getByRole('button', { name: 'More for Frangfurd' }))
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Map' }))
+  fireEvent.click(screen.getByRole('menuitem', { name: 'Map of Frangfurd' }))
 }
 
 function switchTo(name: RegExp) {

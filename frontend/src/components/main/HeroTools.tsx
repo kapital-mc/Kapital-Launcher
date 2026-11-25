@@ -1,7 +1,7 @@
 import { Ellipsis, MapIcon, Pencil, Plane, SquareTerminal } from '../../lib/icons'
 import { useMenu } from '../../lib/useMenu'
+import { Fold } from '../ui/Fold'
 import { IconButton } from '../ui/IconButton'
-import { Menu, MenuItem } from '../ui/Menu'
 
 interface Props {
   /** The chapter's name, which names the group and each tool. */
@@ -18,11 +18,12 @@ interface Props {
 }
 
 /**
- * A chapter's tools: its settings, its logs and its map. Where its pack has
- * saved contraptions, the map and the contraptions share a ⋯ menu that opens
- * downward. A wash behind them, so they read on bright art too (#77). They are
- * one group (issue 162): each cell's hover fills it edge to edge, with no gap
- * between cells, and only the group's outer corners round.
+ * A chapter's tools: its settings, its logs and its map. A wash behind them,
+ * so they read on bright art too (#77). They are one group (issue 162): each
+ * cell's hover fills it edge to edge, with no gap between cells, and only the
+ * group's outer corners round. Where the pack has saved contraptions, the map
+ * and the contraptions fold down under a ⋯ cell as a column of the same cells
+ * on a darker wash.
  */
 export function HeroTools({
   name,
@@ -33,7 +34,7 @@ export function HeroTools({
   className,
   morph,
 }: Props) {
-  const menu = useMenu()
+  const menu = useMenu<HTMLSpanElement>()
   const pick = (open: () => void) => () => {
     menu.close()
     open()
@@ -60,14 +61,31 @@ export function HeroTools({
         )}
       </div>
       {onOpenContraptions && (
-        <Menu state={menu} label={`More for ${name}`} align="right">
-          <MenuItem icon={MapIcon} onClick={pick(onOpenMap)}>
-            Map
-          </MenuItem>
-          <MenuItem icon={Plane} onClick={pick(onOpenContraptions)}>
-            Contraptions
-          </MenuItem>
-        </Menu>
+        <Fold open={menu.open} axis="y" className="absolute top-full right-0 mt-1">
+          <span
+            ref={menu.menu}
+            id={menu.id}
+            role="menu"
+            aria-label={`More for ${name}`}
+            onKeyDown={menu.onKeyDown}
+            className="bg-sunken/85 flex flex-col overflow-hidden rounded-md backdrop-blur-sm"
+          >
+            <IconButton
+              grouped
+              role="menuitem"
+              icon={MapIcon}
+              title={`Map of ${name}`}
+              onClick={pick(onOpenMap)}
+            />
+            <IconButton
+              grouped
+              role="menuitem"
+              icon={Plane}
+              title={`Contraptions of ${name}`}
+              onClick={pick(onOpenContraptions)}
+            />
+          </span>
+        </Fold>
       )}
     </div>
   )
