@@ -72,10 +72,10 @@ stay sharp. A change to a master means rendering those files again.
 ## `wordmark/`
 
 The Kapital Launcher wordmark's two words as separate pictures, rendered from
-the logo's model: `kapital.png` (2048 × 335) and `launcher.png` (2030 × 568).
+the logo's model: `kapital.png` (2048 × 335) and `launcher.png` (2028 × 550).
 LAUNCHER's depth runs up behind KAPITAL, so it is drawn first. Laid over the
 800 × 219 `frontend/src/assets/brand/kapital-launcher-logo-compact.png`,
-KAPITAL is 800 wide at 0, 0 and LAUNCHER 580 wide at 110, 59.
+KAPITAL is 800 wide at 0, 0 and LAUNCHER 580 wide at 110, 65.
 
 Nothing in the app reads them yet.
 
