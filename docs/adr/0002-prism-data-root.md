@@ -966,3 +966,44 @@ under 100 MB of resource packs, config and the rest.
   `config`, options and the packs stay in the rest (their settings files reset
   from the Instance section, twenty-fifth amendment). Reinstall (twenty-third
   amendment) still keeps `flashback`. See SECURITY_CHECKLIST S3.13.
+
+## Twenty-seventh amendment, 2026-11-25
+
+The author asked to list, inspect, rename, delete, import and export the saved
+contraptions of a chapter in the launcher. The game's Creative Tool Gun
+(create_aeronautics_toolgun 0.3.6) is how contraptions are saved and loaded,
+and stays so: the launcher manages its files and never writes inside one.
+
+- **Which files.** Two kinds under the game folder, each a fixed folder and
+  extension: the Tool Gun's blueprints in `enxv_aeronautics_structures/*.excraft`
+  (`BlueprintFileRepository`, client side) and Create's schematics in
+  `schematics/*.nbt`. A chapter shows the page only when its manifest entry says
+  `contraptions: true` (Frangfurd). Only regular files directly in the folder
+  are listed, at most 500, newest first.
+- **What is read.** Each file is gzipped NBT, unpacked up to 64 MiB (the Tool
+  Gun's own archive cap). A blueprint states its block count, block types,
+  sub-levels and its blocks and items as `{id, count}` (`AST_MaterialSummary`,
+  formats `enxv_aeronautics_plot_print_v8` and `v9`); a schematic's blocks are
+  counted from its palette and those of each of Create's `sub_levels`, air and
+  structure voids left out. A file that cannot be read is listed without facts.
+  No picture: rendering a blueprint is out of scope.
+- **Rename** changes the file name only, which is the name the Tool Gun lists.
+  A name follows the Tool Gun's own rule (`normalizeName`: letters, digits,
+  spaces, `_` and `-`), at most 64 characters, so a renamed file still loads in
+  game. A name another file has is refused.
+- **Delete** removes one file, after the popup, which offers no "Don't ask me
+  again", as for a world.
+- **Import** copies picked `.excraft` and `.nbt` files in, the kind told by the
+  extension, each read whole and checked as that kind first. Its name is cleaned
+  to the rule above and numbered ("Bus 2") when taken, so nothing is replaced.
+- **Export** copies one file to where the save dialog points.
+- **When.** Writes are refused under a developer preview. They are allowed
+  while the game runs: the Tool Gun reads the folder when its list opens.
+- **Reinstall keeps the blueprints.** `enxv_aeronautics_structures` joins the
+  twenty-third amendment's kept list (issue 379): a Reinstall had dropped every
+  saved contraption with the stash.
+
+The Tool Gun's server side keeps its own copies under
+`<world>/enxv_aeronautics_server_structures/<uuid>`; a shared library, limits
+and a spawn history on the server are a frangfurd-mod matter and not part of
+the launcher. See SECURITY_CHECKLIST S3.17.

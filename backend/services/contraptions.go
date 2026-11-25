@@ -39,16 +39,21 @@ const (
 	maxContraptions = 500
 )
 
+// contraptionKind is one kind's folder under the game folder and its extension.
+type contraptionKind struct{ kind, dir, ext string }
+
 // contraptionKinds are the kinds in the order the page lists them.
-var contraptionKinds = []string{models.ContraptionToolgun, models.ContraptionSchematic}
+var contraptionKinds = []contraptionKind{
+	{models.ContraptionToolgun, toolgunDir, toolgunExt},
+	{models.ContraptionSchematic, schematicsDir, schematicExt},
+}
 
 // contraptionFolder is a kind's folder under the game folder and its extension.
 func contraptionFolder(kind string) (dir, ext string, err error) {
-	switch kind {
-	case models.ContraptionToolgun:
-		return toolgunDir, toolgunExt, nil
-	case models.ContraptionSchematic:
-		return schematicsDir, schematicExt, nil
+	for _, k := range contraptionKinds {
+		if k.kind == kind {
+			return k.dir, k.ext, nil
+		}
 	}
 	return "", "", fmt.Errorf("%q is not a kind of contraption", kind)
 }
@@ -67,9 +72,8 @@ func ContraptionFolder(gameDir, kind string) (string, error) {
 // with Unread set.
 func ListContraptions(gameDir string) ([]models.Contraption, error) {
 	out := []models.Contraption{}
-	for _, kind := range contraptionKinds {
-		dir, ext, _ := contraptionFolder(kind)
-		entries, err := os.ReadDir(filepath.Join(gameDir, dir))
+	for _, k := range contraptionKinds {
+		entries, err := os.ReadDir(filepath.Join(gameDir, k.dir))
 		if errors.Is(err, fs.ErrNotExist) {
 			continue
 		}
@@ -80,14 +84,14 @@ func ListContraptions(gameDir string) ([]models.Contraption, error) {
 			if len(out) >= maxContraptions {
 				break
 			}
-			if !e.Type().IsRegular() || !strings.EqualFold(filepath.Ext(e.Name()), ext) {
+			if !e.Type().IsRegular() || !strings.EqualFold(filepath.Ext(e.Name()), k.ext) {
 				continue
 			}
 			info, err := e.Info()
 			if err != nil {
 				continue
 			}
-			out = append(out, contraptionEntry(filepath.Join(gameDir, dir), kind, info))
+			out = append(out, contraptionEntry(filepath.Join(gameDir, k.dir), k.kind, info))
 		}
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].Modified > out[j].Modified })
@@ -244,13 +248,14 @@ func ExportContraption(gameDir, kind, file, dest string) error {
 // maxContraptionFile. Its name is cleaned to the Tool Gun's rule and numbered
 // when taken, so an import never replaces a file.
 func ImportContraption(gameDir, src string) (models.Contraption, error) {
-	kind, ext := "", strings.ToLower(filepath.Ext(src))
-	switch ext {
-	case toolgunExt:
-		kind = models.ContraptionToolgun
-	case schematicExt:
-		kind = models.ContraptionSchematic
-	default:
+	ext := strings.ToLower(filepath.Ext(src))
+	var k contraptionKind
+	for _, c := range contraptionKinds {
+		if c.ext == ext {
+			k = c
+		}
+	}
+	if k.kind == "" {
 		return models.Contraption{}, fmt.Errorf("%s is not a .excraft or .nbt file", filepath.Base(src))
 	}
 	info, err := os.Lstat(src)
@@ -265,14 +270,14 @@ func ImportContraption(gameDir, src string) (models.Contraption, error) {
 		return models.Contraption{}, err
 	}
 	probe := models.Contraption{}
-	if err := readContraptionFacts(kind, data, &probe); err != nil {
+	if err := readContraptionFacts(k.kind, data, &probe); err != nil {
 		return models.Contraption{}, fmt.Errorf("%s: %w", filepath.Base(src), err)
 	}
-	dir, _, _ := contraptionFolder(kind)
-	if err := os.MkdirAll(filepath.Join(gameDir, dir), 0o755); err != nil {
+	dir := filepath.Join(gameDir, k.dir)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return models.Contraption{}, err
 	}
-	root, err := os.OpenRoot(filepath.Join(gameDir, dir))
+	root, err := os.OpenRoot(dir)
 	if err != nil {
 		return models.Contraption{}, err
 	}
@@ -285,7 +290,7 @@ func ImportContraption(gameDir, src string) (models.Contraption, error) {
 	if err != nil {
 		return models.Contraption{}, err
 	}
-	return contraptionEntry(filepath.Join(gameDir, dir), kind, written), nil
+	return contraptionEntry(dir, k.kind, written), nil
 }
 
 // writeNewContraption writes data as "<name><ext>", or "<name> 2<ext>" and on
