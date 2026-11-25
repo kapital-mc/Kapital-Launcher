@@ -26,9 +26,15 @@ export function CopyPlayerUUID():Promise<void>;
 
 export function CopyRedactedLog():Promise<number>;
 
+export function DeleteContraption(arg1:string,arg2:string,arg3:string):Promise<Array<models.Contraption>>;
+
 export function DownloadDHSnapshot(arg1:string,arg2:boolean):Promise<models.DHSnapshotInfo>;
 
 export function DownloadUpdate():Promise<void>;
+
+export function ExportContraption(arg1:string,arg2:string,arg3:string):Promise<boolean>;
+
+export function ExportContraptionsZip(arg1:string,arg2:Array<models.ContraptionRef>):Promise<number>;
 
 export function GetAppVersion():Promise<string>;
 
@@ -92,6 +98,8 @@ export function GetWikiShots():Promise<Array<models.WikiShot>>;
 
 export function GetWindowChrome():Promise<models.WindowChrome>;
 
+export function ImportContraptions(arg1:string):Promise<number>;
+
 export function InstallChapter(arg1:string):Promise<models.InstanceReport>;
 
 export function InstallPrism():Promise<void>;
@@ -102,11 +110,15 @@ export function LaunchChapter(arg1:string):Promise<void>;
 
 export function LeaveSplash():Promise<void>;
 
+export function ListContraptions(arg1:string):Promise<Array<models.Contraption>>;
+
 export function LogFrontendError(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function MarkWhatsNewSeen():Promise<boolean>;
 
 export function OpenChapterWiki(arg1:string):Promise<void>;
+
+export function OpenContraptionFolder(arg1:string,arg2:string):Promise<void>;
 
 export function OpenExternal(arg1:string):Promise<void>;
 
@@ -125,6 +137,8 @@ export function ReadRunLog(arg1:string,arg2:string,arg3:string,arg4:number):Prom
 export function RefreshEngine():Promise<models.EngineInfo>;
 
 export function ReinstallChapter(arg1:string):Promise<models.ReinstallResult>;
+
+export function RenameContraption(arg1:string,arg2:string,arg3:string,arg4:string):Promise<Array<models.Contraption>>;
 
 export function ResetGameSetting(arg1:string,arg2:string):Promise<models.ChapterGameSettings>;
 

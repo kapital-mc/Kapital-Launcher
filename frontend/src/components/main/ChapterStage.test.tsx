@@ -9,8 +9,9 @@ const chapters = BUNDLED_MANIFEST.chapters
 const noop = () => undefined
 const [luxemburg, lichdenstein, frangfurd] = [chapters[0]!, chapters[1]!, chapters[2]!]
 
-/** The card that is leaving, or null once its animation has ended. */
-const leaving = () => document.querySelector<HTMLElement>('[inert]')
+/** The card that is leaving, or null once its animation has ended. A folded menu is inert too. */
+const LEAVING = 'div[inert][aria-hidden]'
+const leaving = () => document.querySelector<HTMLElement>(LEAVING)
 /** jsdom has no AnimationEvent, so React listens for the prefixed name there. */
 const endAnimation = (el: HTMLElement) =>
   fireEvent(el, new Event('webkitAnimationEnd', { bubbles: true }))
@@ -26,6 +27,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('Luxemburg')
@@ -41,6 +43,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     rerender(
@@ -50,6 +53,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     // A chapter further down: the content moves up, so the new card comes
@@ -69,6 +73,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     expect(leaving()).toHaveClass('card-out-down')
@@ -85,6 +90,7 @@ describe('ChapterStage', () => {
           onOpenSettings={noop}
           onOpenLogs={noop}
           onOpenMap={noop}
+          onOpenContraptions={noop}
         />,
       )
       rerender(
@@ -94,6 +100,7 @@ describe('ChapterStage', () => {
           onOpenSettings={noop}
           onOpenLogs={noop}
           onOpenMap={noop}
+          onOpenContraptions={noop}
         />,
       )
       expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('Frangfurd')
@@ -112,6 +119,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       >
         <section aria-label="A page">Page</section>
       </ChapterStage>,
@@ -126,6 +134,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
         covered
       >
         <section aria-label="A page">Page</section>
@@ -145,6 +154,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     expect(card()).not.toHaveAttribute('inert')
@@ -159,6 +169,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     rerender(
@@ -168,6 +179,7 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
     rerender(
@@ -177,9 +189,10 @@ describe('ChapterStage', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
       />,
     )
-    expect(document.querySelectorAll('[inert]').length).toBe(1)
+    expect(document.querySelectorAll(LEAVING).length).toBe(1)
     expect(leaving()).toHaveTextContent('Play Lichdenstein')
     expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('Frangfurd')
   })

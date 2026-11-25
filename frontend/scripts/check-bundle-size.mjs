@@ -146,7 +146,13 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 98.6 on 2026-11-18 (#359, #360, #317): install, reinstall and uninstall read the pack
 // states again after Go answers and the instances again after Go refuses, and the update
 // store's listener checks for a bridge. All three are in the first paint. Measured 98.501 KB.
-const BUDGET_KB = 98.6
+// 98.9 on 2026-11-25: a chapter's Contraptions page. Its six bindings sit
+// in the shared App module, and the chapter tools carry its button through the hero and the
+// compact panel. The page and its store load on demand. Measured 98.804 KB, from 98.537 KB.
+// 99.3 the same day: the author asked for the map and the contraptions behind one ⋯ menu in the
+// chapter tools; the menu is now one component the header's sidebar button shares. Measured
+// 99.206 KB.
+const BUDGET_KB = 99.3
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

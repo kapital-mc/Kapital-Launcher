@@ -114,6 +114,7 @@ export function LauncherLayout({ chapter, chapters, select, pages, compact }: Pr
             onOpenSettings={pages.openChapterSettings}
             onOpenLogs={pages.openLogs}
             onOpenMap={pages.openMap}
+            onOpenContraptions={pages.openContraptions}
             covered={pages.covered}
           >
             {mode === 'full' && layers}
@@ -130,6 +131,7 @@ export function LauncherLayout({ chapter, chapters, select, pages, compact }: Pr
             onOpenSettings={pages.openChapterSettings}
             onOpenLogs={pages.openLogs}
             onOpenMap={pages.openMap}
+            onOpenContraptions={pages.openContraptions}
             shown={mode === 'compact'}
             live={compactLive}
             covered={pages.covered}

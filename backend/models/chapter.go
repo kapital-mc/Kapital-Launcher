@@ -42,6 +42,9 @@ type Chapter struct {
 	// playit tunnel with a port (services.checkMapURL, ADR-4's second
 	// amendment); the launcher opens it and checks it answers, nothing more.
 	Map *string `json:"map,omitempty"`
+	// Contraptions is whether the chapter has a Contraptions page: its Tool
+	// Gun saves and Create schematics, managed as files (app_contraptions.go).
+	Contraptions bool `json:"contraptions,omitempty"`
 }
 
 // Instance names the Prism instance the chapter launches. The id is the

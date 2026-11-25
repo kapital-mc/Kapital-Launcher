@@ -16,6 +16,7 @@ function hero(pack: Partial<typeof chapter.pack>, version: string | null = '1.0.
       onOpenSettings={noop}
       onOpenLogs={noop}
       onOpenMap={noop}
+      onOpenContraptions={noop}
       version={version}
       mods={merged.mods ?? null}
     />,
@@ -25,16 +26,18 @@ function hero(pack: Partial<typeof chapter.pack>, version: string | null = '1.0.
 describe('Hero tools', () => {
   afterEach(cleanup)
 
-  it('has the settings pen, the logs console and the map, each doing its own thing', () => {
+  it('has the settings pen, the logs console and a menu with the map and the contraptions', () => {
     const onOpenMap = vi.fn()
     const onOpenSettings = vi.fn()
     const onOpenLogs = vi.fn()
+    const onOpenContraptions = vi.fn()
     render(
       <Hero
         chapter={chapter}
         onOpenSettings={onOpenSettings}
         onOpenLogs={onOpenLogs}
         onOpenMap={onOpenMap}
+        onOpenContraptions={onOpenContraptions}
         version="1.0.1"
         mods={chapter.pack.mods ?? null}
       />,
@@ -51,14 +54,43 @@ describe('Hero tools', () => {
       0, 0, 1,
     ])
     fireEvent.click(screen.getByRole('button', { name: `${chapter.name} settings` }))
-    // The map takes the wiki book's place in the group (issue 161); the wiki
+    // With contraptions, the map and the contraptions share the ⋯ menu; the wiki
     // link lives in the panels below.
-    fireEvent.click(screen.getByRole('button', { name: `Map of ${chapter.name}` }))
+    const more = screen.getByRole('button', { name: `More for ${chapter.name}` })
+    expect(group.querySelectorAll('button')).toHaveLength(3)
+    fireEvent.click(more)
+    expect(more).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('menuitem', { name: `Map of ${chapter.name}` })).toHaveFocus()
+    fireEvent.click(screen.getByRole('menuitem', { name: `Map of ${chapter.name}` }))
     expect([onOpenMap, onOpenSettings, onOpenLogs].map((f) => f.mock.calls.length)).toEqual([
       1, 1, 1,
     ])
+    expect(more).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('menu', { hidden: true }).closest('[inert]')).not.toBeNull()
     expect(screen.queryByRole('button', { name: 'Read the history on the wiki' })).toBeNull()
-    expect(group.querySelectorAll('button')).toHaveLength(3)
+    // Escape gives the focus back to the ⋯, not the first tool.
+    fireEvent.click(more)
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' })
+    expect(more).toHaveFocus()
+    fireEvent.click(more)
+    fireEvent.click(screen.getByRole('menuitem', { name: `Contraptions of ${chapter.name}` }))
+    expect(onOpenContraptions).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the map itself for a chapter with no contraptions', () => {
+    render(
+      <Hero
+        chapter={{ ...chapter, contraptions: false }}
+        onOpenSettings={noop}
+        onOpenLogs={noop}
+        onOpenMap={noop}
+        onOpenContraptions={noop}
+        version="1.0.1"
+        mods={null}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: `More for ${chapter.name}` })).toBeNull()
+    expect(screen.getByRole('button', { name: `Map of ${chapter.name}` })).toBeInTheDocument()
   })
 })
 
@@ -106,6 +138,7 @@ describe('Hero panorama (issue 195)', () => {
         onOpenSettings={noop}
         onOpenLogs={noop}
         onOpenMap={noop}
+        onOpenContraptions={noop}
         version="1.0.1"
         mods={chapter.pack.mods ?? null}
       />,

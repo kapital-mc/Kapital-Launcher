@@ -89,6 +89,12 @@ function withLichdensteinAt(address: string) {
  * jsdom runs no animations, so the card that is leaving would otherwise stay
  * mounted, inert, with a second copy of every text.
  */
+/** Frangfurd has saved contraptions, so its map is in the tools' ⋯ menu. */
+function openFrangfurdMap() {
+  fireEvent.click(screen.getByRole('button', { name: 'More for Frangfurd' }))
+  fireEvent.click(screen.getByRole('menuitem', { name: 'Map of Frangfurd' }))
+}
+
 function switchTo(name: RegExp) {
   fireEvent.click(screen.getByRole('button', { name }))
   const leaving = document.querySelector('[class*="card-out-"]')
@@ -795,7 +801,7 @@ describe('App', () => {
     beforeEach(() => void Object.assign(window, { go: {} }))
     afterEach(() => void Reflect.deleteProperty(window, 'go'))
 
-    it('opens from the map tool in the hero as a page over the chapter, framing the map once Go says it answers', async () => {
+    it('opens from the map in the hero tools as a page over the chapter, framing the map once Go says it answers', async () => {
       vi.mocked(Bindings.CheckChapterMap).mockResolvedValue(reachable as never)
       render(<App />)
       await screen.findByRole('heading', { level: 1 })
@@ -803,7 +809,7 @@ describe('App', () => {
       expect(screen.queryByRole('button', { name: 'Read the history on the wiki' })).toBeNull()
       switchTo(/03.*Frangfurd/)
 
-      fireEvent.click(screen.getByRole('button', { name: 'Map of Frangfurd' }))
+      openFrangfurdMap()
       const page = await screen.findByRole('region', { name: 'Frangfurd map' })
       expect(page.parentElement).toHaveClass('page-in-right')
       const frame = await within(page).findByTitle('Frangfurd map')
@@ -813,7 +819,7 @@ describe('App', () => {
 
       fireEvent.click(within(page).getByRole('button', { name: 'Back' }))
       expect(screen.queryByRole('region', { name: 'Frangfurd map' })).toBeNull()
-      expect(screen.getByRole('button', { name: 'Map of Frangfurd' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'More for Frangfurd' })).toBeInTheDocument()
     })
 
     it('closes when another chapter is picked', async () => {
@@ -821,7 +827,7 @@ describe('App', () => {
       render(<App />)
       await screen.findByRole('heading', { level: 1 })
       switchTo(/03.*Frangfurd/)
-      fireEvent.click(screen.getByRole('button', { name: 'Map of Frangfurd' }))
+      openFrangfurdMap()
       await screen.findByRole('region', { name: 'Frangfurd map' })
       switchTo(/01.*Luxemburg/)
       expect(screen.queryByRole('region', { name: 'Frangfurd map' })).toBeNull()
@@ -854,7 +860,7 @@ describe('App', () => {
         await waitFor(() => expect(useSettingsStore.getState().settings.mapIn).toBe('browser'))
         switchTo(/03.*Frangfurd/)
 
-        fireEvent.click(screen.getByRole('button', { name: 'Map of Frangfurd' }))
+        openFrangfurdMap()
         expect(Bindings.OpenExternal).toHaveBeenCalledExactlyOnceWith(MAP)
         expect(screen.queryByRole('region', { name: 'Frangfurd map' })).toBeNull()
         expect(Bindings.CheckChapterMap).not.toHaveBeenCalled()
@@ -883,7 +889,7 @@ describe('App', () => {
         await screen.findByRole('heading', { level: 1 })
         await waitFor(() => expect(useSettingsStore.getState().settings.mapIn).toBe('browser'))
         switchTo(/03.*Frangfurd/)
-        fireEvent.click(screen.getByRole('button', { name: 'Map of Frangfurd' }))
+        openFrangfurdMap()
         await waitFor(() => expect(warn).toHaveBeenCalledWith('open map', 'no default browser'))
         warn.mockRestore()
       })

@@ -42,6 +42,7 @@ export {
   PanelLeftClose,
   PanelLeftOpen,
   Pencil,
+  Plane,
   Play,
   Plus,
   Puzzle,
@@ -55,6 +56,7 @@ export {
   Trash2,
   Triangle,
   TriangleAlert,
+  Upload,
   UserRound,
   X,
 } from 'lucide-react'

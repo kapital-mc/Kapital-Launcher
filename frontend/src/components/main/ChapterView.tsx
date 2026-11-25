@@ -27,9 +27,16 @@ interface Props {
   onOpenSettings: (chapterId: string) => void
   onOpenLogs: (chapterId: string) => void
   onOpenMap: (chapterId: string) => void
+  onOpenContraptions: (chapterId: string) => void
 }
 
-export function ChapterView({ chapter, onOpenSettings, onOpenLogs, onOpenMap }: Props) {
+export function ChapterView({
+  chapter,
+  onOpenSettings,
+  onOpenLogs,
+  onOpenMap,
+  onOpenContraptions,
+}: Props) {
   const slide = useChapterStore(selectSlide(chapter.id))
   const wikiPick = slide?.page
   // Only the slideshow shows the slide's picture, and only the panorama shows the
@@ -60,6 +67,7 @@ export function ChapterView({ chapter, onOpenSettings, onOpenLogs, onOpenMap }: 
         onOpenSettings={() => onOpenSettings(chapter.id)}
         onOpenLogs={() => onOpenLogs(chapter.id)}
         onOpenMap={openMap}
+        onOpenContraptions={() => onOpenContraptions(chapter.id)}
         version={packVersion(packState, chapter.pack.version)}
         mods={packMods(packState, chapter.pack.mods)}
       />

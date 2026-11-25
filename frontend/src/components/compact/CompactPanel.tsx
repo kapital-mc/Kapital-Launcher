@@ -21,6 +21,7 @@ interface Props {
   onOpenSettings: (chapterId: string) => void
   onOpenLogs: (chapterId: string) => void
   onOpenMap: (chapterId: string) => void
+  onOpenContraptions: (chapterId: string) => void
 }
 
 /**
@@ -39,6 +40,7 @@ export function CompactPanel({
   onOpenSettings,
   onOpenLogs,
   onOpenMap,
+  onOpenContraptions,
 }: Props) {
   const slide = useChapterStore(selectSlide(chapter.id))
   const heroArt = useSettingsStore((s) => heroArtOf(s.settings))
@@ -88,6 +90,9 @@ export function CompactPanel({
           onOpenSettings={() => onOpenSettings(chapter.id)}
           onOpenLogs={() => onOpenLogs(chapter.id)}
           onOpenMap={openMap}
+          onOpenContraptions={
+            chapter.contraptions ? () => onOpenContraptions(chapter.id) : undefined
+          }
           className="compact-tools absolute top-6 right-6"
           morph="panel-tools"
         />

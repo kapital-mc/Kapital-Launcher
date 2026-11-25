@@ -14,6 +14,8 @@ interface Props {
   onContextMenu?: (e: MouseEvent<HTMLButtonElement>) => void
   /** Whether the button has a menu, and whether it is open. */
   menu?: { open: boolean; id: string }
+  /** `menuitem` for a button inside a menu, such as the chapter tools' ⋯ column. */
+  role?: 'menuitem'
   /**
    * `md` is the 44px box the hero tools use; `sm` the 32px one in the account card; `xs`
    * the 28px one in a column's corner, with the smaller glyph; `2xs` the 20px one on a line of
@@ -50,6 +52,7 @@ export function IconButton({
   onClick,
   onContextMenu,
   menu,
+  role,
   size = 'md',
   disabled,
   grouped,
@@ -60,6 +63,7 @@ export function IconButton({
   return (
     <button
       type="button"
+      role={role}
       onClick={onClick}
       onContextMenu={onContextMenu}
       aria-haspopup={menu ? 'menu' : undefined}

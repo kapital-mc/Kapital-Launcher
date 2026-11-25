@@ -3,6 +3,7 @@ import type { ChapterPageSpec } from '../../lib/usePages'
 import { ChapterSettingsPanel } from '../settings/ChapterSettingsPanel'
 import { LogsPanel } from '../logs/LogsPanel'
 import { MapPanel } from '../map/MapPanel'
+import { ContraptionsPanel } from '../contraptions/ContraptionsPanel'
 import { RunReportPanel } from './RunReportPanel'
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 
 /**
  * The page a chapter's slot names: its settings, its logs (issue 155), its map
- * (issue 161) or the report of its latest run. One module so the launcher loads
+ * (issue 161), its contraptions or the report of its latest run. One module so the launcher loads
  * them together when the first is asked for, and not before (App lazy-loads this,
  * which keeps them out of the first paint and the bundle budget,
  * scripts/check-bundle-size.mjs).
@@ -22,5 +23,6 @@ export function ChapterPage({ page, chapter, onClose }: Props) {
   if (page.kind === 'settings') return <ChapterSettingsPanel chapter={chapter} onClose={onClose} />
   if (page.kind === 'logs') return <LogsPanel chapter={chapter} onClose={onClose} />
   if (page.kind === 'map') return <MapPanel chapter={chapter} onClose={onClose} />
+  if (page.kind === 'contraptions') return <ContraptionsPanel chapter={chapter} onClose={onClose} />
   return <RunReportPanel chapter={chapter} onClose={onClose} />
 }

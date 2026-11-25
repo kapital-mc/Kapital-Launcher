@@ -19,6 +19,7 @@ function stage(selectedId: string, shown = true, live = shown) {
       onOpenSettings={onOpenSettings}
       onOpenLogs={noop}
       onOpenMap={noop}
+      onOpenContraptions={noop}
       shown={shown}
       live={live}
     />,

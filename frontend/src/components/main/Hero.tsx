@@ -30,6 +30,8 @@ interface Props {
   onOpenLogs: () => void
   /** Opens the chapter's map, in the launcher or the browser as settings say (issue 161). */
   onOpenMap: () => void
+  /** Opens the chapter's saved contraptions; shown only where the manifest says it has them. */
+  onOpenContraptions: () => void
   /** The pack's version, as the pack line names it (issue 162); null when nobody knows it yet. */
   version: string | null
   /** The pack's mod count, from the pack source when read; null when nobody knows it yet. */
@@ -51,6 +53,7 @@ export function Hero({
   onOpenSettings,
   onOpenLogs,
   onOpenMap,
+  onOpenContraptions,
   version,
   mods: modCount,
 }: Props) {
@@ -116,6 +119,7 @@ export function Hero({
         onOpenSettings={onOpenSettings}
         onOpenLogs={onOpenLogs}
         onOpenMap={onOpenMap}
+        onOpenContraptions={chapter.contraptions ? onOpenContraptions : undefined}
         className="absolute top-7 right-7"
         morph="hero-tools"
       />

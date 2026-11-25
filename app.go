@@ -56,6 +56,10 @@ type App struct {
 	runCtx context.Context
 	// openFolder shows a folder in the file manager; a test swaps it.
 	openFolder func(string) error
+	// pickFiles and pickSaveFile are the contraption page's file dialogs; nil
+	// uses Wails' own, and a test swaps them (app_contraptions.go).
+	pickFiles    func(title string) ([]string, error)
+	pickSaveFile func(title, name string) (string, error)
 	// showInPrism opens an instance's window in Prism (issue 190); a test swaps it.
 	showInPrism func(engine models.EngineInfo, instanceID, root string) error
 	// openPrism opens Prism's main window (issue 192); a test swaps it.

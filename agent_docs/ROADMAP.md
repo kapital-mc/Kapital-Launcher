@@ -167,6 +167,10 @@ What is left:
 - [x] Storage section splits Flashback replays (one row per replay) and the
       Frangfurd menu's server map out of "Everything else", each with a delete
       (ADR-2 twenty-sixth amendment, 2026-11-25)
+- [x] Contraptions page per chapter: the Tool Gun's saved blueprints and
+      Create's schematics, with block counts and materials, rename, delete,
+      import, export and a zip of picked files; Reinstall keeps the blueprints (issue 379, ADR-2
+      twenty-seventh amendment, 2026-11-25)
 - [x] Play time on the account page counts time in a world from the game's
       logs, with AFK left out where the server announces it (issue 341, ADR-2
       twenty-fourth amendment, 2026-11-08)

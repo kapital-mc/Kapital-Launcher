@@ -724,6 +724,35 @@ Probe: an id of `../options` or `config/iris.properties`; `config/iris.propertie
 as a link to a file outside the instance (refused, the target untouched);
 `options.txt` as a link (refused); a reset while the game is open.
 
+**S3.17 The Contraptions page touches one regular file, named by the listing, in one of two fixed folders.**
+Holds when: `ListContraptions`, `RenameContraption`, `DeleteContraption`,
+`ImportContraptions`, `ExportContraption` and `OpenContraptionFolder` (ADR-2
+twenty-seventh amendment) take a chapter id, resolved through the manifest and
+the disk's own instance report (S3.3), a kind (`toolgun` or `schematic`, any
+other refused) and a file name. The folder is built in Go from the kind. A file
+name must be a plain base name with the kind's extension: a path separator,
+`:` or NUL is refused before any disk access, and every rename, removal and
+read goes through an `os.Root` on that folder after an `Lstat` that requires a
+regular file, so a link is never followed or removed. A new name follows the
+Tool Gun's rule (letters, digits, spaces, `_`, `-`, at most 64 characters).
+Import reads only files the player picked in the system dialog, regular, at
+most 64 MiB, gzipped NBT of the kind's shape, and writes with `O_EXCL` under a
+cleaned, numbered name, so it never replaces a file. Export, of one file or a
+zip of picks (`ExportContraptionsZip`, each pick a kind and a file name checked
+as above before anything is written), writes only to the path the save dialog
+returned, and a failed zip is removed. NBT is parsed with bounded reads (64 MiB
+unpacked, the reader's own depth and length checks), nothing in a file names a
+path, and no file is written inside. Writes are refused under a preview. Errors
+pass the redactor before they reach the page.
+Verify: `TestDeleteContraptionRemovesOnlyARegularFile` (its link half skipped
+on Windows), `TestRenameContraption`, `TestContraptionNameFollowsTheToolGunsRule`,
+`TestImportContraptionChecksAndNumbers`, `TestExportContraptionsZipRefusesABadPick`,
+`TestContraptionWritesAreRefusedUnderAPreview`,
+`TestContraptionsOfAChapterThatIsNotThere`.
+Probe: a file name of `../../keep.nbt` or `Bus.excraft/..`; `schematics/link.nbt`
+as a link to a file outside (refused, the target untouched); an import of a
+zip renamed `.excraft`; a gzip that unpacks past 64 MiB (listed without facts).
+
 ## S4. Downloads (milestone 4)
 
 **S4.1 Every downloaded file is verified against its hash before use.** `.mrpack`
