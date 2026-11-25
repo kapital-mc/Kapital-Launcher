@@ -7,19 +7,25 @@ const DELETABLE: readonly string[] = [
   'terrain',
   'terrainDownload',
   'worldMap',
+  'serverMap',
   'saves',
+  'replays',
   'screenshots',
   'logs',
 ]
 
 export const canDelete = (item: StorageItem): boolean => DELETABLE.includes(item.kind)
 
-/** The kinds whose confirmed delete asks once more in a popup: worlds, terrain, maps and pictures. */
+/**
+ * The kinds whose confirmed delete asks once more in a popup: worlds, terrain, the world map,
+ * replays and pictures.
+ */
 const ASKS_TWICE: readonly string[] = [
   'terrain',
   'terrainDownload',
   'worldMap',
   'saves',
+  'replays',
   'screenshots',
 ]
 
@@ -28,11 +34,15 @@ export const asksTwice = (item: StorageItem): boolean => ASKS_TWICE.includes(ite
 /** A world asks every time: "Don't ask me again" does not cover it. */
 export const alwaysAsks = (item: StorageItem): boolean => item.kind === 'saves'
 
-/** A row's key: its kind, and the server folder for terrain or the world folder for a save. */
+/** A row's key: its kind, and the server folder for terrain, the world folder or the replay file. */
 export const storageKey = (item: StorageItem): string => `${item.kind}/${item.name}`
 
-/** The groups the section shows, in order: a mod's files together, the worlds, then one kind each. */
-export type StorageGroupId = 'terrain' | 'map' | 'saves' | 'screenshots' | 'logs' | 'mods' | 'other'
+/**
+ * The groups the section shows, in order: a mod's files together, the worlds, the replays, then one
+ * kind each.
+ */
+export type StorageGroupId =
+  'terrain' | 'map' | 'saves' | 'replays' | 'screenshots' | 'logs' | 'mods' | 'other'
 
 export interface StorageGroup {
   id: StorageGroupId
@@ -46,7 +56,9 @@ const GROUP_OF: Record<string, StorageGroupId> = {
   terrainDownload: 'terrain',
   worldMap: 'map',
   minimap: 'map',
+  serverMap: 'map',
   saves: 'saves',
+  replays: 'replays',
   screenshots: 'screenshots',
   logs: 'logs',
   mods: 'mods',
@@ -54,8 +66,9 @@ const GROUP_OF: Record<string, StorageGroupId> = {
 
 const GROUPS: readonly { id: StorageGroupId; title: string }[] = [
   { id: 'terrain', title: 'Distant Horizons' },
-  { id: 'map', title: "Xaero's maps" },
+  { id: 'map', title: 'Maps' },
   { id: 'saves', title: 'Saves' },
+  { id: 'replays', title: 'Replays' },
   { id: 'screenshots', title: 'Screenshots' },
   { id: 'logs', title: 'Logs and crash reports' },
   { id: 'mods', title: 'Mods' },
@@ -70,6 +83,7 @@ export const GROUP_COLOUR: Record<StorageGroupId, string> = {
   terrain: 'bg-storage-terrain',
   map: 'bg-storage-map',
   saves: 'bg-storage-saves',
+  replays: 'bg-storage-replays',
   screenshots: 'bg-storage-screenshots',
   logs: 'bg-storage-logs',
   mods: 'bg-storage-mods',
@@ -85,11 +99,11 @@ export function storageGroups(items: readonly StorageItem[]): StorageGroup[] {
 }
 
 /**
- * Whether a group is drawn as a heading over its own rows, folded at first: Distant Horizons,
- * Xaero's maps and the saves.
+ * Whether a group is drawn as a heading over its own rows, folded at first: Distant Horizons, the
+ * maps, the saves and the replays.
  */
 export const hasRows = (group: StorageGroup): boolean =>
-  group.id === 'terrain' || group.id === 'map' || group.id === 'saves'
+  group.id === 'terrain' || group.id === 'map' || group.id === 'saves' || group.id === 'replays'
 
 /**
  * The server a terrain folder is for. Distant Horizons names it `<server id>_<key>` when the server
@@ -104,12 +118,14 @@ const TITLES: Record<string, string> = {
   terrainDownload: 'Unfinished download',
   worldMap: 'World map',
   minimap: 'Minimap and waypoints',
+  serverMap: 'Server map',
 }
 
 /** A row's title under its group's heading. */
 export function storageTitle(item: StorageItem): string {
   if (item.kind === 'terrain') return serverName(item)
   if (item.kind === 'saves') return item.name
+  if (item.kind === 'replays') return item.name.replace(/\.zip$/i, '')
   return TITLES[item.kind] ?? item.kind
 }
 
@@ -123,6 +139,7 @@ export function storageDetail(item: StorageItem, locale?: string): string {
     case 'terrainDownload':
     case 'worldMap':
     case 'minimap':
+    case 'serverMap':
       return item.lastModified
         ? `${size} · last written ${publishedOn(item.lastModified, locale)}`
         : size

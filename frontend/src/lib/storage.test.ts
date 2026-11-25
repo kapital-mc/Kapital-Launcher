@@ -47,7 +47,9 @@ describe('storage rows', () => {
       'terrainDownload',
       'worldMap',
       'minimap',
+      'serverMap',
       'saves',
+      'replays',
       'screenshots',
       'logs',
       'mods',
@@ -58,6 +60,7 @@ describe('storage rows', () => {
       'terrainDownload',
       'worldMap',
       'saves',
+      'replays',
       'screenshots',
     ])
     expect(kinds.filter((kind) => alwaysAsks(item({ kind })))).toEqual(['saves'])
@@ -65,7 +68,9 @@ describe('storage rows', () => {
       'terrain',
       'terrainDownload',
       'worldMap',
+      'serverMap',
       'saves',
+      'replays',
       'screenshots',
       'logs',
     ])
@@ -77,29 +82,33 @@ describe('storage rows', () => {
       item({ kind: 'terrain', name: 'b', bytes: 3 }),
       item({ kind: 'terrainDownload', bytes: 2 }),
       item({ kind: 'minimap', bytes: 1 }),
+      item({ kind: 'serverMap', bytes: 2 }),
       item({ kind: 'mods', bytes: 7 }),
       item({ kind: 'saves', name: 'Convert', bytes: 4 }),
       item({ kind: 'saves', name: 'Test', bytes: 1 }),
+      item({ kind: 'replays', name: 'firefly.zip', bytes: 8 }),
       item({ kind: 'other', bytes: 6 }),
     ])
     expect(groups.map((g) => [g.id, g.bytes, g.items.length])).toEqual([
       ['terrain', 10, 3],
-      ['map', 1, 1],
+      ['map', 3, 2],
       ['saves', 5, 2],
+      ['replays', 8, 1],
       ['mods', 7, 1],
       ['other', 6, 1],
     ])
-    expect(groups.map(hasRows)).toEqual([true, true, true, false, false])
+    expect(groups.map(hasRows)).toEqual([true, true, true, true, false, false])
     expect(groups[2]!.title).toBe('Saves')
     expect(groups[0]!.title).toBe('Distant Horizons')
-    expect(groups[1]!.title).toBe("Xaero's maps")
+    expect(groups[1]!.title).toBe('Maps')
+    expect(groups[3]!.title).toBe('Replays')
   })
 
   it('says each row’s size and what to know about it', () => {
     expect(storageDetail(item({ kind: 'screenshots', files: 1 }))).toBe('3.0 MB · 1 picture')
     expect(storageDetail(item({ kind: 'logs' }))).toBe('3.0 MB · 2 files')
     expect(storageDetail(item({ kind: 'mods' }))).toBe('3.0 MB')
-    for (const kind of ['worldMap', 'minimap', 'terrainDownload'])
+    for (const kind of ['worldMap', 'minimap', 'serverMap', 'terrainDownload'])
       expect(storageDetail(item({ kind, lastModified: '2026-10-20T19:40:00Z' }), 'en-GB')).toBe(
         '3.0 MB · last written 20 Oct 2026',
       )
@@ -113,5 +122,12 @@ describe('storage rows', () => {
     expect(storageTitle(item({ kind: 'saves', name: 'Convert' }))).toBe('Convert')
     expect(storageDetail(item({ kind: 'other' }))).toBe('3.0 MB')
     expect(storageTitle(item({ kind: 'minimap' }))).toBe('Minimap and waypoints')
+    expect(storageTitle(item({ kind: 'serverMap' }))).toBe('Server map')
+    expect(storageTitle(item({ kind: 'replays', name: '2026-10-26T01_22_36-firefly.zip' }))).toBe(
+      '2026-10-26T01_22_36-firefly',
+    )
+    expect(storageDetail(item({ kind: 'replays', lastModified: '2026-10-20T19:40:00Z' }))).toBe(
+      '3.0 MB',
+    )
   })
 })

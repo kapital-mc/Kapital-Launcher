@@ -900,3 +900,26 @@ Frangfurd instance that was 71.9 h against 46.9 h in a world with AFK left out.
 - **Limits of the reading.** Only regular files the logs page's listing would
   show are opened, through an `os.Root`, unpacked up to the same 256 MiB. See
   SECURITY_CHECKLIST S3.15.
+
+## Twenty-sixth amendment, 2026-11-25
+
+The author's Frangfurd instance showed 2.0 GB as "Everything else", a row with
+no delete. Measured on his Windows instance: 1.4 GB Flashback replays (nine
+recordings, 28 MB to 597 MB each), 202 MB Sinytra Connector's remapped copy of
+Flashback, 184 MB Essential's folder, 137 MB the Frangfurd menu's map tiles, and
+under 100 MB of resource packs, config and the rest.
+
+- **Replays.** Each entry under `<game folder>/flashback/replays/` is one row of
+  a Replays group, largest first, as a world is under Saves. A delete removes
+  that one entry, a regular file (Flashback writes a `.zip`) or a folder, never
+  a link, and asks once more in the popup with "Don't ask me again" offered.
+  The row's folder button opens the replays folder. Flashback's own
+  `editor_states` stays in the rest.
+- **The server map.** `<game folder>/frangfurd_menu/map` is the Frangfurd menu
+  mod's copy of the relayed map, one folder per server, trimmed by the mod to
+  256 MiB each and fetched again from the server when gone. It is a row of the
+  maps group, now titled Maps, and deletes without the popup, as the logs do.
+- **Still without a delete.** Connector's `.cache` (rebuilt at the next start
+  while Camera Tools is on), Essential's folder (may hold account data, S1.1),
+  `config`, options and the packs stay in the rest. Reinstall (twenty-third
+  amendment) still keeps `flashback`. See SECURITY_CHECKLIST S3.13.
