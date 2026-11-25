@@ -26,7 +26,7 @@ function hero(pack: Partial<typeof chapter.pack>, version: string | null = '1.0.
 describe('Hero tools', () => {
   afterEach(cleanup)
 
-  it('has the settings pen, the logs console, the map and the contraptions, each doing its own thing', () => {
+  it('has the settings pen, the logs console and a menu with the map and the contraptions', () => {
     const onOpenMap = vi.fn()
     const onOpenSettings = vi.fn()
     const onOpenLogs = vi.fn()
@@ -54,19 +54,25 @@ describe('Hero tools', () => {
       0, 0, 1,
     ])
     fireEvent.click(screen.getByRole('button', { name: `${chapter.name} settings` }))
-    // The map takes the wiki book's place in the group (issue 161); the wiki
+    // With contraptions, the map and the contraptions share the ⋯ menu; the wiki
     // link lives in the panels below.
-    fireEvent.click(screen.getByRole('button', { name: `Map of ${chapter.name}` }))
+    const more = screen.getByRole('button', { name: `More for ${chapter.name}` })
+    expect(group.querySelectorAll('button')).toHaveLength(3)
+    fireEvent.click(more)
+    expect(more).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('menuitem', { name: 'Map' })).toHaveFocus()
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Map' }))
     expect([onOpenMap, onOpenSettings, onOpenLogs].map((f) => f.mock.calls.length)).toEqual([
       1, 1, 1,
     ])
+    expect(screen.queryByRole('menu')).toBeNull()
     expect(screen.queryByRole('button', { name: 'Read the history on the wiki' })).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: `Contraptions of ${chapter.name}` }))
+    fireEvent.click(more)
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Contraptions' }))
     expect(onOpenContraptions).toHaveBeenCalledTimes(1)
-    expect(group.querySelectorAll('button')).toHaveLength(4)
   })
 
-  it('has no contraptions button for a chapter whose pack has none', () => {
+  it('shows the map itself for a chapter with no contraptions', () => {
     render(
       <Hero
         chapter={{ ...chapter, contraptions: false }}
@@ -78,7 +84,8 @@ describe('Hero tools', () => {
         mods={null}
       />,
     )
-    expect(screen.queryByRole('button', { name: `Contraptions of ${chapter.name}` })).toBeNull()
+    expect(screen.queryByRole('button', { name: `More for ${chapter.name}` })).toBeNull()
+    expect(screen.getByRole('button', { name: `Map of ${chapter.name}` })).toBeInTheDocument()
   })
 })
 

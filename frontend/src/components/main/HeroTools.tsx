@@ -1,5 +1,7 @@
-import { Blocks, MapIcon, Pencil, SquareTerminal } from '../../lib/icons'
+import { Ellipsis, MapIcon, Pencil, Plane, SquareTerminal } from '../../lib/icons'
+import { useMenu } from '../../lib/useMenu'
 import { IconButton } from '../ui/IconButton'
+import { Menu, MenuItem } from '../ui/Menu'
 
 interface Props {
   /** The chapter's name, which names the group and each tool. */
@@ -16,11 +18,11 @@ interface Props {
 }
 
 /**
- * A chapter's tools: its settings, its logs, its map and, where its pack
- * has them, its contraptions. A wash behind them,
- * so they read on bright art too (#77). They are one group (issue 162): each
- * cell's hover fills it edge to edge, with no gap between cells, and only the
- * group's outer corners round.
+ * A chapter's tools: its settings, its logs and its map. Where its pack has
+ * saved contraptions, the map and the contraptions share a ⋯ menu that opens
+ * downward. A wash behind them, so they read on bright art too (#77). They are
+ * one group (issue 162): each cell's hover fills it edge to edge, with no gap
+ * between cells, and only the group's outer corners round.
  */
 export function HeroTools({
   name,
@@ -31,23 +33,41 @@ export function HeroTools({
   className,
   morph,
 }: Props) {
+  const menu = useMenu()
+  const pick = (open: () => void) => () => {
+    menu.close()
+    open()
+  }
   return (
-    <div
-      role="group"
-      aria-label={`${name} tools`}
-      data-morph={morph}
-      className={`bg-sunken/55 flex overflow-hidden rounded-md backdrop-blur-sm ${className}`}
-    >
-      <IconButton grouped icon={Pencil} title={`${name} settings`} onClick={onOpenSettings} />
-      <IconButton grouped icon={SquareTerminal} title={`Logs for ${name}`} onClick={onOpenLogs} />
-      <IconButton grouped icon={MapIcon} title={`Map of ${name}`} onClick={onOpenMap} />
+    <div ref={menu.wrap} data-morph={morph} className={className}>
+      <div
+        role="group"
+        aria-label={`${name} tools`}
+        className="bg-sunken/55 flex overflow-hidden rounded-md backdrop-blur-sm"
+      >
+        <IconButton grouped icon={Pencil} title={`${name} settings`} onClick={onOpenSettings} />
+        <IconButton grouped icon={SquareTerminal} title={`Logs for ${name}`} onClick={onOpenLogs} />
+        {onOpenContraptions ? (
+          <IconButton
+            grouped
+            icon={Ellipsis}
+            title={`More for ${name}`}
+            onClick={menu.toggle}
+            menu={{ open: menu.open, id: menu.id }}
+          />
+        ) : (
+          <IconButton grouped icon={MapIcon} title={`Map of ${name}`} onClick={onOpenMap} />
+        )}
+      </div>
       {onOpenContraptions && (
-        <IconButton
-          grouped
-          icon={Blocks}
-          title={`Contraptions of ${name}`}
-          onClick={onOpenContraptions}
-        />
+        <Menu state={menu} label={`More for ${name}`} align="right">
+          <MenuItem icon={MapIcon} onClick={pick(onOpenMap)}>
+            Map
+          </MenuItem>
+          <MenuItem icon={Plane} onClick={pick(onOpenContraptions)}>
+            Contraptions
+          </MenuItem>
+        </Menu>
       )}
     </div>
   )

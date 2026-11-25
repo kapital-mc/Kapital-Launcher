@@ -15,7 +15,6 @@ export type { LucideIcon } from 'lucide-react'
 export {
   ArrowDown,
   ArrowLeft,
-  Blocks,
   BookOpen,
   Check,
   ChevronRight,
@@ -43,6 +42,7 @@ export {
   PanelLeftClose,
   PanelLeftOpen,
   Pencil,
+  Plane,
   Play,
   Plus,
   Puzzle,

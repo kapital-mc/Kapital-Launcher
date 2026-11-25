@@ -1,8 +1,9 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import type { Contraption, MaterialCount } from '../../types'
 import { contraptionDetail, materialName } from '../../lib/contraptions'
-import { ChevronDown, Download, Trash2 } from '../../lib/icons'
+import { ChevronDown, Trash2, Upload } from '../../lib/icons'
 import { Button } from '../ui/Button'
+import { Fold } from '../ui/Fold'
 import { Grow } from '../ui/Grow'
 import { Icon } from '../ui/Icon'
 import { TextField } from '../ui/TextField'
@@ -20,7 +21,7 @@ interface Props {
 
 /**
  * One saved contraption: its name and facts on a line that opens it, and under it, opened, its
- * name to edit, what it is built from and what it carries, and Export and Delete.
+ * name to edit, what it is built from and what it carries (folded), and Export and Delete.
  */
 export function ContraptionRow({
   item,
@@ -62,14 +63,11 @@ export function ContraptionRow({
               {item.unread ? (
                 <p className="text-fg-muted m-0 text-sm">The file could not be read.</p>
               ) : (
-                <>
-                  <Counts title="Blocks" counts={item.materials} />
-                  <Counts title="Items" counts={item.items} />
-                </>
+                <Materials item={item} />
               )}
               <div className="flex flex-wrap items-center gap-3">
                 <Button onClick={onExport} disabled={busy}>
-                  <Icon icon={Download} size="sm" />
+                  <Icon icon={Upload} size="sm" />
                   <span>Export</span>
                 </Button>
                 <Button onClick={onDelete} disabled={busy}>
@@ -81,6 +79,46 @@ export function ContraptionRow({
           )}
         </Grow>
       </div>
+    </div>
+  )
+}
+
+/** The blocks and items in one fold, closed at first, its line counting both. */
+function Materials({ item }: { item: Contraption }) {
+  const [open, setOpen] = useState(false)
+  const id = useId()
+  const kinds = item.materials.length
+  const items = item.items.length
+  if (kinds + items === 0) return null
+  const facts = [
+    kinds > 0 && `${kinds} ${kinds === 1 ? 'block type' : 'block types'}`,
+    items > 0 && `${items} ${items === 1 ? 'item' : 'items'}`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((o) => !o)}
+        className="group flex items-center gap-2.5 text-left"
+      >
+        <span className="text-fg text-sm font-medium">Materials</span>
+        <span className="text-fg-muted text-xs tabular-nums">{facts}</span>
+        <Icon
+          icon={ChevronDown}
+          size="sm"
+          className={`text-fg-muted group-hover:text-fg duration-fast ease-standard ml-auto transition-transform motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      <Fold open={open} axis="y">
+        <span id={id} className="flex flex-col gap-4 pt-3">
+          <Counts title="Blocks" counts={item.materials} />
+          <Counts title="Items" counts={item.items} />
+        </span>
+      </Fold>
     </div>
   )
 }

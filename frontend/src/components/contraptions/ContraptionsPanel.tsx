@@ -4,7 +4,7 @@ import { selectInstalled, useEngineStore } from '../../stores/useEngineStore'
 import { useContraptionStore } from '../../stores/useContraptionStore'
 import { CONTRAPTION_KINDS, contraptionDetail, contraptionKey } from '../../lib/contraptions'
 import { errMsg } from '../../lib/ipc'
-import { FolderOpen, Upload } from '../../lib/icons'
+import { Download, FolderOpen } from '../../lib/icons'
 import { Button } from '../ui/Button'
 import { Grow } from '../ui/Grow'
 import { Icon } from '../ui/Icon'
@@ -145,7 +145,7 @@ export function ContraptionsPanel({ chapter, onClose }: Props) {
           onClick={() => void run(() => store().importFiles(chapter.id))}
           disabled={installed !== true || busy !== null}
         >
-          <Icon icon={Upload} size="sm" />
+          <Icon icon={Download} size="sm" />
           <span>Import</span>
         </Button>
       }
