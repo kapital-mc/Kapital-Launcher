@@ -22,8 +22,8 @@ interface Props {
  * cell's hover fills it edge to edge, with no gap between cells, and only the
  * group's outer corners round. Where the pack has saved contraptions, the map
  * and the contraptions fold down under a ⋯ cell as a column of the same cells
- * on a darker wash, joined to it: while open, the group's corner over the
- * column goes square and its other corners stay round.
+ * on a darker wash, joined to it with no gap. The group keeps all four round
+ * corners while it is open (the author, 2026-11-25).
  */
 export function HeroTools({
   name,
@@ -44,7 +44,7 @@ export function HeroTools({
       <div
         role="group"
         aria-label={`${name} tools`}
-        className={`bg-sunken/55 flex overflow-hidden rounded-md backdrop-blur-sm ${menu.open ? 'rounded-br-none' : ''}`}
+        className="bg-sunken/55 flex overflow-hidden rounded-md backdrop-blur-sm"
       >
         <IconButton grouped icon={Pencil} title={`${name} settings`} onClick={onOpenSettings} />
         <IconButton grouped icon={SquareTerminal} title={`Logs for ${name}`} onClick={onOpenLogs} />
