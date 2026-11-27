@@ -31,7 +31,7 @@ same licence.
 
 Start from an issue. Setup and the dev loop are in the [README](README.md);
 conventions and the full command list are in
-[`agent_docs/CLAUDE.md`](agent_docs/CLAUDE.md). Run the gates before opening
+[`AGENTS.md`](AGENTS.md). Run the gates before opening
 a pull request:
 
 ```bash

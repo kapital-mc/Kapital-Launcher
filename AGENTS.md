@@ -4,6 +4,9 @@ A branded desktop front-end for the Kapitel Kapital Minecraft packs. It is not a
 launcher: Prism Launcher is the engine (sign-in, Java, loaders, launching), and
 this app finds it, shows the three chapters, and calls Prism's documented CLI.
 
+An agent that does not load `.claude/rules/` itself reads `working.md`,
+`writing.md` and `simplicity.md` there first.
+
 ## Stack
 
 Wails v2 shell (Go 1.26, system WebView) with React 19, TypeScript, Vite and
@@ -87,7 +90,9 @@ gap you cannot close under `HEALTH_CHECKLIST.md`'s Open backlog.
 ## Task tracking
 
 GitHub Issues. `ROADMAP.md` holds direction and milestones; work items are
-issues. `CONTRIBUTING.md` holds the rules CI enforces: an `area:` label and
+issues. Every issue carries a `type:`, an `area:` and one `p0`-`p3` label; an
+issue opened through the API sets it in the same call, `p2` when unclear.
+`CONTRIBUTING.md` holds the rules CI enforces: an `area:` label and
 either a `## Changelog` section or a `type:` label on every pull request
 (`pr-labelled`), a title in sentence case with no em dash (`pr-copy`), the type
 ladder that files each change into the release notes. One pull request per
@@ -100,9 +105,7 @@ questions, the issues still to file. Update it when handing over.
 Locked files come from the `sandrogekeler/AllesSandro` template
 (`.copier-answers.yml`) and are listed in `.claude/rules/template-files.md`:
 change them there, never here. Renovate opens a pull request for each template
-release, and a local edit shows up in it as a conflict. Still vendored by hand
-from `kollektiv-mc/Kollektiv`: `.github/workflows/issue-priority.yml`,
-`.github/scripts/release-notes_test.py` and `.github/release.yml`.
+release, and a local edit shows up in it as a conflict.
 
 ## Deeper rules, loaded on demand
 

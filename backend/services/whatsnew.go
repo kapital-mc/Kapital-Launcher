@@ -86,7 +86,7 @@ func ParseWhatsNew(data []byte) ([]models.WhatsNewRelease, error) {
 
 // checkHighlight holds one highlight to the copy rules: a title, with a text,
 // a list of items, both or neither, each within its length, and no em dash
-// (agent_docs/CLAUDE.md). A title alone ("UI and bug fixes") names a group of
+// (AGENTS.md). A title alone ("UI and bug fixes") names a group of
 // small changes without listing them.
 func checkHighlight(h models.WhatsNewHighlight) error {
 	title, text := strings.TrimSpace(h.Title), strings.TrimSpace(h.Text)
