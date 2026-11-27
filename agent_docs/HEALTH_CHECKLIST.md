@@ -23,7 +23,7 @@ and by CI. Items below that a gate already holds say so; the rest are review.
   module` invariant.
 - **No inline `style`.** Gate: ESLint `no-restricted-syntax`.
 - **Each fact lives in one file.** `CLAUDE.md` links, it does not restate. The
-  always-loaded memory (root `CLAUDE.md` plus `agent_docs/CLAUDE.md`) stays
+  always-loaded memory (root `CLAUDE.md` plus `AGENTS.md`) stays
   under 200 lines. Gate: the runner's `memory` section.
 - **Published copy carries no em dash.** Gate: the `no em dashes` invariant over
   `frontend/src`, `data/`, `README.md` and `wails.json`; review for commits and

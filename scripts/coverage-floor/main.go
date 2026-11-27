@@ -1,5 +1,5 @@
 // Guards against silent coverage regressions in backend/services, the package
-// that carries every side effect (agent_docs/CLAUDE.md, "Where things live").
+// that carries every side effect (AGENTS.md, "Where things live").
 // Same shape as Konnekt's scripts/coverage-floor and as the frontend floor in
 // vite.config.ts: a script owns the threshold, and both .claude/suite.json and
 // CI call it by name, so the check runner enforces it too.

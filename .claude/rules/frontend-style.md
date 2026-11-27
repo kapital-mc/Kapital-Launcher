@@ -5,7 +5,7 @@ paths:
 
 # Frontend style
 
-The short universal rules stay in `agent_docs/CLAUDE.md` (no inline `style`,
+The short universal rules stay in `AGENTS.md` (no inline `style`,
 tokens not literals, icons from one module). This is the rest.
 
 ## UI copy

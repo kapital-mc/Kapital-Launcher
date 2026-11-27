@@ -9,7 +9,7 @@ paths:
 
 **Go owns all side effects** and **IPC goes through the generated bindings
 only**, imported from `wailsjs/go/`, never raw `window.go`. Those two hold before
-any file is opened and live in `agent_docs/CLAUDE.md`. The rest is here.
+any file is opened and live in `AGENTS.md`. The rest is here.
 
 ## Shape
 

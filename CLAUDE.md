@@ -1,4 +1,4 @@
-See @agent_docs/CLAUDE.md for the stack, conventions and build commands.
+See @AGENTS.md for the stack, conventions and build commands.
 
 Two rules hold before any file is opened:
 

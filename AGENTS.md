@@ -1,70 +1,115 @@
 # Kapital Launcher
 
-Branded desktop front-end for the Kapitel Kapital Minecraft packs
+A branded desktop front-end for the Kapitel Kapital Minecraft packs. It is not a
+launcher: Prism Launcher is the engine (sign-in, Java, loaders, launching), and
+this app finds it, shows the three chapters, and calls Prism's documented CLI.
 
-<!-- Project-owned. Seeded once from sandrogekeler/AllesSandro; rewrite freely.
-The one agent file: Codex reads it directly, CLAUDE.md and GEMINI.md import it.
-Keep it under ~200 lines, since it loads into every session. Put rules that
-only matter for some files in .claude/rules/ with `paths:` frontmatter. -->
-
-Rules shared with other projects are in `.claude/rules/`. An agent that does
-not load that directory itself reads `working.md`, `writing.md` and
-`simplicity.md` there before starting.
+An agent that does not load `.claude/rules/` itself reads `working.md`,
+`writing.md` and `simplicity.md` there first.
 
 ## Stack
-- Go (module at the repo root)
-- TypeScript, pnpm (package in `frontend/`)
-- TODO: frameworks and versions that matter
 
-## Project structure
+Wails v2 shell (Go 1.26, system WebView) with React 19, TypeScript, Vite and
+Tailwind v4; Zustand for state; pnpm for the frontend, Go modules for the backend.
+Same shape as Konnekt, deliberately (docs/adr/0001-app-framework.md).
 
-TODO: what the layout does not show: where each kind of change goes and what
-is generated.
+## Where things live
 
-## Architecture rules
+- `design/tokens.json` is the one source of every design value. `pnpm gen:tokens`
+  turns it into `frontend/src/styles/tokens.css` (Tailwind theme), `tokens.ts` and
+  `backend/design/design_gen.go`. Never edit those three by hand.
+- `data/launcher.json` is the chapter manifest built into the app, validated by
+  `design/launcher.schema.json` and again by Go at startup. The wiki will publish
+  the same shape later (ADR-4).
+- `backend/models/` holds the data shapes; Wails generates `frontend/wailsjs/` from
+  the bound methods on `App` in `app.go`. Regenerate with `wails generate module`.
+- `backend/services/` holds everything with a side effect: Prism detection and
+  launch, the pre-launch sync (the launcher's own copy, `--prelaunch-sync`) and
+  the mod switches, the server ping and its ticker, settings, logging,
+  redaction. Each service ships with tests.
+- `site/` is the static download page (ADR-9). It imports the app's tokens,
+  fonts and images from `frontend/`, and its links live in `site/links.json`.
+- `frontend/src/`: `components/` (view), `stores/` (one Zustand store per
+  domain), `lib/` (pure helpers), `types/` (the data shapes).
 
-TODO: the few rules a change must not break (layering, IPC boundaries, where
-state lives). Short and checkable beats long and aspirational.
+## Rules
 
-## Build & dev commands
+- **Go owns all side effects.** Process spawning, file I/O, URLs to the browser.
+- **IPC via generated bindings only**: import from `wailsjs/go/`, never `window.go`.
+  Every bound method returns `(T, error)`; `app_test.go` checks it.
+- **A manifest is untrusted input.** It names things and never runs them: no
+  command, JVM argument or path fields, https on allowlisted hosts only, refused
+  whole on any violation (`services.ValidateManifest`).
+- **Every value that reaches Prism is validated first**: instance id, server
+  `host[:port]`, profile name, root path. `LaunchArgs` (and `ShowArgs`, which
+  shares its checks) is the one place, tested.
+- **One Zustand store per domain**, one file each in `frontend/src/stores/`. Reads
+  degrade without a bridge (`lib/ipc.ts`), writes revert and rethrow when a real
+  backend rejects. Server status arrives as `server:status` events from Go's
+  ticker and a game's phases as `game:state` events; nothing in the frontend
+  polls.
+- **Styling is Tailwind utilities over the token layer.** No literal colour or
+  pixel size in a component; a missing value is a token to add. Inline `style` is
+  an ESLint error. The chapter accent is `data-chapter` on the root and
+  `text-accent` everywhere else.
+- **Icons come from `lib/icons.ts`**, the one module allowed to import
+  `lucide-react`, rendered through `components/ui/Icon`.
+- **No em dashes** in anything a user reads: UI copy, the manifest, README,
+  commits, pull requests. A comma, a colon, a middle dot or two sentences.
+- **UI copy states facts, never explanations**: a size, a count, a date, not
+  why or what happens next. The examples are in `.claude/rules/frontend-style.md`.
+- Go: `gofmt`, errors always handled (`//nolint:errcheck // reason` for a
+  deliberate discard), `log/slog` for diagnostics, never `fmt.Println`.
 
-```sh
-go build ./...
-go vet ./...
-go test ./...
-cd frontend && pnpm install
-pnpm typecheck && pnpm lint && pnpm test
-python3 .claude/suite-check.py   # every health check in .claude/suite.json
+## Commands
+
+```bash
+# frontend/
+pnpm dev | build | typecheck | lint | test | format:check
+pnpm test:coverage     # the floor, in vite.config.ts
+pnpm check-tokens      # every token-named class compiles (builds if stale)
+pnpm check-bundle      # entry chunk gzip budget
+pnpm gen:tokens        # regenerate the three token outputs
+
+# site/
+pnpm build | preview   # preview serves dist/, without _headers
+
+# repo root
+go vet ./... && go test ./...
+go run ./scripts/coverage-floor  # backend/services' floor, held in the script
+wails dev | wails build | wails generate module
+node scripts/validate-schemas.mjs
+.claude/suite-check.py           # every gate above, from .claude/suite.json
 ```
 
-Run the last one before calling a task done. A check it reports as skipped did
-not pass.
+**Definition of done:** `.claude/suite-check.py` is green (it is the same list CI
+runs), the change is in scope for the current milestone in `ROADMAP.md`, and
+anything security-relevant is checked against `SECURITY_CHECKLIST.md`. Track a
+gap you cannot close under `HEALTH_CHECKLIST.md`'s Open backlog.
 
 ## Task tracking
-Work is tracked in GitHub Issues. Every issue carries a `type:`, an `area:` and
-exactly one priority (`p0`-`p3`) label. The issue forms ask for it and the
-`issue-priority` workflow applies it; an issue opened through the API (by an
-agent) sets the label in the same call, `p2` when unclear. Close issues from
-the pull request with `Fixes #N`.
 
-## Pull requests
+GitHub Issues. `ROADMAP.md` holds direction and milestones; work items are
+issues. Every issue carries a `type:`, an `area:` and one `p0`-`p3` label; an
+issue opened through the API sets it in the same call, `p2` when unclear.
+`CONTRIBUTING.md` holds the rules CI enforces: an `area:` label and
+either a `## Changelog` section or a `type:` label on every pull request
+(`pr-labelled`), a title in sentence case with no em dash (`pr-copy`), the type
+ladder that files each change into the release notes. One pull request per
+piece of work with a Changelog line per change, never one per tweak. Branch
+from `origin/main`.
 
-Follow `CONTRIBUTING.md`: one pull request per piece of work, a `## Changelog`
-line per change, an `area:` label.
+`docs/HANDOVER.md` is the state a session cannot derive: branches, open
+questions, the issues still to file. Update it when handing over.
 
-## Files that come from the template
+Locked files come from the `sandrogekeler/AllesSandro` template
+(`.copier-answers.yml`) and are listed in `.claude/rules/template-files.md`:
+change them there, never here. Renovate opens a pull request for each template
+release, and a local edit shows up in it as a conflict.
 
-Some files are owned by sandrogekeler/AllesSandro and must not be edited here:
-`.claude/rules/template-files.md` lists them.
+## Deeper rules, loaded on demand
 
-## Docs
-
-Describe what is on disk, in the present tense. Intent goes in
-`agent_docs/ROADMAP.md` as an unchecked item. Unsure whether something landed?
-Check before writing it down.
-
-## Do not
-
-- Commit secrets, `.env` files or credentials.
-- Edit generated files or lockfiles by hand; regenerate them.
-- Add a dependency without reading `agent_docs/DEPENDENCIES.md`.
+`.claude/rules/` holds what matters in one part of the tree, scoped by `paths:`
+so it costs no context until a matching file is opened: `frontend-style.md`,
+`ipc.md`, `backend.md`, `tokens.md`, `manifest.md`, `builds-and-releases.md`,
+`dependencies.md`, `aislop.md`, `site.md`.
