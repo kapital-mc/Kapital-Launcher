@@ -32,7 +32,10 @@ var AllowedManifestHosts = []string{
 	"cdn.modrinth.com",
 	// Frangfurd's Distant Horizons snapshot: the custom domain of the R2 bucket
 	// Konnekt publishes it to (issue 136). Worker static assets refuse a file
-	// over 25 MiB, and the r2.dev address is rate-limited.
+	// over 25 MiB, and the r2.dev address is rate-limited. The same bucket is
+	// on kapital.click since issue 385; the old domain stays for the builds
+	// already installed, whose built-in manifest still names it.
+	"frangfurd-dh.kapital.click",
 	"dh.frangfurd.click",
 }
 

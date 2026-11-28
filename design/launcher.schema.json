@@ -152,6 +152,15 @@
                         "type": "string",
                         "pattern": "^https://login\\.tailscale\\.com/admin/invite/[A-Za-z0-9]{8,64}$",
                         "description": "The Tailscale share link for the server's machine, on a Tailscale address only. Connect opens it in the browser so the player can accept it."
+                      },
+                      "former": {
+                        "type": "array",
+                        "maxItems": 4,
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9.-]+(:[0-9]{1,5})?$"
+                        },
+                        "description": "Addresses the Tailscale address had before, host[:port], on the Tailscale address only and never one the server still lists. The in-game server list drops an entry with one of them, so the current address takes its place."
                       }
                     }
                   }

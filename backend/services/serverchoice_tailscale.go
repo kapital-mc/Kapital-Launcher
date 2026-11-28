@@ -12,15 +12,24 @@ import (
 // string, so nothing can come before or after it.
 var tailscaleInvite = regexp.MustCompile(`^https://login\.tailscale\.com/admin/invite/[A-Za-z0-9]{8,64}$`)
 
+// maxFormerAddresses caps a Tailscale address's former addresses.
+const maxFormerAddresses = 4
+
 // validateTailscaleAddress holds a server's Tailscale address to its rules: at
 // most one, and never the first. The first is the default every player gets,
 // and a player without Tailscale cannot reach a tailnet address. A share link
-// belongs to the Tailscale address alone and has Tailscale's own shape.
+// and former addresses belong to the Tailscale address alone.
 func validateTailscaleAddress(where string, s *models.Server) error {
 	n := 0
 	for i, a := range s.Addresses {
 		if a.Invite != "" && (!a.Tailscale || !tailscaleInvite.MatchString(a.Invite)) {
 			return fmt.Errorf("%s: server: %q: an invite is a Tailscale share link on the Tailscale address", where, a.Label)
+		}
+		if len(a.Former) > 0 && !a.Tailscale {
+			return fmt.Errorf("%s: server: %q: former addresses belong to the Tailscale address", where, a.Label)
+		}
+		if err := validateFormerAddresses(where, s, a); err != nil {
+			return err
 		}
 		if !a.Tailscale {
 			continue
@@ -32,6 +41,31 @@ func validateTailscaleAddress(where string, s *models.Server) error {
 	}
 	if n > 1 {
 		return fmt.Errorf("%s: server: more than one Tailscale address", where)
+	}
+	return nil
+}
+
+// validateFormerAddresses holds an address's former addresses to the rule for
+// any address (host[:port]): at most maxFormerAddresses, none twice, and none
+// an address the server still lists, which the sync would otherwise remove.
+func validateFormerAddresses(where string, s *models.Server, a models.ServerAddress) error {
+	if len(a.Former) > maxFormerAddresses {
+		return fmt.Errorf("%s: server: %q: %d former addresses, the limit is %d", where, a.Label, len(a.Former), maxFormerAddresses)
+	}
+	for i, f := range a.Former {
+		if _, _, err := ParseServerAddress(f); err != nil {
+			return fmt.Errorf("%s: server: %q: former[%d]: %w", where, a.Label, i, err)
+		}
+		for _, other := range a.Former[:i] {
+			if sameServerAddress(other, f) {
+				return fmt.Errorf("%s: server: %q: former address %q appears twice", where, a.Label, f)
+			}
+		}
+		for _, current := range s.Addresses {
+			if sameServerAddress(current.Address, f) {
+				return fmt.Errorf("%s: server: %q: former address %q is still one of the server's addresses", where, a.Label, f)
+			}
+		}
 	}
 	return nil
 }

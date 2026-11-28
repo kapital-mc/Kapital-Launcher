@@ -71,6 +71,8 @@ export interface ServerAddress {
   address: string
   /** Reached only through Tailscale: offered once the chapter's Tailscale switch is on. */
   tailscale?: boolean
+  /** The Tailscale address's earlier addresses, which the in-game server list drops. */
+  former?: string[]
 }
 
 export interface Server {

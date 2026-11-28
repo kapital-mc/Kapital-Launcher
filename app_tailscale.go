@@ -361,7 +361,7 @@ func (a *App) syncTailscaleList(settings models.AppSettings, chapter models.Chap
 	if dir == "" {
 		return
 	}
-	entry := services.ServerListEntry{Name: fmt.Sprintf("%s (%s)", chapter.Name, addr.Label), Address: addr.Address}
+	entry := services.ServerListEntry{Name: fmt.Sprintf("%s (%s)", chapter.Name, addr.Label), Address: addr.Address, Former: addr.Former}
 	wrote, err := services.SyncServerList(dir, entry, services.UsesTailscale(settings, chapter.ID))
 	if err != nil {
 		slog.Warn("tailscale server list", "chapter", chapter.ID, "error", err)

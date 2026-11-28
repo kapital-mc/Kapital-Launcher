@@ -118,7 +118,7 @@
             "packwiz": "https://kapital-packs.alessandrogekeler.workers.dev/frangfurd-camera/pack.toml"
           }
         ],
-        "dhSnapshot": "https://dh.frangfurd.click/dh/latest.json"
+        "dhSnapshot": "https://frangfurd-dh.kapital.click/dh/latest.json"
       },
       "server": {
         "addresses": [
@@ -126,8 +126,9 @@
           { "label": "Germany", "address": "rails-enjoyed.tun.ply.gg" },
           {
             "label": "Tailscale",
-            "address": "ts.frangfurd.click",
+            "address": "frangfurd-ts.kapital.click",
             "tailscale": true,
+            "former": ["ts.frangfurd.click"],
             "invite": "https://login.tailscale.com/admin/invite/ALNcG9hKCCNaCrtn659n11"
           }
         ],

@@ -171,3 +171,14 @@ The manifest's two fields stay, in the schema and the Go and TypeScript shapes,
 as the **fallback** for a source that cannot be read, like the changelog's.
 `pack.minecraft` and `pack.loader` are unchanged: Install still refuses a pack
 that disagrees with them.
+
+## Amendment, 2026-11-28: a Tailscale address may name its former addresses
+
+`former` on the Tailscale address lists up to four addresses it had before,
+each `host[:port]` like any address, none twice and none an address the server
+still lists. It is only allowed on the Tailscale address. The launcher uses it
+for one thing: the in-game server list drops an entry with a former address
+(ADR-14 amendment of the same day), so moving the address to `kapital.click`
+(issue 385) does not leave players a stale entry. It names entries to remove
+from a list the launcher already edits and runs nothing. A former address can
+leave the manifest once no build that wrote it is in use.

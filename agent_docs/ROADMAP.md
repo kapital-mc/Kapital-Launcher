@@ -115,6 +115,9 @@ What is left:
 - [x] Frangfurd's Tailscale address (`ts.frangfurd.click`), behind a switch per
       chapter that also keeps the in-game server list in step, and Get Tailscale
       on approval (ADR-14, 2026-10-18)
+- [x] Frangfurd's terrain and Tailscale addresses on `kapital.click`
+      (`frangfurd-dh`, `frangfurd-ts`), the old Tailscale entry swapped out of
+      the in-game server list (#385, `docs/kapital-click.md`)
 - [ ] Show the MOTD and the player sample somewhere the reference has room for
 - [ ] Drop the per-minute "connection refused" log line to debug once the
       addresses are real

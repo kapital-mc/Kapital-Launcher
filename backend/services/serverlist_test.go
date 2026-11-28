@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -112,7 +113,7 @@ func gameDir(t *testing.T) (instance, game string) {
 	return instance, game
 }
 
-var tailscaleEntry = ServerListEntry{Name: "Frangfurd (Tailscale)", Address: "ts.frangfurd.click"}
+var tailscaleEntry = ServerListEntry{Name: "Frangfurd (Tailscale)", Address: "frangfurd-ts.kapital.click", Former: []string{"ts.frangfurd.click"}}
 
 func TestSyncServerListAddsAndRemovesOnlyItsEntry(t *testing.T) {
 	instance, game := gameDir(t)
@@ -128,7 +129,7 @@ func TestSyncServerListAddsAndRemovesOnlyItsEntry(t *testing.T) {
 	want := []string{
 		"Frangfurd (Global)=female-specified.gl.joinmc.link",
 		"Frangfurd (Germany)=rails-enjoyed.tun.ply.gg",
-		"Frangfurd (Tailscale)=ts.frangfurd.click",
+		"Frangfurd (Tailscale)=frangfurd-ts.kapital.click",
 	}
 	if len(got) != 3 || got[0] != want[0] || got[1] != want[1] || got[2] != want[2] {
 		t.Fatalf("after add: %v", got)
@@ -150,7 +151,7 @@ func TestSyncServerListAddsAndRemovesOnlyItsEntry(t *testing.T) {
 
 func TestSyncServerListRemovesAnEntryThePlayerRenamed(t *testing.T) {
 	instance, game := gameDir(t)
-	if _, err := SyncServerList(instance, ServerListEntry{Name: "Mine", Address: "TS.frangfurd.click "}, true); err != nil {
+	if _, err := SyncServerList(instance, ServerListEntry{Name: "Mine", Address: "FRANGFURD-TS.kapital.click "}, true); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := SyncServerList(instance, tailscaleEntry, false); err != nil {
@@ -209,5 +210,37 @@ func TestSyncServerListRefusesABrokenList(t *testing.T) {
 	data, err := os.ReadFile(path)
 	if err != nil || string(data) != "not nbt" {
 		t.Fatalf("the broken list changed: %q %v", data, err)
+	}
+}
+
+func TestSyncServerListSwapsAFormerAddress(t *testing.T) {
+	old := ServerListEntry{Name: "Frangfurd (Tailscale)", Address: "ts.frangfurd.click"}
+	for _, want := range []bool{true, false} {
+		instance, game := gameDir(t)
+		path := filepath.Join(game, "servers.dat")
+		if err := os.WriteFile(path, packServersDat(t), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := SyncServerList(instance, old, true); err != nil {
+			t.Fatal(err)
+		}
+		wrote, err := SyncServerList(instance, tailscaleEntry, want)
+		if err != nil || !wrote {
+			t.Fatalf("switch %v: %v %v", want, wrote, err)
+		}
+		got := serverIPs(t, path)
+		keep := []string{
+			"Frangfurd (Global)=female-specified.gl.joinmc.link",
+			"Frangfurd (Germany)=rails-enjoyed.tun.ply.gg",
+		}
+		if want {
+			keep = append(keep, "Frangfurd (Tailscale)=frangfurd-ts.kapital.click")
+		}
+		if !slices.Equal(got, keep) {
+			t.Fatalf("switch %v: %v", want, got)
+		}
+		if wrote, err := SyncServerList(instance, tailscaleEntry, want); err != nil || wrote {
+			t.Fatalf("switch %v, again: wrote %v %v", want, wrote, err)
+		}
 	}
 }

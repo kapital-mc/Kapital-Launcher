@@ -111,6 +111,11 @@ type ServerAddress struct {
 	// server's machine (https://login.tailscale.com/admin/invite/<code>), for a
 	// Tailscale address only. Connect opens it in the browser.
 	Invite string `json:"invite,omitempty"`
+	// Former lists the addresses the Tailscale address had before, each
+	// host[:port], for the Tailscale address only. The in-game server list
+	// drops an entry with one of them, so a player whose switch is on gets the
+	// current address in its place instead of beside it (issue 385).
+	Former []string `json:"former,omitempty"`
 }
 
 // WikiTeaser is the "From the wiki" panel: a title, one line, and where to read on.

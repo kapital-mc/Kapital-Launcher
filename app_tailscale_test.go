@@ -71,7 +71,7 @@ func TestSaveSettingsHoldsTheTailscaleChoiceToItsSwitch(t *testing.T) {
 	if err := app.SaveSettings(models.AppSettings{Theme: "dark", ServerChoices: chosen, TailscaleServers: []string{"frangfurd"}}); err != nil {
 		t.Fatal(err)
 	}
-	if got := app.serverAddress(frangfurd(t, app)); got != "ts.frangfurd.click" {
+	if got := app.serverAddress(frangfurd(t, app)); got != "frangfurd-ts.kapital.click" {
 		t.Fatalf("switch on: %q", got)
 	}
 	// The switch turned off takes the choice with it.

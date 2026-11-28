@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -13,14 +14,18 @@ import (
 // one in config/defaultoptions/, which the Default Options mod copies in on
 // the first start only, so a player's list is theirs from then on: the
 // launcher adds or removes the one entry a chapter's Tailscale switch is
-// about, matched by its address, and leaves every other entry as it was.
+// about, matched by its address, drops any entry with one of that address's
+// former addresses, and leaves every other entry as it was.
 
 const maxServersDat = 4 << 20
 
-// ServerListEntry is the entry a Tailscale switch puts in the list.
+// ServerListEntry is the entry a Tailscale switch puts in the list. Former
+// are addresses it had before: an entry with one of them is removed whether
+// the switch is on or off, so the list never holds an address that moved.
 type ServerListEntry struct {
 	Name    string
 	Address string
+	Former  []string
 }
 
 // SyncServerList makes the instance's server list hold the entry, or not,
@@ -65,7 +70,8 @@ func SyncServerList(instanceDir string, entry ServerListEntry, want bool) (bool,
 }
 
 // editServerList adds the entry at the end of the root's "servers" list, or
-// removes every entry with its address, and reports whether anything changed.
+// removes every entry with its address, removes every entry with a former
+// address either way, and reports whether anything changed.
 func editServerList(root *nbtTag, entry ServerListEntry, want bool) bool {
 	servers, ok := root.field("servers")
 	if !ok || servers.Type != nbtList {
@@ -83,21 +89,29 @@ func editServerList(root *nbtTag, entry ServerListEntry, want bool) bool {
 		return false
 	}
 	kept := servers.List[:0:0]
+	changed, listed := false, false
 	for _, s := range servers.List {
-		if !sameServerAddress(s.stringField("ip"), entry.Address) {
+		ip := s.stringField("ip")
+		switch {
+		case slices.ContainsFunc(entry.Former, func(f string) bool { return sameServerAddress(ip, f) }):
+			changed = true
+		case sameServerAddress(ip, entry.Address) && !want:
+			changed = true
+		default:
+			listed = listed || sameServerAddress(ip, entry.Address)
 			kept = append(kept, s)
 		}
 	}
-	found := len(kept) != len(servers.List)
-	if want == found {
-		return false
-	}
-	if want {
+	if want && !listed {
 		kept = append(kept, nbtTag{Type: nbtCompound, Fields: []nbtField{
 			{Name: "name", Tag: nbtText(entry.Name)},
 			{Name: "ip", Tag: nbtText(entry.Address)},
 			{Name: "hidden", Tag: nbtTag{Type: nbtByte, Value: int8(0)}},
 		}})
+		changed = true
+	}
+	if !changed {
+		return false
 	}
 	servers.List = kept
 	return true

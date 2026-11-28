@@ -145,3 +145,20 @@ Prism's (ADR-11 amendment of the same day, `CancelTailscaleInstall`): only
 while the installer downloads, never once it is being checked or has been
 started. The Launcher previews gain the popup on its offer, and the install
 preview now plays inside the popup.
+
+## Amendment, 2026-11-28: the address moves, the old entry goes
+
+The author bought `kapital.click` as the one domain for everything Kapital
+(`docs/kapital-click.md`), and Frangfurd's Tailscale address is now
+`frangfurd-ts.kapital.click`: the same DNS-only A record for `100.64.209.106`
+as `ts.frangfurd.click`, which stays until `frangfurd.click` lapses on
+2028-10-13 (issue 385).
+
+The server list sync matches its entry by address, so a moved address alone
+would leave every player whose switch is on with the old entry beside the new
+one. The Tailscale address now carries `former` (ADR-4 amendment of the same
+day): its earlier addresses. On a switch and before every Play the sync removes
+every entry with a former address, switch on or off, then adds the current one
+when the switch is on and it is missing. A player's entry under the old address
+is replaced by one named `Frangfurd (Tailscale)` at the end of the list; a name
+they gave the old entry is not carried over. Every other entry keeps its bytes.
