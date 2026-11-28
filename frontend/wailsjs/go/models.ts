@@ -197,6 +197,7 @@ export namespace models {
 	    address: string;
 	    tailscale?: boolean;
 	    invite?: string;
+	    former?: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new ServerAddress(source);
@@ -208,6 +209,7 @@ export namespace models {
 	        this.address = source["address"];
 	        this.tailscale = source["tailscale"];
 	        this.invite = source["invite"];
+	        this.former = source["former"];
 	    }
 	}
 	export class Server {

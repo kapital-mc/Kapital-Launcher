@@ -36,11 +36,13 @@ chapter's `map` (below): a playit tunnel serves BlueMap over http.
 - `instance.id` is the Prism instance folder name, `kapital-<id>` by convention
   (ADR-2), and is what `--launch` receives.
 - `server` is `null` or `{ addresses, software }`. `addresses`
-  is a list of `{ label, address, tailscale?, invite? }`, at least one, the first the default
+  is a list of `{ label, address, tailscale?, invite?, former? }`, at least one, the first the default
   (ADR-4, amendment). `tailscale: true` marks at most one, never the first, as
   reached only through Tailscale (ADR-4 amendment 2026-10-18, ADR-14); only it
   may carry `invite`, the server's `https://login.tailscale.com/admin/invite/<id>`
-  share link that Connect opens (ADR-4 amendment 2026-10-19). Each address is `host[:port]`, any of them pinged for
+  share link that Connect opens (ADR-4 amendment 2026-10-19), and `former`, up to
+  four earlier addresses that the in-game server list drops (ADR-4 amendment
+  2026-11-28, issue 385). Each address is `host[:port]`, any of them pinged for
   the status line; the label is short, unique in the chapter and is what the
   player's choice in the chapter's settings is saved as, never the address. The one in use
   is `services.ServerAddress(chapter, settings)`: use it, never
@@ -69,7 +71,8 @@ chapter's `map` (below): a playit tunnel serves BlueMap over http.
   (`checkDHSnapshotURL`). It is what the chapter's World data card downloads on
   the player's click. The pointer and index it leads to are untrusted too and
   are held to the same host (`ParseDHPointer`, `ParseDHIndex`, `dhResolve`).
-  Frangfurd's is on `dh.frangfurd.click`, the R2 bucket's custom domain.
+  Frangfurd's is on `frangfurd-dh.kapital.click`, the R2 bucket's custom domain
+  (`dh.frangfurd.click` stays allowlisted for builds already installed, issue 385).
 - `map` is optional: a chapter's BlueMap web map (issue 161, ADR-4's third
   amendment), `http` or `https` on `*.tun.ply.gg` with an explicit port, lowercase
   and bare (no user info, path, query or fragment); `services.checkMapURL` refuses

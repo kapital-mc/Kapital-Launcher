@@ -109,3 +109,26 @@ func TestValidateServerHoldsTheInviteToTailscalesShape(t *testing.T) {
 		t.Error("an invite on the public address: accepted")
 	}
 }
+
+func TestValidateServerHoldsTheFormerAddresses(t *testing.T) {
+	with := func(on int, former ...string) *models.Server {
+		c := withTailscale()
+		c.Server.Addresses[on].Former = former
+		return c.Server
+	}
+	if err := validateServer("c", with(1, "ts.old.example", "ts.older.example:25566")); err != nil {
+		t.Errorf("valid former addresses: %v", err)
+	}
+	for name, s := range map[string]*models.Server{
+		"on the public address": with(0, "old.example"),
+		"not host[:port]":       with(1, "https://old.example"),
+		"a space":               with(1, "old example"),
+		"twice":                 with(1, "old.example", "OLD.example"),
+		"still listed":          with(1, "global.example"),
+		"too many":              with(1, "a.example", "b.example", "c.example", "d.example", "e.example"),
+	} {
+		if err := validateServer("c", s); err == nil {
+			t.Errorf("%s: accepted", name)
+		}
+	}
+}

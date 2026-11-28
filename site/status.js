@@ -21,7 +21,7 @@ export const SERVERS = [
 // The manifest's own values, as for the addresses above.
 // aislop-ignore-next-line ai-slop/hardcoded-url -- the manifest's map, held to it by status.test.js
 export const MAP = 'http://spiral-reminders.tun.ply.gg:1111'
-export const TERRAIN = 'https://dh.frangfurd.click/dh/latest.json'
+export const TERRAIN = 'https://frangfurd-dh.kapital.click/dh/latest.json'
 // aislop-ignore-next-line ai-slop/hardcoded-url -- the manifest's pack, held to it by status.test.js
 export const PACK = 'https://kapital-packs.alessandrogekeler.workers.dev/frangfurd/pack.toml'
 

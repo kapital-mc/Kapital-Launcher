@@ -152,7 +152,10 @@ import { ensureFreshDist } from './lib/dist-freshness.mjs'
 // 99.3 the same day: the author asked for the map and the contraptions behind one ⋯ menu in the
 // chapter tools; the menu is now one component the header's sidebar button shares. Measured
 // 99.206 KB.
-const BUDGET_KB = 99.3
+// 99.4 since kapital.click (2026-11-28, issue 385): the bundled manifest, which the first paint
+// embeds, names Frangfurd's longer terrain and Tailscale hosts and the Tailscale address's former
+// one. Measured 99.303 KB, from 99.284 KB before it.
+const BUDGET_KB = 99.4
 
 const DIST_ASSETS = await ensureFreshDist()
 const DIST = path.dirname(DIST_ASSETS)

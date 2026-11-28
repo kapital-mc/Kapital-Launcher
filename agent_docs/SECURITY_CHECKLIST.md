@@ -595,12 +595,15 @@ it); a game writing a line of megabytes with no newline (sent as it stands in
 64 KiB pieces); two chapters' pages opened one after the other (the first is
 ended before the second reads).
 
-**S3.12 The in-game server list gains or loses one entry, the chapter's Tailscale address, and nothing else changes.**
+**S3.12 The in-game server list gains or loses one entry, the chapter's Tailscale address, loses entries with its former addresses, and nothing else changes.**
 Holds when: `SyncServerList` (`serverlist.go`) reads `servers.dat` in the
 chapter's game folder, at most 4 MiB, through a bounded NBT reader (depth 64,
 at most 2^20 items per list); with the switch on it appends one entry
 (`name`, `ip`, `hidden: 0`) when no entry has that address, with it off it
-removes every entry whose `ip` is that address (trimmed, any case); every
+removes every entry whose `ip` is that address (trimmed, any case); either
+way it removes every entry whose `ip` is one of the address's `former`
+addresses (at most four, `host[:port]`, never an address the server still
+lists, only on the Tailscale address: `validateFormerAddresses`); every
 other byte is written back as it was read, atomically; a missing file is
 seeded from the pack's `config/defaultoptions/servers.dat`, or an empty list;
 a list it cannot read is left alone and logged. The address and the entry's
@@ -611,6 +614,8 @@ Verify: `TestNBTRoundTripsTheGamesOwnFile`, `TestNBTRefusesBrokenFiles`,
 `TestSyncServerListRemovesAnEntryThePlayerRenamed`,
 `TestSyncServerListSeedsFromThePacksDefaults`,
 `TestSyncServerListRefusesABrokenList`,
+`TestSyncServerListSwapsAFormerAddress`,
+`TestValidateServerHoldsTheFormerAddresses`,
 `TestTheTailscaleSwitchEditsTheInGameServerList`.
 Probe: a `servers.dat` nested 100 lists deep, or a list claiming 2^31 items
 (refused, the file untouched).

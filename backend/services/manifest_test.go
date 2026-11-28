@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -42,14 +43,21 @@ func TestBundledManifestIsValid(t *testing.T) {
 	}
 	// Frangfurd's two public addresses, Global the default, then its
 	// Tailscale one; Lichdenstein's one (issue 151).
-	tail := models.ServerAddress{Label: "Tailscale", Address: "ts.frangfurd.click", Tailscale: true, Invite: "https://login.tailscale.com/admin/invite/ALNcG9hKCCNaCrtn659n11"}
-	if got := fra.Server.Addresses; len(got) != 3 || got[0] != addr("Global", "female-specified.gl.joinmc.link") || got[1] != addr("Germany", "rails-enjoyed.tun.ply.gg") || got[2] != tail {
+	// Its Tailscale address moved to kapital.click and names the old one as
+	// former, so the in-game server list swaps it (issue 385).
+	tail := models.ServerAddress{
+		Label: "Tailscale", Address: "frangfurd-ts.kapital.click", Tailscale: true,
+		Invite: "https://login.tailscale.com/admin/invite/ALNcG9hKCCNaCrtn659n11",
+		Former: []string{"ts.frangfurd.click"},
+	}
+	want := []models.ServerAddress{addr("Global", "female-specified.gl.joinmc.link"), addr("Germany", "rails-enjoyed.tun.ply.gg"), tail}
+	if got := fra.Server.Addresses; !reflect.DeepEqual(got, want) {
 		t.Errorf("Frangfurd's addresses: %+v", got)
 	}
-	if got := lic.Server.Addresses; len(got) != 1 || got[0] != addr("Main", "stamina-berkshire.tun.ply.gg") {
+	if got := lic.Server.Addresses; !reflect.DeepEqual(got, []models.ServerAddress{addr("Main", "stamina-berkshire.tun.ply.gg")}) {
 		t.Errorf("Lichdenstein's address: %+v", got)
 	}
-	if lux := m.Chapters[0].Server; lux == nil || len(lux.Addresses) != 1 || lux.Addresses[0] != addr("Main", "stamina-exemplary.tun.ply.gg") {
+	if lux := m.Chapters[0].Server; lux == nil || !reflect.DeepEqual(lux.Addresses, []models.ServerAddress{addr("Main", "stamina-exemplary.tun.ply.gg")}) {
 		t.Errorf("Luxemburg has one address: %+v", lux)
 	}
 	if m.Chapters[0].Pack.Loader != "Forge" || m.Chapters[0].Pack.Minecraft != "1.19.2" {

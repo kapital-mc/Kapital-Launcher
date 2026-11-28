@@ -382,7 +382,8 @@ macOS `pkgutil --check-signature` for Tailscale's Developer ID Installer) into
 -W <file>`. Open Tailscale starts `tailscale-ipn.exe` or `open -a
 /Applications/Tailscale.app`. A chapter's switch (`TailscaleServers`) adds or
 removes one entry with the manifest's Tailscale address in the instance's
-`servers.dat`, through a bounded NBT reader that writes every other byte back
+`servers.dat`, and drops any entry with one of its `former` addresses (issue
+385), through a bounded NBT reader that writes every other byte back
 as read, on a switch and before each Play; a missing list is seeded from the
 pack's `config/defaultoptions/servers.dat`.
 
