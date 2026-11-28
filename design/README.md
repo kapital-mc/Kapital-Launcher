@@ -1,6 +1,6 @@
 # Design
 
-Two data files and their schemas, read by machines, and the app icon's masters.
+Two data files and their schemas, read by machines, the app icon's masters and the wordmark's two words.
 
 ## `tokens.json`
 
@@ -68,3 +68,14 @@ brown tile, its colours the logo gradient's.
 size rather than scaled from 256. At 48 px and under the K snaps to whole
 pixels (one K unit is 1 px at 16, 2 at 32, 3 at 40 and 48), so the small sizes
 stay sharp. A change to a master means rendering those files again.
+
+## `wordmark/`
+
+The Kapital Launcher wordmark's two words as separate pictures, rendered from
+the logo's model: `kapital.png` (2048 × 335) and `launcher.png` (2028 × 550).
+LAUNCHER's depth runs up behind KAPITAL, so it is drawn first. Laid over the
+800 × 219 `frontend/src/assets/brand/kapital-launcher-logo-compact.png`,
+KAPITAL is 800 wide at 0, 0 and LAUNCHER 580 wide at 110, 65.
+
+Nothing in the app reads them yet.
+
